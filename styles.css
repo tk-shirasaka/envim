@@ -1,0 +1,37 @@
+@font-face {
+  font-family: "Ricty Diminished";
+  font-style: normal;
+  src: url(fonts/RictyDiminished-Regular.ttf);
+}
+
+@font-face {
+  font-family: "Ricty Diminished";
+  font-style: normal;
+  src: url(fonts/Powerline-Regular.otf);
+}
+
+@font-face {
+  font-family: "Ricty Diminished Bold";
+  font-style: bold;
+  src: url(fonts/RictyDiminished-Bold.ttf);
+}
+
+@font-face {
+  font-family: "Ricty Diminished Bold";
+  font-style: bold;
+  src: url(fonts/Powerline-Bold.ttf);
+}
+
+@font-face {
+  font-family: "Ricty Diminished Oblique";
+  font-style: oblique;
+  src: url(fonts/RictyDiminished-Oblique.ttf);
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background: #273340;
+    color: #f9ecec;
+    font-family: Ricty Diminished, Ricty Diminished Bold, Ricty Diminished Oblique;
+}
