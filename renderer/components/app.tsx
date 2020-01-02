@@ -22,7 +22,6 @@ export class AppComponent extends React.Component<Props, States> {
     super(props);
     this.state = { init: false, font: this.ls.get() };
 
-    this.onChangeFont = this.onChangeFont.bind(this);
     ipcRenderer.on("app:start", this.onStart.bind(this));
     ipcRenderer.on("app:stop", this.onStop.bind(this));
     window.addEventListener("beforeunload", this.onStop.bind(this));
@@ -56,6 +55,6 @@ export class AppComponent extends React.Component<Props, States> {
   render() {
     return this.state.init
       ? <EnvimComponent font={this.state.font} />
-      : <SettingComponent font={this.state.font} onChangeFont={this.onChangeFont} />;
+      : <SettingComponent font={this.state.font} onChangeFont={this.onChangeFont.bind(this)} />;
   }
 }

@@ -102,8 +102,8 @@ export class SettingComponent extends React.Component<Props, States> {
           <label><input style={styles.radio} type="radio" value="port" checked={this.state.type === "port"} onChange={this.onToggle} />Port</label>
         </div>
         {this.state.type === "cmd"
-          ?  <p><label>Enter neovim command<input style={styles.text} value={this.state.cmd} list="cmd-list" onChange={this.onChangeCmd} autoFocus /></label></p>
-          :  <p><label>Enter neovim port<input style={styles.text} value={this.state.port} onChange={this.onChangePort} autoFocus /></label></p>
+          ?  <p><label>Enter neovim command<input style={styles.text} value={this.state.cmd} list="cmd-list" onChange={this.onChangeCmd} autoFocus={true} /></label></p>
+          :  <p><label>Enter neovim port<input style={styles.text} value={this.state.port} onChange={this.onChangePort} autoFocus={true} /></label></p>
         }
         <datalist id="cmd-list">
           {this.state.cmdList.map(cmd => <option key={`list_${cmd}`} value={cmd} />)}

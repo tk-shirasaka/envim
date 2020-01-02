@@ -10,6 +10,7 @@ export class Envim {
   constructor() {
     ipcMain.on("envim:attach", this.onAttach.bind(this));
     ipcMain.on("envim:resize", this.onResize.bind(this));
+    ipcMain.on("envim:mouse", this.onMouse.bind(this));
     ipcMain.on("envim:input", this.onInput.bind(this));
     ipcMain.on("envim:detach", this.onDetach.bind(this));
   }
@@ -45,6 +46,10 @@ export class Envim {
 
   private async onResize(_: IpcMainEvent, width: number, height: number) {
     await this.nvim?.uiTryResize(width, height);
+  }
+
+  private async onMouse(_: IpcMainEvent, button: string, action: string, row: number, col: number) {
+    await this.nvim?.inputMouse(button, action, "", 0, row, col);
   }
 
   private async onInput(_: IpcMainEvent, input: string) {
