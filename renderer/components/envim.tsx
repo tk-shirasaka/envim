@@ -1,4 +1,4 @@
-import React from "react";
+import React, { ChangeEvent, MouseEvent, WheelEvent, KeyboardEvent } from "react";
 import { ipcRenderer, IpcRendererEvent } from "electron";
 
 import { keycode } from "../utils/keycode";
@@ -18,6 +18,13 @@ const styles = {
   canvas: {
     display: "block",
   },
+  input: {
+    display: "block",
+    height: 0,
+    padding: 0,
+    margin: 0,
+    border: "none",
+  },
 };
 
 export class EnvimComponent extends React.Component<Props, States> {
@@ -30,12 +37,7 @@ export class EnvimComponent extends React.Component<Props, States> {
 
     this.state = { width: window.innerWidth, height: window.innerHeight };
     this.renderer = new Context2D(this.state, this.props.font)
-    window.addEventListener("mousedown", this.onMouseDown.bind(this));
-    window.addEventListener("mousemove", this.onMouseMove.bind(this));
-    window.addEventListener("mouseup", this.onMouseUp.bind(this));
-    window.addEventListener("wheel", this.onMouseWheel.bind(this));
     window.addEventListener("resize", this.onResize.bind(this));
-    window.addEventListener("keydown", this.onKeyDown.bind(this));
     ipcRenderer.on("envim:redraw", this.onRedraw.bind(this));
     ipcRenderer.send("envim:resize", ...this.getNvimSize());
   }
@@ -81,9 +83,20 @@ export class EnvimComponent extends React.Component<Props, States> {
   }
 
   private onKeyDown(e: KeyboardEvent) {
+    const input = this.refs.input as HTMLInputElement;
+    const code = keycode(e);
+
     e.stopPropagation();
     e.preventDefault();
-    ipcRenderer.send("envim:input", keycode(e));
+    if (code) {
+      ipcRenderer.send("envim:input", `${input.value}${code}`);
+      input.value = "";
+    } else {
+      setTimeout(() => {
+        const ctx = (this.refs.canvas as HTMLCanvasElement).getContext("2d");
+        ctx && this.renderer.text(ctx, input.value.split(""), true);
+      });
+    }
   }
 
   private onRedraw(_: IpcRendererEvent, redraw: any[][]) {
@@ -137,7 +150,15 @@ export class EnvimComponent extends React.Component<Props, States> {
 
   render() {
     return (
-      <canvas style={styles.canvas} width={this.state.width} height={this.state.height} ref="canvas" />
+      <>
+        <canvas style={styles.canvas} width={this.state.width} height={this.state.height} ref="canvas"
+          onMouseDown={this.onMouseDown.bind(this)}
+          onMouseMove={this.onMouseMove.bind(this)}
+          onMouseUp={this.onMouseUp.bind(this)}
+          onWheel={this.onMouseWheel.bind(this)}
+        />
+        <input style={styles.input} onKeyDown={this.onKeyDown.bind(this)} autoFocus={true} ref="input" />
+      </>
     );
   }
 }

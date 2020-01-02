@@ -114,13 +114,19 @@ export class Context2D {
     this.special = -1;
   }
 
-  text(ctx: CanvasRenderingContext2D, text: string[]) {
-    this.rect(ctx, text.length);
-    this.underline(ctx, text.length);
-    this.style(ctx, this.fg);
-    text.forEach(c => {
-      ctx.fillText(c, this.x, this.y);
-      this.x += this.font.width;
-    });
+  text(ctx: CanvasRenderingContext2D, text: string[], stay: boolean = false) {
+    if (stay) {
+      this.rect(ctx, text.length * 2, true);
+      this.style(ctx, this.defaultFg);
+      ctx.fillText(text.join(""), this.x, this.y);
+    } else {
+      this.rect(ctx, text.length);
+      this.underline(ctx, text.length);
+      this.style(ctx, this.fg);
+      text.forEach(c => {
+        ctx.fillText(c, this.x, this.y);
+        this.x += this.font.width;
+      });
+    }
   }
 }
