@@ -47,7 +47,7 @@ export class EnvimComponent extends React.Component<Props, States> {
   }
 
   private onMouse(e: MouseEvent, button: string, action: string) {
-    const [col, row] = this.getNvimSize(e.x, e.y);
+    const [col, row] = this.getNvimSize(e.clientX, e.clientY);
 
     button === "left" && e.stopPropagation();
     button === "left" && e.preventDefault();
