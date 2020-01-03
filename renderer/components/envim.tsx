@@ -1,4 +1,4 @@
-import React, { ChangeEvent, MouseEvent, WheelEvent, KeyboardEvent } from "react";
+import React, { MouseEvent, WheelEvent, KeyboardEvent } from "react";
 import { ipcRenderer, IpcRendererEvent } from "electron";
 
 import { keycode } from "../utils/keycode";
@@ -30,16 +30,22 @@ const styles = {
 export class EnvimComponent extends React.Component<Props, States> {
   private timer: number = 0;
   private drag: boolean = false;
-  private renderer: Context2D;
+  private renderer?: Context2D;
+  private capture?: ImageData;
 
   constructor(props: Props) {
     super(props);
 
     this.state = { width: window.innerWidth, height: window.innerHeight };
-    this.renderer = new Context2D(this.state, this.props.font)
     window.addEventListener("resize", this.onResize.bind(this));
     ipcRenderer.on("envim:redraw", this.onRedraw.bind(this));
     ipcRenderer.send("envim:resize", ...this.getNvimSize());
+  }
+
+  componentDidMount() {
+    const canvas = this.refs.canvas as HTMLCanvasElement;
+    const ctx = canvas.getContext("2d");
+    ctx && (this.renderer = new Context2D(canvas, ctx, this.state, this.props.font));
   }
 
   private getNvimSize(width: number = this.state.width, height: number = this.state.height) {
@@ -88,61 +94,58 @@ export class EnvimComponent extends React.Component<Props, States> {
 
     e.stopPropagation();
     e.preventDefault();
-    if (code) {
-      ipcRenderer.send("envim:input", `${input.value}${code}`);
-      input.value = "";
-    } else {
-      setTimeout(() => {
-        const ctx = (this.refs.canvas as HTMLCanvasElement).getContext("2d");
-        ctx && this.renderer.text(ctx, input.value.split(""), true);
-      });
-    }
+    setTimeout(() => {
+      if (input.value && code !== '<CR>') {
+        this.capture = this.renderer?.capture("win");
+        this.renderer?.text(input.value.split(""), true);
+      } else {
+        ipcRenderer.send("envim:input", input.value || code);
+        input.value = "";
+      }
+    });
+    this.capture && this.renderer?.restore(this.capture, "win");
+    delete(this.capture);
   }
 
   private onRedraw(_: IpcRendererEvent, redraw: any[][]) {
-    const canvas = this.refs.canvas as HTMLCanvasElement;
-    const ctx = canvas.getContext("2d");
-
-    if (!ctx) return;
-
-    this.renderer.reverse(ctx);
-    this.renderer.fontStyle(ctx);
+    this.renderer?.reverse();
+    this.renderer?.fontStyle();
     redraw.forEach(r => {
       const name = r.shift();
       switch (name) {
         case "clear":
-          this.renderer.clearAll(ctx);
+          this.renderer?.clearAll();
         break;
         case "eol_clear":
-          this.renderer.clearEol(ctx);
+          this.renderer?.clearEol();
         break;
         case "resize":
-          this.renderer.resize(r[0][0], r[0][1]);
+          this.renderer?.resize(r[0][0], r[0][1]);
         break;
         case "flush":
-          this.renderer.reverse(ctx);
+          this.renderer?.reverse();
         break;
         case "set_scroll_region":
-          this.renderer.scrollRegion(r[0][0], r[0][1], r[0][2], r[0][3]);
+          this.renderer?.scrollRegion(r[0][0], r[0][1], r[0][2], r[0][3]);
         break;
         case "scroll":
-          this.renderer.scroll(canvas, ctx, r[0][0]);
+          this.renderer?.scroll(r[0][0]);
         break;
         case "cursor_goto":
-          this.renderer.cursor(r[0][0], r[0][1]);
+          this.renderer?.cursor(r[0][0], r[0][1]);
         break;
         case "highlight_set":
           const { foreground, background, special, reverse, bold, italic } = r[0][0];
-          this.renderer.highlight(ctx, foreground, background, special, reverse, bold, italic);
+          this.renderer?.highlight(foreground, background, special, reverse, bold, italic);
         break;
         case "update_fg":
-          this.renderer.update(r[0][0], "fg");
+          this.renderer?.update(r[0][0], "fg");
         break;
         case "update_bg":
-          this.renderer.update(r[0][0], "bg");
+          this.renderer?.update(r[0][0], "bg");
         break;
         case "put":
-          this.renderer.text(ctx, (r as string[][]).map(c => c[0] || ""));
+          this.renderer?.text((r as string[][]).map(c => c[0] || ""));
         break;
       }
     });

@@ -1,7 +1,7 @@
 import { KeyboardEvent } from "react";
 
 export const keycode = (e: KeyboardEvent) => {
-  const { key, ctrlKey, altKey, metaKey } = e;
+  const { keyCode, key, ctrlKey, altKey, metaKey } = e;
 
   switch (key) {
     case "<": return "<LT>";
@@ -26,7 +26,7 @@ export const keycode = (e: KeyboardEvent) => {
     case "Alt": return "";
   }
 
-  if (key === "Unidentified") return "";
+  if (keyCode === 229) return "";
   if (ctrlKey && key === "|") return "<C-\\>";
   if (ctrlKey) return `<C-${key}>`;
   if (altKey) return `<A-${key}>`;

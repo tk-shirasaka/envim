@@ -1,17 +1,20 @@
 import { IFont } from "./interfaces";
 
 export class Context2D {
+  private x = 0;
+  private y = 0;
+  private fg = 0;
+  private bg = 0;
+  private special = -1;
+  private defaultFg = 0;
+  private defaultBg = 0;
+  private region = { top: 0, bottom: 0, left: 0, right: 0 };
+
   constructor(
+    private canvas: HTMLCanvasElement,
+    private ctx: CanvasRenderingContext2D,
     private win: { width: number; height: number; },
     private font: IFont,
-    private x = 0,
-    private y = 0,
-    private fg = 0,
-    private bg = 0,
-    private special = -1,
-    private defaultFg = 0,
-    private defaultBg = 0,
-    private region = { top: 0, bottom: 0, left: 0, right: 0 },
   ) { }
 
   cursor(row: number, col: number) {
@@ -26,14 +29,14 @@ export class Context2D {
     this.win.height = y * this.font.height;
   }
 
-  highlight(ctx: CanvasRenderingContext2D, fg: number, bg: number, special: number, reverse: boolean, bold: boolean, italic: boolean) {
-    this.fontStyle(ctx);
+  highlight(fg: number, bg: number, special: number, reverse: boolean, bold: boolean, italic: boolean) {
+    this.fontStyle();
     this.fg = fg || this.defaultFg;
     this.bg = bg || this.defaultBg;
     this.special = special || -1;
     reverse && ([this.fg, this.bg] = [this.bg, this.fg]);
-    bold && (this.fontStyle(ctx, "bold"));
-    italic && (this.fontStyle(ctx, "italic"));
+    bold && (this.fontStyle("bold"));
+    italic && (this.fontStyle("italic"));
   }
 
   update(color: number, type: "fg" | "bg") {
@@ -41,38 +44,51 @@ export class Context2D {
     type === "bg" && ([this.bg, this.defaultBg] = [color, color])
   }
 
-  fontStyle(ctx: CanvasRenderingContext2D, type: "normal" | "bold" | "italic" = "normal") {
-    ctx.textBaseline = "top";
-    type === "normal" && (ctx.font = `${this.font.height}px Ricty Diminished`);
-    type === "bold" && (ctx.font = `${this.font.height}px Ricty Diminished Bold`);
-    type === "italic" && (ctx.font = `${this.font.height}px Ricty Diminished Oblique`);
+  fontStyle(type: "normal" | "bold" | "italic" = "normal") {
+    this.ctx.textBaseline = "top";
+    type === "normal" && (this.ctx.font = `${this.font.height}px Ricty Diminished`);
+    type === "bold" && (this.ctx.font = `${this.font.height}px Ricty Diminished Bold`);
+    type === "italic" && (this.ctx.font = `${this.font.height}px Ricty Diminished Oblique`);
   }
 
-  clear(ctx: CanvasRenderingContext2D, col: number) {
-    ctx.clearRect(this.x, this.y, col * this.font.width, this.font.height);
+  clear(col: number) {
+    this.ctx.clearRect(this.x, this.y, col * this.font.width, this.font.height);
   }
 
-  clearEol(ctx: CanvasRenderingContext2D) {
+  clearEol() {
     const col = Math.floor((this.win.width - this.x) / this.font.width);
-    this.rect(ctx, col, true);
+    this.rect(col, true);
   }
 
-  clearAll(ctx: CanvasRenderingContext2D) {
-    this.style(ctx, this.defaultBg);
-    ctx.clearRect(0, 0, this.win.width, this.win.height);
-    ctx.fillRect(0, 0, this.win.width, this.win.height);
+  clearAll() {
+    this.style(this.defaultBg);
+    this.ctx.clearRect(0, 0, this.win.width, this.win.height);
+    this.ctx.fillRect(0, 0, this.win.width, this.win.height);
   }
 
-  reverse(ctx: CanvasRenderingContext2D) {
-    const src = ctx.getImageData(this.x, this.y, this.font.width, this.font.height);
-    const dst = ctx.createImageData(this.font.width, this.font.height);
+  capture(type: "cursor" | "win") {
+    const [x, y, w, h] = type === "cursor"
+      ? [this.x, this.y, this.font.width, this.font.height]
+      : [0, 0, this.win.width, this.win.height];
+
+    return this.ctx.getImageData(x, y, w, h);
+  }
+
+  restore(capture: ImageData, type: "cursor" | "win") {
+    const [x, y] = type === "cursor" ? [this.x, this.y] : [0, 0];
+    this.ctx.putImageData(capture, x, y);
+  }
+
+  reverse() {
+    const src = this.capture("cursor");
+    const dst = this.ctx.createImageData(this.font.width, this.font.height);
     for (let i = 0; i < src.data.length; i += 4) {
       dst.data[i] = 255 - src.data[i];
       dst.data[i + 1] = 255 - src.data[i + 1];
       dst.data[i + 2] = 255 - src.data[i + 2];
       dst.data[i + 3] = src.data[i + 3];
     }
-    ctx.putImageData(dst, this.x, this.y);
+    this.restore(dst, "cursor");
   }
 
   scrollRegion(top: number, bottom: number, left: number, right: number) {
@@ -81,50 +97,50 @@ export class Context2D {
     this.region = { top, bottom, left, right };
   }
 
-  scroll(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, row: number) {
+  scroll(row: number) {
     const offset = this.font.height * row;
     const [x, w, h] = [this.region.left, this.region.right - this.region.left, this.region.bottom - this.region.top - Math.abs(offset)];
     const sy = Math.max(this.region.top, this.region.top + offset);
     const dy = Math.max(this.region.top, this.region.top - offset);
-    ctx.drawImage(canvas, x, sy, w, h, x, dy, w, h);
+    this.ctx.drawImage(this.canvas, x, sy, w, h, x, dy, w, h);
   }
 
-  style(ctx: CanvasRenderingContext2D, color: number) {
-    ctx.fillStyle = `#${color.toString(16)}`;
+  style(color: number) {
+    this.ctx.fillStyle = `#${color.toString(16)}`;
   }
 
-  rect(ctx: CanvasRenderingContext2D, col: number, isDefault: boolean = false) {
-    this.clear(ctx, col);
-    this.style(ctx, isDefault ? this.defaultBg : this.bg);
-    ctx.fillRect(this.x, this.y, col * this.font.width, this.font.height);
+  rect(col: number, isDefault: boolean = false) {
+    this.clear(col);
+    this.style(isDefault ? this.defaultBg : this.bg);
+    this.ctx.fillRect(this.x, this.y, col * this.font.width, this.font.height);
   }
 
-  underline(ctx: CanvasRenderingContext2D, col: number) {
+  underline(col: number) {
     if (this.special >= 0) {
-      ctx.save();
-      ctx.strokeStyle = `#${this.special.toString(16)}`;
-      ctx.beginPath();
-      ctx.moveTo(this.x, this.y + this.font.height - 1);
-      ctx.lineTo(this.x + col * this.font.width, this.y + this.font.height - 1);
-      ctx.closePath();
-      ctx.stroke()
-      ctx.restore();
+      this.ctx.save();
+      this.ctx.strokeStyle = `#${this.special.toString(16)}`;
+      this.ctx.beginPath();
+      this.ctx.moveTo(this.x, this.y + this.font.height - 1);
+      this.ctx.lineTo(this.x + col * this.font.width, this.y + this.font.height - 1);
+      this.ctx.closePath();
+      this.ctx.stroke()
+      this.ctx.restore();
     }
 
     this.special = -1;
   }
 
-  text(ctx: CanvasRenderingContext2D, text: string[], stay: boolean = false) {
+  text(text: string[], stay: boolean = false) {
     if (stay) {
-      this.rect(ctx, text.length * 2, true);
-      this.style(ctx, this.defaultFg);
-      ctx.fillText(text.join(""), this.x, this.y);
+      this.rect(text.length * 2, true);
+      this.style(this.defaultFg);
+      this.ctx.fillText(text.join(""), this.x, this.y);
     } else {
-      this.rect(ctx, text.length);
-      this.underline(ctx, text.length);
-      this.style(ctx, this.fg);
+      this.rect(text.length);
+      this.underline(text.length);
+      this.style(this.fg);
       text.forEach(c => {
-        ctx.fillText(c, this.x, this.y);
+        this.ctx.fillText(c, this.x, this.y);
         this.x += this.font.width;
       });
     }
