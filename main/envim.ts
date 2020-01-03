@@ -12,6 +12,7 @@ export class Envim {
     ipcMain.on("envim:resize", this.onResize.bind(this));
     ipcMain.on("envim:mouse", this.onMouse.bind(this));
     ipcMain.on("envim:input", this.onInput.bind(this));
+    ipcMain.on("envim:paste", this.onPaste.bind(this));
     ipcMain.on("envim:detach", this.onDetach.bind(this));
   }
 
@@ -54,6 +55,10 @@ export class Envim {
 
   private async onInput(_: IpcMainEvent, input: string) {
     await this.nvim?.input(input);
+  }
+
+  private async onPaste(_: IpcMainEvent, data: string) {
+    await this.nvim?.request("nvim_paste", [data, true, -1]);
   }
 
   private async onDetach() {

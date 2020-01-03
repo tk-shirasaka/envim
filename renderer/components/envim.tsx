@@ -1,4 +1,4 @@
-import React, { MouseEvent, WheelEvent, KeyboardEvent } from "react";
+import React, { MouseEvent, WheelEvent, KeyboardEvent, ClipboardEvent } from "react";
 import { ipcRenderer, IpcRendererEvent } from "electron";
 
 import { keycode } from "../utils/keycode";
@@ -16,6 +16,7 @@ interface States {
 
 const styles = {
   canvas: {
+    cursor: "pointer",
     display: "block",
   },
   input: {
@@ -92,6 +93,8 @@ export class EnvimComponent extends React.Component<Props, States> {
     const input = this.refs.input as HTMLInputElement;
     const code = keycode(e);
 
+    if (["<C-V>", "<D-v>"].indexOf(code) >= 0) return;
+
     e.stopPropagation();
     e.preventDefault();
     setTimeout(() => {
@@ -105,6 +108,12 @@ export class EnvimComponent extends React.Component<Props, States> {
     });
     this.capture && this.renderer?.restore(this.capture, "win");
     delete(this.capture);
+  }
+
+  private onPaste(e: ClipboardEvent) {
+    e.stopPropagation();
+    e.preventDefault();
+    ipcRenderer.send("envim:paste", e.clipboardData.getData("text/plain"));
   }
 
   private onRedraw(_: IpcRendererEvent, redraw: any[][]) {
@@ -160,7 +169,10 @@ export class EnvimComponent extends React.Component<Props, States> {
           onMouseUp={this.onMouseUp.bind(this)}
           onWheel={this.onMouseWheel.bind(this)}
         />
-        <input style={styles.input} onKeyDown={this.onKeyDown.bind(this)} autoFocus={true} ref="input" />
+        <input style={styles.input} autoFocus={true} ref="input"
+          onKeyDown={this.onKeyDown.bind(this)}
+          onPaste={this.onPaste.bind(this)}
+        />
       </>
     );
   }

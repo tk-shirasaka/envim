@@ -4,6 +4,7 @@ export const keycode = (e: KeyboardEvent) => {
   const { keyCode, key, ctrlKey, altKey, metaKey } = e;
 
   switch (key) {
+    case "¥": return "\\";
     case "<": return "<LT>";
     case "Escape": return "<Esc>";
     case "Backspace": return "<BS>";

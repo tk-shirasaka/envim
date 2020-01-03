@@ -49,10 +49,6 @@ export class SettingComponent extends React.Component<Props, States> {
     super(props);
     this.state = this.ls.get();
 
-    this.onToggle = this.onToggle.bind(this);
-    this.onChangeCmd = this.onChangeCmd.bind(this);
-    this.onChangePort = this.onChangePort.bind(this);
-    this.onSubmit = this.onSubmit.bind(this);
     ipcRenderer.on("setting:cmd-list", this.onCmdList.bind(this));
   }
 
@@ -95,15 +91,15 @@ export class SettingComponent extends React.Component<Props, States> {
 
   render() {
     return (
-      <form style={styles.scope} onSubmit={this.onSubmit}>
+      <form style={styles.scope} onSubmit={this.onSubmit.bind(this)}>
         <h1>Welcome To Envim!</h1>
         <div>
-          <label><input style={styles.radio} type="radio" value="cmd" checked={this.state.type === "cmd"} onChange={this.onToggle} />Command</label>
-          <label><input style={styles.radio} type="radio" value="port" checked={this.state.type === "port"} onChange={this.onToggle} />Port</label>
+          <label><input style={styles.radio} type="radio" value="cmd" checked={this.state.type === "cmd"} onChange={this.onToggle.bind(this)} />Command</label>
+          <label><input style={styles.radio} type="radio" value="port" checked={this.state.type === "port"} onChange={this.onToggle.bind(this)} />Port</label>
         </div>
         {this.state.type === "cmd"
-          ?  <p><label>Enter neovim command<input style={styles.text} value={this.state.cmd} list="cmd-list" onChange={this.onChangeCmd} autoFocus={true} /></label></p>
-          :  <p><label>Enter neovim port<input style={styles.text} value={this.state.port} onChange={this.onChangePort} autoFocus={true} /></label></p>
+          ?  <p><label>Enter neovim command<input style={styles.text} value={this.state.cmd} list="cmd-list" onChange={this.onChangeCmd.bind(this)} autoFocus={true} /></label></p>
+          :  <p><label>Enter neovim port<input style={styles.text} value={this.state.port} onChange={this.onChangePort.bind(this)} autoFocus={true} /></label></p>
         }
         <datalist id="cmd-list">
           {this.state.cmdList.map(cmd => <option key={`list_${cmd}`} value={cmd} />)}
