@@ -35,8 +35,9 @@ export class AppComponent extends React.Component<Props, States> {
       case "width":
         font.width = +target.value;
       break;
-      case "height":
-        font.height = +target.value;
+      case "size":
+        font.size = +target.value;
+        font.height = font.size + 1;
       break;
     }
     this.ls.set(font);

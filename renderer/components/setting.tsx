@@ -108,7 +108,7 @@ export class SettingComponent extends React.Component<Props, States> {
         <datalist id="cmd-list">
           {this.state.cmdList.map(cmd => <option key={`list_${cmd}`} value={cmd} />)}
         </datalist>
-        <p><label>Font size <input style={styles.text} name="height" value={this.props.font.height} onChange={this.props.onChangeFont} /></label></p>
+        <p><label>Font size <input style={styles.text} name="size" value={this.props.font.size} onChange={this.props.onChangeFont} /></label></p>
         <p><label>Column space <input style={styles.text} name="width" value={this.props.font.width} onChange={this.props.onChangeFont} /></label></p>
         <button style={styles.button}>Start</button>
       </form>
