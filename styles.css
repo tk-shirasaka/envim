@@ -5,9 +5,9 @@
 }
 
 @font-face {
-  font-family: "Ricty Diminished";
+  font-family: "Nerd Font";
   font-style: normal;
-  src: url(fonts/Powerline-Regular.otf);
+  src: url(fonts/NerdFont-Regular.ttf);
 }
 
 @font-face {
@@ -17,9 +17,9 @@
 }
 
 @font-face {
-  font-family: "Ricty Diminished Bold";
+  font-family: "Nerd Font Bold";
   font-style: bold;
-  src: url(fonts/Powerline-Bold.ttf);
+  src: url(fonts/NerdFont-Bold.ttf);
 }
 
 @font-face {
@@ -33,5 +33,5 @@ body {
     padding: 0;
     background: #273340;
     color: #f9ecec;
-    font-family: Ricty Diminished, Ricty Diminished Bold, Ricty Diminished Oblique;
+    font-family: Ricty Diminished;
 }

@@ -46,8 +46,8 @@ export class Context2D {
 
   fontStyle(type: "normal" | "bold" | "italic" = "normal") {
     this.ctx.textBaseline = "top";
-    type === "normal" && (this.ctx.font = `${this.font.height}px Ricty Diminished`);
-    type === "bold" && (this.ctx.font = `${this.font.height}px Ricty Diminished Bold`);
+    type === "normal" && (this.ctx.font = `${this.font.height}px Ricty Diminished, Nerd Font`);
+    type === "bold" && (this.ctx.font = `${this.font.height}px Ricty Diminished Bold, Nerd Font Bold`);
     type === "italic" && (this.ctx.font = `${this.font.height}px Ricty Diminished Oblique`);
   }
 
