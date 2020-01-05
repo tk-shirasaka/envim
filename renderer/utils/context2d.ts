@@ -9,6 +9,7 @@ export class Context2D {
   private defaultFg = 0;
   private defaultBg = 0;
   private region = { top: 0, bottom: 0, left: 0, right: 0 };
+  private captures: { ime?: ImageData; cursor?: ImageData; } = {};
 
   constructor(
     private canvas: HTMLCanvasElement,
@@ -66,29 +67,23 @@ export class Context2D {
     this.ctx.fillRect(0, 0, this.win.width, this.win.height);
   }
 
-  capture(type: "cursor" | "win") {
-    const [x, y, w, h] = type === "cursor"
-      ? [this.x, this.y, this.font.width, this.font.height]
-      : [0, 0, this.win.width, this.win.height];
-
-    return this.ctx.getImageData(x, y, w, h);
+  capture(type: "cursor" | "ime") {
+    this.captures[type] = this.ctx.getImageData(0, 0, this.win.width, this.win.height);
   }
 
-  restore(capture: ImageData, type: "cursor" | "win") {
-    const [x, y] = type === "cursor" ? [this.x, this.y] : [0, 0];
-    this.ctx.putImageData(capture, x, y);
+  restore(type: "cursor" | "ime") {
+    const capture = this.captures[type];
+    delete(this.captures[type]);
+    capture && this.ctx.putImageData(capture, 0, 0);
   }
 
-  reverse() {
-    const src = this.capture("cursor");
-    const dst = this.ctx.createImageData(this.font.width, this.font.height);
-    for (let i = 0; i < src.data.length; i += 4) {
-      dst.data[i] = 255 - src.data[i];
-      dst.data[i + 1] = 255 - src.data[i + 1];
-      dst.data[i + 2] = 255 - src.data[i + 2];
-      dst.data[i + 3] = src.data[i + 3];
-    }
-    this.restore(dst, "cursor");
+  flush() {
+    this.capture("cursor");
+    this.ctx.save();
+    this.ctx.globalCompositeOperation = "overlay";
+    this.style(0xfff);
+    this.ctx.fillRect(this.x, this.y, this.font.width, this.font.height);
+    this.ctx.restore();
   }
 
   scrollRegion(top: number, bottom: number, left: number, right: number) {

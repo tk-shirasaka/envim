@@ -1,4 +1,4 @@
-import React, { MouseEvent, WheelEvent, KeyboardEvent, ClipboardEvent } from "react";
+import React, { MouseEvent, WheelEvent, KeyboardEvent, CompositionEvent, ClipboardEvent } from "react";
 import { ipcRenderer, IpcRendererEvent } from "electron";
 
 import { keycode } from "../utils/keycode";
@@ -32,7 +32,6 @@ export class EnvimComponent extends React.Component<Props, States> {
   private timer: number = 0;
   private drag: boolean = false;
   private renderer?: Context2D;
-  private capture?: ImageData;
 
   constructor(props: Props) {
     super(props);
@@ -90,7 +89,7 @@ export class EnvimComponent extends React.Component<Props, States> {
   }
 
   private onKeyDown(e: KeyboardEvent) {
-    const input = this.refs.input as HTMLInputElement;
+    const input = e.target as HTMLInputElement;
     const code = keycode(e);
 
     if (["<C-V>", "<D-v>"].indexOf(code) >= 0) return;
@@ -98,16 +97,21 @@ export class EnvimComponent extends React.Component<Props, States> {
     e.stopPropagation();
     e.preventDefault();
     setTimeout(() => {
-      if (input.value && code !== '<CR>') {
-        this.capture = this.renderer?.capture("win");
+      if (input.value) {
+        this.renderer?.capture("ime");
         this.renderer?.text(input.value.split(""), true);
       } else {
-        ipcRenderer.send("envim:input", input.value || code);
-        input.value = "";
+        code && ipcRenderer.send("envim:input", code);
       }
     });
-    this.capture && this.renderer?.restore(this.capture, "win");
-    delete(this.capture);
+    this.renderer?.restore("ime");
+  }
+
+  private onCompositionEnd(e: CompositionEvent) {
+    const input = e.target as HTMLInputElement;
+
+    ipcRenderer.send("envim:input", input.value);
+    input.value = "";
   }
 
   private onPaste(e: ClipboardEvent) {
@@ -117,7 +121,7 @@ export class EnvimComponent extends React.Component<Props, States> {
   }
 
   private onRedraw(_: IpcRendererEvent, redraw: any[][]) {
-    this.renderer?.reverse();
+    this.renderer?.restore("cursor");
     this.renderer?.fontStyle();
     redraw.forEach(r => {
       const name = r.shift();
@@ -132,7 +136,7 @@ export class EnvimComponent extends React.Component<Props, States> {
           this.renderer?.resize(r[0][0], r[0][1]);
         break;
         case "flush":
-          this.renderer?.reverse();
+          this.renderer?.flush();
         break;
         case "set_scroll_region":
           this.renderer?.scrollRegion(r[0][0], r[0][1], r[0][2], r[0][3]);
@@ -169,8 +173,9 @@ export class EnvimComponent extends React.Component<Props, States> {
           onMouseUp={this.onMouseUp.bind(this)}
           onWheel={this.onMouseWheel.bind(this)}
         />
-        <input style={styles.input} autoFocus={true} ref="input"
+        <input style={styles.input} autoFocus={true}
           onKeyDown={this.onKeyDown.bind(this)}
+          onCompositionEnd={this.onCompositionEnd.bind(this)}
           onPaste={this.onPaste.bind(this)}
         />
       </>
