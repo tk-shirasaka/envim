@@ -1,10 +1,10 @@
 import React, { ChangeEvent } from "react";
 import { ipcRenderer } from "electron";
 
+import { Localstorage } from "../utils/localstorage";
+
 import { SettingComponent } from "./setting";
 import { EnvimComponent } from "./envim";
-
-import { Localstorage } from "../utils/localstorage";
 
 interface Props {
 }

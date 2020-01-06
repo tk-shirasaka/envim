@@ -1,11 +1,10 @@
 import React, { KeyboardEvent, CompositionEvent, ClipboardEvent } from "react";
 import { ipcRenderer } from "electron";
-import { EventEmitter } from "events";
 
+import { Emit } from "../utils/emit";
 import { keycode } from "../utils/keycode";
 
 interface Props {
-  emit: EventEmitter;
 }
 
 interface States {
@@ -21,6 +20,16 @@ const style = {
 
 export class InputComponent extends React.Component<Props, States> {
 
+  constructor(props: Props) {
+    super(props);
+
+    Emit.on("menu:off", this.onFocus.bind(this));
+  }
+
+  private onFocus() {
+    (this.refs.input as HTMLInputElement).focus();
+  }
+
   private onKeyDown(e: KeyboardEvent) {
     const input = e.target as HTMLInputElement;
     const code = keycode(e);
@@ -32,7 +41,7 @@ export class InputComponent extends React.Component<Props, States> {
     e.preventDefault();
     setTimeout(() => {
       if (input.value) {
-        this.props.emit.emit("envim:ime", input.value);
+        Emit.send("envim:ime", input.value);
       } else {
         code && ipcRenderer.send("envim:input", code);
       }
@@ -54,7 +63,7 @@ export class InputComponent extends React.Component<Props, States> {
 
   render() {
     return (
-      <input style={style} autoFocus={true}
+      <input style={style} autoFocus={true} ref="input"
         onKeyDown={this.onKeyDown.bind(this)}
         onCompositionEnd={this.onCompositionEnd.bind(this)}
         onPaste={this.onPaste.bind(this)}

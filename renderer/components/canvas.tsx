@@ -1,13 +1,12 @@
 import React, { MouseEvent, WheelEvent } from "react";
 import { ipcRenderer, IpcRendererEvent } from "electron";
-import { EventEmitter } from "events";
 
 import { Context2D } from "../utils/context2d";
+import { Emit } from "../utils/emit";
 
 interface Props {
   font: { size: number; width: number; height: number; };
   win: { width: number; height: number; };
-  emit: EventEmitter;
 }
 
 interface States {
@@ -25,7 +24,7 @@ export class CanvasComponent extends React.Component<Props, States> {
   constructor(props: Props) {
     super(props);
 
-    this.props.emit.on("envim:ime", this.onIme.bind(this));
+    Emit.on("envim:ime", this.onIme.bind(this));
     ipcRenderer.on("envim:redraw", this.onRedraw.bind(this));
     ipcRenderer.send("envim:resize", ...this.getNvimSize(this.props.win.width, this.props.win.height));
   }
