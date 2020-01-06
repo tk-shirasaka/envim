@@ -2,10 +2,9 @@ import React, { FormEvent, ChangeEvent } from "react";
 import { ipcRenderer, IpcRendererEvent } from "electron";
 
 import { Localstorage } from "../utils/localstorage";
-import { IFont } from "../utils/interfaces";
 
 interface Props {
-  font: IFont;
+  font: { size: number; width: number; height: number; };
   onChangeFont: (e: ChangeEvent) => void;
 }
 

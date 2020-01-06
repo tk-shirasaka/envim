@@ -1,12 +1,11 @@
-import React, { MouseEvent, WheelEvent, KeyboardEvent, CompositionEvent, ClipboardEvent } from "react";
-import { ipcRenderer, IpcRendererEvent } from "electron";
+import React from "react";
+import { EventEmitter } from "events";
 
-import { keycode } from "../utils/keycode";
-import { IFont } from "../utils/interfaces";
-import { Context2D } from "../utils/context2d";
+import { CanvasComponent } from "./canvas";
+import { InputComponent } from "./input";
 
 interface Props {
-  font: IFont;
+  font: { size: number; width: number; height: number; };
 }
 
 interface States {
@@ -14,68 +13,15 @@ interface States {
   height: number;
 }
 
-const styles = {
-  canvas: {
-    cursor: "pointer",
-    display: "block",
-  },
-  input: {
-    display: "block",
-    height: 0,
-    padding: 0,
-    margin: 0,
-    border: "none",
-  },
-};
-
 export class EnvimComponent extends React.Component<Props, States> {
   private timer: number = 0;
-  private drag: boolean = false;
-  private renderer?: Context2D;
+  private emit = new EventEmitter;
 
   constructor(props: Props) {
     super(props);
 
     this.state = { width: window.innerWidth, height: window.innerHeight };
     window.addEventListener("resize", this.onResize.bind(this));
-    ipcRenderer.on("envim:redraw", this.onRedraw.bind(this));
-    ipcRenderer.send("envim:resize", ...this.getNvimSize());
-  }
-
-  componentDidMount() {
-    const canvas = this.refs.canvas as HTMLCanvasElement;
-    const ctx = canvas.getContext("2d");
-    ctx && (this.renderer = new Context2D(canvas, ctx, this.state, this.props.font));
-  }
-
-  private getNvimSize(width: number = this.state.width, height: number = this.state.height) {
-    return [Math.floor(width / this.props.font.width), Math.floor(height / this.props.font.height)];
-  }
-
-  private onMouse(e: MouseEvent, button: string, action: string) {
-    const [col, row] = this.getNvimSize(e.clientX, e.clientY);
-
-    button === "left" && e.stopPropagation();
-    button === "left" && e.preventDefault();
-    ipcRenderer.send("envim:mouse", button, action, row, col);
-  }
-
-  private onMouseDown(e: MouseEvent) {
-    this.drag = true;
-    this.onMouse(e, "left", "press");
-  }
-
-  private onMouseMove(e: MouseEvent) {
-    this.drag && this.onMouse(e, "left", "drag");
-  }
-
-  private onMouseUp(e: MouseEvent) {
-    this.drag = false;
-    this.onMouse(e, "left", "release");
-  }
-
-  private onMouseWheel(e: WheelEvent) {
-    this.onMouse(e, "wheel", e.deltaY < 0 ? "up" : "down");
   }
 
   private onResize() {
@@ -83,102 +29,15 @@ export class EnvimComponent extends React.Component<Props, States> {
       if (timer !== this.timer) return;
 
       this.setState({ width: window.innerWidth, height: window.innerHeight })
-      ipcRenderer.send("envim:resize", ...this.getNvimSize());
     }, 200);
     this.timer = timer;
-  }
-
-  private onKeyDown(e: KeyboardEvent) {
-    const input = e.target as HTMLInputElement;
-    const code = keycode(e);
-
-    if (input.value && code === "<CR>") return;
-    if (["<C-V>", "<D-v>"].indexOf(code) >= 0) return;
-
-    e.stopPropagation();
-    e.preventDefault();
-    setTimeout(() => {
-      if (input.value) {
-        this.renderer?.capture("ime");
-        this.renderer?.text(input.value.split(""), true);
-      } else {
-        code && ipcRenderer.send("envim:input", code);
-      }
-    });
-    this.renderer?.restore("ime");
-  }
-
-  private onCompositionEnd(e: CompositionEvent) {
-    const input = e.target as HTMLInputElement;
-
-    ipcRenderer.send("envim:input", input.value);
-    input.value = "";
-  }
-
-  private onPaste(e: ClipboardEvent) {
-    e.stopPropagation();
-    e.preventDefault();
-    ipcRenderer.send("envim:paste", e.clipboardData.getData("text/plain"));
-  }
-
-  private onRedraw(_: IpcRendererEvent, redraw: any[][]) {
-    this.renderer?.restore("cursor");
-    this.renderer?.fontStyle();
-    redraw.forEach(r => {
-      const name = r.shift();
-      switch (name) {
-        case "clear":
-          this.renderer?.clearAll();
-        break;
-        case "eol_clear":
-          this.renderer?.clearEol();
-        break;
-        case "resize":
-          this.renderer?.resize(r[0][0], r[0][1]);
-        break;
-        case "flush":
-          this.renderer?.flush();
-        break;
-        case "set_scroll_region":
-          this.renderer?.scrollRegion(r[0][0], r[0][1], r[0][2], r[0][3]);
-        break;
-        case "scroll":
-          this.renderer?.scroll(r[0][0]);
-        break;
-        case "cursor_goto":
-          this.renderer?.cursor(r[0][0], r[0][1]);
-        break;
-        case "highlight_set":
-          const { foreground, background, special, reverse, bold, italic } = r[0][0];
-          this.renderer?.highlight(foreground, background, special, reverse, bold, italic);
-        break;
-        case "update_fg":
-          this.renderer?.update(r[0][0], "fg");
-        break;
-        case "update_bg":
-          this.renderer?.update(r[0][0], "bg");
-        break;
-        case "put":
-          this.renderer?.text((r as string[][]).map(c => c[0] || ""));
-        break;
-      }
-    });
   }
 
   render() {
     return (
       <>
-        <canvas style={styles.canvas} width={this.state.width} height={this.state.height} ref="canvas"
-          onMouseDown={this.onMouseDown.bind(this)}
-          onMouseMove={this.onMouseMove.bind(this)}
-          onMouseUp={this.onMouseUp.bind(this)}
-          onWheel={this.onMouseWheel.bind(this)}
-        />
-        <input style={styles.input} autoFocus={true}
-          onKeyDown={this.onKeyDown.bind(this)}
-          onCompositionEnd={this.onCompositionEnd.bind(this)}
-          onPaste={this.onPaste.bind(this)}
-        />
+        <CanvasComponent font={this.props.font} win={{ width: this.state.width, height: this.state.height }} emit={this.emit} />
+        <InputComponent emit={this.emit} />
       </>
     );
   }

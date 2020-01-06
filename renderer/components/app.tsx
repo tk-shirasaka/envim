@@ -5,18 +5,17 @@ import { SettingComponent } from "./setting";
 import { EnvimComponent } from "./envim";
 
 import { Localstorage } from "../utils/localstorage";
-import { IFont, Font } from "../utils/interfaces";
 
 interface Props {
 }
 
 interface States {
   init: boolean;
-  font: IFont;
+  font: { size: number; width: number; height: number; };
 }
 
 export class AppComponent extends React.Component<Props, States> {
-  private ls: Localstorage<IFont> = new Localstorage<IFont>("font", new Font);
+  private ls: Localstorage<States["font"]> = new Localstorage<States["font"]>("font", { size: 16, width: 8, height: 17 });
 
   constructor(props: Props) {
     super(props);

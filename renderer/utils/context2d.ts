@@ -1,5 +1,3 @@
-import { IFont } from "./interfaces";
-
 export class Context2D {
   private x = 0;
   private y = 0;
@@ -15,7 +13,7 @@ export class Context2D {
     private canvas: HTMLCanvasElement,
     private ctx: CanvasRenderingContext2D,
     private win: { width: number; height: number; },
-    private font: IFont,
+    private font: { size: number; width: number; height: number; },
   ) { }
 
   cursor(row: number, col: number) {
