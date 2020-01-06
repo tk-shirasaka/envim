@@ -1,6 +1,4 @@
-import React, { MouseEvent } from "react";
-
-import { Emit } from "../utils/emit";
+import React from "react";
 
 import { CanvasComponent } from "./canvas";
 import { InputComponent } from "./input";
@@ -22,7 +20,12 @@ export class EnvimComponent extends React.Component<Props, States> {
     super(props);
 
     this.state = { width: window.innerWidth, height: window.innerHeight };
-    window.addEventListener("resize", this.onResize.bind(this));
+    this.onResize = this.onResize.bind(this);
+    window.addEventListener("resize", this.onResize);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener("resize", this.onResize);
   }
 
   private onResize() {
@@ -34,19 +37,13 @@ export class EnvimComponent extends React.Component<Props, States> {
     this.timer = timer;
   }
 
-  private onMenu(e: MouseEvent) {
-    e.preventDefault();
-    e.stopPropagation();
-    Emit.send("menu:on", e.clientY, e.clientX);
-  }
-
   render() {
     return (
-      <div onContextMenu={this.onMenu.bind(this)}>
+      <>
         <CanvasComponent font={this.props.font} win={this.state} />
         <InputComponent />
         <MenuComponent />
-      </div>
+      </>
     );
   }
 }

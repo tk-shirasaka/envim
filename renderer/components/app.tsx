@@ -23,7 +23,6 @@ export class AppComponent extends React.Component<Props, States> {
 
     ipcRenderer.on("app:start", this.onStart.bind(this));
     ipcRenderer.on("app:stop", this.onStop.bind(this));
-    window.addEventListener("beforeunload", this.onStop.bind(this));
   }
 
   private onChangeFont(e: ChangeEvent) {
@@ -48,7 +47,6 @@ export class AppComponent extends React.Component<Props, States> {
   }
 
   private onStop() {
-    ipcRenderer.send("envim:detach");
     this.setState({ init: false });
   }
 

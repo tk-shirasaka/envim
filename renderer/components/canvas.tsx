@@ -39,6 +39,11 @@ export class CanvasComponent extends React.Component<Props, States> {
     ipcRenderer.send("envim:resize", ...this.getNvimSize(this.props.win.width, this.props.win.height));
   }
 
+  componentWillUnmount() {
+    Emit.clear("envim:ime");
+    ipcRenderer.removeAllListeners("envim:redraw");
+  }
+
   private getNvimSize(width: number, height: number) {
     return [Math.floor(width / this.props.font.width), Math.floor(height / this.props.font.height)];
   }
@@ -52,8 +57,16 @@ export class CanvasComponent extends React.Component<Props, States> {
   }
 
   private onMouseDown(e: MouseEvent) {
-    this.drag = true;
-    this.onMouse(e, "left", "press");
+    switch (e.button) {
+      case 0:
+        this.drag = true;
+        this.onMouse(e, "left", "press");
+        Emit.send("menu:off");
+      break;
+      case 2:
+        Emit.send("menu:on", e.clientY, e.clientX);
+      break;
+    }
   }
 
   private onMouseMove(e: MouseEvent) {

@@ -10,4 +10,8 @@ export class Emit {
   static send(event: string, ...args: any[]) {
     Emit.emit.emit(event, ...args);
   }
+
+  static clear(event: string) {
+    Emit.emit.removeAllListeners(event);
+  }
 }

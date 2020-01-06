@@ -42,10 +42,6 @@ export class Envim {
     }
   }
 
-  private onDisconnect() {
-    Browser.win?.webContents.send("app:stop");
-  }
-
   private async onResize(_: IpcMainEvent, width: number, height: number) {
     await this.nvim?.uiTryResize(width, height);
   }
@@ -69,6 +65,11 @@ export class Envim {
 
   private async onDetach() {
     await this.nvim?.uiDetach();
+    this.onDisconnect();
+  }
+
+  private onDisconnect() {
     delete(this.nvim);
+    Browser.win?.webContents.send("app:stop");
   }
 }

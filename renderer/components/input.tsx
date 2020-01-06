@@ -26,6 +26,10 @@ export class InputComponent extends React.Component<Props, States> {
     Emit.on("menu:off", this.onFocus.bind(this));
   }
 
+  componentWillUnmount() {
+    Emit.clear("menu:off");
+  }
+
   private onFocus() {
     (this.refs.input as HTMLInputElement).focus();
   }

@@ -51,6 +51,10 @@ export class SettingComponent extends React.Component<Props, States> {
     ipcRenderer.on("setting:cmd-list", this.onCmdList.bind(this));
   }
 
+  componentWillUnmount() {
+    ipcRenderer.removeAllListeners("setting:cmd-list");
+  }
+
   private onToggle(e: ChangeEvent) {
     const type = (e.target as HTMLInputElement).value === "cmd" ? "cmd" : "port";
     this.setState({type: type, cmdList: []});
