@@ -92,6 +92,7 @@ export class EnvimComponent extends React.Component<Props, States> {
     const input = e.target as HTMLInputElement;
     const code = keycode(e);
 
+    if (input.value && code === "<CR>") return;
     if (["<C-V>", "<D-v>"].indexOf(code) >= 0) return;
 
     e.stopPropagation();
