@@ -1,4 +1,4 @@
-import React, { KeyboardEvent, CompositionEvent, ClipboardEvent } from "react";
+import React, { KeyboardEvent, CompositionEvent } from "react";
 import { ipcRenderer } from "electron";
 
 import { Emit } from "../utils/emit";
@@ -39,7 +39,6 @@ export class InputComponent extends React.Component<Props, States> {
     const code = keycode(e);
 
     if (input.value && code === "<CR>") return;
-    if (["<C-V>", "<D-v>"].indexOf(code) >= 0) return;
 
     e.stopPropagation();
     e.preventDefault();
@@ -59,18 +58,11 @@ export class InputComponent extends React.Component<Props, States> {
     input.value = "";
   }
 
-  private onPaste(e: ClipboardEvent) {
-    e.stopPropagation();
-    e.preventDefault();
-    ipcRenderer.send("envim:paste", e.clipboardData.getData("text/plain"));
-  }
-
   render() {
     return (
       <input style={style} autoFocus={true} ref="input"
         onKeyDown={this.onKeyDown.bind(this)}
         onCompositionEnd={this.onCompositionEnd.bind(this)}
-        onPaste={this.onPaste.bind(this)}
       />
     );
   }

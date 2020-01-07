@@ -1,8 +1,10 @@
 import { ipcMain, IpcMainEvent } from "electron";
 import { spawn } from "child_process";
 import { attach, NeovimClient } from "neovim";
+import { Response } from "neovim/lib/host";
 
 import { Browser } from "./browser";
+import { Clipboard } from "./clipboard";
 
 export class Envim {
   private nvim?: NeovimClient;
@@ -12,8 +14,6 @@ export class Envim {
     ipcMain.on("envim:resize", this.onResize.bind(this));
     ipcMain.on("envim:mouse", this.onMouse.bind(this));
     ipcMain.on("envim:input", this.onInput.bind(this));
-    ipcMain.on("envim:copy", this.onCopy.bind(this));
-    ipcMain.on("envim:paste", this.onPaste.bind(this));
     ipcMain.on("envim:detach", this.onDetach.bind(this));
   }
 
@@ -30,15 +30,26 @@ export class Envim {
     if (this.nvim) {
       await this.nvim.uiAttach(10, 10, {})
 
+      this.nvim.on("request", this.onRequest.bind(this));
       this.nvim.on("notification", this.onNotification.bind(this));
       this.nvim.on("disconnect", this.onDisconnect.bind(this));
+
+      Clipboard.setup(this.nvim);
       Browser.win?.webContents.send("app:start");
     }
   }
 
+  private onRequest(method: string, args: any, res: Response) {
+    switch (method) {
+      case "envim_clipboard":return Clipboard.paste(res);
+    }
+    console.log({ method, args });
+  }
+
   private onNotification(method: string, args: any) {
-    if (method === "redraw") {
-      Browser.win?.webContents.send("envim:redraw", args);
+    switch (method) {
+      case "redraw":return Browser.win?.webContents.send("envim:redraw", args);
+      case "envim_clipboard":return Clipboard.copy(args[0], args[1]);
     }
   }
 
@@ -52,15 +63,6 @@ export class Envim {
 
   private async onInput(_: IpcMainEvent, input: string) {
     await this.nvim?.input(input);
-  }
-
-  private async onCopy() {
-    const data = await this.nvim?.commandOutput("echo @");
-    data && Browser.win?.webContents.send("envim:clipboard", data);
-  }
-
-  private async onPaste(_: IpcMainEvent, data: string) {
-    await this.nvim?.request("nvim_paste", [data, true, -1]);
   }
 
   private async onDetach() {
