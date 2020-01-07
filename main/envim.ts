@@ -30,6 +30,7 @@ export class Envim {
     if (this.nvim) {
       await this.nvim.uiAttach(10, 10, {})
 
+      this.nvim.setClientInfo("Envim", { major: 0, minor: 0, patch: 1, prerelease: "dev" }, "ui", {}, {})
       this.nvim.on("request", this.onRequest.bind(this));
       this.nvim.on("notification", this.onNotification.bind(this));
       this.nvim.on("disconnect", this.onDisconnect.bind(this));
