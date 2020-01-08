@@ -9,10 +9,10 @@ interface Props {
 }
 
 interface States {
-  type: "cmd" | "port";
-  cmd: string;
-  port: string;
-  cmdList: string[];
+  type: "command" | "address";
+  command: string;
+  address: string;
+  commandList: string[];
 }
 
 const styles = {
@@ -41,48 +41,48 @@ const styles = {
 
 export class SettingComponent extends React.Component<Props, States> {
   private timeout: number = 0;
-  private prevCmd: string = "";
-  private ls: Localstorage<States> = new Localstorage<States>("setting", { type: "cmd", cmd: "", port: "", cmdList: [] });
+  private prevCommand: string = "";
+  private ls: Localstorage<States> = new Localstorage<States>("setting", { type: "command", command: "", address: "", commandList: [] });
 
   constructor(props: Props) {
     super(props);
     this.state = this.ls.get();
 
-    ipcRenderer.on("setting:cmd-list", this.onCmdList.bind(this));
+    ipcRenderer.on("setting:command-list", this.onCommandList.bind(this));
   }
 
   componentWillUnmount() {
-    ipcRenderer.removeAllListeners("setting:cmd-list");
+    ipcRenderer.removeAllListeners("setting:command-list");
   }
 
   private onToggle(e: ChangeEvent) {
-    const type = (e.target as HTMLInputElement).value === "cmd" ? "cmd" : "port";
-    this.setState({type: type, cmdList: []});
+    const type = (e.target as HTMLInputElement).value === "command" ? "command" : "address";
+    this.setState({type: type, commandList: []});
   }
 
-  private onChangeCmd(e: ChangeEvent) {
-    const cmd = (e.target as HTMLInputElement).value;
+  private onChangeCommand(e: ChangeEvent) {
+    const command = (e.target as HTMLInputElement).value;
 
-    if (this.state.type === "cmd") {
+    if (this.state.type === "command") {
       const timeout = +setTimeout(() => {
-        if (cmd === this.prevCmd) return;
-        if (!(cmd && timeout === this.timeout)) return;
+        if (command === this.prevCommand) return;
+        if (!(command && timeout === this.timeout)) return;
         this.timeout = 0;
-        this.prevCmd = cmd;
-        ipcRenderer.send("setting:cmd", cmd);
+        this.prevCommand = command;
+        ipcRenderer.send("setting:command", command);
       }, 500);
       this.timeout = timeout;
     }
-    this.setState({ cmd });
+    this.setState({ command });
   }
 
   private onChangePort(e: ChangeEvent) {
-    const port = (e.target as HTMLInputElement).value;
-    this.setState({ port });
+    const address = (e.target as HTMLInputElement).value;
+    this.setState({ address });
   }
 
-  private onCmdList(_: IpcRendererEvent, list: string[]) {
-    this.setState({cmdList: list});
+  private onCommandList(_: IpcRendererEvent, list: string[]) {
+    this.setState({commandList: list});
   }
 
   private onSubmit(e: FormEvent) {
@@ -97,15 +97,15 @@ export class SettingComponent extends React.Component<Props, States> {
       <form style={styles.scope} onSubmit={this.onSubmit.bind(this)}>
         <h1>Welcome To Envim!</h1>
         <div>
-          <label><input style={styles.radio} type="radio" value="cmd" checked={this.state.type === "cmd"} onChange={this.onToggle.bind(this)} />Command</label>
-          <label><input style={styles.radio} type="radio" value="port" checked={this.state.type === "port"} onChange={this.onToggle.bind(this)} />Port</label>
+          <label><input style={styles.radio} type="radio" value="command" checked={this.state.type === "command"} onChange={this.onToggle.bind(this)} />Command</label>
+          <label><input style={styles.radio} type="radio" value="address" checked={this.state.type === "address"} onChange={this.onToggle.bind(this)} />Port</label>
         </div>
-        {this.state.type === "cmd"
-          ?  <p><label>Enter neovim command<input style={styles.text} value={this.state.cmd} list="cmd-list" onChange={this.onChangeCmd.bind(this)} autoFocus={true} /></label></p>
-          :  <p><label>Enter neovim port<input style={styles.text} value={this.state.port} onChange={this.onChangePort.bind(this)} autoFocus={true} /></label></p>
+        {this.state.type === "command"
+          ?  <p><label>Enter neovim command<input style={styles.text} value={this.state.command} list="command-list" onChange={this.onChangeCommand.bind(this)} autoFocus={true} /></label></p>
+          :  <p><label>Enter neovim address<input style={styles.text} value={this.state.address} onChange={this.onChangePort.bind(this)} autoFocus={true} /></label></p>
         }
-        <datalist id="cmd-list">
-          {this.state.cmdList.map(cmd => <option key={`list_${cmd}`} value={cmd} />)}
+        <datalist id="command-list">
+          {this.state.commandList.map(command => <option key={`list_${command}`} value={command} />)}
         </datalist>
         <p><label>Font size <input style={styles.text} name="size" value={this.props.font.size} onChange={this.props.onChangeFont} /></label></p>
         <p><label>Column space <input style={styles.text} name="width" value={this.props.font.width} onChange={this.props.onChangeFont} /></label></p>

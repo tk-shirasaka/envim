@@ -1,13 +1,15 @@
 import { ipcMain, IpcMainEvent } from "electron";
+import { createConnection } from "net";
 import { spawn } from "child_process";
-import { attach, NeovimClient } from "neovim";
+import { NeovimClient } from "neovim";
 import { Response } from "neovim/lib/host";
 
 import { Browser } from "./browser";
 import { Clipboard } from "./clipboard";
 
 export class Envim {
-  private nvim?: NeovimClient;
+  private nvim = new NeovimClient;
+  private attached: boolean = false;
 
   constructor() {
     ipcMain.on("envim:attach", this.onAttach.bind(this));
@@ -18,23 +20,26 @@ export class Envim {
   }
 
   private async onAttach(_: IpcMainEvent, type: string, value: string) {
+    let reader, writer;
+
     switch (type) {
-      case "cmd":
+      case "command":
         const proc = spawn(value, ["--embed"]);
-        this.nvim = attach({proc: proc});
+        [reader, writer] = [proc.stdout, proc.stdin];
       break;
-      case "port":
-        this.nvim = attach({socket: value});
+      case "address":
+        const [port, host] = value.split(":").reverse();
+        const socket = createConnection({ port: +port, host: host });
+        [reader, writer] = [socket, socket];
       break;
     }
-    if (this.nvim) {
-      await this.nvim.uiAttach(10, 10, {})
 
+    if (reader && writer) {
+      this.nvim.attach({ reader, writer });
       this.nvim.setClientInfo("Envim", { major: 0, minor: 0, patch: 1, prerelease: "dev" }, "ui", {}, {})
       this.nvim.on("request", this.onRequest.bind(this));
       this.nvim.on("notification", this.onNotification.bind(this));
       this.nvim.on("disconnect", this.onDisconnect.bind(this));
-
       Clipboard.setup(this.nvim);
       Browser.win?.webContents.send("app:start");
     }
@@ -55,24 +60,27 @@ export class Envim {
   }
 
   private async onResize(_: IpcMainEvent, width: number, height: number) {
-    await this.nvim?.uiTryResize(width, height);
+    this.attached || await this.nvim.uiAttach(width, height, {});
+    await this.nvim.uiTryResize(width, height);
+    this.attached = true;
   }
 
   private async onMouse(_: IpcMainEvent, button: string, action: string, row: number, col: number) {
-    await this.nvim?.inputMouse(button, action, "", 0, row, col);
+    await this.nvim.inputMouse(button, action, "", 0, row, col);
   }
 
   private async onInput(_: IpcMainEvent, input: string) {
-    await this.nvim?.input(input);
+    await this.nvim.input(input);
   }
 
   private async onDetach() {
-    await this.nvim?.uiDetach();
+    await this.nvim.uiDetach();
     this.onDisconnect();
   }
 
   private onDisconnect() {
-    delete(this.nvim);
+    this.attached = false;
+    this.nvim = new NeovimClient;
     Browser.win?.webContents.send("app:stop");
   }
 }
