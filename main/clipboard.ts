@@ -34,7 +34,7 @@ export class Clipboard {
   static paste(res: Response) {
     const text = clipboard.readText();
     const lines = text.split("\n");
-    if (Clipboard.lines.join("\n") === text) {
+    if (Clipboard.lines && Clipboard.lines.join("\n") === text) {
       res.send([Clipboard.lines, Clipboard.type]);
     } else {
       res.send([lines, lines.length > 1 ? "V" : "v"]);
