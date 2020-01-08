@@ -78,8 +78,8 @@ export class Context2D {
   flush() {
     this.capture("cursor");
     this.ctx.save();
-    this.ctx.globalCompositeOperation = "overlay";
-    this.style(0xfff);
+    this.ctx.globalCompositeOperation = "exclusion";
+    this.style(0xffffff);
     this.ctx.fillRect(this.x, this.y, this.font.width, this.font.height);
     this.ctx.restore();
   }
@@ -98,8 +98,12 @@ export class Context2D {
     this.ctx.drawImage(this.canvas, x, sy, w, h, x, dy, w, h);
   }
 
+  intToColor(color: number) {
+    return `#${("000000" + color.toString(16)).slice(-6)}`;
+  }
+
   style(color: number) {
-    this.ctx.fillStyle = `#${color.toString(16)}`;
+    this.ctx.fillStyle = this.intToColor(color);
   }
 
   rect(col: number, isDefault: boolean = false) {
@@ -111,7 +115,7 @@ export class Context2D {
   underline(col: number) {
     if (this.special >= 0) {
       this.ctx.save();
-      this.ctx.strokeStyle = `#${this.special.toString(16)}`;
+      this.ctx.strokeStyle = this.intToColor(this.special);
       this.ctx.beginPath();
       this.ctx.moveTo(this.x, this.y + this.font.height - 1);
       this.ctx.lineTo(this.x + col * this.font.width, this.y + this.font.height - 1);
