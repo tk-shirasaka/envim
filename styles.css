@@ -29,9 +29,19 @@
 }
 
 body {
-    margin: 0;
-    padding: 0;
-    background: #273340;
-    color: #f9ecec;
-    font-family: Ricty Diminished;
+  margin: 0;
+  padding: 0;
+  background: #273340;
+  color: #f9ecec;
+  font-family: Ricty Diminished;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: Ricty Diminished Bold;
+}
+
+i {
+  font-size: 40px;
+  font-style: normal;
+  font-family: Nerd Font;
 }

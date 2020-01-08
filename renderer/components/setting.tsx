@@ -2,6 +2,7 @@ import React, { FormEvent, ChangeEvent } from "react";
 import { ipcRenderer, IpcRendererEvent } from "electron";
 
 import { Localstorage } from "../utils/localstorage";
+import { icons } from "../utils/icons";
 
 interface Props {
   font: { size: number; width: number; height: number; };
@@ -15,12 +16,19 @@ interface States {
   commandList: string[];
 }
 
+const flexDirection: "column" = "column";
 const styles = {
   scope: {
+    display: "flex",
+    flexDirection,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  label: {
+    margin: 8,
   },
   radio: {
-    verticalAlign: "top",
-    margin: ".3em .5em auto 1em",
+    margin: "0 8px",
   },
   text: {
     fontSize: "1em",
@@ -29,9 +37,11 @@ const styles = {
     border: "none",
     borderRadius: ".2em",
   },
+  i: {
+    margin: 8,
+  },
   button: {
     fontSize: "1em",
-    margin: "auto .2em",
     padding: ".2em .4em",
     border: "none",
     borderRadius: ".2em",
@@ -97,18 +107,21 @@ export class SettingComponent extends React.Component<Props, States> {
       <form style={styles.scope} onSubmit={this.onSubmit.bind(this)}>
         <h1>Welcome To Envim!</h1>
         <div>
-          <label><input style={styles.radio} type="radio" value="command" checked={this.state.type === "command"} onChange={this.onToggle.bind(this)} />Command</label>
-          <label><input style={styles.radio} type="radio" value="address" checked={this.state.type === "address"} onChange={this.onToggle.bind(this)} />Port</label>
+          <label style={styles.label}><input style={styles.radio} type="radio" value="command" checked={this.state.type === "command"} onChange={this.onToggle.bind(this)} />Command</label>
+          <label style={styles.label}><input style={styles.radio} type="radio" value="address" checked={this.state.type === "address"} onChange={this.onToggle.bind(this)} />Port</label>
         </div>
         {this.state.type === "command"
-          ?  <p><label>Enter neovim command<input style={styles.text} value={this.state.command} list="command-list" onChange={this.onChangeCommand.bind(this)} autoFocus={true} /></label></p>
-          :  <p><label>Enter neovim address<input style={styles.text} value={this.state.address} onChange={this.onChangePort.bind(this)} autoFocus={true} /></label></p>
+          ?  <label style={styles.label}>Enter neovim command<input style={styles.text} value={this.state.command} list="command-list" onChange={this.onChangeCommand.bind(this)} autoFocus={true} /></label>
+          :  <label style={styles.label}>Enter neovim address<input style={styles.text} value={this.state.address} onChange={this.onChangePort.bind(this)} autoFocus={true} /></label>
         }
         <datalist id="command-list">
           {this.state.commandList.map(command => <option key={`list_${command}`} value={command} />)}
         </datalist>
-        <p><label>Font size <input style={styles.text} name="size" value={this.props.font.size} onChange={this.props.onChangeFont} /></label></p>
-        <p><label>Column space <input style={styles.text} name="width" value={this.props.font.width} onChange={this.props.onChangeFont} /></label></p>
+        <label style={styles.label}>Font size <input style={styles.text} name="size" value={this.props.font.size} onChange={this.props.onChangeFont} /></label>
+        <label style={styles.label}>Column space <input style={styles.text} name="width" value={this.props.font.width} onChange={this.props.onChangeFont} /></label>
+        <div>
+          {icons.map(icon => <i key={icon.name} style={{color: icon.color, ...styles.i}}>{icon.font}</i>)}
+        </div>
         <button style={styles.button}>Start</button>
       </form>
     );
