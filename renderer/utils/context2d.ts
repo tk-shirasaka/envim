@@ -23,11 +23,6 @@ export class Context2D {
     }
   }
 
-  resize(x: number, y: number) {
-    this.win.width = x * this.font.width;
-    this.win.height = y * this.font.height;
-  }
-
   highlight(fg: number, bg: number, special: number, reverse: boolean, bold: boolean, italic: boolean) {
     this.fontStyle();
     this.fg = fg || this.defaultFg;
@@ -48,6 +43,11 @@ export class Context2D {
     type === "normal" && (this.ctx.font = `${this.font.size}px Ricty Diminished, Nerd Font`);
     type === "bold" && (this.ctx.font = `${this.font.size}px Ricty Diminished Bold, Nerd Font Bold`);
     type === "italic" && (this.ctx.font = `${this.font.size}px Ricty Diminished Oblique`);
+  }
+
+  size(win: { width: number, height: number }, font: { size: number, width: number, height: number }) {
+    this.win = win;
+    this.font = font;
   }
 
   clear(col: number) {

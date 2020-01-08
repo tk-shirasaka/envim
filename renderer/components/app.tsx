@@ -1,6 +1,7 @@
-import React, { ChangeEvent } from "react";
+import React from "react";
 import { ipcRenderer } from "electron";
 
+import { Emit } from "../utils/emit";
 import { Localstorage } from "../utils/localstorage";
 
 import { SettingComponent } from "./setting";
@@ -21,25 +22,28 @@ export class AppComponent extends React.Component<Props, States> {
     super(props);
     this.state = { init: false, font: this.ls.get() };
 
+    Emit.on("menu:zoom-in", this.onZoomIn.bind(this));
+    Emit.on("menu:zoom-out", this.onZoomOut.bind(this));
     ipcRenderer.on("app:start", this.onStart.bind(this));
     ipcRenderer.on("app:stop", this.onStop.bind(this));
   }
 
-  private onChangeFont(e: ChangeEvent) {
-    const target = e.target as HTMLInputElement;
+  private zoom(offset: number) {
     const font = Object.assign({}, this.state.font);
 
-    switch (target.name) {
-      case "width":
-        font.width = +target.value;
-      break;
-      case "size":
-        font.size = +target.value;
-        font.height = font.size + 1;
-      break;
-    }
+    font.size += offset
+    font.width = Math.floor(font.size / 2);
+    font.height = font.size + 1;
     this.ls.set(font);
     this.setState({ font });
+  }
+
+  private onZoomIn() {
+    this.zoom(1);
+  }
+
+  private onZoomOut() {
+    this.zoom(-1);
   }
 
   private onStart() {
@@ -53,6 +57,6 @@ export class AppComponent extends React.Component<Props, States> {
   render() {
     return this.state.init
       ? <EnvimComponent font={this.state.font} />
-      : <SettingComponent font={this.state.font} onChangeFont={this.onChangeFont.bind(this)} />;
+      : <SettingComponent />;
   }
 }

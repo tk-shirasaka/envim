@@ -53,12 +53,14 @@ export class MenuComponent extends React.Component<Props, States> {
 
   render() {
     const menus = [
-      { key: 1, label: "Quit", onClick: () => ipcRenderer.send("envim:detach") },
+      { label: "Quit", onClick: () => ipcRenderer.send("envim:detach") },
+      { label: "Zoom In", onClick: () => Emit.send("menu:zoom-in") },
+      { label: "Zoom Out", onClick: () => Emit.send("menu:zoom-out") },
     ];
 
     return this.state.visible && (
       <ul style={{ ...styles.ul, ...this.state.style }}>
-        { menus.map(({key, label, onClick}) => <li key={key} style={styles.li} onClick={onClick.bind(this)}>{ label }</li>) }
+        { menus.map(({label, onClick}, i) => <li key={i} style={styles.li} onClick={onClick.bind(this)}>{ label }</li>) }
       </ul>
     );
   }

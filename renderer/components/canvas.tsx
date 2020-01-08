@@ -36,6 +36,7 @@ export class CanvasComponent extends React.Component<Props, States> {
   }
 
   componentDidUpdate() {
+    this.renderer?.size(this.props.win, this.props.font);
     ipcRenderer.send("envim:resize", ...this.getNvimSize(this.props.win.width, this.props.win.height));
   }
 
@@ -100,9 +101,6 @@ export class CanvasComponent extends React.Component<Props, States> {
         break;
         case "eol_clear":
           this.renderer?.clearEol();
-        break;
-        case "resize":
-          this.renderer?.resize(r[0][0], r[0][1]);
         break;
         case "flush":
           this.renderer?.flush();

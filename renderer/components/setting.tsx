@@ -5,8 +5,6 @@ import { Localstorage } from "../utils/localstorage";
 import { icons } from "../utils/icons";
 
 interface Props {
-  font: { size: number; width: number; height: number; };
-  onChangeFont: (e: ChangeEvent) => void;
 }
 
 interface States {
@@ -117,8 +115,6 @@ export class SettingComponent extends React.Component<Props, States> {
         <datalist id="command-list">
           {this.state.commandList.map(command => <option key={`list_${command}`} value={command} />)}
         </datalist>
-        <label style={styles.label}>Font size <input style={styles.text} name="size" value={this.props.font.size} onChange={this.props.onChangeFont} /></label>
-        <label style={styles.label}>Column space <input style={styles.text} name="width" value={this.props.font.width} onChange={this.props.onChangeFont} /></label>
         <div>
           {icons.map(icon => <i key={icon.name} style={{color: icon.color, ...styles.i}}>{icon.font}</i>)}
         </div>
