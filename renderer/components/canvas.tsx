@@ -86,7 +86,7 @@ export class CanvasComponent extends React.Component<Props, States> {
   private onIme(text: string) {
     this.renderer?.restore("ime");
     this.renderer?.capture("ime");
-    this.renderer?.text(text.split(""), 0, true);
+    this.renderer?.text(text, 0, true);
   }
 
   private onRedraw(_: IpcRendererEvent, redraw: any[][]) {

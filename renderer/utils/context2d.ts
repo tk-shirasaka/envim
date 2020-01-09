@@ -85,20 +85,18 @@ export class Context2D {
     this.font = font;
   }
 
-  text(text: string[], hl: number, stay: boolean = false) {
+  text(text: string, hl: number, stay: boolean = false) {
     if (stay) {
       this.rect(text.length * 2, 0);
       this.style(0, "foreground");
-      this.ctx.fillText(text.join(""), this.x, this.y);
+      this.ctx.fillText(text, this.x, this.y);
     } else {
       this.rect(text.length, hl);
       this.underline(text.length, hl);
       this.fontStyle(hl);
       this.style(hl, "foreground");
-      text.forEach(c => {
-        this.ctx.fillText(c, this.x, this.y);
-        this.x += this.font.width;
-      });
+      this.ctx.fillText(text, this.x, this.y);
+      this.x += this.font.width * Math.max(1, text.length);
     }
   }
 
@@ -142,7 +140,7 @@ export class Context2D {
     cells.forEach(cell => {
       cell.length > 1 && (hl = +cell[1]);
       cell[2] && (cell[0] = cell[0].repeat(+cell[2]));
-      this.text(cell[0].split(""), hl ? hl : 0);
+      this.text(cell[0], hl);
     });
   }
 
