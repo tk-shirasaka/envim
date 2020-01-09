@@ -36,7 +36,7 @@ export class CanvasComponent extends React.Component<Props, States> {
   }
 
   componentDidUpdate() {
-    this.renderer?.size(this.props.win, this.props.font);
+    this.renderer?.resize(this.props.win, this.props.font);
     ipcRenderer.send("envim:resize", ...this.getNvimSize(this.props.win.width, this.props.win.height));
   }
 
@@ -86,46 +86,38 @@ export class CanvasComponent extends React.Component<Props, States> {
   private onIme(text: string) {
     this.renderer?.restore("ime");
     this.renderer?.capture("ime");
-    this.renderer?.text(text.split(""), true);
+    this.renderer?.text(text.split(""), 0, true);
   }
 
   private onRedraw(_: IpcRendererEvent, redraw: any[][]) {
     this.renderer?.restore("ime");
     this.renderer?.restore("cursor");
-    this.renderer?.fontStyle();
     redraw.forEach(r => {
       const name = r.shift();
       switch (name) {
-        case "clear":
-          this.renderer?.clearAll();
+        case "grid_resize":
+          r.forEach(([grid, width, height]) => this.renderer?.gridResize(grid, width, height));
         break;
-        case "eol_clear":
-          this.renderer?.clearEol();
+        case "default_colors_set":
+          this.renderer?.defaultColorsSet(r[0][0], r[0][1], r[0][2]);
         break;
-        case "flush":
-          this.renderer?.flush();
+        case "hl_attr_define":
+          r.forEach(([id, rgb]) => this.renderer?.hlAttrDefine(id, rgb));
         break;
-        case "set_scroll_region":
-          this.renderer?.scrollRegion(r[0][0], r[0][1], r[0][2], r[0][3]);
+        case "grid_line":
+          r.forEach(r => this.renderer?.gridLine(r[1], r[2], r[3]));
         break;
-        case "scroll":
-          this.renderer?.scroll(r[0][0]);
+        case "grid_clear":
+          this.renderer?.gridClear(r[0][0]);
         break;
-        case "cursor_goto":
-          this.renderer?.cursor(r[0][0], r[0][1]);
+        case "grid_destroy":
+          this.renderer?.gridDestory(r[0][0]);
         break;
-        case "highlight_set":
-          const { foreground, background, special, reverse, bold, italic } = r[0][0];
-          this.renderer?.highlight(foreground, background, special, reverse, bold, italic);
+        case "grid_cursor_goto":
+          this.renderer?.gridCursorGoto(r[0][1], r[0][2]);
         break;
-        case "update_fg":
-          this.renderer?.update(r[0][0], "fg");
-        break;
-        case "update_bg":
-          this.renderer?.update(r[0][0], "bg");
-        break;
-        case "put":
-          this.renderer?.text((r as string[][]).map(c => c[0] || ""));
+        case "grid_scroll":
+          this.renderer?.gridScroll(r[0][1], r[0][2], r[0][3], r[0][4], r[0][5]);
         break;
       }
     });

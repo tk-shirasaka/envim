@@ -1,12 +1,21 @@
+interface Highlight {
+  foreground: number;
+  background: number;
+  special: number;
+  reverse: boolean;
+  italic: boolean;
+  bold: boolean;
+  strikethrough: boolean;
+  underline:boolean;
+  undercurl:boolean;
+  blend: number;
+}
+
 export class Context2D {
-  private x = 0;
-  private y = 0;
-  private fg = 0;
-  private bg = 0;
-  private special = -1;
-  private defaultFg = 0;
-  private defaultBg = 0;
-  private region = { top: 0, bottom: 0, left: 0, right: 0 };
+  private x: number = 0;
+  private y: number = 0;
+  private grids: { [k: number]: { width: number, height: number } } = {};
+  private highlights: { [k: number]: Highlight } = {};
   private captures: { ime?: ImageData; cursor?: ImageData; } = {};
 
   constructor(
@@ -16,53 +25,81 @@ export class Context2D {
     private font: { size: number; width: number; height: number; },
   ) { }
 
-  cursor(row: number, col: number) {
-    const [y, x] = [row * this.font.height, col * this.font.width];
-    if (x < this.win.width && y < this.win.height) {
-      [this.x, this.y] = [x, y];
+  private calcSize(size: number, direction: "row" | "col") {
+    const type: "width" | "height" = direction === "row" ? "height" : "width";
+    return Math.min(this.font[type] * size, this.win[type]);
+  }
+
+  private calcPos(row: number, col: number) {
+    return [ this.calcSize(row, "row"), this.calcSize(col, "col") ];
+  }
+
+  private region(left: number, top: number, right: number, bottom: number) {
+    [ top, left ] = this.calcPos(top, left);
+    [ bottom, right ] = this.calcPos(bottom, right);
+    return [ left, top, right, bottom ];
+  }
+
+  private grid(grid: number) {
+    return this.region(0, 0, this.grids[grid].width + 1, this.grids[grid].height + 1);
+  }
+
+  private intToColor(color: number) {
+    return `#${("000000" + color.toString(16)).slice(-6)}`;
+  }
+
+  private style(hl: number, type: "foreground" | "background") {
+    const color = this.highlights[hl][type] || this.highlights[0][type];
+
+    this.ctx.fillStyle = this.intToColor(color);
+  }
+
+  private fontStyle(hl: number) {
+    this.ctx.textBaseline = "top";
+    this.ctx.font = `${this.font.size}px Ricty Diminished, Nerd Font`;
+    this.highlights[hl].bold && (this.ctx.font = `${this.font.size}px Ricty Diminished Bold, Nerd Font Bold`);
+    this.highlights[hl].italic && (this.ctx.font = `${this.font.size}px Ricty Diminished Oblique`);
+  }
+
+  private underline(col: number, hl: number) {
+    if (this.highlights[hl].underline || this.highlights[hl].undercurl) {
+      this.ctx.save();
+      this.ctx.strokeStyle = this.intToColor(this.highlights[hl].special || this.highlights[0].special);
+      this.ctx.beginPath();
+      this.ctx.moveTo(this.x, this.y + this.font.height - 1);
+      this.ctx.lineTo(this.x + col * this.font.width, this.y + this.font.height - 1);
+      this.ctx.closePath();
+      this.ctx.stroke()
+      this.ctx.restore();
     }
   }
 
-  highlight(fg: number, bg: number, special: number, reverse: boolean, bold: boolean, italic: boolean) {
-    this.fontStyle();
-    this.fg = fg || this.defaultFg;
-    this.bg = bg || this.defaultBg;
-    this.special = special || -1;
-    reverse && ([this.fg, this.bg] = [this.bg, this.fg]);
-    bold && (this.fontStyle("bold"));
-    italic && (this.fontStyle("italic"));
+  private rect(col: number, hl: number) {
+    this.ctx.clearRect(this.x, this.y, col * this.font.width, this.font.height);
+    this.style(hl, "background");
+    this.ctx.fillRect(this.x, this.y, col * this.font.width, this.font.height);
   }
 
-  update(color: number, type: "fg" | "bg") {
-    type === "fg" && ([this.fg, this.defaultFg] = [color, color])
-    type === "bg" && ([this.bg, this.defaultBg] = [color, color])
-  }
-
-  fontStyle(type: "normal" | "bold" | "italic" = "normal") {
-    this.ctx.textBaseline = "top";
-    type === "normal" && (this.ctx.font = `${this.font.size}px Ricty Diminished, Nerd Font`);
-    type === "bold" && (this.ctx.font = `${this.font.size}px Ricty Diminished Bold, Nerd Font Bold`);
-    type === "italic" && (this.ctx.font = `${this.font.size}px Ricty Diminished Oblique`);
-  }
-
-  size(win: { width: number, height: number }, font: { size: number, width: number, height: number }) {
+  resize(win: { width: number; height: number; }, font: { size: number; width: number; height: number; }) {
     this.win = win;
     this.font = font;
   }
 
-  clear(col: number) {
-    this.ctx.clearRect(this.x, this.y, col * this.font.width, this.font.height);
-  }
-
-  clearEol() {
-    const col = Math.floor((this.win.width - this.x) / this.font.width);
-    this.rect(col, true);
-  }
-
-  clearAll() {
-    this.style(this.defaultBg);
-    this.ctx.clearRect(0, 0, this.win.width, this.win.height);
-    this.ctx.fillRect(0, 0, this.win.width, this.win.height);
+  text(text: string[], hl: number, stay: boolean = false) {
+    if (stay) {
+      this.rect(text.length * 2, 0);
+      this.style(0, "foreground");
+      this.ctx.fillText(text.join(""), this.x, this.y);
+    } else {
+      this.rect(text.length, hl);
+      this.underline(text.length, hl);
+      this.fontStyle(hl);
+      this.style(hl, "foreground");
+      text.forEach(c => {
+        this.ctx.fillText(c, this.x, this.y);
+        this.x += this.font.width;
+      });
+    }
   }
 
   capture(type: "cursor" | "ime") {
@@ -75,71 +112,67 @@ export class Context2D {
     capture && this.ctx.putImageData(capture, 0, 0);
   }
 
-  flush() {
+  gridResize(grid: number, width: number, height: number) {
+    this.grids[grid] = { width, height };
+  }
+
+  defaultColorsSet(foreground: number, background: number, special: number) {
+    this.highlights[0] = {
+      foreground,
+      background,
+      special,
+      reverse: false,
+      italic: false,
+      bold: false,
+      strikethrough: false,
+      underline:false,
+      undercurl:false,
+      blend: 0,
+    };
+  }
+
+  hlAttrDefine(id: number, rgb: Highlight) {
+    this.highlights[id] = rgb;
+  }
+
+  gridLine(row: number, col: number, cells: string[][]) {
+    let hl: number;
+
+    [ this.y, this.x ] = this.calcPos(row, col);
+    cells.forEach(cell => {
+      cell.length > 1 && (hl = +cell[1]);
+      cell[2] && (cell[0] = cell[0].repeat(+cell[2]));
+      this.text(cell[0].split(""), hl ? hl : 0);
+    });
+  }
+
+  gridClear(grid: number) {
+    const [x, y, width, height] = this.grid(grid);
+    this.ctx.clearRect(x, y, width, height);
+    this.style(0, "background");
+    this.ctx.fillRect(x, y, width, height);
+  }
+
+  gridDestory(grid: number) {
+    delete(this.grids[grid]);
+  }
+
+  gridCursorGoto(row: number, col: number) {
+    [ this.y, this.x ] = this.calcPos(row, col);
     this.capture("cursor");
     this.ctx.save();
     this.ctx.globalCompositeOperation = "exclusion";
-    this.style(0xffffff);
+    this.ctx.fillStyle = this.intToColor(0xffffff);
     this.ctx.fillRect(this.x, this.y, this.font.width, this.font.height);
     this.ctx.restore();
   }
 
-  scrollRegion(top: number, bottom: number, left: number, right: number) {
-    [top, bottom] = [top * this.font.height, (bottom + 1) * this.font.height];
-    [left, right] = [left * this.font.width, right * this.font.width];
-    this.region = { top, bottom, left, right };
-  }
-
-  scroll(row: number) {
-    const offset = this.font.height * row;
-    const [x, w, h] = [this.region.left, this.region.right - this.region.left, this.region.bottom - this.region.top - Math.abs(offset)];
-    const sy = Math.max(this.region.top, this.region.top + offset);
-    const dy = Math.max(this.region.top, this.region.top - offset);
+  gridScroll(top: number, bottom: number, left: number, right: number, rows: number) {
+    [left, top, right, bottom] = this.region(left, top, right, bottom);
+    const offset = this.font.height * rows;
+    const [x, w, h] = [left, right - left, bottom - top - Math.abs(offset)];
+    const sy = Math.max(top, top + offset);
+    const dy = Math.max(top, top - offset);
     this.ctx.drawImage(this.canvas, x, sy, w, h, x, dy, w, h);
-  }
-
-  intToColor(color: number) {
-    return `#${("000000" + color.toString(16)).slice(-6)}`;
-  }
-
-  style(color: number) {
-    this.ctx.fillStyle = this.intToColor(color);
-  }
-
-  rect(col: number, isDefault: boolean = false) {
-    this.clear(col);
-    this.style(isDefault ? this.defaultBg : this.bg);
-    this.ctx.fillRect(this.x, this.y, col * this.font.width, this.font.height);
-  }
-
-  underline(col: number) {
-    if (this.special >= 0) {
-      this.ctx.save();
-      this.ctx.strokeStyle = this.intToColor(this.special);
-      this.ctx.beginPath();
-      this.ctx.moveTo(this.x, this.y + this.font.height - 1);
-      this.ctx.lineTo(this.x + col * this.font.width, this.y + this.font.height - 1);
-      this.ctx.closePath();
-      this.ctx.stroke()
-      this.ctx.restore();
-    }
-
-    this.special = -1;
-  }
-
-  text(text: string[], stay: boolean = false) {
-    if (stay) {
-      this.rect(text.length * 2, true);
-      this.style(this.defaultFg);
-      this.ctx.fillText(text.join(""), this.x, this.y);
-    } else {
-      this.rect(text.length);
-      this.underline(text.length);
-      this.style(this.fg);
-      text.forEach(c => {
-        this.ctx.fillText(c, this.x, this.y);
-        this.x += this.font.width;
-      });
-    }
   }
 }
