@@ -84,14 +84,10 @@ export class CanvasComponent extends React.Component<Props, States> {
   }
 
   private onIme(text: string) {
-    this.renderer?.restore("ime");
-    this.renderer?.capture("ime");
-    this.renderer?.text(text, 0, true);
+    this.renderer?.text(1, text);
   }
 
   private onRedraw(_: IpcRendererEvent, redraw: any[][]) {
-    this.renderer?.restore("ime");
-    this.renderer?.restore("cursor");
     redraw.forEach(r => {
       const name = r.shift();
       switch (name) {
@@ -105,7 +101,7 @@ export class CanvasComponent extends React.Component<Props, States> {
           r.forEach(([id, rgb]) => this.renderer?.hlAttrDefine(id, rgb));
         break;
         case "grid_line":
-          r.forEach(r => this.renderer?.gridLine(r[1], r[2], r[3]));
+          r.forEach(r => this.renderer?.gridLine(r[0], r[1], r[2], r[3]));
         break;
         case "grid_clear":
           this.renderer?.gridClear(r[0][0]);
@@ -114,10 +110,10 @@ export class CanvasComponent extends React.Component<Props, States> {
           this.renderer?.gridDestory(r[0][0]);
         break;
         case "grid_cursor_goto":
-          this.renderer?.gridCursorGoto(r[0][1], r[0][2]);
+          this.renderer?.gridCursorGoto(r[0][0], r[0][1], r[0][2] + 1);
         break;
         case "grid_scroll":
-          this.renderer?.gridScroll(r[0][1], r[0][2], r[0][3], r[0][4], r[0][5]);
+          this.renderer?.gridScroll(r[0][0], r[0][1], r[0][2], r[0][3], r[0][4], r[0][5]);
         break;
       }
     });

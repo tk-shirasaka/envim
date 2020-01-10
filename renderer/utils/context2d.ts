@@ -1,3 +1,5 @@
+import { Grid } from "../canvas/grid";
+
 interface Highlight {
   foreground: number;
   background: number;
@@ -14,9 +16,8 @@ interface Highlight {
 export class Context2D {
   private x: number = 0;
   private y: number = 0;
-  private grids: { [k: number]: { width: number, height: number } } = {};
+  private grids: { [k: number]: Grid } = {};
   private highlights: { [k: number]: Highlight } = {};
-  private captures: { ime?: ImageData; cursor?: ImageData; } = {};
 
   constructor(
     private canvas: HTMLCanvasElement,
@@ -41,7 +42,8 @@ export class Context2D {
   }
 
   private grid(grid: number) {
-    return this.region(0, 0, this.grids[grid].width + 1, this.grids[grid].height + 1);
+    const { left, top, right, bottom } = this.grids[grid].position;
+    return this.region(left, top, right + 1, bottom + 1);
   }
 
   private intToColor(color: number) {
@@ -61,23 +63,23 @@ export class Context2D {
     this.highlights[hl].italic && (this.ctx.font = `${this.font.size}px Ricty Diminished Oblique`);
   }
 
-  private underline(col: number, hl: number) {
+  private underline(x: number, y: number, col: number, hl: number) {
     if (this.highlights[hl].underline || this.highlights[hl].undercurl) {
       this.ctx.save();
       this.ctx.strokeStyle = this.intToColor(this.highlights[hl].special || this.highlights[0].special);
       this.ctx.beginPath();
-      this.ctx.moveTo(this.x, this.y + this.font.height - 1);
-      this.ctx.lineTo(this.x + col * this.font.width, this.y + this.font.height - 1);
+      this.ctx.moveTo(x, y + this.font.height - 1);
+      this.ctx.lineTo(x + col * this.font.width, y + this.font.height - 1);
       this.ctx.closePath();
       this.ctx.stroke()
       this.ctx.restore();
     }
   }
 
-  private rect(col: number, hl: number) {
-    this.ctx.clearRect(this.x, this.y, col * this.font.width, this.font.height);
+  private rect(x: number, y: number, col: number, hl: number) {
+    this.ctx.clearRect(x, y, col * this.font.width, this.font.height);
     this.style(hl, "background");
-    this.ctx.fillRect(this.x, this.y, col * this.font.width, this.font.height);
+    this.ctx.fillRect(x, y, col * this.font.width, this.font.height);
   }
 
   resize(win: { width: number; height: number; }, font: { size: number; width: number; height: number; }) {
@@ -85,33 +87,19 @@ export class Context2D {
     this.font = font;
   }
 
-  text(text: string, hl: number, stay: boolean = false) {
-    if (stay) {
-      this.rect(text.length * 2, 0);
-      this.style(0, "foreground");
-      this.ctx.fillText(text, this.x, this.y);
-    } else {
-      this.rect(text.length, hl);
-      this.underline(text.length, hl);
-      this.fontStyle(hl);
-      this.style(hl, "foreground");
-      this.ctx.fillText(text, this.x, this.y);
-      this.x += this.font.width * Math.max(1, text.length);
+  text(grid: number, text: string) {
+    const limit = text.length * 2;
+    this.gridCursorGoto(grid, this.y, this.x);
+    this.rect(this.x, this.y, limit, 0);
+    this.style(0, "foreground");
+    this.ctx.fillText(text, this.x * this.font.width, this.y * this.font.height);
+    for (let i = 0; i < limit; i++) {
+      this.grids[grid].resetCell(this.y, this.x + i);
     }
   }
 
-  capture(type: "cursor" | "ime") {
-    this.captures[type] = this.ctx.getImageData(0, 0, this.win.width, this.win.height);
-  }
-
-  restore(type: "cursor" | "ime") {
-    const capture = this.captures[type];
-    delete(this.captures[type]);
-    capture && this.ctx.putImageData(capture, 0, 0);
-  }
-
   gridResize(grid: number, width: number, height: number) {
-    this.grids[grid] = { width, height };
+    this.grids[grid] = new Grid(0, 0, width, height);
   }
 
   defaultColorsSet(foreground: number, background: number, special: number) {
@@ -133,14 +121,13 @@ export class Context2D {
     this.highlights[id] = rgb;
   }
 
-  gridLine(row: number, col: number, cells: string[][]) {
-    let hl: number;
-
-    [ this.y, this.x ] = this.calcPos(row, col);
+  gridLine(grid: number, row: number, col: number, cells: string[][]) {
+    let i = 0;
     cells.forEach(cell => {
-      cell.length > 1 && (hl = +cell[1]);
-      cell[2] && (cell[0] = cell[0].repeat(+cell[2]));
-      this.text(cell[0], hl);
+      const repeat = cell[2] || 1;
+      for (let j = 0; j < repeat; j++) {
+        this.grids[grid].setCell(row, col + ++i, cell[0], cell.length > 1 ? +cell[1] : -1);
+      }
     });
   }
 
@@ -155,22 +142,35 @@ export class Context2D {
     delete(this.grids[grid]);
   }
 
-  gridCursorGoto(row: number, col: number) {
-    [ this.y, this.x ] = this.calcPos(row, col);
-    this.capture("cursor");
+  gridCursorGoto(grid: number, row: number, col: number) {
+    [this.y, this.x] = [row, col];
+
+    this.grids[grid].getFlush(cell => {
+      const [x, y] = [cell.x * this.font.width, cell.y * this.font.height]
+      this.rect(x, y, cell.width, cell.hl);
+      this.underline(x, y, cell.width, cell.hl);
+      this.fontStyle(cell.hl);
+      this.style(cell.hl, "foreground");
+      this.ctx.fillText(cell.text, x, y);
+    });
+
     this.ctx.save();
     this.ctx.globalCompositeOperation = "exclusion";
     this.ctx.fillStyle = this.intToColor(0xffffff);
-    this.ctx.fillRect(this.x, this.y, this.font.width, this.font.height);
+    this.ctx.fillRect(this.x * this.font.width, this.y * this.font.height, this.font.width, this.font.height);
     this.ctx.restore();
+    this.grids[grid].resetCell(row, col)
   }
 
-  gridScroll(top: number, bottom: number, left: number, right: number, rows: number) {
-    [left, top, right, bottom] = this.region(left, top, right, bottom);
-    const offset = this.font.height * rows;
-    const [x, w, h] = [left, right - left, bottom - top - Math.abs(offset)];
-    const sy = Math.max(top, top + offset);
-    const dy = Math.max(top, top - offset);
-    this.ctx.drawImage(this.canvas, x, sy, w, h, x, dy, w, h);
+  gridScroll(grid: number, top: number, bottom: number, left: number, right: number, rows: number) {
+    const check = (x: number, y: number) => (top >= y && left >= x && bottom <= y && right <= x);
+
+    this.grids[grid].getLines(0, rows < 0, cell => {
+      if (!check(cell.col, cell.row)) return;
+      const method = check(cell.col, cell.row + rows) ? "getCell" : "getDefault";
+      const next = this.grids[grid][method](cell.row, cell.col + rows);
+
+      this.grids[grid].setCell(cell.row, cell.col, next.text, next.hl);
+    });
   }
 }
