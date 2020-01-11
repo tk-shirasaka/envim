@@ -30,13 +30,11 @@ export class CanvasComponent extends React.Component<Props, States> {
   }
 
   componentDidMount() {
-    const canvas = this.refs.canvas as HTMLCanvasElement;
-    const ctx = canvas.getContext("2d");
-    ctx && (this.renderer = new Context2D(canvas, ctx, this.props.win, this.props.font));
+    const ctx = (this.refs.canvas as HTMLCanvasElement).getContext("2d");
+    ctx && (this.renderer = new Context2D(ctx, this.props.font));
   }
 
   componentDidUpdate() {
-    this.renderer?.resize(this.props.win, this.props.font);
     ipcRenderer.send("envim:resize", ...this.getNvimSize(this.props.win.width, this.props.win.height));
   }
 
@@ -110,10 +108,13 @@ export class CanvasComponent extends React.Component<Props, States> {
           this.renderer?.gridDestory(r[0][0]);
         break;
         case "grid_cursor_goto":
-          this.renderer?.gridCursorGoto(r[0][0], r[0][1], r[0][2] + 1);
+          this.renderer?.gridCursorGoto(r[0][0], r[0][1], r[0][2]);
         break;
         case "grid_scroll":
-          this.renderer?.gridScroll(r[0][0], r[0][1], r[0][2], r[0][3], r[0][4], r[0][5]);
+          this.renderer?.gridScroll(r[0][0], r[0][1], r[0][2], r[0][3], r[0][4], r[0][5], r[0][6]);
+        break;
+        case "flush":
+          this.renderer?.flush();
         break;
       }
     });

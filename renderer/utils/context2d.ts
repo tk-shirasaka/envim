@@ -14,46 +14,27 @@ interface Highlight {
 }
 
 export class Context2D {
-  private x: number = 0;
-  private y: number = 0;
   private grids: { [k: number]: Grid } = {};
   private highlights: { [k: number]: Highlight } = {};
 
   constructor(
-    private canvas: HTMLCanvasElement,
     private ctx: CanvasRenderingContext2D,
-    private win: { width: number; height: number; },
     private font: { size: number; width: number; height: number; },
   ) { }
-
-  private calcSize(size: number, direction: "row" | "col") {
-    const type: "width" | "height" = direction === "row" ? "height" : "width";
-    return Math.min(this.font[type] * size, this.win[type]);
-  }
-
-  private calcPos(row: number, col: number) {
-    return [ this.calcSize(row, "row"), this.calcSize(col, "col") ];
-  }
-
-  private region(left: number, top: number, right: number, bottom: number) {
-    [ top, left ] = this.calcPos(top, left);
-    [ bottom, right ] = this.calcPos(bottom, right);
-    return [ left, top, right, bottom ];
-  }
-
-  private grid(grid: number) {
-    const { left, top, right, bottom } = this.grids[grid].position;
-    return this.region(left, top, right + 1, bottom + 1);
-  }
 
   private intToColor(color: number) {
     return `#${("000000" + color.toString(16)).slice(-6)}`;
   }
 
   private style(hl: number, type: "foreground" | "background") {
-    const color = this.highlights[hl][type] || this.highlights[0][type];
+    const foreground = this.highlights[hl].foreground || this.highlights[0].foreground;
+    const background = this.highlights[hl].background || this.highlights[0].background;
+    const reverse = this.highlights[hl].reverse;
 
-    this.ctx.fillStyle = this.intToColor(color);
+    switch (type) {
+      case "foreground": return (this.ctx.fillStyle = this.intToColor(reverse ? background : foreground));
+      case "background": return (this.ctx.fillStyle = this.intToColor(reverse ? foreground : background));
+    }
   }
 
   private fontStyle(hl: number) {
@@ -76,25 +57,23 @@ export class Context2D {
     }
   }
 
-  private rect(x: number, y: number, col: number, hl: number) {
+  private rect(x: number, y: number, col: number, hl: number, reverse: boolean) {
     this.ctx.clearRect(x, y, col * this.font.width, this.font.height);
-    this.style(hl, "background");
+    this.style(hl, reverse ? "foreground" : "background");
     this.ctx.fillRect(x, y, col * this.font.width, this.font.height);
   }
 
-  resize(win: { width: number; height: number; }, font: { size: number; width: number; height: number; }) {
-    this.win = win;
-    this.font = font;
-  }
-
   text(grid: number, text: string) {
+    const { row, col } = this.grids[grid].getCursor();
+    const { hl } = this.grids[grid].getCell(row, col);
     const limit = text.length * 2;
-    this.gridCursorGoto(grid, this.y, this.x);
-    this.rect(this.x, this.y, limit, 0);
-    this.style(0, "foreground");
-    this.ctx.fillText(text, this.x * this.font.width, this.y * this.font.height);
+
+    this.flush();
+    this.rect(col * this.font.width, row * this.font.height, limit, hl, true);
+    this.style(hl, "background");
+    this.ctx.fillText(text, col * this.font.width, row * this.font.height);
     for (let i = 0; i < limit; i++) {
-      this.grids[grid].resetCell(this.y, this.x + i);
+      this.grids[grid].moveCell(row, col + i, row, col + i);
     }
   }
 
@@ -126,13 +105,15 @@ export class Context2D {
     cells.forEach(cell => {
       const repeat = cell[2] || 1;
       for (let j = 0; j < repeat; j++) {
-        this.grids[grid].setCell(row, col + ++i, cell[0], cell.length > 1 ? +cell[1] : -1);
+        this.grids[grid].setCell(row, col + i++, cell[0], cell.length > 1 ? +cell[1] : -1);
       }
     });
   }
 
   gridClear(grid: number) {
-    const [x, y, width, height] = this.grid(grid);
+    const position = this.grids[grid].position;
+    const [y, height] = [position.y * this.font.height, position.height * this.font.height];
+    const [x, width] = [position.x * this.font.width, position.width * this.font.width]
     this.ctx.clearRect(x, y, width, height);
     this.style(0, "background");
     this.ctx.fillRect(x, y, width, height);
@@ -143,34 +124,36 @@ export class Context2D {
   }
 
   gridCursorGoto(grid: number, row: number, col: number) {
-    [this.y, this.x] = [row, col];
-
-    this.grids[grid].getFlush(cell => {
-      const [x, y] = [cell.x * this.font.width, cell.y * this.font.height]
-      this.rect(x, y, cell.width, cell.hl);
-      this.underline(x, y, cell.width, cell.hl);
-      this.fontStyle(cell.hl);
-      this.style(cell.hl, "foreground");
-      this.ctx.fillText(cell.text, x, y);
-    });
-
-    this.ctx.save();
-    this.ctx.globalCompositeOperation = "exclusion";
-    this.ctx.fillStyle = this.intToColor(0xffffff);
-    this.ctx.fillRect(this.x * this.font.width, this.y * this.font.height, this.font.width, this.font.height);
-    this.ctx.restore();
-    this.grids[grid].resetCell(row, col)
+    this.grids[grid].setCursor(row, col);
   }
 
-  gridScroll(grid: number, top: number, bottom: number, left: number, right: number, rows: number) {
-    const check = (x: number, y: number) => (top >= y && left >= x && bottom <= y && right <= x);
+  gridScroll(grid: number, top: number, bottom: number, left: number, right: number, rows: number, cols: number) {
+    const check = (y: number, x: number) => (top <= y && left <= x && y < bottom && x < right);
 
-    this.grids[grid].getLines(0, rows < 0, cell => {
-      if (!check(cell.col, cell.row)) return;
-      const method = check(cell.col, cell.row + rows) ? "getCell" : "getDefault";
-      const next = this.grids[grid][method](cell.row, cell.col + rows);
+    this.grids[grid].getLines(0, rows > 0, cell => {
+      const [srow, trow] = [cell.row, cell.row - rows];
+      const [scol, tcol] = [cell.col, cell.col - cols];
+      if (!check(srow, scol)) return;
+      if (!check(trow, tcol)) return;
+      this.grids[grid].moveCell(srow, scol, trow, tcol);
+    });
+  }
 
-      this.grids[grid].setCell(cell.row, cell.col, next.text, next.hl);
+  flush() {
+    Object.values(this.grids).forEach(grid => {
+      const { row, col } = grid.getCursor();
+
+      grid.moveCell(row, col, row, col)
+      grid.getFlush(cell => {
+        const [x, y] = [cell.x * this.font.width, cell.y * this.font.height];
+        const reverse = (row === cell.y && col === cell.x);
+        this.rect(x, y, cell.width, cell.hl, reverse);
+        this.underline(x, y, cell.width, cell.hl);
+        this.fontStyle(cell.hl);
+        this.style(cell.hl, reverse ? "background" : "foreground");
+        this.ctx.fillText(cell.text, x, y);
+      });
+      grid.moveCell(row, col, row, col)
     });
   }
 }

@@ -47,15 +47,15 @@ export class Envim {
 
   private onRequest(method: string, args: any, res: Response) {
     switch (method) {
-      case "envim_clipboard":return Clipboard.paste(res);
+      case "envim_clipboard": return Clipboard.paste(res);
     }
     console.log({ method, args });
   }
 
   private onNotification(method: string, args: any) {
     switch (method) {
-      case "redraw":return Browser.win?.webContents.send("envim:redraw", args);
-      case "envim_clipboard":return Clipboard.copy(args[0], args[1]);
+      case "redraw" :return Browser.win?.webContents.send("envim:redraw", args);
+      case "envim_clipboard": return Clipboard.copy(args[0], args[1]);
     }
   }
 
