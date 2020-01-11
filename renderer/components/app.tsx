@@ -32,7 +32,7 @@ export class AppComponent extends React.Component<Props, States> {
     const font = Object.assign({}, this.state.font);
 
     font.size += offset
-    font.width = Math.floor(font.size / 2);
+    font.width = font.size / 2;
     font.height = font.size + 1;
     this.ls.set(font);
     this.setState({ font });
