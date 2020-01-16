@@ -11,6 +11,7 @@ interface States {
   tabs: { name: string; type: string; active: boolean }[];
 }
 
+const whiteSpace: "nowrap" = "nowrap";
 const styles = {
   scope: {
     display: "flex",
@@ -18,8 +19,12 @@ const styles = {
   tabs: {
     cursor: "pointer",
     background: "#4a4646",
+    maxWidth: 300,
     padding: "4px 30px 2px 10px",
-    borderBottom: "solid 2px #4a4646"
+    borderBottom: "solid 2px #4a4646",
+    textOverflow: "ellipsis",
+    overflow: "hidden",
+    whiteSpace,
   },
   active: {
     background: "#5a5757",
