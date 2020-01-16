@@ -90,10 +90,7 @@ export class App {
   }
 
   gridCursorGoto(grid: number, row: number, col: number) {
-    const { x, y } = this.grids[grid].getCursorPos(row, col);
-    const { hl } = this.grids[grid].getCell(row, col);
-
-    this.grids[grid].moveCell(row, col, row, col);
+    const { x, y, hl } = this.grids[grid].setCursorPos(row, col);
     Browser.win?.webContents.send("envim:cursor", x, y, hl);
   }
 

@@ -15,6 +15,7 @@ export class Grid {
   private y :number = 0;
   private width :number = 0;
   private height: number = 0;
+  private cursor: { row: number, col: number } = { row: 0, col: 0 };
 
   constructor(y :number, x :number, width :number, height: number) {
     this.resize(y, x, width, height);
@@ -35,8 +36,14 @@ export class Grid {
     }
   }
 
-  getCursorPos(row: number, col: number) {
-    return { x: this.x + col, y: this.y + row };
+  setCursorPos(row: number, col: number) {
+    const { text, hl } = this.getCell(row, col);
+
+    this.moveCell(this.cursor.row, this.cursor.col, this.cursor.row, this.cursor.col);
+    this.setCell(row, col, text, hl);
+    this.cursor = { row, col };
+
+    return { x: this.x + col, y: this.y + row, hl };
   }
 
   getDefault(row: number, col: number) {

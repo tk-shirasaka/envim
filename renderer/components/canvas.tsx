@@ -25,8 +25,9 @@ export class CanvasComponent extends React.Component<Props, States> {
     super(props);
 
     Emit.on("envim:ime", this.onIme.bind(this));
-    ipcRenderer.on("envim:flush", this.onFlush.bind(this));
+    ipcRenderer.on("envim:cursor", this.onCursor.bind(this));
     ipcRenderer.on("envim:highlights", this.onHighlight.bind(this));
+    ipcRenderer.on("envim:flush", this.onFlush.bind(this));
     ipcRenderer.send("envim:resize", ...this.getNvimSize(this.props.win.width, this.props.win.height));
   }
 
@@ -41,6 +42,7 @@ export class CanvasComponent extends React.Component<Props, States> {
 
   componentWillUnmount() {
     Emit.clear("envim:ime");
+    ipcRenderer.removeAllListeners("envim:cursor");
     ipcRenderer.removeAllListeners("envim:highlights");
     ipcRenderer.removeAllListeners("envim:flush");
   }
@@ -85,6 +87,10 @@ export class CanvasComponent extends React.Component<Props, States> {
 
   private onIme(text: string) {
     this.renderer?.text(text);
+  }
+
+  private onCursor(_: IpcRendererEvent, x: number, y: number, hl: number) {
+    this.renderer?.setCursor(x, y, hl);
   }
 
   private onHighlight(_: IpcRendererEvent, highlights: any[][]) {
