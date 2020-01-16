@@ -1,5 +1,3 @@
-import { Grid } from "../canvas/grid";
-
 interface Highlight {
   foreground: number;
   background: number;
@@ -14,8 +12,8 @@ interface Highlight {
 }
 
 export class Context2D {
-  private grids: { [k: number]: Grid } = {};
   private highlights: { [k: number]: Highlight } = {};
+  private cursor: { x: number, y: number, hl: number } = { x: 0, y: 0, hl: 0 };
 
   constructor(
     private ctx: CanvasRenderingContext2D,
@@ -63,97 +61,31 @@ export class Context2D {
     this.ctx.fillRect(x, y, col * this.font.width, this.font.height);
   }
 
-  text(grid: number, text: string) {
-    const { row, col } = this.grids[grid].getCursor();
-    const { hl } = this.grids[grid].getCell(row, col);
+  setHighlight(id: number, hl: Highlight) {
+    this.highlights[id] = hl;
+  }
+
+  setCursor(x: number, y: number, hl: number) {
+    this.cursor = { x, y, hl };
+  }
+
+  text(text: string) {
     const limit = text.length * 2;
 
-    this.flush();
-    this.rect(col * this.font.width, row * this.font.height, limit, hl, true);
-    this.style(hl, "background");
-    this.ctx.fillText(text, col * this.font.width, row * this.font.height);
-    for (let i = 0; i < limit; i++) {
-      this.grids[grid].moveCell(row, col + i, row, col + i);
-    }
+    this.rect(this.cursor.x * this.font.width, this.cursor.y * this.font.height, limit, this.cursor.hl, true);
+    this.style(this.cursor.hl, "background");
+    this.ctx.fillText(text, this.cursor.x * this.font.width, this.cursor.y * this.font.height);
   }
 
-  gridResize(grid: number, width: number, height: number) {
-    this.grids[grid] = new Grid(0, 0, width, height);
-  }
-
-  defaultColorsSet(foreground: number, background: number, special: number) {
-    this.highlights[0] = {
-      foreground,
-      background,
-      special,
-      reverse: false,
-      italic: false,
-      bold: false,
-      strikethrough: false,
-      underline:false,
-      undercurl:false,
-      blend: 0,
-    };
-  }
-
-  hlAttrDefine(id: number, rgb: Highlight) {
-    this.highlights[id] = rgb;
-  }
-
-  gridLine(grid: number, row: number, col: number, cells: string[][]) {
-    let i = 0;
+  flush(cells: any[]) {
     cells.forEach(cell => {
-      const repeat = cell[2] || 1;
-      for (let j = 0; j < repeat; j++) {
-        this.grids[grid].setCell(row, col + i++, cell[0], cell.length > 1 ? +cell[1] : -1);
-      }
-    });
-  }
-
-  gridClear(grid: number) {
-    const position = this.grids[grid].position;
-    const [y, height] = [position.y * this.font.height, position.height * this.font.height];
-    const [x, width] = [position.x * this.font.width, position.width * this.font.width]
-    this.ctx.clearRect(x, y, width, height);
-    this.style(0, "background");
-    this.ctx.fillRect(x, y, width, height);
-  }
-
-  gridDestory(grid: number) {
-    delete(this.grids[grid]);
-  }
-
-  gridCursorGoto(grid: number, row: number, col: number) {
-    this.grids[grid].setCursor(row, col);
-  }
-
-  gridScroll(grid: number, top: number, bottom: number, left: number, right: number, rows: number, cols: number) {
-    const check = (y: number, x: number) => (top <= y && left <= x && y < bottom && x < right);
-
-    this.grids[grid].getLines(0, rows > 0, cell => {
-      const [srow, trow] = [cell.row, cell.row - rows];
-      const [scol, tcol] = [cell.col, cell.col - cols];
-      if (!check(srow, scol)) return;
-      if (!check(trow, tcol)) return;
-      this.grids[grid].moveCell(srow, scol, trow, tcol);
-    });
-  }
-
-  flush() {
-    Object.values(this.grids).forEach(grid => {
-      const { row, col } = grid.getCursor();
-
-      grid.moveCell(row, col, row, col)
-      grid.getFlush(cell => {
-        const [x, y] = [cell.x * this.font.width, cell.y * this.font.height];
-        const reverse = (row === cell.y && col === cell.x);
-        this.rect(x, y, cell.width, cell.hl, reverse);
-        this.underline(x, y, cell.width, cell.hl);
-        this.fontStyle(cell.hl);
-        this.style(cell.hl, reverse ? "background" : "foreground");
-        this.ctx.fillText(cell.text, x, y);
-      });
-      grid.moveCell(row, col, row, col)
+      const [x, y] = [cell.x * this.font.width, cell.y * this.font.height];
+      const reverse = (this.cursor.y === cell.y && this.cursor.x === cell.x);
+      this.rect(x, y, cell.width, cell.hl, reverse);
+      this.underline(x, y, cell.width, cell.hl);
+      this.fontStyle(cell.hl);
+      this.style(cell.hl, reverse ? "background" : "foreground");
+      this.ctx.fillText(cell.text, x, y);
     });
   }
 }

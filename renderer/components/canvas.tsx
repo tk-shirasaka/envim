@@ -25,7 +25,8 @@ export class CanvasComponent extends React.Component<Props, States> {
     super(props);
 
     Emit.on("envim:ime", this.onIme.bind(this));
-    ipcRenderer.on("envim:redraw", this.onRedraw.bind(this));
+    ipcRenderer.on("envim:flush", this.onFlush.bind(this));
+    ipcRenderer.on("envim:highlights", this.onHighlight.bind(this));
     ipcRenderer.send("envim:resize", ...this.getNvimSize(this.props.win.width, this.props.win.height));
   }
 
@@ -40,7 +41,8 @@ export class CanvasComponent extends React.Component<Props, States> {
 
   componentWillUnmount() {
     Emit.clear("envim:ime");
-    ipcRenderer.removeAllListeners("envim:redraw");
+    ipcRenderer.removeAllListeners("envim:highlights");
+    ipcRenderer.removeAllListeners("envim:flush");
   }
 
   private getNvimSize(width: number, height: number) {
@@ -82,42 +84,16 @@ export class CanvasComponent extends React.Component<Props, States> {
   }
 
   private onIme(text: string) {
-    this.renderer?.text(1, text);
+    this.renderer?.text(text);
   }
 
-  private onRedraw(_: IpcRendererEvent, redraw: any[][]) {
-    redraw.forEach(r => {
-      const name = r.shift();
-      switch (name) {
-        case "grid_resize":
-          r.forEach(([grid, width, height]) => this.renderer?.gridResize(grid, width, height));
-        break;
-        case "default_colors_set":
-          this.renderer?.defaultColorsSet(r[0][0], r[0][1], r[0][2]);
-        break;
-        case "hl_attr_define":
-          r.forEach(([id, rgb]) => this.renderer?.hlAttrDefine(id, rgb));
-        break;
-        case "grid_line":
-          r.forEach(r => this.renderer?.gridLine(r[0], r[1], r[2], r[3]));
-        break;
-        case "grid_clear":
-          this.renderer?.gridClear(r[0][0]);
-        break;
-        case "grid_destroy":
-          this.renderer?.gridDestory(r[0][0]);
-        break;
-        case "grid_cursor_goto":
-          this.renderer?.gridCursorGoto(r[0][0], r[0][1], r[0][2]);
-        break;
-        case "grid_scroll":
-          this.renderer?.gridScroll(r[0][0], r[0][1], r[0][2], r[0][3], r[0][4], r[0][5], r[0][6]);
-        break;
-        case "flush":
-          this.renderer?.flush();
-        break;
-      }
-    });
+  private onHighlight(_: IpcRendererEvent, highlights: any[][]) {
+    console.log(highlights);
+    highlights.forEach(([id, hl]) => this.renderer?.setHighlight(id, hl));
+  }
+
+  private onFlush(_: IpcRendererEvent, cells: any[]) {
+    this.renderer?.flush(cells);
   }
 
   render() {

@@ -15,15 +15,9 @@ export class Grid {
   private y :number = 0;
   private width :number = 0;
   private height: number = 0;
-  private cursor: { row: number, col: number } = { row: 0, col: 0 };
 
   constructor(y :number, x :number, width :number, height: number) {
     this.resize(y, x, width, height);
-  }
-
-  get position() {
-    const { y, x, width, height } = this;
-    return { y, x, width, height };
   }
 
   resize(y :number, x :number, width :number, height: number) {
@@ -41,13 +35,8 @@ export class Grid {
     }
   }
 
-  getCursor() {
-    return { ...this.cursor };
-  }
-
-  setCursor(row: number, col: number) {
-    this.cursor.row = row;
-    this.cursor.col = col;
+  getCursorPos(row: number, col: number) {
+    return { x: this.x + col, y: this.y + row };
   }
 
   getDefault(row: number, col: number) {
@@ -75,11 +64,11 @@ export class Grid {
     this.setCell(trow, tcol, text, hl)
   }
 
-  getFlush(fn: (cell: Cell) => void) {
-    while (this.flush.length) {
-      const cell = this.flush.shift() as Cell;
-      cell && cell.width && fn(cell);
-    }
+  getFlush() {
+    const flush = this.flush;
+
+    this.flush = [];
+    return flush;
   }
 
   getLine(row: number, col: number, fn: (cell: Cell) => void) {

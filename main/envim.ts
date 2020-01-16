@@ -58,7 +58,7 @@ export class Envim {
 
   private onNotification(method: string, args: any) {
     switch (method) {
-      case "redraw" :return Browser.win?.webContents.send("envim:redraw", args);
+      case "redraw" :return this.app.redraw(args);
       case "envim_clipboard": return Clipboard.copy(args[0], args[1]);
     }
   }
