@@ -1,15 +1,18 @@
 import { ipcMain, IpcMainEvent } from "electron";
-import { createConnection } from "net";
-import { spawn } from "child_process";
+import { createConnection, Socket } from "net";
+import { spawn, ChildProcess } from "child_process";
 import { NeovimClient } from "neovim";
 import { Response } from "neovim/lib/host";
 
 import { Browser } from "./browser";
-import { Clipboard } from "./clipboard";
+import { App } from "./envim/app";
+import { Clipboard } from "./envim/clipboard";
 
 export class Envim {
   private nvim = new NeovimClient;
+  private app = new App;
   private attached: boolean = false;
+  private connect: { process?: ChildProcess; socket?: Socket; } = {}
 
   constructor() {
     ipcMain.on("envim:attach", this.onAttach.bind(this));
@@ -24,17 +27,18 @@ export class Envim {
 
     switch (type) {
       case "command":
-        const proc = spawn(value, ["--embed"]);
-        [reader, writer] = [proc.stdout, proc.stdin];
+        this.connect.process = spawn(value, ["--embed"]);
+        [reader, writer] = [this.connect.process.stdout, this.connect.process.stdin];
       break;
       case "address":
         const [port, host] = value.split(":").reverse();
-        const socket = createConnection({ port: +port, host: host });
-        [reader, writer] = [socket, socket];
+        this.connect.socket = createConnection({ port: +port, host: host });
+        [reader, writer] = [this.connect.socket, this.connect.socket];
       break;
     }
 
     if (reader && writer) {
+      this.nvim = new NeovimClient;
       this.nvim.attach({ reader, writer });
       this.nvim.setClientInfo("Envim", { major: 0, minor: 0, patch: 1, prerelease: "dev" }, "ui", {}, {})
       this.nvim.on("request", this.onRequest.bind(this));
@@ -75,12 +79,13 @@ export class Envim {
 
   private async onDetach() {
     await this.nvim.uiDetach();
-    this.onDisconnect();
+    this.connect.process?.kill();
+    this.connect.socket?.end("");
+    this.connect = {};
   }
 
   private onDisconnect() {
     this.attached = false;
-    this.nvim = new NeovimClient;
     Browser.win?.webContents.send("app:stop");
   }
 }
