@@ -13,7 +13,7 @@ interface States {
 }
 
 const style = {
-  cursor: "pointer",
+  cursor: "text",
   display: "block",
 };
 
@@ -88,7 +88,6 @@ export class CanvasComponent extends React.Component<Props, States> {
   }
 
   private onHighlight(_: IpcRendererEvent, highlights: any[][]) {
-    console.log(highlights);
     highlights.forEach(([id, hl]) => this.renderer?.setHighlight(id, hl));
   }
 

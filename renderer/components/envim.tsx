@@ -1,5 +1,6 @@
 import React from "react";
 
+import { TablineComponent } from "./tabline";
 import { CanvasComponent } from "./canvas";
 import { InputComponent } from "./input";
 import { MenuComponent } from "./menu";
@@ -19,7 +20,7 @@ export class EnvimComponent extends React.Component<Props, States> {
   constructor(props: Props) {
     super(props);
 
-    this.state = { width: window.innerWidth, height: window.innerHeight };
+    this.state = { width: window.innerWidth, height: window.innerHeight - this.props.font.height - 8 };
     this.onResize = this.onResize.bind(this);
     window.addEventListener("resize", this.onResize);
   }
@@ -32,7 +33,7 @@ export class EnvimComponent extends React.Component<Props, States> {
     const timer = +setTimeout(() => {
       if (timer !== this.timer) return;
 
-      this.setState({ width: window.innerWidth, height: window.innerHeight });
+      this.setState({ width: window.innerWidth, height: window.innerHeight - this.props.font.height - 8 });
     }, 200);
     this.timer = timer;
   }
@@ -40,6 +41,7 @@ export class EnvimComponent extends React.Component<Props, States> {
   render() {
     return (
       <>
+        <TablineComponent font={this.props.font} />
         <CanvasComponent font={this.props.font} win={this.state} />
         <InputComponent />
         <MenuComponent />

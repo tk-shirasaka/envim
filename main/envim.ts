@@ -19,6 +19,7 @@ export class Envim {
     ipcMain.on("envim:resize", this.onResize.bind(this));
     ipcMain.on("envim:mouse", this.onMouse.bind(this));
     ipcMain.on("envim:input", this.onInput.bind(this));
+    ipcMain.on("envim:tab", this.onTab.bind(this));
     ipcMain.on("envim:detach", this.onDetach.bind(this));
   }
 
@@ -64,7 +65,7 @@ export class Envim {
   }
 
   private async onResize(_: IpcMainEvent, width: number, height: number) {
-    this.attached || await this.nvim.request("nvim_ui_attach", [width, height, { ext_linegrid: true, }]);
+    this.attached || await this.nvim.request("nvim_ui_attach", [width, height, { ext_linegrid: true, ext_tabline: true }]);
     await this.nvim.uiTryResize(width, height);
     this.attached = true;
   }
@@ -75,6 +76,10 @@ export class Envim {
 
   private async onInput(_: IpcMainEvent, input: string) {
     await this.nvim.input(input);
+  }
+
+  private async onTab(_: IpcMainEvent, no: number) {
+    await this.nvim.command(`tabnext ${no}`);
   }
 
   private async onDetach() {

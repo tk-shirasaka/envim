@@ -37,6 +37,9 @@ export class App {
         case "flush":
           this.flush();
         break;
+        case "tabline_update":
+          this.tablineUpdate(r[0][0], r[0][1]);
+        break;
       }
     });
   }
@@ -104,6 +107,14 @@ export class App {
       if (!check(trow, tcol)) return;
       this.grids[grid].moveCell(srow, scol, trow, tcol);
     });
+  }
+
+  private tablineUpdate(current: Tabpage, tabs: { tab: Tabpage, name: string }[]) {
+    Browser.win?.webContents.send("envim:tabline", tabs.map(({tab, name}) => ({
+      name,
+      type: "js",
+      active: current.data === tab.data,
+    })));
   }
 
   private flush() {

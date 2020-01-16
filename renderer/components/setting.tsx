@@ -90,7 +90,7 @@ export class SettingComponent extends React.Component<Props, States> {
           :  <label style={styles.label}>Enter neovim address<input style={styles.text} value={this.state.address} onChange={this.onChangePort.bind(this)} autoFocus={true} /></label>
         }
         <div>
-          {icons.map(icon => <i key={icon.name} style={{color: icon.color, ...styles.i}}>{icon.font}</i>)}
+          {icons.map((icon, i) => <i key={i} style={{color: icon.color, ...styles.i}}>{icon.font}</i>)}
         </div>
         <button style={styles.button}>Start</button>
       </form>
