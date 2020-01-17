@@ -1,7 +1,7 @@
 import React from "react";
 import { ipcRenderer, IpcRendererEvent } from "electron";
 
-import { icons } from "../utils/icons";
+import { icons } from "../../utils/icons";
 
 interface Props {
   font: { size: number; width: number; height: number; };

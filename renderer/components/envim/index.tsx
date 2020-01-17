@@ -1,7 +1,7 @@
 import React from "react";
 
 import { TablineComponent } from "./tabline";
-import { CanvasComponent } from "./canvas";
+import { EditorComponent } from "./editor";
 import { InputComponent } from "./input";
 import { MenuComponent } from "./menu";
 
@@ -50,7 +50,7 @@ export class EnvimComponent extends React.Component<Props, States> {
     return (
       <>
         <TablineComponent font={this.props.font} win={this.state.tab} />
-        <CanvasComponent font={this.props.font} win={this.state.canvas} />
+        <EditorComponent font={this.props.font} win={this.state.canvas} />
         <InputComponent />
         <MenuComponent />
       </>

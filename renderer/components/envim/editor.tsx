@@ -1,8 +1,8 @@
 import React, { MouseEvent, WheelEvent } from "react";
 import { ipcRenderer, IpcRendererEvent } from "electron";
 
-import { Context2D } from "../utils/context2d";
-import { Emit } from "../utils/emit";
+import { Context2D } from "../../utils/context2d";
+import { Emit } from "../../utils/emit";
 
 interface Props {
   font: { size: number; width: number; height: number; };
@@ -17,7 +17,7 @@ const style = {
   display: "block",
 };
 
-export class CanvasComponent extends React.Component<Props, States> {
+export class EditorComponent extends React.Component<Props, States> {
   private drag: boolean = false;
   private renderer?: Context2D;
   private offset?: { x: number, y: number };

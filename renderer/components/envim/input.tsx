@@ -1,8 +1,8 @@
 import React, { KeyboardEvent, CompositionEvent } from "react";
 import { ipcRenderer } from "electron";
 
-import { Emit } from "../utils/emit";
-import { keycode } from "../utils/keycode";
+import { Emit } from "../../utils/emit";
+import { keycode } from "../../utils/keycode";
 
 interface Props {
 }
