@@ -20,6 +20,7 @@ const style = {
 export class CanvasComponent extends React.Component<Props, States> {
   private drag: boolean = false;
   private renderer?: Context2D;
+  private offset?: { x: number, y: number };
 
   constructor(props: Props) {
     super(props);
@@ -32,8 +33,14 @@ export class CanvasComponent extends React.Component<Props, States> {
   }
 
   componentDidMount() {
-    const ctx = (this.refs.canvas as HTMLCanvasElement).getContext("2d");
-    ctx && (this.renderer = new Context2D(ctx, this.props.font));
+    const font = { size: this.props.font.size * 2, width: this.props.font.width * 2, height: this.props.font.height * 2 };
+    const canvas = this.refs.canvas as HTMLCanvasElement;
+    const ctx = canvas.getContext("2d");
+    if (ctx) {
+      const { x, y } = canvas.getBoundingClientRect();
+      this.renderer = new Context2D(ctx, font);
+      this.offset = { x, y };
+    }
   }
 
   componentDidUpdate() {
@@ -52,7 +59,8 @@ export class CanvasComponent extends React.Component<Props, States> {
   }
 
   private onMouse(e: MouseEvent, button: string, action: string) {
-    const [col, row] = this.getNvimSize(e.clientX, e.clientY);
+    const { x, y } = this.offset || { x: 0, y: 0 };
+    const [col, row] = this.getNvimSize(e.clientX - x, e.clientY - y);
 
     button === "left" && e.stopPropagation();
     button === "left" && e.preventDefault();
