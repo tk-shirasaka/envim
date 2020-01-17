@@ -1,3 +1,5 @@
+import { IHighlight } from "common/interface";
+
 export class Highlight {
   public foreground: string = "";
   public background: string = "";
@@ -7,18 +9,7 @@ export class Highlight {
 
   public blend: number;
 
-  constructor(highlight :{
-    foreground?: number,
-    background?: number,
-    special?: number,
-    reverse?: boolean,
-    italic?: boolean,
-    bold?: boolean,
-    strikethrough?: boolean,
-    underline?: boolean,
-    undercurl?: boolean,
-    blend?: number,
-  }) {
+  constructor(highlight: IHighlight) {
     if (highlight.reverse) {
       highlight.foreground && (this.background = this.intToColor(highlight.foreground));
       highlight.background && (this.foreground = this.intToColor(highlight.background));

@@ -1,16 +1,8 @@
-interface Cell {
-  row: number;
-  col: number;
-  y: number;
-  x: number;
-  text: string;
-  hl: number;
-  width: number;
-}
+import { ICell } from "common/interface";
 
 export class Grid {
-  private lines: Cell[][] = [];
-  private flush: Cell[] = [];
+  private lines: ICell[][] = [];
+  private flush: ICell[] = [];
   private x :number = 0;
   private y :number = 0;
   private width :number = 0;
@@ -83,13 +75,13 @@ export class Grid {
     return flush;
   }
 
-  getLine(row: number, col: number, fn: (cell: Cell) => void) {
+  getLine(row: number, col: number, fn: (cell: ICell) => void) {
     for (let i = col; i < this.width; i++) {
       fn(this.getCell(row, col + i));
     }
   }
 
-  getLines(row: number, asc: boolean, fn: (cell: Cell) => void) {
+  getLines(row: number, asc: boolean, fn: (cell: ICell) => void) {
     const [offset, direction] = asc ? [0, 1] : [this.height - row - 1, -1];
 
     for (let i = row; i < this.height; i++) {

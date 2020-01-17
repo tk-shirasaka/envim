@@ -10,6 +10,7 @@ export class App {
     redraw.forEach(r => {
       const name = r.shift();
       switch (name) {
+        /** ext_linegrid **/
         case "grid_resize":
           r.forEach(([grid, width, height]) => this.gridResize(grid, width, height));
         break;
@@ -34,11 +35,38 @@ export class App {
         case "grid_scroll":
           this.gridScroll(r[0][0], r[0][1], r[0][2], r[0][3], r[0][4], r[0][5], r[0][6]);
         break;
-        case "flush":
-          this.flush();
-        break;
+
+        /** ext_tabline **/
         case "tabline_update":
           this.tablineUpdate(r[0][0], r[0][1]);
+        break;
+
+        /** ext_tabline **/
+        case "cmdline_show":
+          this.cmdlineShow(r[0][0], r[0][1], r[0][2] || r[0][3], r[0][4], r[0][5]);
+        break;
+        case "cmdline_pos":
+          this.cmdlinePos(r[0][0], r[0][1]);
+        break;
+        case "cmdline_special_char":
+          this.cmdlineSpecialChar(r[0][0], r[0][1], r[0][2]);
+        break;
+        case "cmdline_hide":
+          this.cmdlineHide();
+        break;
+        case "cmdline_block_show":
+          this.cmdlineBlockShow(r[0][0]);
+        break;
+        case "cmdline_block_append":
+          this.cmdlineBlockAppend(r[0][0]);
+        break;
+        case "cmdline_block_hide":
+          this.cmdlineBlockHide();
+        break;
+
+        /** default **/
+        case "flush":
+          this.flush();
         break;
       }
     });
@@ -49,7 +77,7 @@ export class App {
   }
 
   private defaultColorsSet(foreground: number, background: number, special: number) {
-    Browser.win?.webContents.send("envim:highlights", [[0, {
+    Browser.win?.webContents.send("envim:highlights", [{id: 0, hl: {
       foreground,
       background,
       special,
@@ -60,11 +88,11 @@ export class App {
       underline:false,
       undercurl:false,
       blend: 0,
-    }]]);
+    }}]);
   }
 
   private hlAttrDefine(highlights: any[]) {
-    highlights = highlights.map(([id, rgb]) => [id, rgb]);
+    highlights = highlights.map(([id, rgb]) => ({id, hl: rgb}));
     Browser.win?.webContents.send("envim:highlights", highlights);
   }
 
@@ -119,6 +147,34 @@ export class App {
       });
     }
     Browser.win?.webContents.send("envim:tabline", next);
+  }
+
+  private cmdlineShow(content: string[][], pos: number, prompt: string, indent: number, level: number) {
+    Browser.win?.webContents.send("cmdline:show", { content, pos, prompt, indent, level });
+  }
+
+  private cmdlinePos(pos: number, level: number) {
+    Browser.win?.webContents.send("cmdline:pos", pos, level);
+  }
+
+  private cmdlineSpecialChar(c: string, shift: boolean, level: number) {
+    Browser.win?.webContents.send("cmdline:specialchar", c, shift, level);
+  }
+
+  private cmdlineHide() {
+    Browser.win?.webContents.send("cmdline:hide");
+  }
+
+  private cmdlineBlockShow(lines: string[][][]) {
+    Browser.win?.webContents.send("cmdline:blockshow", lines);
+  }
+
+  private cmdlineBlockAppend(line: string[][]) {
+    Browser.win?.webContents.send("cmdline:blockappend", line);
+  }
+
+  private cmdlineBlockHide() {
+    Browser.win?.webContents.send("cmdline:blockhide");
   }
 
   private flush() {

@@ -1,6 +1,8 @@
 import React, { MouseEvent, WheelEvent } from "react";
 import { ipcRenderer, IpcRendererEvent } from "electron";
 
+import { ICell, IHighlight } from "common/interface";
+
 import { Context2D } from "../../utils/context2d";
 import { Emit } from "../../utils/emit";
 
@@ -105,11 +107,11 @@ export class EditorComponent extends React.Component<Props, States> {
     this.renderer?.setCursor(x, y, hl);
   }
 
-  private onHighlight(_: IpcRendererEvent, highlights: any[][]) {
-    highlights.forEach(([id, hl]) => this.renderer?.setHighlight(id, hl));
+  private onHighlight(_: IpcRendererEvent, highlights: {id: number, hl: IHighlight}[]) {
+    highlights.forEach(({id, hl}) => this.renderer?.setHighlight(id, hl));
   }
 
-  private onFlush(_: IpcRendererEvent, cells: any[]) {
+  private onFlush(_: IpcRendererEvent, cells: ICell[]) {
     this.renderer?.flush(cells);
   }
 

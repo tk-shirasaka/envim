@@ -1,3 +1,5 @@
+import { ICell, IHighlight } from "common/interface";
+
 import { Highlight } from "./highlight";
 
 export class Context2D {
@@ -41,7 +43,7 @@ export class Context2D {
     this.font = font;
   }
 
-  setHighlight(id: number, hl: object) {
+  setHighlight(id: number, hl: IHighlight) {
     this.highlights[id] = new Highlight(hl);
   }
 
@@ -57,7 +59,7 @@ export class Context2D {
     this.ctx.fillText(text, this.cursor.x * this.font.width, this.cursor.y * this.font.height);
   }
 
-  flush(cells: any[]) {
+  flush(cells: ICell[]) {
     cells.forEach(cell => {
       const [x, y] = [cell.x * this.font.width, cell.y * this.font.height];
       const reverse = (this.cursor.y === cell.y && this.cursor.x === cell.x);

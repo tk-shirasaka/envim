@@ -65,7 +65,12 @@ export class Envim {
   }
 
   private async onResize(_: IpcMainEvent, width: number, height: number) {
-    this.attached || await this.nvim.request("nvim_ui_attach", [width, height, { ext_linegrid: true, ext_tabline: true }]);
+    const options = {
+      ext_linegrid: true,
+      ext_tabline: true,
+      ext_cmdline: true ,
+    };
+    this.attached || await this.nvim.request("nvim_ui_attach", [width, height, options]);
     await this.nvim.uiTryResize(width, height);
     this.attached = true;
   }
