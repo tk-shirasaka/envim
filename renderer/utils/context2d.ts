@@ -61,6 +61,10 @@ export class Context2D {
     this.ctx.fillRect(x, y, col * this.font.width, this.font.height);
   }
 
+  setFont(font: { size: number; width: number; height: number; }) {
+    this.font = font;
+  }
+
   setHighlight(id: number, hl: Highlight) {
     this.highlights[id] = hl;
   }

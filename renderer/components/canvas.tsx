@@ -33,17 +33,17 @@ export class CanvasComponent extends React.Component<Props, States> {
   }
 
   componentDidMount() {
-    const font = { size: this.props.font.size * 2, width: this.props.font.width * 2, height: this.props.font.height * 2 };
     const canvas = this.refs.canvas as HTMLCanvasElement;
     const ctx = canvas.getContext("2d");
     if (ctx) {
       const { x, y } = canvas.getBoundingClientRect();
-      this.renderer = new Context2D(ctx, font);
+      this.renderer = new Context2D(ctx, this.getRenderFont());
       this.offset = { x, y };
     }
   }
 
   componentDidUpdate() {
+    this.renderer?.setFont(this.getRenderFont());
     ipcRenderer.send("envim:resize", ...this.getNvimSize(this.props.win.width, this.props.win.height));
   }
 
@@ -52,6 +52,10 @@ export class CanvasComponent extends React.Component<Props, States> {
     ipcRenderer.removeAllListeners("envim:cursor");
     ipcRenderer.removeAllListeners("envim:highlights");
     ipcRenderer.removeAllListeners("envim:flush");
+  }
+
+  private getRenderFont() {
+    return { size: this.props.font.size * 2, width: this.props.font.width * 2, height: this.props.font.height * 2 };
   }
 
   private getNvimSize(width: number, height: number) {
