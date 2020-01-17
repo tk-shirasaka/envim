@@ -10,8 +10,8 @@ interface Props {
 }
 
 interface States {
-  width: number;
-  height: number;
+  tab: { width: number, height: number; };
+  canvas: { width: number, height: number; };
 }
 
 export class EnvimComponent extends React.Component<Props, States> {
@@ -20,7 +20,7 @@ export class EnvimComponent extends React.Component<Props, States> {
   constructor(props: Props) {
     super(props);
 
-    this.state = { width: window.innerWidth, height: window.innerHeight - this.props.font.height - 8 };
+    this.state = this.newState();
     this.onResize = this.onResize.bind(this);
     window.addEventListener("resize", this.onResize);
   }
@@ -29,11 +29,19 @@ export class EnvimComponent extends React.Component<Props, States> {
     window.removeEventListener("resize", this.onResize);
   }
 
+  private newState() {
+    const win = { width: window.innerWidth, height: window.innerHeight };
+    const canvas = { width: win.width, height: win.height - this.props.font.height - 8 };
+    const tab = { width: win.width, height: win.height - canvas.height };
+
+    return { tab, canvas };
+  }
+
   private onResize() {
     const timer = +setTimeout(() => {
       if (timer !== this.timer) return;
 
-      this.setState({ width: window.innerWidth, height: window.innerHeight - this.props.font.height - 8 });
+      this.setState(this.newState());
     }, 200);
     this.timer = timer;
   }
@@ -41,8 +49,8 @@ export class EnvimComponent extends React.Component<Props, States> {
   render() {
     return (
       <>
-        <TablineComponent font={this.props.font} />
-        <CanvasComponent font={this.props.font} win={this.state} />
+        <TablineComponent font={this.props.font} win={this.state.tab} />
+        <CanvasComponent font={this.props.font} win={this.state.canvas} />
         <InputComponent />
         <MenuComponent />
       </>

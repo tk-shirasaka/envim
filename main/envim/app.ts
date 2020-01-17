@@ -106,12 +106,19 @@ export class App {
     });
   }
 
-  private tablineUpdate(current: Tabpage, tabs: { tab: Tabpage, name: string }[]) {
-    Browser.win?.webContents.send("envim:tabline", tabs.map(({tab, name}) => ({
-      name,
-      type: "js",
-      active: current.data === tab.data,
-    })));
+  private async tablineUpdate(current: Tabpage, tabs: { tab: Tabpage, name: string }[]) {
+    const next: { name: string, type: string, active: boolean }[] = [];
+    for (let i = 0; i < tabs.length; i++) {
+      const { tab, name } = tabs[i];
+      const buffer = await tab.window.buffer;
+      const type = await current.request("nvim_buf_get_option", [buffer.data, "filetype"])
+      next.push({
+        name,
+        type,
+        active: current.data === tab.data,
+      });
+    }
+    Browser.win?.webContents.send("envim:tabline", next);
   }
 
   private flush() {

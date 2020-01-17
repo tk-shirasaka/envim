@@ -5,6 +5,7 @@ import { icons } from "../utils/icons";
 
 interface Props {
   font: { size: number; width: number; height: number; };
+  win: { width: number; height: number; };
 }
 
 interface States {
@@ -20,7 +21,7 @@ const styles = {
     cursor: "pointer",
     background: "#4a4646",
     maxWidth: 300,
-    padding: "4px 30px 2px 10px",
+    padding: "0 10px",
     borderBottom: "solid 2px #4a4646",
     textOverflow: "ellipsis",
     overflow: "hidden",
@@ -53,9 +54,10 @@ export class TablineComponent extends React.Component<Props, States> {
   }
 
   private getChildStayle(active: boolean) {
+    const base = { lineHeight: `${this.props.win.height}px` };
     return active
-      ? {...styles.tabs, ...styles.active}
-      : styles.tabs;
+      ? {...base, ...styles.tabs, ...styles.active}
+      : {...base, ...styles.tabs};
   }
 
   private getIcon(type: string) {
@@ -65,7 +67,7 @@ export class TablineComponent extends React.Component<Props, States> {
 
   render() {
     return (
-      <div style={{height: this.props.font.height + 8, fontSize: this.props.font.size, ...styles.scope}}>
+      <div style={{...this.props.win, fontSize: this.props.font.size, ...styles.scope}}>
         {this.state.tabs.map((tab, i) => (
           <div key={i} style={this.getChildStayle(tab.active)} onClick={() => this.onClick(i)}>
             { this.getIcon(tab.type) }

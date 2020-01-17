@@ -111,7 +111,7 @@ export class CanvasComponent extends React.Component<Props, States> {
 
   render() {
     return (
-      <canvas style={style} width={this.props.win.width} height={this.props.win.height} ref="canvas"
+      <canvas style={{...this.props.win, ...style}} width={this.props.win.width * 2} height={this.props.win.height * 2} ref="canvas"
         onMouseDown={this.onMouseDown.bind(this)}
         onMouseMove={this.onMouseMove.bind(this)}
         onMouseUp={this.onMouseUp.bind(this)}
