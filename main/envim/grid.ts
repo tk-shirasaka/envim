@@ -31,19 +31,22 @@ export class Grid {
     for (let i = 0; i < height; i++) {
       this.lines.push([]);
       for (let j = 0; j < width; j++) {
-        this.lines[i].push(this.getDefault(i, j));
+        const cell = this.getDefault(i, j)
+        this.flush.push(cell);
+        this.lines[i].push(cell);
       }
     }
   }
 
   setCursorPos(row: number, col: number) {
-    const { text, hl } = this.getCell(row, col);
+    const prev = this.getCell(this.cursor.row, this.cursor.col);
+    const cell = this.getCell(row, col);
 
-    this.moveCell(this.cursor.row, this.cursor.col, this.cursor.row, this.cursor.col);
-    this.setCell(row, col, text, hl);
+    this.flush.push(prev);
+    this.flush.push(cell);
     this.cursor = { row, col };
 
-    return { x: this.x + col, y: this.y + row, hl };
+    return { x: this.x + col, y: this.y + row, hl: cell.hl };
   }
 
   getDefault(row: number, col: number) {
@@ -59,10 +62,12 @@ export class Grid {
     const cell = this.getCell(row, col);
     const next = this.getCell(row, col + 1);
 
+    if (cell.text === text && cell.hl === hl) return;
+
     text || (prev.width = 2);
     hl < 0 && (hl = prev.hl);
     [ cell.row, cell.col, cell.y, cell.x ] = [ row, col, this.x + row, this.y + col ];
-    [ cell.text, cell.hl, cell.width ] = [ text, hl || 0, next.width ? text.length : 2 ];
+    [ cell.text, cell.hl, cell.width ] = [ text, hl, next.width ? text.length : 2 ];
     this.flush.push(cell);
   }
 
