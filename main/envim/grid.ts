@@ -42,7 +42,7 @@ export class Grid {
   }
 
   getDefault(row: number, col: number) {
-    return { row, col, y: this.x + row, x: this.y + col, text: " ", hl: 0, width: 1 };
+    return { row, col, y: this.y + row, x: this.x + col, text: " ", hl: 0, width: 1 };
   }
 
   getCell(row: number, col: number) {
@@ -58,7 +58,7 @@ export class Grid {
 
     text || (prev.width = 2);
     hl < 0 && (hl = prev.hl);
-    [ cell.row, cell.col, cell.y, cell.x ] = [ row, col, this.x + row, this.y + col ];
+    [ cell.row, cell.col, cell.y, cell.x ] = [ row, col, this.y + row, this.x + col ];
     [ cell.text, cell.hl, cell.width ] = [ text, hl, next.width ? text.length : 2 ];
     this.flush.push(cell);
   }
