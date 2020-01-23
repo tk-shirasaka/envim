@@ -2,9 +2,11 @@ import { Tabpage } from "neovim/lib/api/Tabpage";
 
 import { Browser } from "../browser";
 import { Grid } from "./grid";
+import { Cmdline } from "./cmdline";
 
 export class App {
   private grids: { [k: number]: Grid } = {};
+  private cmdline: Cmdline = new Cmdline;
 
   redraw(redraw: any[][]) {
     redraw.forEach(r => {
@@ -43,13 +45,13 @@ export class App {
 
         /** ext_tabline **/
         case "cmdline_show":
-          this.cmdlineShow(r[0][0], r[0][1], r[0][2] || r[0][3], r[0][4], r[0][5]);
+          this.cmdlineShow(r[0][0], r[0][1], r[0][2] || r[0][3], r[0][4]);
         break;
         case "cmdline_pos":
-          this.cmdlinePos(r[0][0], r[0][1]);
+          this.cmdlinePos(r[0][0]);
         break;
         case "cmdline_special_char":
-          this.cmdlineSpecialChar(r[0][0], r[0][1], r[0][2]);
+          this.cmdlineSpecialChar(r[0][0], r[0][1]);
         break;
         case "cmdline_hide":
           this.cmdlineHide();
@@ -74,6 +76,7 @@ export class App {
 
   private gridResize(grid: number, width: number, height: number) {
     this.grids[grid] = new Grid(0, 0, width, height);
+    this.cmdline.resize(width, height);
   }
 
   private defaultColorsSet(foreground: number, background: number, special: number) {
@@ -149,32 +152,41 @@ export class App {
     Browser.win?.webContents.send("envim:tabline", next);
   }
 
-  private cmdlineShow(content: string[][], pos: number, prompt: string, indent: number, level: number) {
-    Browser.win?.webContents.send("cmdline:show", { content, pos, prompt, indent, level });
+  private cmdlineShow(content: string[][], pos: number, prompt: string, indent: number) {
+    const { cursor, cells } = this.cmdline.show(content, pos, prompt, indent);
+    Browser.win?.webContents.send("cmdline:show");
+    Browser.win?.webContents.send("cmdline:cursor", cursor.x, cursor.y, cursor.hl);
+    Browser.win?.webContents.send("cmdline:flush", cells);
   }
 
-  private cmdlinePos(pos: number, level: number) {
-    Browser.win?.webContents.send("cmdline:pos", pos, level);
+  private cmdlinePos(pos: number) {
+    const { cursor, cells } = this.cmdline.pos(pos);
+    Browser.win?.webContents.send("cmdline:cursor", cursor.x, cursor.y, cursor.hl);
+    Browser.win?.webContents.send("cmdline:flush", cells);
   }
 
-  private cmdlineSpecialChar(c: string, shift: boolean, level: number) {
-    Browser.win?.webContents.send("cmdline:specialchar", c, shift, level);
+  private cmdlineSpecialChar(c: string, shift: boolean) {
+    const { cursor, cells } = this.cmdline.specialchar(c, shift);
+    Browser.win?.webContents.send("cmdline:cursor", cursor.x, cursor.y, cursor.hl);
+    Browser.win?.webContents.send("cmdline:flush", cells);
   }
 
   private cmdlineHide() {
+    this.cmdline.hide();
     Browser.win?.webContents.send("cmdline:hide");
   }
 
   private cmdlineBlockShow(lines: string[][][]) {
-    Browser.win?.webContents.send("cmdline:blockshow", lines);
+    this.cmdline.blockShow(lines);
   }
 
   private cmdlineBlockAppend(line: string[][]) {
-    Browser.win?.webContents.send("cmdline:blockappend", line);
+    this.cmdline.blockAppend(line);
   }
 
   private cmdlineBlockHide() {
-    Browser.win?.webContents.send("cmdline:blockhide");
+    this.cmdline.blockHide();
+    Browser.win?.webContents.send("cmdline:hide");
   }
 
   private flush() {

@@ -13,7 +13,6 @@ interface Props {
 interface States {
   tab: { width: number, height: number; };
   canvas: { width: number, height: number; };
-  cmdline: { width: number, height: number; };
 }
 
 export class EnvimComponent extends React.Component<Props, States> {
@@ -35,9 +34,8 @@ export class EnvimComponent extends React.Component<Props, States> {
     const win = { width: window.innerWidth, height: window.innerHeight };
     const canvas = { width: win.width, height: win.height - this.props.font.height - 8 };
     const tab = { width: win.width, height: win.height - canvas.height };
-    const cmdline = { width: win.width * 0.8, height: this.props.font.height * 2 };
 
-    return { tab, canvas, cmdline };
+    return { tab, canvas };
   }
 
   private onResize() {
@@ -53,8 +51,10 @@ export class EnvimComponent extends React.Component<Props, States> {
     return (
       <>
         <TablineComponent font={this.props.font} win={this.state.tab} />
-        <EditorComponent font={this.props.font} win={this.state.canvas} />
-        <CmdlineComponent font={this.props.font} win={this.state.cmdline} />
+        <div>
+          <EditorComponent font={this.props.font} win={this.state.canvas} />
+          <CmdlineComponent font={this.props.font} win={this.state.canvas} />
+        </div>
         <InputComponent />
         <MenuComponent />
       </>

@@ -14,7 +14,9 @@ interface Props {
 interface States {
 }
 
+const position: "absolute" = "absolute";
 const style = {
+  position,
   cursor: "text",
   display: "block",
 };
