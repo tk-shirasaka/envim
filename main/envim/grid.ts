@@ -2,7 +2,7 @@ import { ICell } from "common/interface";
 
 export class Grid {
   private lines: ICell[][] = [];
-  private flush: ICell[] = [];
+  private flush: { [k: string]: ICell } = {};
   private x :number = 0;
   private y :number = 0;
   private width :number = 0;
@@ -24,7 +24,7 @@ export class Grid {
       this.lines.push([]);
       for (let j = 0; j < width; j++) {
         const cell = this.getDefault(i, j)
-        this.flush.push(cell);
+        this.flush[`${cell.row},${cell.col}`] = cell;
         this.lines[i].push(cell);
       }
     }
@@ -34,8 +34,8 @@ export class Grid {
     const prev = this.getCell(this.cursor.row, this.cursor.col);
     const cell = this.getCell(row, col);
 
-    this.flush.push(prev);
-    this.flush.push(cell);
+    this.flush[`${prev.row},${prev.col}`] = prev;
+    this.flush[`${cell.row},${cell.col}`] = cell;
     this.cursor = { row, col };
 
     return { x: this.x + col, y: this.y + row, hl: cell.hl };
@@ -60,7 +60,7 @@ export class Grid {
     hl < 0 && (hl = prev.hl);
     [ cell.row, cell.col, cell.y, cell.x ] = [ row, col, this.y + row, this.x + col ];
     [ cell.text, cell.hl, cell.width ] = [ text, hl, next.width ? text.length : 2 ];
-    this.flush.push(cell);
+    this.flush[`${cell.row},${cell.col}`] = cell;
   }
 
   moveCell(srow: number, scol: number, trow: number, tcol: number) {
@@ -71,8 +71,8 @@ export class Grid {
   getFlush() {
     const flush = this.flush;
 
-    this.flush = [];
-    return flush;
+    this.flush = {};
+    return Object.keys(flush).map(k => flush[k]);
   }
 
   getLine(row: number, col: number, fn: (cell: ICell) => void) {
