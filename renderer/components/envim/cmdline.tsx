@@ -1,7 +1,7 @@
 import React from "react";
 import { ipcRenderer, IpcRendererEvent } from "electron";
 
-import { ICell, ICmdline } from "common/interface";
+import { ICell } from "common/interface";
 import { Context2D } from "../../utils/context2d";
 
 interface Props {
@@ -22,7 +22,6 @@ const style = {
 
 export class CmdlineComponent extends React.Component<Props, States> {
   private renderer?: Context2D;
-  private cmdline?: ICmdline;
 
   constructor(props: Props) {
     super(props);

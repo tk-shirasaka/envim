@@ -43,7 +43,7 @@ export class App {
           this.tablineUpdate(r[0][0], r[0][1]);
         break;
 
-        /** ext_tabline **/
+        /** ext_cmdline **/
         case "cmdline_show":
           this.cmdlineShow(r[0][0], r[0][1], r[0][2] || r[0][3], r[0][4]);
         break;
@@ -64,6 +64,17 @@ export class App {
         break;
         case "cmdline_block_hide":
           this.cmdlineBlockHide();
+        break;
+
+        /** ext_popupmenu **/
+        case "popupmenu_show":
+          this.popupmenuShow(r[0][0], r[0][1], r[0][3], r[0][4], r[0][5]);
+        break;
+        case "popupmenu_select":
+          this.popupmenuSelect(r[0][0]);
+        break;
+        case "popupmenu_hide":
+          this.popupmenuHide();
         break;
 
         /** default **/
@@ -187,6 +198,24 @@ export class App {
   private cmdlineBlockHide() {
     this.cmdline.blockHide();
     Browser.win?.webContents.send("cmdline:hide");
+  }
+
+  private popupmenuShow(items: string[][], selected: number, row: number, col: number, grid: number) {
+    Browser.win?.webContents.send("popupmenu:show", {
+      items: items.map(([ word, kind, menu, info ]) => ({ word, kind, menu, info })),
+      selected,
+      row,
+      col,
+      grid,
+    });
+  }
+
+  private popupmenuSelect(selected: number) {
+    Browser.win?.webContents.send("popupmenu:select", selected);
+  }
+
+  private popupmenuHide() {
+    Browser.win?.webContents.send("popupmenu:hide");
   }
 
   private flush() {

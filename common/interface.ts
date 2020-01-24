@@ -20,11 +20,3 @@ export interface IHighlight {
   undercurl?: boolean,
   blend?: number,
 }
-
-export interface ICmdline {
-  content: string[][];
-  pos: number;
-  prompt: string;
-  indent: number;
-  level: number;
-}
