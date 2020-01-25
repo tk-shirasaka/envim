@@ -7,6 +7,7 @@ import { Highlights } from "../../utils/highlight";
 
 interface Props {
   font: { size: number; width: number; height: number; };
+  win: { width: number; height: number; };
 }
 
 interface States {
@@ -19,11 +20,12 @@ const overflowY: "scroll" = "scroll";
 const styles = {
   scope: {
     position,
-    top: "60%",
     left: 0,
     right: 0,
     bottom: 0,
     opacity: 0.8,
+    animation: "fadeIn .5s ease",
+    borderRadius: "4px 4px 0 0",
     boxShadow: "0 0 10px 5px #000",
     overflowX,
     overflowY,
@@ -35,7 +37,7 @@ const styles = {
     padding: "1px 8px",
   },
   message: {
-    padding: 1,
+    padding: "1px 4px",
   },
 };
 
@@ -65,6 +67,7 @@ export class HistoryComponent extends React.Component<Props, States> {
   private getScopeStyle() {
     return {
       ...styles.scope,
+      ...this.props.win,
       background: Highlights.color(0, "background"),
       fontSize: this.props.font.size,
     };
