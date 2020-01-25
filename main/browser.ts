@@ -35,6 +35,6 @@ export class Browser {
     Browser.win.loadURL(`file://${__dirname}/../index.html`);
       Browser.win.on("closed", () => delete(Browser.win));
 
-    Browser.win.webContents.openDevTools();
+    // Browser.win.webContents.openDevTools();
   }
 }

@@ -20,6 +20,7 @@ export class Envim {
     ipcMain.on("envim:mouse", this.onMouse.bind(this));
     ipcMain.on("envim:input", this.onInput.bind(this));
     ipcMain.on("envim:tab", this.onTab.bind(this));
+    ipcMain.on("envim:log", this.onLog.bind(this));
     ipcMain.on("envim:detach", this.onDetach.bind(this));
   }
 
@@ -87,6 +88,13 @@ export class Envim {
 
   private async onTab(_: IpcMainEvent, no: number) {
     await this.nvim.command(`tabnext ${no}`);
+  }
+
+  private async onLog(_: IpcMainEvent, log: any) {
+    if (["number", "string"].indexOf(typeof log) < 0) {
+      log = JSON.stringify(log);
+    }
+    this.nvim.outWriteLine(log);
   }
 
   private async onDetach() {
