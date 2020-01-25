@@ -81,7 +81,7 @@ export class EditorComponent extends React.Component<Props, States> {
       case 0:
         this.drag = true;
         this.onMouse(e, "left", "press");
-        Emit.send("menu:off");
+        Emit.send("envim:focus");
       break;
       case 2:
         Emit.send("menu:on", e.clientY, e.clientX);

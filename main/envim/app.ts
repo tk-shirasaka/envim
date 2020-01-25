@@ -77,6 +77,17 @@ export class App {
           this.popupmenuHide();
         break;
 
+        /** ext_popupmenu **/
+        case "msg_show":
+          this.msgShow(r[0][0], r[0][1], r[0][2]);
+        break;
+        case "msg_clear":
+          this.msgClear();
+        break;
+        case "msg_history_show": // ["msg_history_show", entries]
+          this.msgHistoryShow(r[0][0]);
+        break;
+
         /** default **/
         case "flush":
           this.flush();
@@ -216,6 +227,18 @@ export class App {
 
   private popupmenuHide() {
     Browser.win?.webContents.send("popupmenu:hide");
+  }
+
+  private msgShow(kind: string, content: string[][], replace_last: boolean) {
+    Browser.win?.webContents.send("messages:show", kind, content, replace_last);
+  }
+
+  private msgClear() {
+    Browser.win?.webContents.send("messages:clear");
+  }
+
+  private msgHistoryShow(contents: string[][][]) {
+    Browser.win?.webContents.send("messages:history", contents.map(([kind, content]) => ({ kind, content })));
   }
 
   private flush() {

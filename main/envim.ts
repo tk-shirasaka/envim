@@ -68,8 +68,9 @@ export class Envim {
     const options = {
       ext_linegrid: true,
       ext_tabline: true,
-      ext_cmdline: true ,
-      ext_popupmenu: true ,
+      ext_cmdline: true,
+      ext_popupmenu: true,
+      ext_messages: true,
     };
     this.attached || await this.nvim.request("nvim_ui_attach", [width, height, options]);
     await this.nvim.uiTryResize(width, height);

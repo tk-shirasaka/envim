@@ -18,8 +18,6 @@ const whiteSpace: "nowrap" = "nowrap";
 const styles = {
   scope: {
     position,
-    cursor: "text",
-    display: "block",
   },
   table: {
     borderSpacing: 0,
@@ -97,7 +95,7 @@ export class PopupmenuComponent extends React.Component<Props, States> {
   }
 
   render() {
-    return (
+    return this.state.items.length && (
       <div style={this.getScopeStyle()}>
         <table style={styles.table}>
           <tbody>

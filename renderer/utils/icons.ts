@@ -11,3 +11,24 @@ export const icons = [
   { font: "", color: "#12b324", name: "Vim", type: ["vim"] },
   { font: "", color: "#21bd8a", name: "Shell", type: ["sh", "zsh"] },
 ];
+
+export const notificate = (kind: string) => {
+  switch (kind) {
+    case "emsg":
+      case "echoerr":
+      case "lua_error":
+      case "rpc_error":
+      case "wmsg":
+      return ""
+    case "":
+      case "confirm":
+      case "confirm_sub":
+      case "echo":
+      case "echomsg":
+      case "return_prompt":
+      return ""
+    case "quickfix":
+      case "search_count":
+      return ""
+  }
+};

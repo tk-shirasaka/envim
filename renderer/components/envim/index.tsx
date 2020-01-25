@@ -4,6 +4,8 @@ import { TablineComponent } from "./tabline";
 import { EditorComponent } from "./editor";
 import { CmdlineComponent } from "./cmdline";
 import { PopupmenuComponent } from "./popupmenu";
+import { MessageComponent } from "./message";
+import { HistoryComponent } from "./history";
 import { InputComponent } from "./input";
 import { MenuComponent } from "./menu";
 
@@ -62,6 +64,8 @@ export class EnvimComponent extends React.Component<Props, States> {
           <EditorComponent font={this.props.font} win={this.state.canvas} />
           <CmdlineComponent font={this.props.font} win={this.state.canvas} />
           <PopupmenuComponent font={this.props.font} />
+          <MessageComponent font={this.props.font} />
+          <HistoryComponent font={this.props.font} />
         </div>
         <InputComponent />
         <MenuComponent />

@@ -35,12 +35,12 @@ export class MenuComponent extends React.Component<Props, States> {
 
     this.state = { visible: false, style: { top: 0, left: 0 } };
     Emit.on("menu:on", this.onMenu.bind(this));
-    Emit.on("menu:off", this.offMenu.bind(this));
+    Emit.on("envim:focus", this.offMenu.bind(this));
   }
 
   componentWillUnmount() {
     Emit.clear("menu:on");
-    Emit.clear("menu:off");
+    Emit.clear("envim:focus");
   }
 
   private onMenu(y: number, x: number) {

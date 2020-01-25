@@ -23,11 +23,11 @@ export class InputComponent extends React.Component<Props, States> {
   constructor(props: Props) {
     super(props);
 
-    Emit.on("menu:off", this.onFocus.bind(this));
+    Emit.on("envim:focus", this.onFocus.bind(this));
   }
 
   componentWillUnmount() {
-    Emit.clear("menu:off");
+    Emit.clear("envim:focus");
   }
 
   private onFocus() {
@@ -46,6 +46,7 @@ export class InputComponent extends React.Component<Props, States> {
       if (input.value) {
         Emit.send("envim:ime", input.value);
       } else {
+        Emit.send("envim:focus");
         code && ipcRenderer.send("envim:input", code);
       }
     });
