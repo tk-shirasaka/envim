@@ -14,12 +14,12 @@ interface States {
 }
 
 const position: "absolute" = "absolute";
-const whiteSpace: "nowrap" = "nowrap";
 const styles = {
   scope: {
     position,
   },
   table: {
+    animation: "fadeIn .5s ease",
     borderSpacing: 0,
     background: "rgba(47, 43, 43, 0.8)",
     color: "#ded4d5",
@@ -32,10 +32,6 @@ const styles = {
   },
   td: {
     padding: 2,
-    maxWidth: 300,
-    textOverflow: "ellipsis",
-    overflow: "hidden",
-    whiteSpace,
   },
   kind: {
     padding: 2,
@@ -99,7 +95,7 @@ export class PopupmenuComponent extends React.Component<Props, States> {
       <div style={this.getScopeStyle()}>
         <table style={styles.table}>
           <tbody>
-            {this.state.items.map(({ word, kind, menu, info }, i) => (
+            {this.state.items.map(({ word, kind, menu, info }, i) => this.state.selected <= i && (
               <tr style={this.state.selected === i ? styles.active : styles.tr} key={i}>
                 <td style={styles.td}>{ word }</td>
                 <td style={styles.td}>{ menu }</td>
