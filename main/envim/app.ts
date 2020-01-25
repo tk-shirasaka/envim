@@ -68,7 +68,7 @@ export class App {
 
         /** ext_popupmenu **/
         case "popupmenu_show":
-          this.popupmenuShow(r[0][0], r[0][1], r[0][3], r[0][4], r[0][5]);
+          this.popupmenuShow(r[0][0], r[0][1], r[0][2], r[0][3], r[0][4]);
         break;
         case "popupmenu_select":
           this.popupmenuSelect(r[0][0]);

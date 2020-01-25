@@ -14,6 +14,7 @@ interface States {
 }
 
 const position: "absolute" = "absolute";
+const whiteSpace: "nowrap" = "nowrap";
 const styles = {
   scope: {
     position,
@@ -33,6 +34,10 @@ const styles = {
   },
   td: {
     padding: 2,
+    maxWidth: 300,
+    textOverflow: "ellipsis",
+    overflow: "hidden",
+    whiteSpace,
   },
   kind: {
     padding: 2,
@@ -73,6 +78,8 @@ export class PopupmenuComponent extends React.Component<Props, States> {
   private getScopeStyle() {
     return {
       ...styles.scope,
+      top: (this.state.row + 1) * this.props.font.height,
+      left: this.state.col * this.props.font.width,
       fontSize: this.props.font.size - 2,
     }
   }
@@ -84,7 +91,8 @@ export class PopupmenuComponent extends React.Component<Props, States> {
       case "F": case "G": case "H": case "I": case "J": return { background: "#bbe659", ...styles.kind };
       case "K": case "L": case "M": case "N": case "O": return { background: "#9ff3f0", ...styles.kind };
       case "P": case "Q": case "R": case "S": case "T": return { background: "#d0a7f3", ...styles.kind };
-      case "U": case "V": case "W": case "X": case "Y": case "Z": return { background: "#eff384", ...styles.kind };
+      case "U": case "V": case "W": case "X": case "Y": return { background: "#eff384", ...styles.kind };
+      case "Z": default: return { background: "#8cec8b", ...styles.kind };
     }
   }
 
@@ -95,10 +103,10 @@ export class PopupmenuComponent extends React.Component<Props, States> {
           <tbody>
             {this.state.items.map(({ word, kind, menu, info }, i) => (
               <tr style={this.state.selected === i ? styles.active : styles.tr} key={i}>
-                <td style={this.getKindStyle(kind)}>{ kind }</td>
                 <td style={styles.td}>{ word }</td>
                 <td style={styles.td}>{ menu }</td>
                 <td style={styles.td}>{ info }</td>
+                <td style={this.getKindStyle(kind)}>{ kind }</td>
               </tr>
             ))}
           </tbody>

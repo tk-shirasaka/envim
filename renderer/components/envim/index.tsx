@@ -16,6 +16,12 @@ interface States {
   canvas: { width: number, height: number; };
 }
 
+const position: "relative" = "relative"
+const style = {
+  position,
+  overflow: "hidden",
+};
+
 export class EnvimComponent extends React.Component<Props, States> {
   private timer: number = 0;
 
@@ -52,7 +58,7 @@ export class EnvimComponent extends React.Component<Props, States> {
     return (
       <>
         <TablineComponent font={this.props.font} win={this.state.tab} />
-        <div>
+        <div style={{...style, ...this.state.canvas}}>
           <EditorComponent font={this.props.font} win={this.state.canvas} />
           <CmdlineComponent font={this.props.font} win={this.state.canvas} />
           <PopupmenuComponent font={this.props.font} />
