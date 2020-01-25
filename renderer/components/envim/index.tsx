@@ -14,8 +14,10 @@ interface Props {
 }
 
 interface States {
-  tab: { width: number, height: number; };
-  canvas: { width: number, height: number; };
+  header: { width: number, height: number; };
+  editor: { width: number, height: number; };
+  cmdline: { width: number, height: number; };
+  history: { width: number, height: number; };
 }
 
 const position: "relative" = "relative"
@@ -41,10 +43,13 @@ export class EnvimComponent extends React.Component<Props, States> {
 
   private newState() {
     const win = { width: window.innerWidth, height: window.innerHeight };
-    const canvas = { width: win.width, height: win.height - this.props.font.height - 8 };
-    const tab = { width: win.width, height: win.height - canvas.height };
+    const font = this.props.font;
+    const editor = { width: win.width, height: win.height - font.height - 8 };
+    const header = { width: win.width, height: win.height - editor.height };
+    const cmdline = { width: Math.floor(win.width * 0.8 / font.width) * font.width, height: font.height * 15 };
+    const history = { width: win.width, height: font.height * 15 };
 
-    return { tab, canvas };
+    return { header, editor, cmdline, history };
   }
 
   private onResize() {
@@ -59,13 +64,13 @@ export class EnvimComponent extends React.Component<Props, States> {
   render() {
     return (
       <>
-        <TablineComponent font={this.props.font} win={this.state.tab} />
-        <div style={{...style, ...this.state.canvas}}>
-          <EditorComponent font={this.props.font} win={this.state.canvas} />
-          <CmdlineComponent font={this.props.font} win={this.state.canvas} />
+        <TablineComponent font={this.props.font} win={this.state.header} />
+        <div style={{...style, ...this.state.editor}}>
+          <EditorComponent font={this.props.font} win={this.state.editor} />
+          <CmdlineComponent font={this.props.font} win={this.state.cmdline} />
+          <HistoryComponent font={this.props.font} win={this.state.history} />
           <PopupmenuComponent font={this.props.font} />
           <MessageComponent font={this.props.font} />
-          <HistoryComponent font={this.props.font} />
         </div>
         <InputComponent />
         <MenuComponent />

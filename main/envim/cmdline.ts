@@ -2,9 +2,8 @@ import { Grid } from "./grid";
 
 export class Cmdline {
   private blockline: string[][][] = [];
-  private x: number = 0;
-  private y: number = 0;
   private width: number = 0;
+  private height: number = 0;
   private indent: number = 0;
   private cursor: number = 0;
 
@@ -18,13 +17,16 @@ export class Cmdline {
 
   resize(width: number, height: number) {
     this.blockline = [];
-    this.x = Math.floor(width * 0.1);
-    this.y = Math.floor(height / 3);
-    this.width = Math.floor(width * 0.8);
-    this.grid.resize(this.y, this.x, this.width, this.blockline.length + 1)
+    this.width = width;
+    this.height = height;
+    this.grid.resize(0, 0, this.width, this.height)
   }
 
   show(content: string[][], pos: number, prompt: string, indent: number) {
+    this.grid.getLine(this.blockline.length, 0, ({ row, col }) => {
+      const { text, hl } = this.grid.getDefault(row, col);
+      this.grid.setCell(row, col, text, hl);
+    });
     this.indent = prompt.length + 1;
     this.setLine(this.blockline.length, 1, [["0", prompt]]);
     this.setLine(this.blockline.length, this.indent + indent, content);
@@ -48,12 +50,12 @@ export class Cmdline {
 
   hide() {
     this.grid.setCursorPos(0, 0);
-    this.grid.resize(this.y, this.x, this.width, this.blockline.length + 1)
+    this.grid.resize(0, 0, this.width, this.height)
   }
 
   blockShow(lines: string[][][]) {
     this.blockline = this.blockline.concat(lines);
-    this.grid.resize(this.y, this.x, this.width, this.blockline.length + 1)
+    this.grid.resize(0, 0, this.width, this.height)
 
     for (let i = 0; i < this.blockline.length; i++) {
       this.setLine(i, this.indent, this.blockline[i]);

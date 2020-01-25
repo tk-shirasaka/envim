@@ -2,6 +2,7 @@ import React from "react";
 import { ipcRenderer, IpcRendererEvent } from "electron";
 
 import { ICell } from "common/interface";
+import { Highlights } from "../../utils/highlight";
 import { Context2D } from "../../utils/context2d";
 
 interface Props {
@@ -14,10 +15,19 @@ interface States {
 }
 
 const position: "absolute" = "absolute";
+const pointerEvents: "none" = "none";
 const style = {
   position,
   display: "block",
+  top: "30%",
+  left: "10%",
+  right: "10%",
+  padding: 4,
   opacity: 0.8,
+  animation: "fadeIn .5s ease",
+  borderRadius: 4,
+  boxShadow: "5px 5px 10px 0px #000",
+  pointerEvents,
 };
 
 export class CmdlineComponent extends React.Component<Props, States> {
@@ -69,9 +79,17 @@ export class CmdlineComponent extends React.Component<Props, States> {
     this.state.visible && this.setState({ visible: false });
   }
 
+  private getStyle() {
+    return {
+      ...style,
+      ...this.props.win,
+      background: Highlights.color(0, "background"),
+    };
+  }
+
   render() {
     return this.state.visible && (
-      <canvas style={{...this.props.win, ...style}} width={this.props.win.width * 2} height={this.props.win.height * 2} ref="canvas"></canvas>
+      <canvas style={this.getStyle()} width={this.props.win.width * 2} height={this.props.win.height * 2} ref="canvas"></canvas>
     );
   }
 }
