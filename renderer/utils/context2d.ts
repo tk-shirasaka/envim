@@ -1,9 +1,8 @@
-import { ICell, IHighlight } from "common/interface";
+import { ICell } from "common/interface";
 
-import { Highlight } from "./highlight";
+import { Highlights } from "./highlight";
 
 export class Context2D {
-  private highlights: { [k: number]: Highlight } = {};
   private cursor: { x: number, y: number, hl: number } = { x: 0, y: 0, hl: 0 };
 
   constructor(
@@ -12,18 +11,18 @@ export class Context2D {
   ) { }
 
   private style(hl: number, type: "foreground" | "background") {
-    this.ctx.fillStyle = this.highlights[hl][type] || this.highlights[0][type];
+    this.ctx.fillStyle = Highlights.color(hl, type);
   }
 
   private fontStyle(hl: number) {
     this.ctx.textBaseline = "top";
-    this.ctx.font = `${this.font.size}px ${this.highlights[hl].font}`;
+    this.ctx.font = `${this.font.size}px ${Highlights.font(hl)}`;
   }
 
   private underline(x: number, y: number, col: number, hl: number) {
-    if (this.highlights[hl].decoration) {
+    if (Highlights.decoration(hl)) {
       this.ctx.save();
-      this.ctx.strokeStyle = this.highlights[hl].special || this.highlights[0].special;
+      this.ctx.strokeStyle = Highlights.color(hl, "special");
       this.ctx.beginPath();
       this.ctx.moveTo(x, y + this.font.height - 1);
       this.ctx.lineTo(x + col * this.font.width, y + this.font.height - 1);
@@ -41,10 +40,6 @@ export class Context2D {
 
   setFont(font: { size: number; width: number; height: number; }) {
     this.font = font;
-  }
-
-  setHighlight(id: number, hl: IHighlight) {
-    this.highlights[id] = new Highlight(hl);
   }
 
   setCursor(x: number, y: number, hl: number) {

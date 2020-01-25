@@ -5,6 +5,7 @@ import { ICell, IHighlight } from "common/interface";
 
 import { Context2D } from "../../utils/context2d";
 import { Emit } from "../../utils/emit";
+import { Highlights } from "../../utils/highlight";
 
 interface Props {
   font: { size: number; width: number; height: number; };
@@ -110,7 +111,7 @@ export class EditorComponent extends React.Component<Props, States> {
   }
 
   private onHighlight(_: IpcRendererEvent, highlights: {id: number, hl: IHighlight}[]) {
-    highlights.forEach(({id, hl}) => this.renderer?.setHighlight(id, hl));
+    highlights.forEach(({id, hl}) => Highlights.setHighlight(id, hl));
   }
 
   private onFlush(_: IpcRendererEvent, cells: ICell[]) {

@@ -1,6 +1,6 @@
 import { IHighlight } from "common/interface";
 
-export class Highlight {
+class Highlight {
   public foreground: string = "";
   public background: string = "";
   public special: string = "";
@@ -35,7 +35,7 @@ export class Highlight {
     return `#${("000000" + color.toString(16)).slice(-6)}`;
   }
 
-  get font() {
+  font() {
     return {
       normal: "Ricty Diminished, Nerd Font",
       bold: "Ricty Diminished Bold, Nerd Font Bold",
@@ -43,7 +43,27 @@ export class Highlight {
     }[this.type];
   }
 
-  get decoration() {
+  decoration() {
     return ["underline", "undercurl"].indexOf(this.decorate) >= 0;
+  }
+}
+
+export class Highlights {
+  private static hls: { [k: number]: Highlight } = {};
+
+  static setHighlight(id: number, hl: IHighlight) {
+    Highlights.hls[id] = new Highlight(hl);
+  }
+
+  static color(id: number, type: "foreground" | "background" | "special") {
+    return Highlights.hls[id][type] || Highlights.hls[0][type];
+  }
+
+  static font(id: number) {
+    return Highlights.hls[id].font();
+  }
+
+  static decoration(id: number) {
+    return Highlights.hls[id].decoration();
   }
 }

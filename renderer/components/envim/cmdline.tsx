@@ -38,7 +38,6 @@ export class CmdlineComponent extends React.Component<Props, States> {
 
     if (ctx) {
       this.renderer = new Context2D(ctx, this.getRenderFont());
-      this.renderer.setHighlight(0, { foreground: 0xcecece, background: 0x141414, special: 0x34879f });
     }
   }
 
