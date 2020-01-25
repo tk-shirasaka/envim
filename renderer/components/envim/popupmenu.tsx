@@ -80,7 +80,7 @@ export class PopupmenuComponent extends React.Component<Props, States> {
       ...styles.scope,
       top: (this.state.row + 1) * this.props.font.height,
       left: this.state.col * this.props.font.width,
-      fontSize: this.props.font.size - 2,
+      fontSize: this.props.font.size,
     }
   }
 
