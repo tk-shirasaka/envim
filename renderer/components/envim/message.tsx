@@ -13,11 +13,14 @@ interface States {
 }
 
 const position: "absolute" = "absolute";
+const pointerEvents: "none" = "none";
+const whiteSpace: "pre" = "pre";
 const styles = {
   scope: {
     position,
     top: 10,
     right: 10,
+    pointerEvents,
   },
   content: {
     animation: "fadeIn .5s ease",
@@ -33,6 +36,7 @@ const styles = {
   },
   message: {
     padding: 4,
+    whiteSpace,
   },
   line: {
     margin: 0,
@@ -101,9 +105,7 @@ export class MessageComponent extends React.Component<Props, States> {
           content.map(([hl, message], j) => (
             <div style={this.getContentStyle(+hl)} key={`${i}.${j}`}>
               {this.getKind(kind, +hl)}
-              <div style={this.getMessageStyle(+hl)}>
-                {message.split("\n").map((line, k) => <p style={styles.line} key={`${i}.${j}.${k}`}>{ line }</p>)}
-              </div>
+              <div style={this.getMessageStyle(+hl)}>{ message.replace(/^\n/, "") }</div>
             </div>
           ))
         ))}

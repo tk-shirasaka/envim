@@ -15,6 +15,7 @@ interface States {
 }
 
 const position: "absolute" = "absolute";
+const whiteSpace: "pre" = "pre";
 const overflowX: "hidden" = "hidden";
 const overflowY: "scroll" = "scroll";
 const styles = {
@@ -27,6 +28,7 @@ const styles = {
     animation: "fadeIn .5s ease",
     borderRadius: "4px 4px 0 0",
     boxShadow: "0 0 10px 5px #000",
+    whiteSpace,
     overflowX,
     overflowY,
   },
