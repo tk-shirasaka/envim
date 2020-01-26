@@ -24,7 +24,6 @@ const styles = {
     left: 0,
     right: 0,
     bottom: 0,
-    opacity: 0.8,
     animation: "fadeIn .5s ease",
     borderRadius: "4px 4px 0 0",
     boxShadow: "0 0 10px 5px #000",

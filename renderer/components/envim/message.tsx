@@ -24,7 +24,6 @@ const styles = {
   },
   content: {
     animation: "fadeIn .5s ease",
-    opacity: 0.8,
     display: "flex",
     marginBottom: 16,
     border: "2px solid",

@@ -14,6 +14,8 @@ interface States {
 }
 
 const position: "absolute" = "absolute";
+const borderCollapse: "separate" = "separate";
+const whiteSpace: "pre" = "pre";
 const styles = {
   scope: {
     position,
@@ -21,8 +23,11 @@ const styles = {
   table: {
     animation: "fadeIn .5s ease",
     borderSpacing: 0,
-    background: "rgba(47, 43, 43, 0.8)",
+    borderCollapse,
+    background: "#2f2b2b",
     color: "#ded4d5",
+    borderRadius: 4,
+    boxShadow: "5px 5px 10px 0px #000",
   },
   tr: {
     opacity: 0.4,
@@ -38,6 +43,16 @@ const styles = {
     fontFamily: "Ricty Diminished Bold",
     color: "#463c3c",
   },
+  info: {
+    top: -8,
+    position,
+    padding: 2,
+    marginLeft: 4,
+    whiteSpace,
+    background: "#2f2b2b",
+    borderRadius: 4,
+    boxShadow: "5px 5px 10px 0px #000",
+  }
 };
 
 export class PopupmenuComponent extends React.Component<Props, States> {
@@ -99,8 +114,8 @@ export class PopupmenuComponent extends React.Component<Props, States> {
               <tr style={this.state.selected === i ? styles.active : styles.tr} key={i}>
                 <td style={styles.td}>{ word }</td>
                 <td style={styles.td}>{ menu }</td>
-                <td style={styles.td}>{ info }</td>
                 <td style={this.getKindStyle(kind)}>{ kind }</td>
+                {this.state.selected === i && <td style={styles.info}>{ info }</td>}
               </tr>
             ))}
           </tbody>

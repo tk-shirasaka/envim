@@ -23,7 +23,6 @@ const style = {
   left: "10%",
   right: "10%",
   padding: 4,
-  opacity: 0.8,
   animation: "fadeIn .5s ease",
   borderRadius: 4,
   boxShadow: "5px 5px 10px 0px #000",
