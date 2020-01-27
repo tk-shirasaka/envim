@@ -61,7 +61,7 @@ export class CmdlineComponent extends React.Component<Props, States> {
     return { size: this.props.font.size * 2, width: this.props.font.width * 2, height: this.props.font.height * 2 };
   }
 
-  private onCmdline(_: IpcRendererEvent) {
+  private onCmdline() {
     this.state.visible || this.setState({ visible: true });
   }
 
