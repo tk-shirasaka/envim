@@ -27,8 +27,8 @@ export class Cmdline {
       const { text, hl } = this.grid.getDefault(row, col);
       this.grid.setCell(row, col, text, hl);
     });
-    this.indent = prompt.length + 1;
-    this.setLine(this.height - 1, 1, [["0", prompt]]);
+    this.indent = prompt.length;
+    this.setLine(this.height - 1, 0, [["0", prompt]]);
     this.setLine(this.height - 1, this.indent + indent, content);
 
     return this.pos(pos + indent);
