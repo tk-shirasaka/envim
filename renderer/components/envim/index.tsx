@@ -18,8 +18,7 @@ interface Props {
 interface States {
   header: { width: number, height: number; };
   editor: { width: number, height: number; };
-  cmdline: { width: number, height: number; };
-  history: { width: number, height: number; };
+  footer: { width: number, height: number; };
 }
 
 const position: "relative" = "relative"
@@ -62,14 +61,13 @@ export class EnvimComponent extends React.Component<Props, States> {
   }
 
   private newState() {
-    const { width, height } = font.get();
+    const { height } = font.get();
     const win = { width: window.innerWidth, height: window.innerHeight };
     const editor = { width: win.width, height: Math.floor((win.height - height - 4) / height) * height };
     const header = { width: win.width, height: win.height - editor.height };
-    const cmdline = { width: Math.floor(win.width * 0.8 / width) * width, height: height * 15 };
-    const history = { width: win.width, height: height * 15 };
+    const footer = { width: win.width, height: Math.min(editor.height, height * 15) };
 
-    return { header, editor, cmdline, history };
+    return { header, editor, footer };
   }
 
   private onResize() {
@@ -87,8 +85,8 @@ export class EnvimComponent extends React.Component<Props, States> {
         <TablineComponent {...this.state.header} />
         <div style={{...style, ...this.state.editor}}>
           <EditorComponent {...this.state.editor} />
-          <CmdlineComponent {...this.state.cmdline} />
-          <HistoryComponent {...this.state.history} />
+          <CmdlineComponent {...this.state.footer} />
+          <HistoryComponent {...this.state.footer} />
           <PopupmenuComponent />
           <MessageComponent />
         </div>

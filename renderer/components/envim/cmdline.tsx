@@ -19,13 +19,12 @@ const pointerEvents: "none" = "none";
 const style = {
   position,
   display: "block",
-  top: "30%",
-  left: "10%",
-  right: "10%",
-  padding: 4,
+  left: 0,
+  right: 0,
+  bottom: 0,
   animation: "fadeIn .5s ease",
-  borderRadius: 4,
-  boxShadow: "5px 5px 10px 0px #000",
+  borderRadius: "4px 4px 0 0",
+  boxShadow: "0 0 10px 5px #000",
   pointerEvents,
 };
 
