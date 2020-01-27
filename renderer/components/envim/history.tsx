@@ -15,13 +15,14 @@ interface States {
   histories: { kind: string, content: string[][] }[];
 }
 
-const position: "absolute" = "absolute";
+const positionA: "absolute" = "absolute";
+const positionS: "sticky" = "sticky";
 const whiteSpace: "pre-wrap" = "pre-wrap";
 const overflowX: "hidden" = "hidden";
 const overflowY: "scroll" = "scroll";
 const styles = {
   scope: {
-    position,
+    position: positionA,
     left: 0,
     right: 0,
     bottom: 0,
@@ -41,6 +42,15 @@ const styles = {
   message: {
     padding: "1px 4px",
   },
+  clearLine: {
+    position: positionS,
+    top: 0,
+    paddingLeft: 4,
+    cursor: "pointer",
+  },
+  clearIcon: {
+    padding: 4,
+  },
 };
 
 export class HistoryComponent extends React.Component<Props, States> {
@@ -56,6 +66,11 @@ export class HistoryComponent extends React.Component<Props, States> {
   componentWillUnmount() {
     Emit.clear("envim:focus");
     ipcRenderer.removeAllListeners("messages:history");
+  }
+
+  private onClick() {
+    ipcRenderer.send("envim:command", "messages clear");
+    this.setState({ histories: [{kind: "", content: [["0", "-- No Messages --"]]}] });
   }
 
   private onHistory(_: IpcRendererEvent, histories: States["histories"]) {
@@ -76,19 +91,11 @@ export class HistoryComponent extends React.Component<Props, States> {
     };
   }
 
-  private getKindStyle(hl: number) {
+  private getAnyStyle(hl: number, type: "kind" | "message" | "clearLine", reverse: boolean) {
     return {
-      ...styles.kind,
-      color: Highlights.color(hl, "background"),
-      background: Highlights.color(hl, "foreground"),
-    };
-  }
-
-  private getMessageStyle(hl: number) {
-    return {
-      ...styles.message,
-      color: Highlights.color(hl, "foreground"),
-      background: Highlights.color(hl, "background"),
+      ...styles[type],
+      color: Highlights.color(hl, reverse ? "background" : "foreground"),
+      background: Highlights.color(hl, reverse ? "foreground" : "background"),
     };
   }
 
@@ -96,11 +103,12 @@ export class HistoryComponent extends React.Component<Props, States> {
     const { size } = font.get();
     return this.state.histories.length === 0 ? null : (
       <div style={this.getScopeStyle()}>
+        <div style={this.getAnyStyle(0, "clearLine", false)}><i style={{...styles.clearIcon, fontSize: size + 2}} onClick={this.onClick.bind(this)}>﯊</i></div>
         {this.state.histories.map(({ kind, content }, i) => (
           content.map(([hl, message], j) => (
             <div style={styles.line} key={`${i}.${j}`}>
-              <div style={this.getKindStyle(+hl)}><i style={{fontSize: size}}>{ notificate(kind) }</i></div>
-              <div style={this.getMessageStyle(+hl)}>{ message }</div>
+              <div style={this.getAnyStyle(+hl, "kind", true)}><i style={{fontSize: size}}>{ notificate(kind) }</i></div>
+              <div style={this.getAnyStyle(+hl, "message", false)}>{ message }</div>
             </div>
           ))
         ))}

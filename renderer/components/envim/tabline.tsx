@@ -47,7 +47,7 @@ export class TablineComponent extends React.Component<Props, States> {
   }
 
   private onClick(i: number) {
-    ipcRenderer.send("envim:tab", i + 1);
+    ipcRenderer.send("envim:command", `tabnext ${i + 1}`);
   }
 
   private onTabline(_: IpcRendererEvent, tabs: States["tabs"]) {
