@@ -15,7 +15,7 @@ interface States {
 }
 
 const position: "absolute" = "absolute";
-const whiteSpace: "pre" = "pre";
+const whiteSpace: "pre-wrap" = "pre-wrap";
 const overflowX: "hidden" = "hidden";
 const overflowY: "scroll" = "scroll";
 const styles = {

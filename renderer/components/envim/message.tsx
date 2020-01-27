@@ -14,7 +14,7 @@ interface States {
 
 const position: "absolute" = "absolute";
 const pointerEvents: "none" = "none";
-const whiteSpace: "pre" = "pre";
+const whiteSpace: "pre-wrap" = "pre-wrap";
 const styles = {
   scope: {
     position,
@@ -35,6 +35,8 @@ const styles = {
   },
   message: {
     padding: 4,
+    maxWidth: 300,
+    overflow: "hidden",
     whiteSpace,
   },
   line: {
