@@ -91,7 +91,7 @@ export class HistoryComponent extends React.Component<Props, States> {
   }
 
   render() {
-    return this.state.histories.length && (
+    return this.state.histories.length === 0 ? null : (
       <div style={this.getScopeStyle()}>
         {this.state.histories.map(({ kind, content }, i) => (
           content.map(([hl, message], j) => (

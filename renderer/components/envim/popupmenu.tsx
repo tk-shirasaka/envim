@@ -106,7 +106,7 @@ export class PopupmenuComponent extends React.Component<Props, States> {
   }
 
   render() {
-    return this.state.items.length && (
+    return this.state.items.length === 0 ? null : (
       <div style={this.getScopeStyle()}>
         <table style={styles.table}>
           <tbody>

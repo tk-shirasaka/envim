@@ -87,7 +87,7 @@ export class CmdlineComponent extends React.Component<Props, States> {
   }
 
   render() {
-    return this.state.visible && (
+    return this.state.visible === false ? null : (
       <canvas style={this.getStyle()} width={this.props.win.width * 2} height={this.props.win.height * 2} ref="canvas"></canvas>
     );
   }

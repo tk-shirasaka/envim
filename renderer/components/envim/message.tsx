@@ -98,7 +98,7 @@ export class MessageComponent extends React.Component<Props, States> {
   }
 
   render() {
-    return this.state.messages.length && (
+    return this.state.messages.length === 0 ? null : (
       <div style={{...styles.scope, fontSize: this.props.font.size}}>
         {this.state.messages.map(({ kind, content }, i) => (
           content.map(([hl, message], j) => (
