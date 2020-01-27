@@ -79,12 +79,12 @@ export class App {
 
         /** ext_popupmenu **/
         case "msg_show":
-          this.msgShow(r[0][0], r[0][1], r[0][2]);
+          r.forEach(r => this.msgShow(r[0], r[1], r[2]));
         break;
         case "msg_clear":
           this.msgClear();
         break;
-        case "msg_history_show": // ["msg_history_show", entries]
+        case "msg_history_show":
           this.msgHistoryShow(r[0][0]);
         break;
 

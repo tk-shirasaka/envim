@@ -15,20 +15,21 @@ export const icons = [
 export const notificate = (kind: string) => {
   switch (kind) {
     case "emsg":
-      case "echoerr":
-      case "lua_error":
-      case "rpc_error":
-      case "wmsg":
+    case "echoerr":
+    case "lua_error":
+    case "rpc_error":
+    case "wmsg":
       return ""
     case "":
-      case "confirm":
-      case "confirm_sub":
-      case "echo":
-      case "echomsg":
-      case "return_prompt":
+    case "confirm":
+    case "confirm_sub":
+    case "echo":
+    case "echomsg":
       return ""
+    case "return_prompt":
+      return ""
     case "quickfix":
-      case "search_count":
+    case "search_count":
       return ""
   }
 };
