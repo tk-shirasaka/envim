@@ -1,5 +1,8 @@
 import React from "react";
 
+import { Emit } from "../../utils/emit";
+import { font } from "../../utils/font";
+
 import { TablineComponent } from "./tabline";
 import { EditorComponent } from "./editor";
 import { CmdlineComponent } from "./cmdline";
@@ -10,7 +13,6 @@ import { InputComponent } from "./input";
 import { MenuComponent } from "./menu";
 
 interface Props {
-  font: { size: number; width: number; height: number; };
 }
 
 interface States {
@@ -35,19 +37,37 @@ export class EnvimComponent extends React.Component<Props, States> {
     this.state = this.newState();
     this.onResize = this.onResize.bind(this);
     window.addEventListener("resize", this.onResize);
+
+    Emit.on("menu:zoom-in", this.onZoomIn.bind(this));
+    Emit.on("menu:zoom-out", this.onZoomOut.bind(this));
   }
 
   componentWillUnmount() {
     window.removeEventListener("resize", this.onResize);
   }
 
+  private zoom(offset: number) {
+    const { size } = font.get();
+
+    font.set({ size: size + offset, width: (size + offset) / 2, height: size + offset + 1 });
+    this.setState(this.newState());
+  }
+
+  private onZoomIn() {
+    this.zoom(1);
+  }
+
+  private onZoomOut() {
+    this.zoom(-1);
+  }
+
   private newState() {
+    const { width, height } = font.get();
     const win = { width: window.innerWidth, height: window.innerHeight };
-    const font = this.props.font;
-    const editor = { width: win.width, height: win.height - font.height - 8 };
+    const editor = { width: win.width, height: Math.floor((win.height - height - 4) / height) * height };
     const header = { width: win.width, height: win.height - editor.height };
-    const cmdline = { width: Math.floor(win.width * 0.8 / font.width) * font.width, height: font.height * 15 };
-    const history = { width: win.width, height: font.height * 15 };
+    const cmdline = { width: Math.floor(win.width * 0.8 / width) * width, height: height * 15 };
+    const history = { width: win.width, height: height * 15 };
 
     return { header, editor, cmdline, history };
   }
@@ -64,13 +84,13 @@ export class EnvimComponent extends React.Component<Props, States> {
   render() {
     return (
       <>
-        <TablineComponent font={this.props.font} win={this.state.header} />
+        <TablineComponent {...this.state.header} />
         <div style={{...style, ...this.state.editor}}>
-          <EditorComponent font={this.props.font} win={this.state.editor} />
-          <CmdlineComponent font={this.props.font} win={this.state.cmdline} />
-          <HistoryComponent font={this.props.font} win={this.state.history} />
-          <PopupmenuComponent font={this.props.font} />
-          <MessageComponent font={this.props.font} />
+          <EditorComponent {...this.state.editor} />
+          <CmdlineComponent {...this.state.cmdline} />
+          <HistoryComponent {...this.state.history} />
+          <PopupmenuComponent />
+          <MessageComponent />
         </div>
         <InputComponent />
         <MenuComponent />

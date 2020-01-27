@@ -6,8 +6,8 @@ import { Highlights } from "../../utils/highlight";
 import { Context2D } from "../../utils/context2d";
 
 interface Props {
-  font: { size: number; width: number; height: number; };
-  win: { width: number; height: number; };
+  width: number;
+  height: number;
 }
 
 interface States {
@@ -46,7 +46,7 @@ export class CmdlineComponent extends React.Component<Props, States> {
     const ctx = (this.refs.canvas as HTMLCanvasElement)?.getContext("2d");
 
     if (ctx) {
-      this.renderer = new Context2D(ctx, this.getRenderFont());
+      this.renderer = new Context2D(ctx);
     }
   }
 
@@ -55,10 +55,6 @@ export class CmdlineComponent extends React.Component<Props, States> {
     ipcRenderer.removeAllListeners("cmdline:cursor");
     ipcRenderer.removeAllListeners("cmdline:flush");
     ipcRenderer.removeAllListeners("cmdline:hide");
-  }
-
-  private getRenderFont() {
-    return { size: this.props.font.size * 2, width: this.props.font.width * 2, height: this.props.font.height * 2 };
   }
 
   private onCmdline() {
@@ -81,14 +77,14 @@ export class CmdlineComponent extends React.Component<Props, States> {
   private getStyle() {
     return {
       ...style,
-      ...this.props.win,
+      ...this.props,
       background: Highlights.color(0, "background"),
     };
   }
 
   render() {
     return this.state.visible === false ? null : (
-      <canvas style={this.getStyle()} width={this.props.win.width * 2} height={this.props.win.height * 2} ref="canvas"></canvas>
+      <canvas style={this.getStyle()} width={this.props.width * 2} height={this.props.height * 2} ref="canvas"></canvas>
     );
   }
 }

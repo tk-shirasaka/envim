@@ -3,9 +3,9 @@ import { ipcRenderer, IpcRendererEvent } from "electron";
 
 import { notificate } from "../../utils/icons";
 import { Highlights } from "../../utils/highlight";
+import { font } from "../../utils/font";
 
 interface Props {
-  font: { size: number; width: number; height: number; };
 }
 
 interface States {
@@ -81,11 +81,12 @@ export class MessageComponent extends React.Component<Props, States> {
   }
 
   private getKind(kind: string, hl: number) {
+    const { size } = font.get();
     const style = {
       ...styles.kind,
       color: Highlights.color(hl, "background"),
       background: Highlights.color(hl, "foreground"),
-      fontSize: this.props.font.size,
+      fontSize: size,
     };
 
     return <i style={style}>{ notificate(kind) }</i>
@@ -100,8 +101,9 @@ export class MessageComponent extends React.Component<Props, States> {
   }
 
   render() {
+    const { size } = font.get();
     return this.state.messages.length === 0 ? null : (
-      <div style={{...styles.scope, fontSize: this.props.font.size}}>
+      <div style={{...styles.scope, fontSize: size}}>
         {this.state.messages.map(({ kind, content }, i) => (
           content.map(([hl, message], j) => (
             <div style={this.getContentStyle(+hl)} key={`${i}.${j}`}>

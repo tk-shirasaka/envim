@@ -2,10 +2,11 @@ import React from "react";
 import { ipcRenderer, IpcRendererEvent } from "electron";
 
 import { icons } from "../../utils/icons";
+import { font } from "../../utils/font";
 
 interface Props {
-  font: { size: number; width: number; height: number; };
-  win: { width: number; height: number; };
+  width: number;
+  height: number;
 }
 
 interface States {
@@ -54,7 +55,7 @@ export class TablineComponent extends React.Component<Props, States> {
   }
 
   private getChildStayle(active: boolean) {
-    const base = { lineHeight: `${this.props.win.height}px` };
+    const base = { lineHeight: `${this.props.height}px` };
     return active
       ? {...base, ...styles.tabs, ...styles.active}
       : {...base, ...styles.tabs};
@@ -62,12 +63,14 @@ export class TablineComponent extends React.Component<Props, States> {
 
   private getIcon(type: string) {
     const icon = icons.filter(icon => icon.type.indexOf(type) >= 0).pop();
-    return icon && (<i style={{color: icon.color, marginRight: 8, fontSize: this.props.font.size}}>{icon.font}</i>);
+    const { size } = font.get();
+    return icon && (<i style={{color: icon.color, marginRight: 8, fontSize: size}}>{icon.font}</i>);
   }
 
   render() {
+    const { size } = font.get();
     return (
-      <div style={{...this.props.win, fontSize: this.props.font.size, ...styles.scope}}>
+      <div style={{...this.props, fontSize: size, ...styles.scope}}>
         {this.state.tabs.map((tab, i) => (
           <div key={i} style={this.getChildStayle(tab.active)} onClick={() => this.onClick(i)}>
             { this.getIcon(tab.type) }

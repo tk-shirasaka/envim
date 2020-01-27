@@ -1,8 +1,9 @@
 import React from "react";
 import { ipcRenderer, IpcRendererEvent } from "electron";
 
+import { font } from "../../utils/font";
+
 interface Props {
-  font: { size: number; width: number; height: number; };
 }
 
 interface States {
@@ -85,11 +86,12 @@ export class PopupmenuComponent extends React.Component<Props, States> {
   }
 
   private getScopeStyle() {
+    const { size, width, height } = font.get();
     return {
       ...styles.scope,
-      top: (this.state.row + 1) * this.props.font.height,
-      left: this.state.col * this.props.font.width,
-      fontSize: this.props.font.size,
+      top: (this.state.row + 1) * height,
+      left: this.state.col * width,
+      fontSize: size,
     }
   }
 

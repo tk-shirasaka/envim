@@ -1,14 +1,17 @@
 import { ICell } from "common/interface";
 
 import { Highlights } from "./highlight";
+import { font } from "./font";
 
 export class Context2D {
   private cursor: { x: number, y: number, hl: number } = { x: 0, y: 0, hl: 0 };
+  private font: { size: number; width: number; height: number; } = { size: 0, width: 0, height: 0 };
 
   constructor(
     private ctx: CanvasRenderingContext2D,
-    private font: { size: number; width: number; height: number; },
-  ) { }
+  ) {
+    this.setFont();
+  }
 
   private style(hl: number, type: "foreground" | "background") {
     this.ctx.fillStyle = Highlights.color(hl, type);
@@ -38,8 +41,9 @@ export class Context2D {
     this.ctx.fillRect(x, y, col * this.font.width, this.font.height);
   }
 
-  setFont(font: { size: number; width: number; height: number; }) {
-    this.font = font;
+  setFont() {
+    const { size, width, height } = font.get();
+    this.font = { size: size * 2, width: width * 2, height: height * 2 };
   }
 
   setCursor(x: number, y: number, hl: number) {

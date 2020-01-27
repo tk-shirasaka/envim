@@ -4,10 +4,11 @@ import { ipcRenderer, IpcRendererEvent } from "electron";
 import { Emit } from "../../utils/emit";
 import { notificate } from "../../utils/icons";
 import { Highlights } from "../../utils/highlight";
+import { font } from "../../utils/font";
 
 interface Props {
-  font: { size: number; width: number; height: number; };
-  win: { width: number; height: number; };
+  width: number;
+  height: number;
 }
 
 interface States {
@@ -66,11 +67,12 @@ export class HistoryComponent extends React.Component<Props, States> {
   }
 
   private getScopeStyle() {
+    const { size } = font.get();
     return {
       ...styles.scope,
-      ...this.props.win,
+      ...this.props,
       background: Highlights.color(0, "background"),
-      fontSize: this.props.font.size,
+      fontSize: size,
     };
   }
 
@@ -91,12 +93,13 @@ export class HistoryComponent extends React.Component<Props, States> {
   }
 
   render() {
+    const { size } = font.get();
     return this.state.histories.length === 0 ? null : (
       <div style={this.getScopeStyle()}>
         {this.state.histories.map(({ kind, content }, i) => (
           content.map(([hl, message], j) => (
             <div style={styles.line} key={`${i}.${j}`}>
-              <div style={this.getKindStyle(+hl)}><i style={{fontSize: this.props.font.size}}>{ notificate(kind) }</i></div>
+              <div style={this.getKindStyle(+hl)}><i style={{fontSize: size}}>{ notificate(kind) }</i></div>
               <div style={this.getMessageStyle(+hl)}>{ message }</div>
             </div>
           ))

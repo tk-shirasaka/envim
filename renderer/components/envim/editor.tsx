@@ -3,13 +3,14 @@ import { ipcRenderer, IpcRendererEvent } from "electron";
 
 import { ICell, IHighlight } from "common/interface";
 
-import { Context2D } from "../../utils/context2d";
 import { Emit } from "../../utils/emit";
+import { Context2D } from "../../utils/context2d";
 import { Highlights } from "../../utils/highlight";
+import { font } from "../../utils/font";
 
 interface Props {
-  font: { size: number; width: number; height: number; };
-  win: { width: number; height: number; };
+  width: number;
+  height: number;
 }
 
 interface States {
@@ -34,7 +35,7 @@ export class EditorComponent extends React.Component<Props, States> {
     ipcRenderer.on("envim:cursor", this.onCursor.bind(this));
     ipcRenderer.on("envim:highlights", this.onHighlight.bind(this));
     ipcRenderer.on("envim:flush", this.onFlush.bind(this));
-    ipcRenderer.send("envim:resize", ...this.getNvimSize(this.props.win.width, this.props.win.height));
+    ipcRenderer.send("envim:resize", ...this.getNvimSize(this.props.width, this.props.height));
   }
 
   componentDidMount() {
@@ -42,14 +43,14 @@ export class EditorComponent extends React.Component<Props, States> {
     const ctx = canvas.getContext("2d");
     if (ctx) {
       const { x, y } = canvas.getBoundingClientRect();
-      this.renderer = new Context2D(ctx, this.getRenderFont());
+      this.renderer = new Context2D(ctx);
       this.offset = { x, y };
     }
   }
 
   componentDidUpdate() {
-    this.renderer?.setFont(this.getRenderFont());
-    ipcRenderer.send("envim:resize", ...this.getNvimSize(this.props.win.width, this.props.win.height));
+    this.renderer?.setFont();
+    ipcRenderer.send("envim:resize", ...this.getNvimSize(this.props.width, this.props.height));
   }
 
   componentWillUnmount() {
@@ -59,12 +60,9 @@ export class EditorComponent extends React.Component<Props, States> {
     ipcRenderer.removeAllListeners("envim:flush");
   }
 
-  private getRenderFont() {
-    return { size: this.props.font.size * 2, width: this.props.font.width * 2, height: this.props.font.height * 2 };
-  }
-
-  private getNvimSize(width: number, height: number) {
-    return [Math.floor(width / this.props.font.width), Math.floor(height / this.props.font.height)];
+  private getNvimSize(x: number, y: number) {
+    const { width, height } = font.get();
+    return [Math.floor(x / width), Math.floor(y / height)];
   }
 
   private onMouse(e: MouseEvent, button: string, action: string) {
@@ -120,7 +118,7 @@ export class EditorComponent extends React.Component<Props, States> {
 
   render() {
     return (
-      <canvas style={{...this.props.win, ...style}} width={this.props.win.width * 2} height={this.props.win.height * 2} ref="canvas"
+      <canvas style={{...this.props, ...style}} width={this.props.width * 2} height={this.props.height * 2} ref="canvas"
         onMouseDown={this.onMouseDown.bind(this)}
         onMouseMove={this.onMouseMove.bind(this)}
         onMouseUp={this.onMouseUp.bind(this)}
