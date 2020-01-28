@@ -9,7 +9,7 @@ interface Props {
 }
 
 interface States {
-  messages: { kind: string, content: string[][] }[];
+  messages: { group: number, kind: string, content: string[][] }[];
 }
 
 const position: "absolute" = "absolute";
@@ -59,18 +59,22 @@ export class MessageComponent extends React.Component<Props, States> {
     ipcRenderer.removeAllListeners("messages:clear");
   }
 
-  private onMessage(_: IpcRendererEvent, kind: string, content: string[][], replace: boolean) {
-    const messages = [...this.state.messages];
+  private onMessage(_: IpcRendererEvent, group: number, kind: string, content: string[][], replace: boolean) {
+    let messages: States["messages"] = [];
     if (replace) {
-      messages.splice(-1, 1, { kind, content });
+      messages = [
+        ...this.state.messages.filter(message => message.group !== group),
+        ...this.state.messages.filter(message => message.group === group).splice(0, -1),
+        { group, kind, content }
+      ];
     } else {
-      messages.push({ kind, content });
+      messages = [...this.state.messages, { group, kind, content }];
     }
     this.setState({ messages });
   }
 
-  private offMessage() {
-    this.setState({ messages: [] });
+  private offMessage(_: IpcRendererEvent, group: number) {
+    this.setState({ messages: this.state.messages.filter(message => message.group !== group) });
   }
 
   private getContentStyle(hl: number) {

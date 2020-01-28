@@ -81,6 +81,9 @@ export class App {
         case "msg_show":
           r.forEach(r => this.msgShow(r[0], r[1], r[2]));
         break;
+        case "msg_showmode":
+          this.msgShowmode(r[0][0]);
+        break;
         case "msg_clear":
           this.msgClear();
         break;
@@ -229,11 +232,15 @@ export class App {
   }
 
   private msgShow(kind: string, content: string[][], replace_last: boolean) {
-    Browser.win?.webContents.send("messages:show", kind, content, replace_last);
+    Browser.win?.webContents.send("messages:show", 1, kind, content, replace_last);
+  }
+
+  private msgShowmode(content: string[][]) {
+    Browser.win?.webContents.send("messages:show", 2, "", content, true);
   }
 
   private msgClear() {
-    Browser.win?.webContents.send("messages:clear");
+    Browser.win?.webContents.send("messages:clear", 1);
   }
 
   private msgHistoryShow(contents: string[][][]) {
