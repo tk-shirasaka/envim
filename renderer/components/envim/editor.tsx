@@ -104,8 +104,8 @@ export class EditorComponent extends React.Component<Props, States> {
     this.renderer?.text(text);
   }
 
-  private onCursor(_: IpcRendererEvent, x: number, y: number, hl: number) {
-    this.renderer?.setCursor(x, y, hl);
+  private onCursor(_: IpcRendererEvent, cursor: { row: number, col: number, hl: number }) {
+    this.renderer?.setCursor(cursor);
   }
 
   private onHighlight(_: IpcRendererEvent, highlights: {id: number, hl: IHighlight}[]) {

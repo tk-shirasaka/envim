@@ -60,8 +60,8 @@ export class CmdlineComponent extends React.Component<Props, States> {
     this.state.visible || this.setState({ visible: true });
   }
 
-  private onCursor(_: IpcRendererEvent, x: number, y: number, hl: number) {
-    this.renderer?.setCursor(x, y, hl);
+  private onCursor(_: IpcRendererEvent, cursor: { row: number, col: number, hl: number }) {
+    this.renderer?.setCursor(cursor);
   }
 
   private onFlush(_: IpcRendererEvent, cells: ICell[]) {

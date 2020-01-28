@@ -7,7 +7,7 @@ export class Cmdline {
   private indent: number = 0;
   private cursor: number = 0;
 
-  private grid: Grid = new Grid(0, 0, 0, 0);
+  private grid: Grid = new Grid(0, 0);
 
   private setLine(row: number, col: number, content: string[][]) {
     content.forEach(([hl, text]) => {
@@ -19,7 +19,7 @@ export class Cmdline {
     this.blockline = [];
     this.width = width;
     this.height = Math.min(15, height);
-    this.grid.resize(0, 0, this.width, this.height)
+    this.grid.resize(this.width, this.height)
   }
 
   show(content: string[][], pos: number, prompt: string, indent: number) {
@@ -50,12 +50,12 @@ export class Cmdline {
 
   hide() {
     this.grid.setCursorPos(0, 0);
-    this.grid.resize(0, 0, this.width, this.height)
+    this.grid.resize(this.width, this.height)
   }
 
   blockShow(lines: string[][][]) {
     this.blockline = this.blockline.concat(lines);
-    this.grid.resize(0, 0, this.width, this.height)
+    this.grid.resize(this.width, this.height)
 
     for (let i = 0; i < this.blockline.length; i++) {
       this.setLine(this.height - 1 - this.blockline.length + i, this.indent, this.blockline[i]);

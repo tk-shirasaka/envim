@@ -97,7 +97,7 @@ export class App {
   }
 
   private gridResize(grid: number, width: number, height: number) {
-    this.grids[grid] = new Grid(0, 0, width, height);
+    this.grids[grid] = new Grid(width, height);
     this.cmdline.resize(width, height);
   }
 
@@ -143,12 +143,11 @@ export class App {
   }
 
   gridCursorGoto(grid: number, row: number, col: number) {
-    const { x, y, hl } = this.grids[grid].setCursorPos(row, col);
-    Browser.win?.webContents.send("envim:cursor", x, y, hl);
+    Browser.win?.webContents.send("envim:cursor", this.grids[grid].setCursorPos(row, col));
   }
 
   private gridScroll(grid: number, top: number, bottom: number, left: number, right: number, rows: number, cols: number) {
-    const check = (y: number, x: number) => (top <= y && left <= x && y < bottom && x < right);
+    const check = (row: number, col: number) => (top <= row && left <= col && row < bottom && col < right);
 
     this.grids[grid].getLines(0, rows > 0, cell => {
       const [srow, trow] = [cell.row, cell.row - rows];
@@ -177,19 +176,19 @@ export class App {
   private cmdlineShow(content: string[][], pos: number, prompt: string, indent: number) {
     const { cursor, cells } = this.cmdline.show(content, pos, prompt, indent);
     Browser.win?.webContents.send("cmdline:show");
-    Browser.win?.webContents.send("cmdline:cursor", cursor.x, cursor.y, cursor.hl);
+    Browser.win?.webContents.send("cmdline:cursor", cursor);
     Browser.win?.webContents.send("cmdline:flush", cells);
   }
 
   private cmdlinePos(pos: number) {
     const { cursor, cells } = this.cmdline.pos(pos);
-    Browser.win?.webContents.send("cmdline:cursor", cursor.x, cursor.y, cursor.hl);
+    Browser.win?.webContents.send("cmdline:cursor", cursor);
     Browser.win?.webContents.send("cmdline:flush", cells);
   }
 
   private cmdlineSpecialChar(c: string, shift: boolean) {
     const { cursor, cells } = this.cmdline.specialchar(c, shift);
-    Browser.win?.webContents.send("cmdline:cursor", cursor.x, cursor.y, cursor.hl);
+    Browser.win?.webContents.send("cmdline:cursor", cursor);
     Browser.win?.webContents.send("cmdline:flush", cells);
   }
 

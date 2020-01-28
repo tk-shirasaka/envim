@@ -3,19 +3,15 @@ import { ICell } from "common/interface";
 export class Grid {
   private lines: ICell[][] = [];
   private flush: { [k: string]: ICell } = {};
-  private x :number = 0;
-  private y :number = 0;
   private width :number = 0;
   private height: number = 0;
   private cursor: { row: number, col: number } = { row: 0, col: 0 };
 
-  constructor(y :number, x :number, width :number, height: number) {
-    this.resize(y, x, width, height);
+  constructor(width :number, height: number) {
+    this.resize(width, height);
   }
 
-  resize(y :number, x :number, width :number, height: number) {
-    this.y = y;
-    this.x = x;
+  resize(width :number, height: number) {
     this.width = width;
     this.height = height;
     this.lines = [];
@@ -38,11 +34,11 @@ export class Grid {
     this.flush[`${cell.row},${cell.col}`] = cell;
     this.cursor = { row, col };
 
-    return { x: this.x + col, y: this.y + row, hl: cell.hl };
+    return { col, row, hl: cell.hl };
   }
 
   getDefault(row: number, col: number) {
-    return { row, col, y: this.y + row, x: this.x + col, text: " ", hl: 0, width: 1 };
+    return { row, col, text: " ", hl: 0, width: 1 };
   }
 
   getCell(row: number, col: number) {
@@ -52,14 +48,12 @@ export class Grid {
   setCell(row: number, col: number, text: string, hl: number) {
     const prev = this.getCell(row, col - 1);
     const cell = this.getCell(row, col);
-    const next = this.getCell(row, col + 1);
 
     if (cell.text === text && cell.hl === hl) return;
 
     text || (prev.width = 2);
     hl < 0 && (hl = prev.hl);
-    [ cell.row, cell.col, cell.y, cell.x ] = [ row, col, this.y + row, this.x + col ];
-    [ cell.text, cell.hl, cell.width ] = [ text, hl, next.width ? text.length : 2 ];
+    [ cell.row, cell.col, cell.text, cell.hl, cell.width ] = [ row, col, text, hl, text.length ];
     this.flush[`${cell.row},${cell.col}`] = cell;
   }
 

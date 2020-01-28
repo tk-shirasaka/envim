@@ -1,8 +1,6 @@
 export interface ICell {
   row: number;
   col: number;
-  y: number;
-  x: number;
   text: string;
   hl: number;
   width: number;
