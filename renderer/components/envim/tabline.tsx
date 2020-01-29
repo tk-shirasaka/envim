@@ -14,15 +14,18 @@ interface States {
 }
 
 const whiteSpace: "nowrap" = "nowrap";
+const positionR: "relative" = "relative";
+const positionA: "absolute" = "absolute";
 const styles = {
   scope: {
     display: "flex",
   },
   tabs: {
-    cursor: "pointer",
+    position: positionR,
+    cursor: "default",
     background: "#4a4646",
     maxWidth: 300,
-    padding: "0 10px",
+    padding: "0 24px 0 10px",
     borderBottom: "solid 2px #4a4646",
     textOverflow: "ellipsis",
     overflow: "hidden",
@@ -31,6 +34,19 @@ const styles = {
   active: {
     background: "#5a5757",
     borderBottom: "solid 2px #2295c5",
+  },
+  close: {
+    position: positionA,
+    top: 0,
+    right: 8,
+    cursor: "pointer",
+    color: "#b3a1e8",
+  },
+  add: {
+    cursor: "pointer",
+    color: "#71e4b6",
+    background: "#545050",
+    padding: "0 8px",
   },
 };
 
@@ -46,8 +62,16 @@ export class TablineComponent extends React.Component<Props, States> {
     ipcRenderer.removeAllListeners("envim:tabline");
   }
 
-  private onClick(i: number) {
+  private onSelect(i: number) {
     ipcRenderer.send("envim:command", `tabnext ${i + 1}`);
+  }
+
+  private onClose(i: number) {
+    ipcRenderer.send("envim:command", `tabclose ${i + 1}`);
+  }
+
+  private onPlus() {
+    ipcRenderer.send("envim:command", "tabnew");
   }
 
   private onTabline(_: IpcRendererEvent, tabs: States["tabs"]) {
@@ -72,11 +96,13 @@ export class TablineComponent extends React.Component<Props, States> {
     return (
       <div style={{...this.props, fontSize: size, ...styles.scope}}>
         {this.state.tabs.map((tab, i) => (
-          <div key={i} style={this.getChildStayle(tab.active)} onClick={() => this.onClick(i)}>
+          <div key={i} style={this.getChildStayle(tab.active)} onClick={() => this.onSelect(i)}>
             { this.getIcon(tab.type) }
             { tab.name }
+            <i style={{...styles.close, fontSize: size}} onClick={() => this.onClose(i)}></i>
           </div>
         ))}
+        <i style={{...styles.add, fontSize: size, lineHeight: `${this.props.height}px`}} onClick={() => this.onPlus()}></i>
       </div>
     );
   }
