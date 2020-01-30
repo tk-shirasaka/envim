@@ -236,7 +236,11 @@ export class App {
   }
 
   private msgShowmode(content: string[][]) {
-    Browser.win?.webContents.send("messages:show", 2, "", content, true);
+    if (content.length) {
+      Browser.win?.webContents.send("messages:show", 2, "", content, true);
+    } else {
+      Browser.win?.webContents.send("messages:clear", 2);
+    }
   }
 
   private msgClear() {

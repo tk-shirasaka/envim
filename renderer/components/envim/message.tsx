@@ -13,14 +13,11 @@ interface States {
 }
 
 const position: "absolute" = "absolute";
-const pointerEvents: "none" = "none";
-const whiteSpace: "pre-wrap" = "pre-wrap";
 const styles = {
   scope: {
     position,
     top: 10,
     right: 10,
-    pointerEvents,
   },
   content: {
     animation: "fadeIn .5s ease",
@@ -34,10 +31,11 @@ const styles = {
     padding: "4px 8px",
   },
   message: {
+    margin: 0,
     padding: 4,
     maxWidth: 300,
+    textOverflow: "ellipsis",
     overflow: "hidden",
-    whiteSpace,
   },
   line: {
     margin: 0,
@@ -61,6 +59,8 @@ export class MessageComponent extends React.Component<Props, States> {
 
   private onMessage(_: IpcRendererEvent, group: number, kind: string, content: string[][], replace: boolean) {
     let messages: States["messages"] = [];
+
+    if (content.filter(([_, message]) => message.replace("\n", "")).length === 0) return;
     if (replace) {
       messages = [
         ...this.state.messages.filter(message => message.group !== group),
@@ -77,19 +77,20 @@ export class MessageComponent extends React.Component<Props, States> {
     this.setState({ messages: this.state.messages.filter(message => message.group !== group) });
   }
 
-  private getContentStyle(hl: number) {
+  private getContentStyle() {
     return {
       ...styles.content,
-      borderColor: Highlights.color(hl, "foreground"),
+      background: Highlights.color(0, "background"),
+      borderColor: Highlights.color(0, "foreground"),
     };
   }
 
-  private getKind(kind: string, hl: number) {
+  private getKind(kind: string) {
     const { size } = font.get();
     const style = {
       ...styles.kind,
-      color: Highlights.color(hl, "background"),
-      background: Highlights.color(hl, "foreground"),
+      color: Highlights.color(0, "background"),
+      background: Highlights.color(0, "foreground"),
       fontSize: size,
     };
 
@@ -98,7 +99,6 @@ export class MessageComponent extends React.Component<Props, States> {
 
   private getMessageStyle(hl: number) {
     return {
-      ...styles.message,
       color: Highlights.color(hl, "foreground"),
       background: Highlights.color(hl, "background"),
     };
@@ -109,12 +109,12 @@ export class MessageComponent extends React.Component<Props, States> {
     return this.state.messages.length === 0 ? null : (
       <div style={{...styles.scope, fontSize: size}}>
         {this.state.messages.map(({ kind, content }, i) => (
-          content.map(([hl, message], j) => (
-            <div style={this.getContentStyle(+hl)} key={`${i}.${j}`}>
-              {this.getKind(kind, +hl)}
-              <div style={this.getMessageStyle(+hl)}>{ message.replace(/^\n/, "") }</div>
-            </div>
-          ))
+          <div style={this.getContentStyle()} key={i}>
+            {this.getKind(kind)}
+            <pre style={styles.message}>
+              {content.map(([hl, message], j) => <span style={this.getMessageStyle(+hl)} key={`${i}.${j}`}>{ message }</span>)}
+            </pre>
+          </div>
         ))}
       </div>
     );
