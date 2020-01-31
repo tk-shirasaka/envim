@@ -1,31 +1,23 @@
 import React from "react";
-import { ipcRenderer, IpcRendererEvent } from "electron";
 
 import { notificate } from "../../utils/icons";
 import { Highlights } from "../../utils/highlight";
 import { font } from "../../utils/font";
 
 interface Props {
+  kind: string;
+  content: string[][];
+  scrollable: boolean;
 }
 
 interface States {
-  messages: { group: number, kind: string, content: string[][] }[];
 }
 
-const position: "absolute" = "absolute";
 const styles = {
-  scope: {
-    position,
-    top: 10,
-    right: 10,
-  },
   content: {
-    animation: "fadeIn .5s ease",
     display: "flex",
-    marginBottom: 16,
-    border: "2px solid",
-    borderRadius: 4,
-    boxShadow: "5px 5px 10px 0px #000",
+    width: "100%",
+    height: "100%",
   },
   kind: {
     padding: "4px 8px",
@@ -33,55 +25,16 @@ const styles = {
   message: {
     margin: 0,
     padding: 4,
-    maxWidth: 300,
-    textOverflow: "ellipsis",
-    overflow: "hidden",
-  },
-  line: {
-    margin: 0,
   },
 };
 
 export class MessageComponent extends React.Component<Props, States> {
 
-  constructor(props: Props) {
-    super(props);
-
-    this.state = { messages: [] };
-    ipcRenderer.on("messages:show", this.onMessage.bind(this));
-    ipcRenderer.on("messages:clear", this.offMessage.bind(this));
-  }
-
-  componentWillUnmount() {
-    ipcRenderer.removeAllListeners("messages:show");
-    ipcRenderer.removeAllListeners("messages:clear");
-  }
-
-  private onMessage(_: IpcRendererEvent, group: number, kind: string, content: string[][], replace: boolean) {
-    let messages: States["messages"] = [];
-
-    if (content.filter(([_, message]) => message.replace("\n", "")).length === 0) return;
-    if (replace) {
-      messages = [
-        ...this.state.messages.filter(message => message.group !== group),
-        ...this.state.messages.filter(message => message.group === group).splice(0, -1),
-        { group, kind, content }
-      ];
-    } else {
-      messages = [...this.state.messages, { group, kind, content }];
-    }
-    this.setState({ messages });
-  }
-
-  private offMessage(_: IpcRendererEvent, group: number) {
-    this.setState({ messages: this.state.messages.filter(message => message.group !== group) });
-  }
-
   private getContentStyle() {
     return {
       ...styles.content,
+      color: Highlights.color(0, "foreground"),
       background: Highlights.color(0, "background"),
-      borderColor: Highlights.color(0, "foreground"),
     };
   }
 
@@ -105,17 +58,12 @@ export class MessageComponent extends React.Component<Props, States> {
   }
 
   render() {
-    const { size } = font.get();
-    return this.state.messages.length === 0 ? null : (
-      <div style={{...styles.scope, fontSize: size}}>
-        {this.state.messages.map(({ kind, content }, i) => (
-          <div style={this.getContentStyle()} key={i}>
-            {this.getKind(kind)}
-            <pre style={styles.message}>
-              {content.map(([hl, message], j) => <span style={this.getMessageStyle(+hl)} key={`${i}.${j}`}>{ message }</span>)}
-            </pre>
-          </div>
-        ))}
+    return (
+      <div style={this.getContentStyle()}>
+        {this.getKind(this.props.kind)}
+        <pre style={{...styles.message, overflow: this.props.scrollable ? "scroll" : "hidden"}}>
+          {this.props.content.map(([hl, message], i) => <span style={this.getMessageStyle(+hl)} key={i}>{ message }</span>)}
+        </pre>
       </div>
     );
   }

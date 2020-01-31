@@ -2,9 +2,10 @@ import React from "react";
 import { ipcRenderer, IpcRendererEvent } from "electron";
 
 import { Emit } from "../../utils/emit";
-import { notificate } from "../../utils/icons";
 import { Highlights } from "../../utils/highlight";
 import { font } from "../../utils/font";
+
+import { MessageComponent } from "./message";
 
 interface Props {
   width: number;
@@ -17,9 +18,7 @@ interface States {
 
 const positionA: "absolute" = "absolute";
 const positionS: "sticky" = "sticky";
-const whiteSpace: "pre-wrap" = "pre-wrap";
-const overflowX: "hidden" = "hidden";
-const overflowY: "scroll" = "scroll";
+const textAlign: "right" = "right";
 const styles = {
   scope: {
     position: positionA,
@@ -29,27 +28,31 @@ const styles = {
     animation: "fadeIn .5s ease",
     borderRadius: "4px 4px 0 0",
     boxShadow: "0 0 10px 5px #000",
-    whiteSpace,
-    overflowX,
-    overflowY,
+    overflow: "scroll",
   },
   line: {
-    display: "flex",
+    margin: "-4px 0",
   },
-  kind: {
-    padding: "1px 8px",
-  },
-  message: {
-    padding: "1px 4px",
-  },
-  clearLine: {
+  actions: {
     position: positionS,
     top: 0,
-    paddingLeft: 4,
+    paddingRight: 8,
+    textAlign,
+    background: "#dee1e6",
+  },
+  icon: {
+    padding: 4,
     cursor: "pointer",
   },
-  clearIcon: {
+  clear: {
     padding: 4,
+    cursor: "pointer",
+    color: "#d06666"
+  },
+  close: {
+    padding: 4,
+    cursor: "pointer",
+    color: "#737577"
   },
 };
 
@@ -59,7 +62,7 @@ export class HistoryComponent extends React.Component<Props, States> {
     super(props);
 
     this.state = { histories: [] };
-    Emit.on("envim:focus", this.offMessage.bind(this));
+    Emit.on("envim:focus", this.onClose.bind(this));
     ipcRenderer.on("messages:history", this.onHistory.bind(this));
   }
 
@@ -68,17 +71,17 @@ export class HistoryComponent extends React.Component<Props, States> {
     ipcRenderer.removeAllListeners("messages:history");
   }
 
-  private onClick() {
+  private onClear() {
     ipcRenderer.send("envim:command", "messages clear");
     this.setState({ histories: [{kind: "", content: [["0", "-- No Messages --"]]}] });
   }
 
-  private onHistory(_: IpcRendererEvent, histories: States["histories"]) {
-    this.setState({ histories });
+  private onClose() {
+    this.setState({ histories: [] });
   }
 
-  private offMessage() {
-    this.setState({ histories: [] });
+  private onHistory(_: IpcRendererEvent, histories: States["histories"]) {
+    this.setState({ histories });
   }
 
   private getScopeStyle() {
@@ -91,26 +94,16 @@ export class HistoryComponent extends React.Component<Props, States> {
     };
   }
 
-  private getAnyStyle(hl: number, type: "kind" | "message" | "clearLine", reverse: boolean) {
-    return {
-      ...styles[type],
-      color: Highlights.color(hl, reverse ? "background" : "foreground"),
-      background: Highlights.color(hl, reverse ? "foreground" : "background"),
-    };
-  }
-
   render() {
     const { size } = font.get();
     return this.state.histories.length === 0 ? null : (
       <div style={this.getScopeStyle()}>
-        <div style={this.getAnyStyle(0, "clearLine", false)}><i style={{...styles.clearIcon, fontSize: size + 2}} onClick={this.onClick.bind(this)}>﯊</i></div>
+        <div style={styles.actions}>
+          <i style={{...styles.clear, fontSize: size + 2}} onClick={this.onClear.bind(this)}>﯊</i>
+          <i style={{...styles.close, fontSize: size}} onClick={() => this.onClose()}></i>
+        </div>
         {this.state.histories.map(({ kind, content }, i) => (
-          content.map(([hl, message], j) => (
-            <div style={styles.line} key={`${i}.${j}`}>
-              <div style={this.getAnyStyle(+hl, "kind", true)}><i style={{fontSize: size}}>{ notificate(kind) }</i></div>
-              <div style={this.getAnyStyle(+hl, "message", false)}>{ message }</div>
-            </div>
-          ))
+          <div style={styles.line} key={i}><MessageComponent kind={kind} content={content} scrollable={true} /></div>
         ))}
       </div>
     );

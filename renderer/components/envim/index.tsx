@@ -5,10 +5,10 @@ import { font } from "../../utils/font";
 
 import { TablineComponent } from "./tabline";
 import { EditorComponent } from "./editor";
+import { HistoryComponent } from "./history";
 import { CmdlineComponent } from "./cmdline";
 import { PopupmenuComponent } from "./popupmenu";
-import { MessageComponent } from "./message";
-import { HistoryComponent } from "./history";
+import { NotificateComponent } from "./notificate";
 import { InputComponent } from "./input";
 import { MenuComponent } from "./menu";
 
@@ -85,10 +85,10 @@ export class EnvimComponent extends React.Component<Props, States> {
         <TablineComponent {...this.state.header} />
         <div style={{...style, ...this.state.editor}}>
           <EditorComponent {...this.state.editor} />
-          <CmdlineComponent {...this.state.footer} />
           <HistoryComponent {...this.state.footer} />
+          <CmdlineComponent {...this.state.footer} />
           <PopupmenuComponent />
-          <MessageComponent />
+          <NotificateComponent />
         </div>
         <InputComponent />
         <MenuComponent />
