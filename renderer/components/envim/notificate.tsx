@@ -24,8 +24,8 @@ const styles = {
   message: {
     cursor: "pointer",
     animation: "fadeIn .5s ease",
+    width: 300,
     maxHeight: 100,
-    maxWidth: 300,
     marginBottom: 8,
     borderRadius: 4,
     boxShadow: "5px 5px 10px 0px #000",
@@ -95,7 +95,7 @@ export class NotificateComponent extends React.Component<Props, States> {
       <div style={{...styles.notificate, fontSize: size}}>
         {this.state.messages.map(({ kind, content }, i) => (
           <div style={styles.message} onClick={() => this.onSelect(kind, content)} key={i}>
-            <MessageComponent kind={kind} content={content} scrollable={false} />
+            <MessageComponent kind={kind} content={content} />
           </div>
         ))}
       </div>
@@ -106,7 +106,7 @@ export class NotificateComponent extends React.Component<Props, States> {
     const { size } = font.get();
     return this.state.selected && (
       <div style={{...styles.selected, fontSize: size}} onClick={() => this.offSelect()}>
-        <MessageComponent {...this.state.selected} scrollable={true} />
+        <MessageComponent {...this.state.selected} />
       </div>
     );
   }

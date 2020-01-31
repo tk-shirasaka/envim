@@ -3,6 +3,7 @@ import { ipcRenderer, IpcRendererEvent } from "electron";
 
 import { Emit } from "../../utils/emit";
 import { Highlights } from "../../utils/highlight";
+import { notificates } from "../../utils/icons";
 import { font } from "../../utils/font";
 
 import { MessageComponent } from "./message";
@@ -13,6 +14,7 @@ interface Props {
 }
 
 interface States {
+  filter: string[],
   histories: { kind: string, content: string[][] }[];
 }
 
@@ -28,7 +30,7 @@ const styles = {
     animation: "fadeIn .5s ease",
     borderRadius: "4px 4px 0 0",
     boxShadow: "0 0 10px 5px #000",
-    overflow: "scroll",
+    overflow: "auto",
   },
   line: {
     margin: "-4px 0",
@@ -41,18 +43,14 @@ const styles = {
     background: "#dee1e6",
   },
   icon: {
-    padding: 4,
-    cursor: "pointer",
-  },
-  clear: {
-    padding: 4,
-    cursor: "pointer",
-    color: "#d06666"
-  },
-  close: {
-    padding: 4,
+    padding: "2px 4px",
     cursor: "pointer",
     color: "#737577"
+  },
+  clear: {
+    padding: "2px 4px",
+    cursor: "pointer",
+    color: "#d06666"
   },
 };
 
@@ -61,7 +59,7 @@ export class HistoryComponent extends React.Component<Props, States> {
   constructor(props: Props) {
     super(props);
 
-    this.state = { histories: [] };
+    this.state = { filter: [], histories: [] };
     Emit.on("envim:focus", this.onClose.bind(this));
     ipcRenderer.on("messages:history", this.onHistory.bind(this));
   }
@@ -74,6 +72,10 @@ export class HistoryComponent extends React.Component<Props, States> {
   private onClear() {
     ipcRenderer.send("envim:command", "messages clear");
     this.setState({ histories: [{kind: "", content: [["0", "-- No Messages --"]]}] });
+  }
+
+  private onFilter(kinds: string[]) {
+    this.setState({ filter: this.state.filter === kinds ? [] : kinds });
   }
 
   private onClose() {
@@ -94,16 +96,28 @@ export class HistoryComponent extends React.Component<Props, States> {
     };
   }
 
+  private getIconStyle(icon: { font: string; color: string; kinds: string[] }) {
+    const { size } = font.get();
+    const opacity = icon.kinds === this.state.filter ? 1 : 0.4;
+    return {
+      ...styles.icon,
+      opacity,
+      color: icon.color,
+      fontSize: size + 8,
+    };
+  }
+
   render() {
     const { size } = font.get();
     return this.state.histories.length === 0 ? null : (
       <div style={this.getScopeStyle()}>
         <div style={styles.actions}>
-          <i style={{...styles.clear, fontSize: size + 2}} onClick={this.onClear.bind(this)}>﯊</i>
-          <i style={{...styles.close, fontSize: size}} onClick={() => this.onClose()}></i>
+          <i style={{...styles.clear, fontSize: size + 8}} onClick={this.onClear.bind(this)}>ﰸ</i>
+          {notificates.map((icon, i) => <i style={this.getIconStyle(icon)} onClick={() => this.onFilter(icon.kinds)} key={i}>{ icon.font }</i>)}
+          <i style={{...styles.icon, fontSize: size + 8}} onClick={() => this.onClose()}></i>
         </div>
         {this.state.histories.map(({ kind, content }, i) => (
-          <div style={styles.line} key={i}><MessageComponent kind={kind} content={content} scrollable={true} /></div>
+          (this.state.filter.length && this.state.filter.indexOf(kind) < 0) || <div style={styles.line} key={i}><MessageComponent kind={kind} content={content} /></div>
         ))}
       </div>
     );
