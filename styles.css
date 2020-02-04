@@ -52,3 +52,16 @@ i {
   font-style: normal;
   font-family: Nerd Font;
 }
+
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: #dee1e6;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #252d3a;
+}
