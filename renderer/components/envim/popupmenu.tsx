@@ -1,6 +1,7 @@
 import React from "react";
 import { ipcRenderer, IpcRendererEvent } from "electron";
 
+import { Emit } from "../../utils/emit";
 import { font } from "../../utils/font";
 
 interface Props {
@@ -20,6 +21,9 @@ const whiteSpace: "pre" = "pre";
 const styles = {
   scope: {
     position,
+    maxHeight: 200,
+    cursor: "pointer",
+    overflow: "auto",
   },
   table: {
     animation: "fadeIn .5s ease",
@@ -85,6 +89,14 @@ export class PopupmenuComponent extends React.Component<Props, States> {
     this.setState({ items: [] });
   }
 
+  private onItem(i: number) {
+    const num = i - this.state.selected;
+    const cmd = num < 0 ? "<C-p>" : "<C-n>";
+
+    Emit.send("envim:focus");
+    ipcRenderer.send("envim:input", cmd.repeat(Math.abs(num)));
+  }
+
   private getScopeStyle() {
     const { size, width, height } = font.get();
     return {
@@ -107,19 +119,24 @@ export class PopupmenuComponent extends React.Component<Props, States> {
     }
   }
 
+  renderItem(word: string, kind: string, menu: string, info: string, i: number) {
+    return (
+      <tr style={this.state.selected === i ? styles.active : styles.tr} onClick={() => this.onItem(i)} key={i}>
+        <td style={styles.td}>{ word }</td>
+        <td style={styles.td}>{ menu }</td>
+        <td style={this.getKindStyle(kind)}>{ kind }</td>
+        {this.state.selected === i && <td style={styles.info}>{ info }</td>}
+      </tr>
+    );
+  }
+
   render() {
     return this.state.items.length === 0 ? null : (
       <div style={this.getScopeStyle()}>
         <table style={styles.table}>
           <tbody>
-            {this.state.items.map(({ word, kind, menu, info }, i) => this.state.selected <= i && (
-              <tr style={this.state.selected === i ? styles.active : styles.tr} key={i}>
-                <td style={styles.td}>{ word }</td>
-                <td style={styles.td}>{ menu }</td>
-                <td style={this.getKindStyle(kind)}>{ kind }</td>
-                {this.state.selected === i && <td style={styles.info}>{ info }</td>}
-              </tr>
-            ))}
+            {this.state.items.map(({ word, kind, menu, info }, i) => this.state.selected <= i && this.renderItem(word, kind, menu, info, i))}
+            {this.state.items.map(({ word, kind, menu, info }, i) => this.state.selected > i && this.renderItem(word, kind, menu, info, i))}
           </tbody>
         </table>
       </div>
