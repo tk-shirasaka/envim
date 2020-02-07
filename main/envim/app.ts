@@ -7,6 +7,7 @@ import { Cmdline } from "./cmdline";
 export class App {
   private grids: { [k: number]: Grid } = {};
   private cmdline: Cmdline = new Cmdline;
+  private window: { width: number; height: number; } = { width: 0, height: 0 };
 
   redraw(redraw: any[][]) {
     redraw.forEach(r => {
@@ -14,7 +15,7 @@ export class App {
       switch (name) {
         /** ext_linegrid **/
         case "grid_resize":
-          r.forEach(([grid, width, height]) => this.gridResize(grid, width, height));
+          this.gridResize(r[0][0], r[0][1], r[0][2]);
         break;
         case "default_colors_set":
           this.defaultColorsSet(r[0][0], r[0][1], r[0][2]);
@@ -100,6 +101,7 @@ export class App {
   }
 
   private gridResize(grid: number, width: number, height: number) {
+    this.window = { width, height };
     this.grids[grid] = new Grid(width, height);
     this.cmdline.resize(width, height);
   }
@@ -214,13 +216,17 @@ export class App {
   }
 
   private popupmenuShow(items: string[][], selected: number, row: number, col: number, grid: number) {
+    const height = Math.min(5, items.length);
+    grid < 0 && (row = this.window.height - 1);
+    row = row + height > this.window.height ? row - height : row + 1;
+    col = Math.min(col, this.window.width - 10);
+
     Browser.win?.webContents.send("popupmenu:show", {
       items: items.map(([ word, kind, menu, info ]) => ({ word, kind, menu, info })),
       selected,
       start: 0,
       row,
       col,
-      grid,
     });
   }
 

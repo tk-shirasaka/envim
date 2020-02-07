@@ -13,7 +13,6 @@ interface States {
   selected: number;
   row: number;
   col: number;
-  grid: number;
 }
 
 const position: "absolute" = "absolute";
@@ -37,11 +36,11 @@ const styles = {
     background: "#46484c",
   },
   column: {
-    padding: 2,
+    padding: "1px 4px 0",
   },
   info: {
     position,
-    marginLeft: 4,
+    marginLeft: 8,
     whiteSpace,
     borderRadius: 4,
     boxShadow: "5px 5px 10px 0px #000",
@@ -53,7 +52,7 @@ export class PopupmenuComponent extends React.Component<Props, States> {
   constructor(props: Props) {
     super(props);
 
-    this.state = { items: [], start: 0, selected: -1, row: 0, col: 0, grid: 0 };
+    this.state = { items: [], start: 0, selected: -1, row: 0, col: 0 };
     ipcRenderer.on("popupmenu:show", this.onPopupmenu.bind(this));
     ipcRenderer.on("popupmenu:select", this.onSelect.bind(this));
     ipcRenderer.on("popupmenu:hide", this.offPopupmenu.bind(this));
@@ -72,7 +71,7 @@ export class PopupmenuComponent extends React.Component<Props, States> {
   private onSelect(_: IpcRendererEvent, selected: number) {
     const start = this.state.start <= selected && selected <= this.state.start + 4
       ? this.state.start
-      : Math.max(0, Math.min(this.state.items.length, this.state.start - this.state.selected + selected));
+      : Math.max(0, Math.min(this.state.items.length - 5, this.state.start - this.state.selected + selected));
 
     this.setState({ selected, start });
   }
@@ -93,9 +92,9 @@ export class PopupmenuComponent extends React.Component<Props, States> {
     const { size, width, height } = font.get();
     return {
       ...styles.scope,
-      top: (this.state.row + 1) * height,
+      top: this.state.row * height,
       left: this.state.col * width,
-      fontSize: size,
+      fontSize: size - 1,
     };
   }
 
