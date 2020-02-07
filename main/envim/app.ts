@@ -217,6 +217,7 @@ export class App {
     Browser.win?.webContents.send("popupmenu:show", {
       items: items.map(([ word, kind, menu, info ]) => ({ word, kind, menu, info })),
       selected,
+      start: 0,
       row,
       col,
       grid,
