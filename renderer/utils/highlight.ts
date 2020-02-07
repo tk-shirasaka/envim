@@ -11,13 +11,13 @@ class Highlight {
 
   constructor(highlight: IHighlight) {
     if (highlight.reverse) {
-      highlight.foreground && (this.background = this.intToColor(highlight.foreground));
-      highlight.background && (this.foreground = this.intToColor(highlight.background));
+      highlight.foreground === undefined || (this.background = this.intToColor(highlight.foreground));
+      highlight.background === undefined || (this.foreground = this.intToColor(highlight.background));
     } else {
-      highlight.foreground && (this.foreground = this.intToColor(highlight.foreground));
-      highlight.background && (this.background = this.intToColor(highlight.background));
+      highlight.foreground === undefined || (this.foreground = this.intToColor(highlight.foreground));
+      highlight.background === undefined || (this.background = this.intToColor(highlight.background));
     }
-    highlight.special && (this.special = this.intToColor(highlight.special));
+    highlight.special === undefined ||  (this.special = this.intToColor(highlight.special));
 
     this.type = "normal";
     if (highlight.bold) this.type = "bold";
