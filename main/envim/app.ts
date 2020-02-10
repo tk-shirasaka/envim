@@ -93,6 +93,12 @@ export class App {
         break;
 
         /** default **/
+        case "busy_start":
+          this.busy(true);
+        break;
+        case "busy_stop":
+          this.busy(false);
+        break;
         case "flush":
           this.flush();
         break;
@@ -256,6 +262,10 @@ export class App {
 
   private msgHistoryShow(contents: string[][][]) {
     Browser.win?.webContents.send("messages:history", contents.map(([kind, content]) => ({ kind, content })));
+  }
+
+  private busy(busy: boolean) {
+    Object.values(this.grids).forEach(grid => grid.setBusy(busy));
   }
 
   private flush() {

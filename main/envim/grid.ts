@@ -1,6 +1,7 @@
 import { ICell } from "common/interface";
 
 export class Grid {
+  private busy: boolean = false;
   private lines: ICell[][] = [];
   private flush: { [k: string]: ICell } = {};
   private width :number = 0;
@@ -34,7 +35,7 @@ export class Grid {
     this.flush[`${cell.row},${cell.col}`] = cell;
     this.cursor = { row, col };
 
-    return { col, row, hl: cell.hl };
+    return this.busy ? { col: -1, row: -1, hl: 0 } : { col, row, hl: cell.hl };
   }
 
   getDefault(row: number, col: number) {
@@ -81,5 +82,9 @@ export class Grid {
     for (let i = row; i < this.height; i++) {
       this.getLine(offset + row + i * direction, 0, fn);
     }
+  }
+
+  setBusy(busy: boolean) {
+    this.busy = busy
   }
 }

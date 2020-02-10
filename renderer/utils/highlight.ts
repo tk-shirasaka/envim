@@ -4,6 +4,7 @@ class Highlight {
   public foreground: string = "";
   public background: string = "";
   public special: string = "";
+  public reverse: boolean = false;
   private type: "normal" | "bold" | "italic";
   private decorate: "none" | "strikethrough" | "underline" | "undercurl";
 
@@ -18,6 +19,7 @@ class Highlight {
       highlight.background === undefined || (this.background = this.intToColor(highlight.background));
     }
     highlight.special === undefined ||  (this.special = this.intToColor(highlight.special));
+    highlight.reverse && (this.reverse = true);
 
     this.type = "normal";
     if (highlight.bold) this.type = "bold";
@@ -56,7 +58,13 @@ export class Highlights {
   }
 
   static color(id: number, type: "foreground" | "background" | "special") {
-    return Highlights.hls[id][type] || Highlights.hls[0][type];
+    let color = type;
+
+    if (Highlights.hls[id].reverse) {
+      type === "foreground" && (color = "background");
+      type === "background" && (color = "foreground");
+    }
+    return Highlights.hls[id][color] || Highlights.hls[0][color];
   }
 
   static font(id: number) {
