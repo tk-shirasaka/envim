@@ -29,7 +29,7 @@ export class Browser {
     setMenu(false);
     Browser.win = new BrowserWindow({
       transparent: true,
-      titleBarStyle: "hidden",
+      frame: process.platform !== "darwin",
       webPreferences: {
         nodeIntegration: true,
       },

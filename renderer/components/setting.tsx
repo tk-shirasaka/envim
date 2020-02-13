@@ -40,6 +40,7 @@ export class SettingComponent extends React.Component<Props, States> {
   constructor(props: Props) {
     super(props);
     this.state = this.ls.get();
+    document.title = 'Envim';
   }
 
   private onToggle(e: ChangeEvent) {

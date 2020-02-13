@@ -32,8 +32,9 @@ export class EnvimComponent extends React.Component<Props, States> {
 
     this.state = { font: font.get() };
 
-    Emit.on("envim:zoom-in", this.onZoomIn.bind(this));
-    Emit.on("envim:zoom-out", this.onZoomOut.bind(this));
+    Emit.on("menu:zoom-in", this.onZoomIn.bind(this));
+    Emit.on("menu:zoom-out", this.onZoomOut.bind(this));
+    Emit.on("envim:title", this.onTitle.bind(this));
   }
 
   private zoom(offset: number) {
@@ -50,6 +51,10 @@ export class EnvimComponent extends React.Component<Props, States> {
 
   private onZoomOut() {
     this.zoom(-1);
+  }
+
+  private onTitle(title: string) {
+    document.title = title || 'Envim';
   }
 
   render() {
