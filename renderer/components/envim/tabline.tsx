@@ -14,18 +14,18 @@ interface States {
 }
 
 const whiteSpace: "nowrap" = "nowrap";
-const positionR: "relative" = "relative";
-const positionA: "absolute" = "absolute";
 const styles = {
   scope: {
     display: "flex",
   },
-  tabs: {
-    position: positionR,
+  tab: {
+    display: "flex",
     cursor: "default",
-    maxWidth: 300,
-    padding: "0 24px 0 10px",
     borderBottom: 2,
+  },
+  name: {
+    maxWidth: 300,
+    padding: "0 4px",
     textOverflow: "ellipsis",
     overflow: "hidden",
     whiteSpace,
@@ -33,12 +33,7 @@ const styles = {
   active: {
     borderBottom: "solid 2px #2295c5",
   },
-  close: {
-    position: positionA,
-    right: 0,
-    padding: "0 8px",
-  },
-  add: {
+  icon: {
     padding: "0 8px",
   },
 };
@@ -74,14 +69,14 @@ export class TablineComponent extends React.Component<Props, States> {
   private getChildStayle(active: boolean) {
     const base = { lineHeight: `${this.props.height}px` };
     return active
-      ? {...base, ...styles.tabs, ...styles.active}
-      : {...base, ...styles.tabs};
+      ? {...base, ...styles.tab, ...styles.active}
+      : {...base, ...styles.tab};
   }
 
   private getIcon(type: string) {
     const icon = icons.filter(icon => icon.type.indexOf(type) >= 0).pop();
     const { size } = font.get();
-    return icon && (<i style={{color: icon.color, marginRight: 8, fontSize: size}}>{icon.font}</i>);
+    return icon && (<i style={{color: icon.color, padding: "0 4px", fontSize: size}}>{icon.font}</i>);
   }
 
   render() {
@@ -91,11 +86,11 @@ export class TablineComponent extends React.Component<Props, States> {
         {this.state.tabs.map((tab, i) => (
           <div key={i} className={`color-black ${tab.active ? "active" : "clickable"}`} style={this.getChildStayle(tab.active)} onClick={() => this.onSelect(i)}>
             { this.getIcon(tab.type) }
-            { tab.name }
-            <i className={`color-red-fg-dark ${tab.active ? "active" : "clickable"}`} style={{...styles.close, fontSize: size}} onClick={() => this.onClose(i)}></i>
+            <span style={styles.name}>{ tab.name }</span>
+            {tab.active || <i className={`color-red-fg ${tab.active ? "active" : "clickable"}`} style={{...styles.icon, fontSize: size}} onClick={() => this.onClose(i)}></i>}
           </div>
         ))}
-        <i className="color-green-fg-dark clickable" style={{...styles.add, fontSize: size, lineHeight: `${this.props.height}px`}} onClick={() => this.onPlus()}></i>
+        <i className="color-green-fg-dark clickable" style={{...styles.icon, fontSize: size, lineHeight: `${this.props.height}px`}} onClick={() => this.onPlus()}></i>
       </div>
     );
   }
