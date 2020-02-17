@@ -20,27 +20,21 @@ const whiteSpace: "pre" = "pre";
 const styles = {
   scope: {
     position,
-    display: "grid",
     animation: "fadeIn .5s ease",
     borderRadius: 4,
     boxShadow: "5px 5px 10px 0px #000",
-    background: "#2e3138",
-    color: "#737a7d",
-    cursor: "pointer",
   },
   line: {
-    display: "contents",
-  },
-  active: {
-    color: "#ded4d5",
-    background: "#46484c",
+    display: "flex",
+    justifyContent: "space-between",
   },
   column: {
     padding: "1px 4px 0",
   },
   info: {
     position,
-    marginLeft: 8,
+    margin: 4,
+    padding: 4,
     whiteSpace,
     borderRadius: 4,
     boxShadow: "5px 5px 10px 0px #000",
@@ -98,24 +92,15 @@ export class PopupmenuComponent extends React.Component<Props, States> {
     };
   }
 
-  private getColumnStyle(i: number, gridColumn: number, style: object = {}) {
-    return {
-      gridColumn,
-      ...styles.column,
-      ...(this.state.selected === i ? styles.active : {}),
-      ...style,
-    };
-  }
-
   private getKindStyle(kind: string) {
-    if (kind === "") return {};
+    if (kind === "") return "";
     switch (kind[0].toUpperCase()) {
-      case "A": case "B": case "C": case "D": case "E": return { color: "#f58e8e" };
-      case "F": case "G": case "H": case "I": case "J": return { color: "#cde88f" };
-      case "K": case "L": case "M": case "N": case "O": return { color: "#bbefed" };
-      case "P": case "Q": case "R": case "S": case "T": return { color: "#d0a7f3" };
-      case "U": case "V": case "W": case "X": case "Y": return { color: "#eff384" };
-      case "Z": default: return { color: "#8cec8b" };
+      case "A": case "B": case "C": case "D": case "E": return "color-red-fg";
+      case "F": case "G": case "H": case "I": case "J": return "color-green-fg";
+      case "K": case "L": case "M": case "N": case "O": return "color-lightblue-fg";
+      case "P": case "Q": case "R": case "S": case "T": return "color-purple-fg";
+      case "U": case "V": case "W": case "X": case "Y": return "color-yellow-fg";
+      case "Z": default: return "color-orange-fg";
     }
   }
 
@@ -125,14 +110,14 @@ export class PopupmenuComponent extends React.Component<Props, States> {
 
     return this.state.items.length === 0 ? null : (
       <div style={this.getScopeStyle()}>
-        {this.state.items.slice(start, end).map(({ word, kind, menu, info }, i) => (
-          <div style={styles.line} onClick={() => this.onItem(i + start)} key={i}>
-            <div style={this.getColumnStyle(i + start, 1)}>{ word }</div>
-            <div style={this.getColumnStyle(i + start, 2)}>{ menu }</div>
-            <div style={this.getColumnStyle(i + start, 3, this.getKindStyle(kind))}>{ kind }</div>
-            {this.state.selected === i + start && <div style={this.getColumnStyle(i + start, 4, styles.info)}>{ info }</div>}
+        {this.state.items.slice(start, end).map(({ word, kind, menu }, i) => (
+          <div className={`color-black ${this.state.selected === i + start ? "active" : "clickable"}`} style={styles.line} onClick={() => this.onItem(i + start)} key={i}>
+            <div style={styles.column}>{ word }</div>
+            <div style={styles.column}>{ menu }</div>
+            <div className={this.getKindStyle(kind)} style={styles.column}>{ kind }</div>
           </div>
         ))}
+        {this.state.items[this.state.selected]?.info && <div className="color-black active" style={styles.info}>{ this.state.items[this.state.selected]?.info }</div>}
       </div>
     )
   }

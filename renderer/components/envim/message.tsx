@@ -20,7 +20,6 @@ const styles = {
     height: "100%",
   },
   kind: {
-    color: "#2e3138",
     padding: "0 8px",
   },
   message: {
@@ -46,11 +45,10 @@ export class MessageComponent extends React.Component<Props, States> {
     const icon = notificates.filter(icon => icon.kinds.indexOf(kind) >= 0)[0];
     const style = {
       ...styles.kind,
-      background: icon.color,
       fontSize: size + 8,
     };
 
-    return <i style={style}>{ icon.font }</i>
+    return <i className={`color-${icon.color} clickable`} style={style}>{ icon.font }</i>
   }
 
   private getMessageStyle(hl: number) {

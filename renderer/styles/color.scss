@@ -1,0 +1,47 @@
+$color-white: #ececec;
+$color-black: #333435;
+$color-blue: #3b5bbb;
+$color-lightblue: #69aab9;
+$color-green: #79d691;
+$color-yellow: #b7c161;
+$color-orange: #ea953b;
+$color-red: #de5252;
+$color-pink: #d25fa9;
+$color-purple: #9e7ec1;
+
+@mixin make-color($name, $fg, $bg) {
+  .color-#{$name} {
+    color: $fg;
+    background-color: $bg;
+    border-color: $bg;
+
+    &.clickable:hover, &.active {
+      color: lighten($fg, 5%);
+      @if $bg != null {
+        background-color: lighten($bg, 5%);
+        border-color: lighten($bg, 5%);
+      }
+    }
+    &.clickable {
+      cursor: pointer;
+    }
+  }
+}
+
+@mixin make-color-all($name, $fg, $bg) {
+  @include make-color($name, $fg, $bg);
+  @include make-color("#{$name}-fg", $bg, null);
+  @include make-color("#{$name}-fg-light", $bg, $color-white);
+  @include make-color("#{$name}-fg-dark", $bg, $color-black);
+}
+
+@include make-color-all("white", $color-black, $color-white);
+@include make-color-all("black", $color-white, $color-black);
+@include make-color-all("blue", $color-black, $color-blue);
+@include make-color-all("lightblue", $color-black, $color-lightblue);
+@include make-color-all("green", $color-black, $color-green);
+@include make-color-all("yellow", $color-black, $color-yellow);
+@include make-color-all("orange", $color-black, $color-orange);
+@include make-color-all("red", $color-black, $color-red);
+@include make-color-all("pink", $color-black, $color-pink);
+@include make-color-all("purple", $color-black, $color-purple);

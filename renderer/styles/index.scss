@@ -1,12 +1,13 @@
 @import "animate";
+@import "color";
 @import "font";
 @import "scrollbar";
 
 body {
   margin: 0;
   padding: 0;
-  background: #383434;
-  color: #f9ecec;
+  background: $color-black;
+  color: $color-white;
   font-family: Ricty Diminished;
 }
 

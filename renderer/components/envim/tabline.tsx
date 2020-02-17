@@ -23,29 +23,22 @@ const styles = {
   tabs: {
     position: positionR,
     cursor: "default",
-    background: "#4a4646",
     maxWidth: 300,
     padding: "0 24px 0 10px",
-    borderBottom: "solid 2px #4a4646",
+    borderBottom: 2,
     textOverflow: "ellipsis",
     overflow: "hidden",
     whiteSpace,
   },
   active: {
-    background: "#5a5757",
     borderBottom: "solid 2px #2295c5",
   },
   close: {
     position: positionA,
-    top: 0,
-    right: 8,
-    cursor: "pointer",
-    color: "#b3a1e8",
+    right: 0,
+    padding: "0 8px",
   },
   add: {
-    cursor: "pointer",
-    color: "#71e4b6",
-    background: "#545050",
     padding: "0 8px",
   },
 };
@@ -96,13 +89,13 @@ export class TablineComponent extends React.Component<Props, States> {
     return (
       <div style={{...this.props, fontSize: size, ...styles.scope}}>
         {this.state.tabs.map((tab, i) => (
-          <div key={i} style={this.getChildStayle(tab.active)} onClick={() => this.onSelect(i)}>
+          <div key={i} className={`color-black ${tab.active ? "active" : "clickable"}`} style={this.getChildStayle(tab.active)} onClick={() => this.onSelect(i)}>
             { this.getIcon(tab.type) }
             { tab.name }
-            <i style={{...styles.close, fontSize: size}} onClick={() => this.onClose(i)}></i>
+            <i className={`color-red-fg-dark ${tab.active ? "active" : "clickable"}`} style={{...styles.close, fontSize: size}} onClick={() => this.onClose(i)}></i>
           </div>
         ))}
-        <i style={{...styles.add, fontSize: size, lineHeight: `${this.props.height}px`}} onClick={() => this.onPlus()}></i>
+        <i className="color-green-fg-dark clickable" style={{...styles.add, fontSize: size, lineHeight: `${this.props.height}px`}} onClick={() => this.onPlus()}></i>
       </div>
     );
   }

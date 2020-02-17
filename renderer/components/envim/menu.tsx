@@ -18,7 +18,6 @@ const styles = {
     position,
     userSelect,
     width: 150,
-    background: "#464444",
     margin: 0,
     padding: 0,
   },
@@ -60,7 +59,7 @@ export class MenuComponent extends React.Component<Props, States> {
 
     return this.state.visible && (
       <ul style={{ ...styles.ul, ...this.state.style }}>
-        { menus.map(({label, onClick}, i) => <li key={i} style={styles.li} onClick={onClick.bind(this)}>{ label }</li>) }
+        { menus.map(({label, onClick}, i) => <li className="color-black clickable" style={styles.li} onClick={onClick.bind(this)} key={i}>{ label }</li>) }
       </ul>
     );
   }

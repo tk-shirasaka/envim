@@ -44,12 +44,9 @@ const styles = {
   },
   icon: {
     padding: "2px 4px",
-    cursor: "pointer",
-    color: "#737577"
   },
   clear: {
     padding: "2px 4px",
-    cursor: "pointer",
     color: "#d06666"
   },
 };
@@ -102,7 +99,6 @@ export class HistoryComponent extends React.Component<Props, States> {
     return {
       ...styles.icon,
       opacity,
-      color: icon.color,
       fontSize: size + 8,
     };
   }
@@ -112,9 +108,9 @@ export class HistoryComponent extends React.Component<Props, States> {
     return this.state.histories.length === 0 ? null : (
       <div style={this.getScopeStyle()}>
         <div style={styles.actions}>
-          <i style={{...styles.clear, fontSize: size + 8}} onClick={this.onClear.bind(this)}>ﰸ</i>
-          {notificates.map((icon, i) => <i style={this.getIconStyle(icon)} onClick={() => this.onFilter(icon.kinds)} key={i}>{ icon.font }</i>)}
-          <i style={{...styles.icon, fontSize: size + 8}} onClick={() => this.onClose()}></i>
+          <i className="color-red-fg clickable" style={{...styles.clear, fontSize: size + 8}} onClick={this.onClear.bind(this)}>ﰸ</i>
+          {notificates.map((icon, i) => <i className={`color-${icon.color}-fg clickable`} style={this.getIconStyle(icon)} onClick={() => this.onFilter(icon.kinds)} key={i}>{ icon.font }</i>)}
+          <i className="color-black-fg clickable" style={{...styles.icon, fontSize: size + 8}} onClick={() => this.onClose()}></i>
         </div>
         {this.state.histories.map(({ kind, content }, i) => (
           (this.state.filter.length && this.state.filter.indexOf(kind) < 0) || <div style={styles.line} key={i}><MessageComponent kind={kind} content={content} /></div>

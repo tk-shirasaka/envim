@@ -43,7 +43,6 @@ const styles = {
     padding: ".2em .4em",
     border: "none",
     borderRadius: ".2em",
-    background: "#6dc2e6",
   },
 };
 
@@ -93,7 +92,7 @@ export class SettingComponent extends React.Component<Props, States> {
         <div>
           {icons.map((icon, i) => <i key={i} style={{color: icon.color, ...styles.i}}>{icon.font}</i>)}
         </div>
-        <button style={styles.button}>Start</button>
+        <button className="color-blue clickable" style={styles.button}>Start</button>
       </form>
     );
   }
