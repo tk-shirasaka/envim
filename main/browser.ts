@@ -1,4 +1,6 @@
-import { app, BrowserWindow, Menu } from "electron";
+import { app, BrowserWindow } from "electron";
+
+import { setMenu } from "./menu";
 
 export class Browser {
   static win?: BrowserWindow;
@@ -24,8 +26,7 @@ export class Browser {
   private create() {
     if (Browser.win) return;
 
-    Menu.setApplicationMenu(null);
-
+    setMenu(false);
     Browser.win = new BrowserWindow({
       webPreferences: {
         nodeIntegration: true,

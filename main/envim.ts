@@ -1,10 +1,10 @@
-import { ipcMain, IpcMainEvent } from "electron";
 import { createConnection, Socket } from "net";
 import { spawn, ChildProcess } from "child_process";
 import { NeovimClient } from "neovim";
 import { Response } from "neovim/lib/host";
 
-import { Browser } from "./browser";
+import { setMenu } from "./menu";
+import { Emit } from "./emit";
 import { App } from "./envim/app";
 import { Clipboard } from "./envim/clipboard";
 
@@ -15,16 +15,16 @@ export class Envim {
   private connect: { process?: ChildProcess; socket?: Socket; } = {}
 
   constructor() {
-    ipcMain.on("envim:attach", this.onAttach.bind(this));
-    ipcMain.on("envim:resize", this.onResize.bind(this));
-    ipcMain.on("envim:mouse", this.onMouse.bind(this));
-    ipcMain.on("envim:input", this.onInput.bind(this));
-    ipcMain.on("envim:command", this.onCommand.bind(this));
-    ipcMain.on("envim:log", this.onLog.bind(this));
-    ipcMain.on("envim:detach", this.onDetach.bind(this));
+    Emit.on("envim:attach", this.onAttach.bind(this));
+    Emit.on("envim:resize", this.onResize.bind(this));
+    Emit.on("envim:mouse", this.onMouse.bind(this));
+    Emit.on("envim:input", this.onInput.bind(this));
+    Emit.on("envim:command", this.onCommand.bind(this));
+    Emit.on("envim:log", this.onLog.bind(this));
+    Emit.on("envim:detach", this.onDetach.bind(this));
   }
 
-  private async onAttach(_: IpcMainEvent, type: string, value: string) {
+  private async onAttach(type: string, value: string) {
     let reader, writer;
 
     switch (type) {
@@ -47,7 +47,8 @@ export class Envim {
       this.nvim.on("notification", this.onNotification.bind(this));
       this.nvim.on("disconnect", this.onDisconnect.bind(this));
       Clipboard.setup(this.nvim);
-      Browser.win?.webContents.send("app:start");
+      setMenu(true);
+      Emit.share("app:start");
     }
   }
 
@@ -65,7 +66,7 @@ export class Envim {
     }
   }
 
-  private async onResize(_: IpcMainEvent, width: number, height: number) {
+  private async onResize(width: number, height: number) {
     const options = {
       ext_linegrid: true,
       ext_tabline: true,
@@ -78,19 +79,19 @@ export class Envim {
     this.attached = true;
   }
 
-  private async onMouse(_: IpcMainEvent, button: string, action: string, row: number, col: number) {
+  private async onMouse(button: string, action: string, row: number, col: number) {
     await this.nvim.inputMouse(button, action, "", 0, row, col);
   }
 
-  private async onInput(_: IpcMainEvent, input: string) {
+  private async onInput(input: string) {
     await this.nvim.input(input);
   }
 
-  private async onCommand(_: IpcMainEvent, command: string) {
+  private async onCommand(command: string) {
     await this.nvim.command(command);
   }
 
-  private async onLog(_: IpcMainEvent, log: any) {
+  private async onLog(log: any) {
     if (["number", "string"].indexOf(typeof log) < 0) {
       log = JSON.stringify(log);
     }
@@ -106,6 +107,7 @@ export class Envim {
 
   private onDisconnect() {
     this.attached = false;
-    Browser.win?.webContents.send("app:stop");
+    setMenu(false);
+    Emit.share("app:stop");
   }
 }

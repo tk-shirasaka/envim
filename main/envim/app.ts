@@ -1,6 +1,6 @@
 import { Tabpage } from "neovim/lib/api/Tabpage";
 
-import { Browser } from "../browser";
+import { Emit } from "../emit";
 import { Grid } from "./grid";
 import { Cmdline } from "./cmdline";
 
@@ -116,7 +116,7 @@ export class App {
   }
 
   private defaultColorsSet(foreground: number, background: number, special: number) {
-    Browser.win?.webContents.send("envim:highlights", [{id: 0, hl: {
+    Emit.share("envim:highlights", [{id: 0, hl: {
       foreground,
       background,
       special,
@@ -132,7 +132,7 @@ export class App {
 
   private hlAttrDefine(highlights: any[]) {
     highlights = highlights.map(([id, rgb]) => ({id, hl: rgb}));
-    Browser.win?.webContents.send("envim:highlights", highlights);
+    Emit.share("envim:highlights", highlights);
   }
 
   private gridLine(grid: number, row: number, col: number, cells: string[][]) {
@@ -157,7 +157,7 @@ export class App {
   }
 
   gridCursorGoto(grid: number, row: number, col: number) {
-    Browser.win?.webContents.send("envim:cursor", this.grids[grid].setCursorPos(row, col));
+    Emit.share("envim:cursor", this.grids[grid].setCursorPos(row, col));
   }
 
   private gridScroll(grid: number, top: number, bottom: number, left: number, right: number, rows: number, cols: number) {
@@ -184,31 +184,31 @@ export class App {
         active: current.data === tab.data,
       });
     }
-    Browser.win?.webContents.send("envim:tabline", next);
+    Emit.share("envim:tabline", next);
   }
 
   private cmdlineShow(content: string[][], pos: number, prompt: string, indent: number) {
     const { cursor, cells } = this.cmdline.show(content, pos, prompt, indent);
-    Browser.win?.webContents.send("cmdline:show");
-    Browser.win?.webContents.send("cmdline:cursor", cursor);
-    Browser.win?.webContents.send("cmdline:flush", cells);
+    Emit.share("cmdline:show");
+    Emit.share("cmdline:cursor", cursor);
+    Emit.share("cmdline:flush", cells);
   }
 
   private cmdlinePos(pos: number) {
     const { cursor, cells } = this.cmdline.pos(pos);
-    Browser.win?.webContents.send("cmdline:cursor", cursor);
-    Browser.win?.webContents.send("cmdline:flush", cells);
+    Emit.share("cmdline:cursor", cursor);
+    Emit.share("cmdline:flush", cells);
   }
 
   private cmdlineSpecialChar(c: string, shift: boolean) {
     const { cursor, cells } = this.cmdline.specialchar(c, shift);
-    Browser.win?.webContents.send("cmdline:cursor", cursor);
-    Browser.win?.webContents.send("cmdline:flush", cells);
+    Emit.share("cmdline:cursor", cursor);
+    Emit.share("cmdline:flush", cells);
   }
 
   private cmdlineHide() {
     this.cmdline.hide();
-    Browser.win?.webContents.send("cmdline:hide");
+    Emit.share("cmdline:hide");
   }
 
   private cmdlineBlockShow(lines: string[][][]) {
@@ -221,7 +221,7 @@ export class App {
 
   private cmdlineBlockHide() {
     this.cmdline.blockHide();
-    Browser.win?.webContents.send("cmdline:hide");
+    Emit.share("cmdline:hide");
   }
 
   private popupmenuShow(items: string[][], selected: number, row: number, col: number, grid: number) {
@@ -230,7 +230,7 @@ export class App {
     row = row + height > this.window.height ? row - height : row + 1;
     col = Math.min(col, this.window.width - 10);
 
-    Browser.win?.webContents.send("popupmenu:show", {
+    Emit.share("popupmenu:show", {
       items: items.map(([ word, kind, menu, info ]) => ({ word, kind, menu, info })),
       selected,
       start: 0,
@@ -240,35 +240,35 @@ export class App {
   }
 
   private popupmenuSelect(selected: number) {
-    Browser.win?.webContents.send("popupmenu:select", selected);
+    Emit.share("popupmenu:select", selected);
   }
 
   private popupmenuHide() {
-    Browser.win?.webContents.send("popupmenu:hide");
+    Emit.share("popupmenu:hide");
   }
 
   private msgShow(kind: string, content: string[][], replace_last: boolean) {
-    Browser.win?.webContents.send("messages:show", 1, kind, content, replace_last);
+    Emit.share("messages:show", 1, kind, content, replace_last);
   }
 
   private msgShowmode(content: string[][]) {
     if (content.length) {
-      Browser.win?.webContents.send("messages:show", 2, "", content, true);
+      Emit.share("messages:show", 2, "", content, true);
     } else {
-      Browser.win?.webContents.send("messages:clear", 2);
+      Emit.share("messages:clear", 2);
     }
   }
 
   private msgClear() {
-    Browser.win?.webContents.send("messages:clear", 1);
+    Emit.share("messages:clear", 1);
   }
 
   private msgHistoryShow(contents: string[][][]) {
-    Browser.win?.webContents.send("messages:history", contents.map(([kind, content]) => ({ kind, content })));
+    Emit.share("messages:history", contents.map(([kind, content]) => ({ kind, content })));
   }
 
   private setTitle(title: string) {
-    Browser.win?.webContents.send("envim:title", title);
+    Emit.share("envim:title", title);
   }
 
   private busy(busy: boolean) {
@@ -277,7 +277,7 @@ export class App {
 
   private flush() {
     Object.values(this.grids).forEach(grid => {
-      Browser.win?.webContents.send("envim:flush", grid.getFlush());
+      Emit.share("envim:flush", grid.getFlush());
     });
   }
 }

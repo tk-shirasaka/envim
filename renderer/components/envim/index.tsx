@@ -1,7 +1,6 @@
 import React from "react";
 import { ipcRenderer, IpcRendererEvent } from "electron";
 
-import { Emit } from "../../utils/emit";
 import { font } from "../../utils/font";
 
 import { TablineComponent } from "./tabline";
@@ -11,7 +10,6 @@ import { CmdlineComponent } from "./cmdline";
 import { PopupmenuComponent } from "./popupmenu";
 import { NotificateComponent } from "./notificate";
 import { InputComponent } from "./input";
-import { MenuComponent } from "./menu";
 
 interface Props {
 }
@@ -38,8 +36,8 @@ export class EnvimComponent extends React.Component<Props, States> {
     this.onResize = this.onResize.bind(this);
     window.addEventListener("resize", this.onResize);
 
-    Emit.on("menu:zoom-in", this.onZoomIn.bind(this));
-    Emit.on("menu:zoom-out", this.onZoomOut.bind(this));
+    ipcRenderer.on("envim:zoom-in", this.onZoomIn.bind(this));
+    ipcRenderer.on("envim:zoom-out", this.onZoomOut.bind(this));
     ipcRenderer.on("envim:title", this.onTitle.bind(this));
   }
 
@@ -61,6 +59,9 @@ export class EnvimComponent extends React.Component<Props, States> {
   private onZoomOut() {
     this.zoom(-1);
   }
+
+
+
 
   private onTitle(_: IpcRendererEvent, title: string) {
     document.title = title || 'Envim';
@@ -97,7 +98,6 @@ export class EnvimComponent extends React.Component<Props, States> {
           <NotificateComponent />
         </div>
         <InputComponent />
-        <MenuComponent />
       </>
     );
   }
