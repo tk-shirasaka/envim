@@ -8,18 +8,18 @@ export class Emit {
 
   static on(event: string, callback: (...args: any[]) => void) {
     Emit.emit.on(event, callback);
-    ipcMain.on(event, (_: IpcMainEvent, ...args: any[]) => Emit.send(event, ...args));
-  }
-
-  static send(event: string, ...args: any[]) {
-    Emit.emit.emit(event, ...args);
+    ipcMain.on(event, (_: IpcMainEvent, ...args: any[]) => Emit.share(event, ...args));
   }
 
   static share(event: string, ...args: any[]) {
+    Emit.emit.emit(event, ...args);
+  }
+
+  static send(event: string, ...args: any[]) {
     Browser.win?.webContents.send(event, ...args);
   }
 
-  static clear(event: string) {
-    Emit.emit.removeAllListeners(event);
+  static clear(events: string[]) {
+    events.forEach(event => Emit.emit.removeAllListeners(event));
   }
 }

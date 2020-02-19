@@ -1,6 +1,6 @@
 import React from "react";
-import { ipcRenderer, IpcRendererEvent } from "electron";
 
+import { Emit } from "../../utils/emit";
 import { font } from "../../utils/font";
 
 import { TablineComponent } from "./tabline";
@@ -36,9 +36,9 @@ export class EnvimComponent extends React.Component<Props, States> {
     this.onResize = this.onResize.bind(this);
     window.addEventListener("resize", this.onResize);
 
-    ipcRenderer.on("envim:zoom-in", this.onZoomIn.bind(this));
-    ipcRenderer.on("envim:zoom-out", this.onZoomOut.bind(this));
-    ipcRenderer.on("envim:title", this.onTitle.bind(this));
+    Emit.on("envim:zoom-in", this.onZoomIn.bind(this));
+    Emit.on("envim:zoom-out", this.onZoomOut.bind(this));
+    Emit.on("envim:title", this.onTitle.bind(this));
   }
 
   componentWillUnmount() {
@@ -60,10 +60,7 @@ export class EnvimComponent extends React.Component<Props, States> {
     this.zoom(-1);
   }
 
-
-
-
-  private onTitle(_: IpcRendererEvent, title: string) {
+  private onTitle(title: string) {
     document.title = title || 'Envim';
   }
 

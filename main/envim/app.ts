@@ -116,7 +116,7 @@ export class App {
   }
 
   private defaultColorsSet(foreground: number, background: number, special: number) {
-    Emit.share("envim:highlights", [{id: 0, hl: {
+    Emit.send("envim:highlights", [{id: 0, hl: {
       foreground,
       background,
       special,
@@ -132,7 +132,7 @@ export class App {
 
   private hlAttrDefine(highlights: any[]) {
     highlights = highlights.map(([id, rgb]) => ({id, hl: rgb}));
-    Emit.share("envim:highlights", highlights);
+    Emit.send("envim:highlights", highlights);
   }
 
   private gridLine(grid: number, row: number, col: number, cells: string[][]) {
@@ -157,7 +157,7 @@ export class App {
   }
 
   gridCursorGoto(grid: number, row: number, col: number) {
-    Emit.share("envim:cursor", this.grids[grid].setCursorPos(row, col));
+    Emit.send("envim:cursor", this.grids[grid].setCursorPos(row, col));
   }
 
   private gridScroll(grid: number, top: number, bottom: number, left: number, right: number, rows: number, cols: number) {
@@ -184,31 +184,31 @@ export class App {
         active: current.data === tab.data,
       });
     }
-    Emit.share("envim:tabline", next);
+    Emit.send("envim:tabline", next);
   }
 
   private cmdlineShow(content: string[][], pos: number, prompt: string, indent: number) {
     const { cursor, cells } = this.cmdline.show(content, pos, prompt, indent);
-    Emit.share("cmdline:show");
-    Emit.share("cmdline:cursor", cursor);
-    Emit.share("cmdline:flush", cells);
+    Emit.send("cmdline:show");
+    Emit.send("cmdline:cursor", cursor);
+    Emit.send("cmdline:flush", cells);
   }
 
   private cmdlinePos(pos: number) {
     const { cursor, cells } = this.cmdline.pos(pos);
-    Emit.share("cmdline:cursor", cursor);
-    Emit.share("cmdline:flush", cells);
+    Emit.send("cmdline:cursor", cursor);
+    Emit.send("cmdline:flush", cells);
   }
 
   private cmdlineSpecialChar(c: string, shift: boolean) {
     const { cursor, cells } = this.cmdline.specialchar(c, shift);
-    Emit.share("cmdline:cursor", cursor);
-    Emit.share("cmdline:flush", cells);
+    Emit.send("cmdline:cursor", cursor);
+    Emit.send("cmdline:flush", cells);
   }
 
   private cmdlineHide() {
     this.cmdline.hide();
-    Emit.share("cmdline:hide");
+    Emit.send("cmdline:hide");
   }
 
   private cmdlineBlockShow(lines: string[][][]) {
@@ -221,7 +221,7 @@ export class App {
 
   private cmdlineBlockHide() {
     this.cmdline.blockHide();
-    Emit.share("cmdline:hide");
+    Emit.send("cmdline:hide");
   }
 
   private popupmenuShow(items: string[][], selected: number, row: number, col: number, grid: number) {
@@ -230,7 +230,7 @@ export class App {
     row = row + height > this.window.height ? row - height : row + 1;
     col = Math.min(col, this.window.width - 10);
 
-    Emit.share("popupmenu:show", {
+    Emit.send("popupmenu:show", {
       items: items.map(([ word, kind, menu, info ]) => ({ word, kind, menu, info })),
       selected,
       start: 0,
@@ -240,35 +240,35 @@ export class App {
   }
 
   private popupmenuSelect(selected: number) {
-    Emit.share("popupmenu:select", selected);
+    Emit.send("popupmenu:select", selected);
   }
 
   private popupmenuHide() {
-    Emit.share("popupmenu:hide");
+    Emit.send("popupmenu:hide");
   }
 
   private msgShow(kind: string, content: string[][], replace_last: boolean) {
-    Emit.share("messages:show", 1, kind, content, replace_last);
+    Emit.send("messages:show", 1, kind, content, replace_last);
   }
 
   private msgShowmode(content: string[][]) {
     if (content.length) {
-      Emit.share("messages:show", 2, "", content, true);
+      Emit.send("messages:show", 2, "", content, true);
     } else {
-      Emit.share("messages:clear", 2);
+      Emit.send("messages:clear", 2);
     }
   }
 
   private msgClear() {
-    Emit.share("messages:clear", 1);
+    Emit.send("messages:clear", 1);
   }
 
   private msgHistoryShow(contents: string[][][]) {
-    Emit.share("messages:history", contents.map(([kind, content]) => ({ kind, content })));
+    Emit.send("messages:history", contents.map(([kind, content]) => ({ kind, content })));
   }
 
   private setTitle(title: string) {
-    Emit.share("envim:title", title);
+    Emit.send("envim:title", title);
   }
 
   private busy(busy: boolean) {
@@ -277,7 +277,7 @@ export class App {
 
   private flush() {
     Object.values(this.grids).forEach(grid => {
-      Emit.share("envim:flush", grid.getFlush());
+      Emit.send("envim:flush", grid.getFlush());
     });
   }
 }

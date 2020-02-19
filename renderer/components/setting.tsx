@@ -1,6 +1,6 @@
 import React, { FormEvent, ChangeEvent } from "react";
-import { ipcRenderer } from "electron";
 
+import { Emit } from "../utils/emit";
 import { Localstorage } from "../utils/localstorage";
 import { icons } from "../utils/icons";
 
@@ -74,7 +74,7 @@ export class SettingComponent extends React.Component<Props, States> {
     e.stopPropagation();
     e.preventDefault();
     this.ls.set(this.state);
-    ipcRenderer.send("envim:attach", this.state.type, this.state[this.state.type]);
+    Emit.send("envim:attach", this.state.type, this.state[this.state.type]);
   }
 
   render() {

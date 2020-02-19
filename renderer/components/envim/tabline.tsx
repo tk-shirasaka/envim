@@ -1,6 +1,6 @@
 import React from "react";
-import { ipcRenderer, IpcRendererEvent } from "electron";
 
+import { Emit } from "../../utils/emit";
 import { icons } from "../../utils/icons";
 import { font } from "../../utils/font";
 
@@ -43,26 +43,26 @@ export class TablineComponent extends React.Component<Props, States> {
     super(props);
     this.state = { tabs: [] }
 
-    ipcRenderer.on("envim:tabline", this.onTabline.bind(this));
+    Emit.on("envim:tabline", this.onTabline.bind(this));
   }
 
   componentWillUnmount() {
-    ipcRenderer.removeAllListeners("envim:tabline");
+    Emit.clear(["envim:tabline"]);
   }
 
   private onSelect(i: number) {
-    ipcRenderer.send("envim:command", `tabnext ${i + 1}`);
+    Emit.send("envim:command", `tabnext ${i + 1}`);
   }
 
   private onClose(i: number) {
-    ipcRenderer.send("envim:command", `tabclose ${i + 1}`);
+    Emit.send("envim:command", `tabclose ${i + 1}`);
   }
 
   private onPlus() {
-    ipcRenderer.send("envim:command", "tabnew");
+    Emit.send("envim:command", "tabnew");
   }
 
-  private onTabline(_: IpcRendererEvent, tabs: States["tabs"]) {
+  private onTabline(tabs: States["tabs"]) {
     this.setState({ tabs });
   }
 

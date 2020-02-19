@@ -1,5 +1,4 @@
 import React from "react";
-import { ipcRenderer, IpcRendererEvent } from "electron";
 
 import { Emit } from "../../utils/emit";
 import { Highlights } from "../../utils/highlight";
@@ -54,16 +53,15 @@ export class HistoryComponent extends React.Component<Props, States> {
 
     this.state = { filter: [], histories: [] };
     Emit.on("envim:focus", this.onClose.bind(this));
-    ipcRenderer.on("messages:history", this.onHistory.bind(this));
+    Emit.on("messages:history", this.onHistory.bind(this));
   }
 
   componentWillUnmount() {
-    Emit.clear("envim:focus");
-    ipcRenderer.removeAllListeners("messages:history");
+    Emit.clear(["envim:focus", "messages:history"]);
   }
 
   private onClear() {
-    ipcRenderer.send("envim:command", "messages clear");
+    Emit.send("envim:command", "messages clear");
     this.setState({ histories: [{kind: "", content: [["0", "-- No Messages --"]]}] });
   }
 
@@ -75,7 +73,7 @@ export class HistoryComponent extends React.Component<Props, States> {
     this.setState({ histories: [] });
   }
 
-  private onHistory(_: IpcRendererEvent, histories: States["histories"]) {
+  private onHistory(histories: States["histories"]) {
     this.setState({ histories });
   }
 

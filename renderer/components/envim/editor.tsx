@@ -1,5 +1,4 @@
 import React, { MouseEvent, WheelEvent } from "react";
-import { ipcRenderer, IpcRendererEvent } from "electron";
 
 import { ICell, IHighlight } from "common/interface";
 
@@ -32,10 +31,10 @@ export class EditorComponent extends React.Component<Props, States> {
     super(props);
 
     Emit.on("envim:ime", this.onIme.bind(this));
-    ipcRenderer.on("envim:cursor", this.onCursor.bind(this));
-    ipcRenderer.on("envim:highlights", this.onHighlight.bind(this));
-    ipcRenderer.on("envim:flush", this.onFlush.bind(this));
-    ipcRenderer.send("envim:resize", ...this.getNvimSize(this.props.width, this.props.height));
+    Emit.on("envim:cursor", this.onCursor.bind(this));
+    Emit.on("envim:highlights", this.onHighlight.bind(this));
+    Emit.on("envim:flush", this.onFlush.bind(this));
+    Emit.send("envim:resize", ...this.getNvimSize(this.props.width, this.props.height));
   }
 
   componentDidMount() {
@@ -50,14 +49,11 @@ export class EditorComponent extends React.Component<Props, States> {
 
   componentDidUpdate() {
     this.renderer?.setFont();
-    ipcRenderer.send("envim:resize", ...this.getNvimSize(this.props.width, this.props.height));
+    Emit.send("envim:resize", ...this.getNvimSize(this.props.width, this.props.height));
   }
 
   componentWillUnmount() {
-    Emit.clear("envim:ime");
-    ipcRenderer.removeAllListeners("envim:cursor");
-    ipcRenderer.removeAllListeners("envim:highlights");
-    ipcRenderer.removeAllListeners("envim:flush");
+    Emit.clear(["envim:ime", "envim:cursor", "envim:highlights", "envim:flush"]);
   }
 
   private getNvimSize(x: number, y: number) {
@@ -71,7 +67,7 @@ export class EditorComponent extends React.Component<Props, States> {
 
     button === "left" && e.stopPropagation();
     button === "left" && e.preventDefault();
-    ipcRenderer.send("envim:mouse", button, action, row, col);
+    Emit.send("envim:mouse", button, action, row, col);
   }
 
   private onMouseDown(e: MouseEvent) {
@@ -79,7 +75,7 @@ export class EditorComponent extends React.Component<Props, States> {
       case 0:
         this.drag = true;
         this.onMouse(e, "left", "press");
-        Emit.send("envim:focus");
+        Emit.share("envim:focus");
       break;
     }
   }
@@ -101,15 +97,15 @@ export class EditorComponent extends React.Component<Props, States> {
     this.renderer?.text(text);
   }
 
-  private onCursor(_: IpcRendererEvent, cursor: { row: number, col: number, hl: number }) {
+  private onCursor(cursor: { row: number, col: number, hl: number }) {
     this.renderer?.setCursor(cursor);
   }
 
-  private onHighlight(_: IpcRendererEvent, highlights: {id: number, hl: IHighlight}[]) {
+  private onHighlight(highlights: {id: number, hl: IHighlight}[]) {
     highlights.forEach(({id, hl}) => Highlights.setHighlight(id, hl));
   }
 
-  private onFlush(_: IpcRendererEvent, cells: ICell[]) {
+  private onFlush(cells: ICell[]) {
     this.renderer?.flush(cells);
   }
 

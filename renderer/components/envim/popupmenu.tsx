@@ -1,5 +1,4 @@
 import React from "react";
-import { ipcRenderer, IpcRendererEvent } from "electron";
 
 import { Emit } from "../../utils/emit";
 import { font } from "../../utils/font";
@@ -47,22 +46,20 @@ export class PopupmenuComponent extends React.Component<Props, States> {
     super(props);
 
     this.state = { items: [], start: 0, selected: -1, row: 0, col: 0 };
-    ipcRenderer.on("popupmenu:show", this.onPopupmenu.bind(this));
-    ipcRenderer.on("popupmenu:select", this.onSelect.bind(this));
-    ipcRenderer.on("popupmenu:hide", this.offPopupmenu.bind(this));
+    Emit.on("popupmenu:show", this.onPopupmenu.bind(this));
+    Emit.on("popupmenu:select", this.onSelect.bind(this));
+    Emit.on("popupmenu:hide", this.offPopupmenu.bind(this));
   }
 
   componentWillUnmount() {
-    ipcRenderer.removeAllListeners("popupmenu:show");
-    ipcRenderer.removeAllListeners("popupmenu:select");
-    ipcRenderer.removeAllListeners("popupmenu:hide");
+    Emit.clear(["popupmenu:show", "popupmenu:select", "popupmenu:hide"]);
   }
 
-  private onPopupmenu(_: IpcRendererEvent, state: States) {
+  private onPopupmenu(state: States) {
     this.setState(state);
   }
 
-  private onSelect(_: IpcRendererEvent, selected: number) {
+  private onSelect(selected: number) {
     const start = this.state.start <= selected && selected <= this.state.start + 4
       ? this.state.start
       : Math.max(0, Math.min(this.state.items.length - 5, this.state.start - this.state.selected + selected));
@@ -78,8 +75,8 @@ export class PopupmenuComponent extends React.Component<Props, States> {
     const num = i - this.state.selected;
     const cmd = num < 0 ? "<C-p>" : "<C-n>";
 
-    Emit.send("envim:focus");
-    ipcRenderer.send("envim:input", cmd.repeat(Math.abs(num)));
+    Emit.share("envim:focus");
+    Emit.send("envim:input", cmd.repeat(Math.abs(num)));
   }
 
   private getScopeStyle() {

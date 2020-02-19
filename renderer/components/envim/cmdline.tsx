@@ -1,7 +1,7 @@
 import React from "react";
-import { ipcRenderer, IpcRendererEvent } from "electron";
 
 import { ICell } from "common/interface";
+import { Emit } from "../../utils/emit";
 import { Highlights } from "../../utils/highlight";
 import { Context2D } from "../../utils/context2d";
 
@@ -35,10 +35,10 @@ export class CmdlineComponent extends React.Component<Props, States> {
     super(props);
 
     this.state = { visible: false };
-    ipcRenderer.on("cmdline:show", this.onCmdline.bind(this));
-    ipcRenderer.on("cmdline:cursor", this.onCursor.bind(this));
-    ipcRenderer.on("cmdline:flush", this.onFlush.bind(this));
-    ipcRenderer.on("cmdline:hide", this.offCmdline.bind(this));
+    Emit.on("cmdline:show", this.onCmdline.bind(this));
+    Emit.on("cmdline:cursor", this.onCursor.bind(this));
+    Emit.on("cmdline:flush", this.onFlush.bind(this));
+    Emit.on("cmdline:hide", this.offCmdline.bind(this));
   }
 
   componentDidUpdate() {
@@ -50,21 +50,18 @@ export class CmdlineComponent extends React.Component<Props, States> {
   }
 
   componentWillUnmount() {
-    ipcRenderer.removeAllListeners("cmdline:show");
-    ipcRenderer.removeAllListeners("cmdline:cursor");
-    ipcRenderer.removeAllListeners("cmdline:flush");
-    ipcRenderer.removeAllListeners("cmdline:hide");
+    Emit.clear(["cmdline:show", "cmdline:cursor", "cmdline:flush", "cmdline:hide"]);
   }
 
   private onCmdline() {
     this.state.visible || this.setState({ visible: true });
   }
 
-  private onCursor(_: IpcRendererEvent, cursor: { row: number, col: number, hl: number }) {
+  private onCursor(cursor: { row: number, col: number, hl: number }) {
     this.renderer?.setCursor(cursor);
   }
 
-  private onFlush(_: IpcRendererEvent, cells: ICell[]) {
+  private onFlush(cells: ICell[]) {
     this.renderer?.flush(cells);
   }
 

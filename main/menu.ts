@@ -7,22 +7,22 @@ export const setMenu = (inited: boolean) => {
     {
       label: "Window",
       submenu: [
-        { label: "Detach", click: () => Emit.send("envim:detach"), enabled: inited },
+        { label: "Detach", click: () => Emit.share("envim:detach"), enabled: inited },
         { role: "reload", enabled: !inited },
         { type: "separator" },
-        { label: "Zoom In", click: () => Emit.share("envim:zoom-in"), enabled: inited  },
-        { label: "Zoom Out", click: () => Emit.share("envim:zoom-out"), enabled: inited  },
+        { label: "Zoom In", click: () => Emit.send("envim:zoom-in"), enabled: inited  },
+        { label: "Zoom Out", click: () => Emit.send("envim:zoom-out"), enabled: inited  },
       ],
     },
     {
       label: "Edit",
       submenu: [
-        { label: "Undo", click: () => Emit.send("envim:command", "normal u"), enabled: inited },
-        { label: "Redo", click: () => Emit.send("envim:command", "normal R"), enabled: inited },
+        { label: "Undo", click: () => Emit.share("envim:command", "undo"), enabled: inited },
+        { label: "Redo", click: () => Emit.share("envim:command", "redo"), enabled: inited },
         { type: "separator" },
-        { label: "Cut", click: () => Emit.send("envim:command", "normal x"), enabled: inited },
-        { label: "Copy", click: () => Emit.send("envim:command", "normal y"), enabled: inited },
-        { label: "Paste", click: () => Emit.send("envim:command", "normal p"), enabled: inited },
+        { label: "Cut", click: () => Emit.share("envim:command", "normal x"), enabled: inited },
+        { label: "Copy", click: () => Emit.share("envim:command", "normal y"), enabled: inited },
+        { label: "Paste", click: () => Emit.share("envim:command", "normal p"), enabled: inited },
       ],
     },
   ]));

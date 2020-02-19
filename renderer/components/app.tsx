@@ -1,6 +1,6 @@
 import React from "react";
-import { ipcRenderer } from "electron";
 
+import { Emit } from "../utils/emit";
 import { SettingComponent } from "./setting";
 import { EnvimComponent } from "./envim";
 
@@ -16,8 +16,8 @@ export class AppComponent extends React.Component<Props, States> {
     super(props);
     this.state = { init: false };
 
-    ipcRenderer.on("app:start", this.onStart.bind(this));
-    ipcRenderer.on("app:stop", this.onStop.bind(this));
+    Emit.on("app:start", this.onStart.bind(this));
+    Emit.on("app:stop", this.onStop.bind(this));
   }
 
   private onStart() {

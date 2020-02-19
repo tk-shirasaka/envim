@@ -48,7 +48,7 @@ export class Envim {
       this.nvim.on("disconnect", this.onDisconnect.bind(this));
       Clipboard.setup(this.nvim);
       setMenu(true);
-      Emit.share("app:start");
+      Emit.send("app:start");
     }
   }
 
@@ -108,6 +108,6 @@ export class Envim {
   private onDisconnect() {
     this.attached = false;
     setMenu(false);
-    Emit.share("app:stop");
+    Emit.send("app:stop");
   }
 }

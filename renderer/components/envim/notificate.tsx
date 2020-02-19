@@ -1,5 +1,4 @@
 import React from "react";
-import { ipcRenderer, IpcRendererEvent } from "electron";
 
 import { Emit } from "../../utils/emit";
 import { font } from "../../utils/font";
@@ -51,16 +50,15 @@ export class NotificateComponent extends React.Component<Props, States> {
     super(props);
 
     this.state = { messages: [], selected: null };
-    ipcRenderer.on("messages:show", this.onMessage.bind(this));
-    ipcRenderer.on("messages:clear", this.offMessage.bind(this));
+    Emit.on("messages:show", this.onMessage.bind(this));
+    Emit.on("messages:clear", this.offMessage.bind(this));
   }
 
   componentWillUnmount() {
-    ipcRenderer.removeAllListeners("messages:show");
-    ipcRenderer.removeAllListeners("messages:clear");
+    Emit.clear(["messages:show", "messages:clear"]);
   }
 
-  private onMessage(_: IpcRendererEvent, group: number, kind: string, content: string[][], replace: boolean) {
+  private onMessage(group: number, kind: string, content: string[][], replace: boolean) {
     let messages: States["messages"] = [];
 
     if (content.filter(([_, message]) => message.replace("\n", "")).length === 0) return;
@@ -76,7 +74,7 @@ export class NotificateComponent extends React.Component<Props, States> {
     this.setState({ messages });
   }
 
-  private offMessage(_: IpcRendererEvent, group: number) {
+  private offMessage(group: number) {
     this.setState({ messages: this.state.messages.filter(message => message.group !== group) });
   }
 
@@ -85,7 +83,7 @@ export class NotificateComponent extends React.Component<Props, States> {
   }
 
   private offSelect() {
-    Emit.send("envim:focus");
+    Emit.share("envim:focus");
     this.setState({ selected: null })
   }
 

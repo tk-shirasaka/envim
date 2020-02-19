@@ -1,5 +1,4 @@
 import React, { KeyboardEvent, CompositionEvent } from "react";
-import { ipcRenderer } from "electron";
 
 import { Emit } from "../../utils/emit";
 import { keycode } from "../../utils/keycode";
@@ -27,7 +26,7 @@ export class InputComponent extends React.Component<Props, States> {
   }
 
   componentWillUnmount() {
-    Emit.clear("envim:focus");
+    Emit.clear(["envim:focus"]);
   }
 
   private onFocus() {
@@ -44,10 +43,10 @@ export class InputComponent extends React.Component<Props, States> {
     e.preventDefault();
     setTimeout(() => {
       if (input.value) {
-        Emit.send("envim:ime", input.value);
+        Emit.share("envim:ime", input.value);
       } else {
-        Emit.send("envim:focus");
-        code && ipcRenderer.send("envim:input", code);
+        Emit.share("envim:focus");
+        code && Emit.send("envim:input", code);
       }
     });
   }
@@ -55,7 +54,7 @@ export class InputComponent extends React.Component<Props, States> {
   private onCompositionEnd(e: CompositionEvent) {
     const input = e.target as HTMLInputElement;
 
-    ipcRenderer.send("envim:input", input.value);
+    Emit.send("envim:input", input.value);
     input.value = "";
   }
 
