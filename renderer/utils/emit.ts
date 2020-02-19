@@ -18,6 +18,9 @@ export class Emit {
   }
 
   static clear(events: string[]) {
-    events.forEach(event => Emit.emit.removeAllListeners(event));
+    events.forEach(event => {
+      Emit.emit.removeAllListeners(event);
+      ipcRenderer.removeAllListeners(event);
+    });
   }
 }
