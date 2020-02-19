@@ -22,6 +22,7 @@ export class Envim {
     Emit.on("envim:command", this.onCommand.bind(this));
     Emit.on("envim:log", this.onLog.bind(this));
     Emit.on("envim:detach", this.onDetach.bind(this));
+    process.on("uncaughtException", this.onError.bind(this));
   }
 
   private async onAttach(type: string, value: string) {
@@ -109,5 +110,9 @@ export class Envim {
     this.attached = false;
     setMenu(false);
     Emit.send("app:stop");
+  }
+
+  private onError() {
+    this.onDisconnect();
   }
 }
