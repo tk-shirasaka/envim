@@ -100,7 +100,7 @@ export class HistoryComponent extends React.Component<Props, States> {
       <div style={this.getScopeStyle()}>
         <div style={styles.actions}>
           <i className="color-red-fg clickable" style={this.getIconStyle()} onClick={this.onClear.bind(this)}>ﰸ</i>
-          {notificates.map((icon, i) => (
+          {notificates.filter(icon => icon.filter).map((icon, i) => (
             <i className={`color-${icon.color}-fg ${icon.kinds === this.state.filter ? "active" : "clickable"}`} style={this.getIconStyle()} onClick={() => this.onFilter(icon.kinds)} key={i}>{ icon.font }</i>)
           )}
           <i className="color-black-fg clickable" style={this.getIconStyle()} onClick={() => this.onClose()}></i>

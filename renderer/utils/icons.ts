@@ -13,10 +13,10 @@ export const icons = [
 ];
 
 export const notificates = [
-  { font: "", color: "lightblue", kinds: ["echo",  "echomsg", ""]},
-  { font: "", color: "yellow", kinds: ["wmsg"]},
-  { font: "", color: "red", kinds: ["emsg", "echoerr", "lua_error", "rpc_error"]},
-  { font: "", color: "purple", kinds: ["confirm", "confirm_sub"]},
-  { font: "", color: "pink", kinds: ["return_prompt"]},
-  { font: "", color: "green", kinds: ["quickfix",  "search_count"]},
+  { font: "", color: "lightblue", kinds: ["echo",  "echomsg", ""], filter: true},
+  { font: "", color: "yellow", kinds: ["wmsg"], filter: true},
+  { font: "", color: "red", kinds: ["emsg", "echoerr", "lua_error", "rpc_error"], filter: true},
+  { font: "", color: "purple", kinds: ["confirm", "confirm_sub"], filter: false},
+  { font: "", color: "pink", kinds: ["return_prompt"], filter: false},
+  { font: "", color: "green", kinds: ["quickfix",  "search_count"], filter: false},
 ];
