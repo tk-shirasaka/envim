@@ -1,4 +1,4 @@
-import React from "react";
+import React, { MouseEvent } from "react";
 
 import { Emit } from "../../utils/emit";
 import { icons } from "../../utils/icons";
@@ -51,16 +51,20 @@ export class TablineComponent extends React.Component<Props, States> {
     Emit.clear(["envim:tabline"]);
   }
 
-  private onSelect(i: number) {
+  private onSelect(e: MouseEvent, i: number) {
+    e.stopPropagation();
+    e.preventDefault();
     Emit.send("envim:command", `tabnext ${i + 1}`);
   }
 
-  private onClose(i: number) {
+  private onClose(e: MouseEvent, i: number) {
+    e.stopPropagation();
+    e.preventDefault();
     Emit.send("envim:command", `tabclose ${i + 1}`);
   }
 
   private onPlus() {
-    Emit.send("envim:command", "tabnew");
+    Emit.send("envim:command", "$tabnew");
   }
 
   private onTabline(tabs: States["tabs"]) {
@@ -85,10 +89,10 @@ export class TablineComponent extends React.Component<Props, States> {
     return (
       <div style={{...this.props, fontSize: size, ...styles.scope}}>
         {this.state.tabs.map((tab, i) => (
-          <div key={i} className={`color-black ${tab.active ? "active" : "clickable"}`} style={this.getChildStayle(tab.active)} onClick={() => this.onSelect(i)}>
+          <div key={i} className={`color-black ${tab.active ? "active" : "clickable"}`} style={this.getChildStayle(tab.active)} onClick={e => this.onSelect(e, i)}>
             { this.getIcon(tab.type) }
             <span style={styles.name}>{ tab.name }</span>
-            {tab.active || <i className={`color-red-fg ${tab.active ? "active" : "clickable"}`} style={{...styles.icon, fontSize: size}} onClick={() => this.onClose(i)}></i>}
+            {tab.active || <i className={`color-red-fg ${tab.active ? "active" : "clickable"}`} style={{...styles.icon, fontSize: size}} onClick={e => this.onClose(e, i)}></i>}
           </div>
         ))}
         <i className="color-green-fg-dark clickable" style={{...styles.icon, fontSize: size, lineHeight: `${this.props.height}px`}} onClick={() => this.onPlus()}></i>
