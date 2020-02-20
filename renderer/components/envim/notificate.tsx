@@ -28,7 +28,7 @@ const styles = {
     marginBottom: 8,
     borderRadius: 4,
     boxShadow: "5px 5px 10px 0px #000",
-    overflow: "hidden",
+    overflow: "auto",
   },
   selected: {
     position,

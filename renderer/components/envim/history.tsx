@@ -31,9 +31,6 @@ const styles = {
     boxShadow: "0 0 10px 5px #000",
     overflow: "auto",
   },
-  line: {
-    margin: "-4px 0",
-  },
   actions: {
     position: positionS,
     top: 0,
@@ -106,7 +103,7 @@ export class HistoryComponent extends React.Component<Props, States> {
           <i className="color-black-fg clickable" style={this.getIconStyle()} onClick={() => this.onClose()}></i>
         </div>
         {this.state.histories.map(({ kind, content }, i) => (
-          (this.state.filter.length && this.state.filter.indexOf(kind) < 0) || <div style={styles.line} key={i}><MessageComponent kind={kind} content={content} /></div>
+          (this.state.filter.length && this.state.filter.indexOf(kind) < 0) || <div key={i}><MessageComponent kind={kind} content={content} /></div>
         ))}
       </div>
     );
