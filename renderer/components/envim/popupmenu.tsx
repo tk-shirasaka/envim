@@ -109,8 +109,7 @@ export class PopupmenuComponent extends React.Component<Props, States> {
       <div style={this.getScopeStyle()}>
         {this.state.items.slice(start, end).map(({ word, kind, menu }, i) => (
           <div className={`color-black ${this.state.selected === i + start ? "active" : "clickable"}`} style={styles.line} onClick={() => this.onItem(i + start)} key={i}>
-            <div style={styles.column}>{ word }</div>
-            <div style={styles.column}>{ menu }</div>
+            <div style={styles.column}>{ word } { menu }</div>
             <div className={this.getKindStyle(kind)} style={styles.column}>{ kind }</div>
           </div>
         ))}
