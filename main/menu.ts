@@ -1,4 +1,4 @@
-import { Menu } from "electron";
+import { app, Menu } from "electron";
 
 import { Emit } from "./emit";
 
@@ -6,12 +6,20 @@ export const setMenu = (inited: boolean) => {
   Menu.setApplicationMenu(Menu.buildFromTemplate([
     {
       label: "Window",
-      submenu: [
+      submenu: app.isPackaged ?  [
         { label: "Detach", click: () => Emit.share("envim:detach"), enabled: inited },
         { role: "reload", enabled: !inited },
         { type: "separator" },
         { label: "Zoom In", click: () => Emit.send("envim:zoom-in"), enabled: inited  },
         { label: "Zoom Out", click: () => Emit.send("envim:zoom-out"), enabled: inited  },
+      ] : [
+        { label: "Detach", click: () => Emit.share("envim:detach"), enabled: inited },
+        { role: "reload", enabled: !inited },
+        { type: "separator" },
+        { label: "Zoom In", click: () => Emit.send("envim:zoom-in"), enabled: inited  },
+        { label: "Zoom Out", click: () => Emit.send("envim:zoom-out"), enabled: inited  },
+        { type: "separator" },
+        { role: "toggleDevTools" },
       ],
     },
     {
