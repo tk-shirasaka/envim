@@ -20,6 +20,7 @@ const styles = {
   },
   tab: {
     display: "flex",
+    minWidth: 0,
     cursor: "default",
     borderBottom: 2,
   },
