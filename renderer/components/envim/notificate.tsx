@@ -69,7 +69,13 @@ export class NotificateComponent extends React.Component<Props, States> {
         { group, kind, content }
       ];
     } else {
-      messages = [...this.state.messages, { group, kind, content }];
+      const i = this.state.messages.length - 1;
+      messages = [...this.state.messages];
+      if (i < 0 || messages[i].group !== group || messages[i].kind !== kind) {
+        messages.push({ group, kind, content });
+      } else if (JSON.stringify(messages[i].content) !== JSON.stringify(content)) {
+        messages[i].content = [...messages[i].content, ["0", "\n"], ...content];
+      }
     }
     this.setState({ messages });
   }
