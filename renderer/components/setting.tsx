@@ -5,13 +5,14 @@ import { Localstorage } from "../utils/localstorage";
 import { icons } from "../utils/icons";
 
 interface Props {
+  opacity: number;
+  onChangeOpacity: (e: ChangeEvent) => void,
 }
 
 interface States {
   type: "command" | "address";
   command: string;
   address: string;
-  commandList: string[];
 }
 
 const flexDirection: "column" = "column";
@@ -21,19 +22,6 @@ const styles = {
     flexDirection,
     justifyContent: "center",
     alignItems: "center",
-  },
-  label: {
-    margin: 8,
-  },
-  radio: {
-    margin: "0 8px",
-  },
-  text: {
-    fontSize: "1em",
-    margin: "auto .2em",
-    padding: ".2em .4em",
-    border: "none",
-    borderRadius: ".2em",
   },
   i: {
     margin: 8,
@@ -47,17 +35,16 @@ const styles = {
 };
 
 export class SettingComponent extends React.Component<Props, States> {
-  private ls: Localstorage<States> = new Localstorage<States>("setting", { type: "command", command: "", address: "", commandList: [] });
+  private ls: Localstorage<States> = new Localstorage<States>("setting", { type: "command", command: "", address: "" });
 
   constructor(props: Props) {
     super(props);
     this.state = this.ls.get();
-    document.title = 'Envim';
   }
 
   private onToggle(e: ChangeEvent) {
     const type = (e.target as HTMLInputElement).value === "command" ? "command" : "address";
-    this.setState({type: type, commandList: []});
+    this.setState({type: type});
   }
 
   private onChangeCommand(e: ChangeEvent) {
@@ -82,13 +69,16 @@ export class SettingComponent extends React.Component<Props, States> {
       <form style={styles.scope} onSubmit={this.onSubmit.bind(this)}>
         <h1>Welcome To Envim!</h1>
         <div>
-          <label style={styles.label}><input style={styles.radio} type="radio" value="command" checked={this.state.type === "command"} onChange={this.onToggle.bind(this)} />Command</label>
-          <label style={styles.label}><input style={styles.radio} type="radio" value="address" checked={this.state.type === "address"} onChange={this.onToggle.bind(this)} />Port</label>
+          <label><input type="radio" value="command" checked={this.state.type === "command"} onChange={this.onToggle.bind(this)} />Command</label>
+          <label><input type="radio" value="address" checked={this.state.type === "address"} onChange={this.onToggle.bind(this)} />Port</label>
         </div>
         {this.state.type === "command"
-          ?  <label style={styles.label}>Enter neovim command<input style={styles.text} value={this.state.command} onChange={this.onChangeCommand.bind(this)} autoFocus={true} /></label>
-          :  <label style={styles.label}>Enter neovim address<input style={styles.text} value={this.state.address} onChange={this.onChangePort.bind(this)} autoFocus={true} /></label>
+          ?  <label>Enter neovim command<input type="text" value={this.state.command} onChange={this.onChangeCommand.bind(this)} autoFocus={true} /></label>
+          :  <label>Enter neovim address<input type="text" value={this.state.address} onChange={this.onChangePort.bind(this)} autoFocus={true} /></label>
         }
+        <div>
+          <label>Transparent ({this.props.opacity}%)<input type="range" min="0" max="99" value={this.props.opacity} onChange={this.props.onChangeOpacity} /></label>
+        </div>
         <div>
           {icons.map((icon, i) => <i key={i} style={{color: icon.color, ...styles.i}}>{icon.font}</i>)}
         </div>

@@ -28,6 +28,8 @@ export class Browser {
 
     setMenu(false);
     Browser.win = new BrowserWindow({
+      transparent: true,
+      frame: false,
       webPreferences: {
         nodeIntegration: true,
       },

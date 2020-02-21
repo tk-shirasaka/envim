@@ -6,6 +6,11 @@
 body {
   margin: 0;
   padding: 0;
+  background: rgba(0, 0, 0, 0);
+  -webkit-app-region: drag;
+}
+
+#app > div {
   background: $color-black;
   color: $color-white;
   font-family: Ricty Diminished;
@@ -19,4 +24,27 @@ i {
   font-size: 40px;
   font-style: normal;
   font-family: Nerd Font;
+}
+
+label {
+  margin: 8px;
+}
+
+input {
+  &[type=text] {
+    font-size: 1em;
+    margin: auto .2em;
+    padding: .2em .4em;
+    border: none;
+    border-radius: .2em;
+  }
+
+  &[type=radio] {
+    margin: 0 8px;
+  }
+
+  &[type=range] {
+    vertical-align: middle;
+    -webkit-app-region: no-drag;
+  }
 }

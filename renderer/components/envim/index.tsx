@@ -12,12 +12,12 @@ import { NotificateComponent } from "./notificate";
 import { InputComponent } from "./input";
 
 interface Props {
+  width: number;
+  height: number;
 }
 
 interface States {
-  header: { width: number, height: number; };
-  editor: { width: number, height: number; };
-  footer: { width: number, height: number; };
+  font: { width: number; height: number; size: number; };
 }
 
 const position: "relative" = "relative"
@@ -27,29 +27,21 @@ const style = {
 };
 
 export class EnvimComponent extends React.Component<Props, States> {
-  private timer: number = 0;
-
   constructor(props: Props) {
     super(props);
 
-    this.state = this.newState();
-    this.onResize = this.onResize.bind(this);
-    window.addEventListener("resize", this.onResize);
+    this.state = { font: font.get() };
 
     Emit.on("envim:zoom-in", this.onZoomIn.bind(this));
     Emit.on("envim:zoom-out", this.onZoomOut.bind(this));
-    Emit.on("envim:title", this.onTitle.bind(this));
-  }
-
-  componentWillUnmount() {
-    window.removeEventListener("resize", this.onResize);
   }
 
   private zoom(offset: number) {
     const { size } = font.get();
+    const next = { size: size + offset, width: (size + offset) / 2, height: size + offset + 1 };
 
-    font.set({ size: size + offset, width: (size + offset) / 2, height: size + offset + 1 });
-    this.setState(this.newState());
+    font.set(next);
+    this.setState({ font: next });
   }
 
   private onZoomIn() {
@@ -60,37 +52,20 @@ export class EnvimComponent extends React.Component<Props, States> {
     this.zoom(-1);
   }
 
-  private onTitle(title: string) {
-    document.title = title || 'Envim';
-  }
-
-  private newState() {
+  render() {
     const { height } = font.get();
-    const win = { width: window.innerWidth, height: window.innerHeight };
+    const win = this.props;
     const editor = { width: win.width, height: Math.floor((win.height - height - 4) / height) * height };
     const header = { width: win.width, height: win.height - editor.height };
     const footer = { width: win.width, height: Math.min(editor.height, height * 15) };
 
-    return { header, editor, footer };
-  }
-
-  private onResize() {
-    const timer = +setTimeout(() => {
-      if (timer !== this.timer) return;
-
-      this.setState(this.newState());
-    }, 200);
-    this.timer = timer;
-  }
-
-  render() {
     return (
       <>
-        <TablineComponent {...this.state.header} />
-        <div style={{...style, ...this.state.editor}}>
-          <EditorComponent {...this.state.editor} />
-          <HistoryComponent {...this.state.footer} />
-          <CmdlineComponent {...this.state.footer} />
+        <TablineComponent {...header} />
+        <div style={{...style, ...editor}}>
+          <EditorComponent {...editor} />
+          <HistoryComponent {...footer} />
+          <CmdlineComponent {...footer} />
           <PopupmenuComponent />
           <NotificateComponent />
         </div>

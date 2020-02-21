@@ -93,9 +93,6 @@ export class App {
         break;
 
         /** default **/
-        case "set_title":
-          this.setTitle(r[0][0]);
-        break;
         case "busy_start":
           this.busy(true);
         break;
@@ -265,10 +262,6 @@ export class App {
 
   private msgHistoryShow(contents: string[][][]) {
     Emit.send("messages:history", contents.map(([kind, content]) => ({ kind, content })));
-  }
-
-  private setTitle(title: string) {
-    Emit.send("envim:title", title);
   }
 
   private busy(busy: boolean) {
