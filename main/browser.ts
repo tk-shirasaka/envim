@@ -12,11 +12,11 @@ export class Browser {
   }
 
   private onReady() {
-    this.create();
+    setTimeout(this.create, 300);
   }
 
   private onActivate() {
-    this.create();
+    setTimeout(this.create, 300);
   }
 
   private onWindowAllClosed() {
@@ -29,7 +29,7 @@ export class Browser {
     setMenu(false);
     Browser.win = new BrowserWindow({
       transparent: true,
-      frame: false,
+      titleBarStyle: "hidden",
       webPreferences: {
         nodeIntegration: true,
       },
