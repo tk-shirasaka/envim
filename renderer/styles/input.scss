@@ -21,9 +21,10 @@ input {
     vertical-align: middle;
 
     &::-webkit-slider-thumb {
+      -webkit-appearance: none;
       width: 1em;
       height: 1em;
-      margin-top: -.6em;
+      margin-top: -.5em;
       border: 1px solid $color-black;
       border-radius: .5em;
       background: $color-white;
