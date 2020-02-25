@@ -1,6 +1,7 @@
 @import "animate";
 @import "color";
 @import "font";
+@import "input";
 @import "scrollbar";
 
 body {
@@ -23,26 +24,4 @@ i {
   font-size: 40px;
   font-style: normal;
   font-family: Nerd Font;
-}
-
-label {
-  margin: 8px;
-}
-
-input {
-  &[type=text] {
-    font-size: 1em;
-    margin: auto .2em;
-    padding: .2em .4em;
-    border: none;
-    border-radius: .2em;
-  }
-
-  &[type=radio] {
-    margin: 0 8px;
-  }
-
-  &[type=range] {
-    vertical-align: middle;
-  }
 }
