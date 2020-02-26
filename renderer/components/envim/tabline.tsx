@@ -51,20 +51,24 @@ export class TablineComponent extends React.Component<Props, States> {
     Emit.clear(["envim:tabline"]);
   }
 
+  private onCommand(command: string, e: MouseEvent | null = null) {
+    e?.stopPropagation();
+    e?.preventDefault();
+
+    Emit.send("envim:command", command);
+    Emit.share("envim:focus");
+  }
+
   private onSelect(e: MouseEvent, i: number) {
-    e.stopPropagation();
-    e.preventDefault();
-    Emit.send("envim:command", `tabnext ${i + 1}`);
+    this.onCommand(`tabnext ${i + 1}`, e);
   }
 
   private onClose(e: MouseEvent, i: number) {
-    e.stopPropagation();
-    e.preventDefault();
-    Emit.send("envim:command", `tabclose ${i + 1}`);
+    this.onCommand(`tabclose ${i + 1}`, e);
   }
 
   private onPlus() {
-    Emit.send("envim:command", "$tabnew");
+    this.onCommand("$tabnew");
   }
 
   private onTabline(tabs: States["tabs"]) {
