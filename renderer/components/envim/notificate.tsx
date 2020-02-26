@@ -1,8 +1,9 @@
-import React from "react";
+import React, { MouseEvent } from "react";
 
 import { Emit } from "../../utils/emit";
 import { font } from "../../utils/font";
 
+import { IconComponent } from "../icon";
 import { MessageComponent } from "./message";
 
 interface Props {
@@ -23,6 +24,7 @@ const styles = {
   message: {
     cursor: "pointer",
     animation: "fadeIn .5s ease",
+    display: "flex",
     width: 300,
     maxHeight: 100,
     marginBottom: 8,
@@ -41,6 +43,9 @@ const styles = {
     borderRadius: 4,
     boxShadow: "5px 5px 10px 0px #000",
     overflow: "hidden",
+  },
+  icon: {
+    padding: "0 4px",
   },
 };
 
@@ -93,6 +98,14 @@ export class NotificateComponent extends React.Component<Props, States> {
     this.setState({ selected: null })
   }
 
+  private onClose(e: MouseEvent, i: number) {
+    e.stopPropagation();
+    e.preventDefault();
+    Emit.share("envim:focus");
+    this.state.messages.splice(i, 1);
+    this.setState({ messages: this.state.messages, selected: null });
+  }
+
   private renderMessages() {
     const { size } = font.get();
     return this.state.messages.length === 0 ? null : (
@@ -100,6 +113,7 @@ export class NotificateComponent extends React.Component<Props, States> {
         {this.state.messages.map(({ kind, content }, i) => (
           <div style={styles.message} onClick={() => this.onSelect(kind, content)} key={i}>
             <MessageComponent kind={kind} content={content} />
+            <IconComponent color="red" style={styles.icon} font="" onClick={e => this.onClose(e, i)} />
           </div>
         ))}
       </div>
