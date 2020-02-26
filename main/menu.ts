@@ -7,17 +7,19 @@ export const setMenu = (inited: boolean) => {
     {
       label: "Window",
       submenu: app.isPackaged ?  [
+        { role: "quit" },
         { label: "Detach", click: () => Emit.share("envim:detach"), enabled: inited },
         { role: "reload", enabled: !inited },
         { type: "separator" },
-        { label: "Zoom In", click: () => Emit.send("envim:zoom-in"), enabled: inited  },
-        { label: "Zoom Out", click: () => Emit.send("envim:zoom-out"), enabled: inited  },
+        { label: "Zoom In", click: () => Emit.send("app:zoom-in")  },
+        { label: "Zoom Out", click: () => Emit.send("app:zoom-out")  },
       ] : [
+        { role: "quit" },
         { label: "Detach", click: () => Emit.share("envim:detach"), enabled: inited },
         { role: "reload", enabled: !inited },
         { type: "separator" },
-        { label: "Zoom In", click: () => Emit.send("envim:zoom-in"), enabled: inited  },
-        { label: "Zoom Out", click: () => Emit.send("envim:zoom-out"), enabled: inited  },
+        { label: "Zoom In", click: () => Emit.send("app:zoom-in")  },
+        { label: "Zoom Out", click: () => Emit.send("app:zoom-out")  },
         { type: "separator" },
         { role: "toggleDevTools" },
       ],

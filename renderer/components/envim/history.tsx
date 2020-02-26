@@ -3,7 +3,6 @@ import React from "react";
 import { Emit } from "../../utils/emit";
 import { Highlights } from "../../utils/highlight";
 import { notificates } from "../../utils/icons";
-import { font } from "../../utils/font";
 
 import { IconComponent } from "../icon";
 import { MessageComponent } from "./message";
@@ -76,12 +75,10 @@ export class HistoryComponent extends React.Component<Props, States> {
   }
 
   private getScopeStyle() {
-    const { size } = font.get();
     return {
       ...styles.scope,
       ...this.props,
       background: Highlights.color(0, "background"),
-      fontSize: size,
     };
   }
 

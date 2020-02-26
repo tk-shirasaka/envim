@@ -29,7 +29,6 @@ const styles = {
     margin: 8,
   },
   button: {
-    fontSize: "1em",
     padding: ".2em .4em",
     border: "none",
     borderRadius: ".2em",

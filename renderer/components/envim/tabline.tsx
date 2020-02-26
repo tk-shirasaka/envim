@@ -2,7 +2,6 @@ import React, { MouseEvent } from "react";
 
 import { Emit } from "../../utils/emit";
 import { icons } from "../../utils/icons";
-import { font } from "../../utils/font";
 
 import { IconComponent } from "../icon";
 
@@ -90,9 +89,8 @@ export class TablineComponent extends React.Component<Props, States> {
   }
 
   render() {
-    const { size } = font.get();
     return (
-      <div style={{...this.props, fontSize: size, ...styles.scope}}>
+      <div style={{...this.props, ...styles.scope}}>
         {this.state.tabs.map((tab, i) => (
           <div key={i} className={`color-black ${tab.active ? "active" : "clickable"}`} style={this.getChildStayle(tab.active)} onClick={e => this.onSelect(e, i)}>
             { this.getIcon(tab.type) }

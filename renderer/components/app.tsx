@@ -1,5 +1,6 @@
 import React, { ChangeEvent } from "react";
 
+import { font } from "../utils/font";
 import { Emit } from "../utils/emit";
 import { Localstorage } from "../utils/localstorage";
 import { SettingComponent } from "./setting";
@@ -13,6 +14,7 @@ interface States {
   resize: boolean;
   opacity: number;
   window: { width: number; height: number; };
+  font: { width: number; height: number; size: number; };
 }
 
 export class AppComponent extends React.Component<Props, States> {
@@ -21,11 +23,19 @@ export class AppComponent extends React.Component<Props, States> {
 
   constructor(props: Props) {
     super(props);
-    this.state = { init: false, resize: false, opacity: this.ls.get(), window: {width: window.innerWidth, height: window.innerHeight} };
+    this.state = {
+      init: false,
+      resize: false,
+      opacity: this.ls.get(),
+      window: { width: window.innerWidth, height: window.innerHeight },
+      font: font.get(),
+    };
 
     window.addEventListener("resize", this.onResize.bind(this));
     Emit.on("app:start", this.onStart.bind(this));
     Emit.on("app:stop", this.onStop.bind(this));
+    Emit.on("app:zoom-in", this.onZoomIn.bind(this));
+    Emit.on("app:zoom-out", this.onZoomOut.bind(this));
   }
 
   private onResize() {
@@ -44,6 +54,22 @@ export class AppComponent extends React.Component<Props, States> {
     this.setState({ init: false });
   }
 
+  private zoom(offset: number) {
+    const { size } = font.get();
+    const next = { size: size + offset, width: (size + offset) / 2, height: size + offset + 1 };
+
+    font.set(next);
+    this.setState({ font: next });
+  }
+
+  private onZoomIn() {
+    this.zoom(1);
+  }
+
+  private onZoomOut() {
+    this.zoom(-1);
+  }
+
   private onChangeOpacity(e: ChangeEvent) {
     const opacity = +(e.target as HTMLInputElement).value;
     this.ls.set(opacity);
@@ -52,9 +78,13 @@ export class AppComponent extends React.Component<Props, States> {
 
   private renderContent() {
     if (this.state.resize) return null;
-    return this.state.init
-      ? <EnvimComponent {...this.state.window} />
-      : <SettingComponent opacity={this.state.opacity} onChangeOpacity={this.onChangeOpacity.bind(this)} />;
+    return (
+      <div style={{ fontSize: this.state.font.size }}>
+        {this.state.init
+          ? <EnvimComponent {...this.state} />
+          : <SettingComponent opacity={this.state.opacity} onChangeOpacity={this.onChangeOpacity.bind(this)} />}
+      </div>
+    );
   }
 
   render() {

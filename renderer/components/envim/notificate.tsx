@@ -1,7 +1,6 @@
 import React, { MouseEvent } from "react";
 
 import { Emit } from "../../utils/emit";
-import { font } from "../../utils/font";
 
 import { IconComponent } from "../icon";
 import { MessageComponent } from "./message";
@@ -107,9 +106,8 @@ export class NotificateComponent extends React.Component<Props, States> {
   }
 
   private renderMessages() {
-    const { size } = font.get();
     return this.state.messages.length === 0 ? null : (
-      <div style={{...styles.notificate, fontSize: size}}>
+      <div style={styles.notificate}>
         {this.state.messages.map(({ kind, content }, i) => (
           <div style={styles.message} onClick={() => this.onSelect(kind, content)} key={i}>
             <MessageComponent kind={kind} content={content} />
@@ -121,9 +119,8 @@ export class NotificateComponent extends React.Component<Props, States> {
   }
 
   private renderSelected() {
-    const { size } = font.get();
     return this.state.selected && (
-      <div style={{...styles.selected, fontSize: size}} onClick={() => this.offSelect()}>
+      <div style={styles.selected} onClick={() => this.offSelect()}>
         <MessageComponent {...this.state.selected} />
       </div>
     );
