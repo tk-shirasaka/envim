@@ -93,7 +93,7 @@ export class HistoryComponent extends React.Component<Props, States> {
           {notificates.filter(icon => icon.filter).map((icon, i) => (
             <IconComponent color={`${icon.color}-fg`} active={icon.kinds === this.state.filter} style={styles.icon} font={icon.font} onClick={() => this.onFilter(icon.kinds)} key={i} />)
           )}
-          <IconComponent color="black-fg" style={styles.icon} font="" onClick={() => this.onClose()} />
+          <IconComponent color="black-fg" style={styles.icon} font="" onClick={() => this.onClose()} />
         </div>
         {this.state.histories.map(({ kind, content }, i) => (
           (this.state.filter.length && this.state.filter.indexOf(kind) < 0) || <div key={i}><MessageComponent kind={kind} content={content} /></div>

@@ -97,10 +97,10 @@ export class TablineComponent extends React.Component<Props, States> {
           <div key={i} className={`color-black ${tab.active ? "active" : "clickable"}`} style={this.getChildStayle(tab.active)} onClick={e => this.onSelect(e, i)}>
             { this.getIcon(tab.type) }
             <span style={styles.name}>{ tab.name }</span>
-            {tab.active || <IconComponent color="red-fg" style={styles.icon} font="" onClick={e => this.onClose(e, i)} />}
+            {tab.active || <IconComponent color="red-fg" style={styles.icon} font="" onClick={e => this.onClose(e, i)} />}
           </div>
         ))}
-        <IconComponent color="green-fg-dark" style={{...styles.icon, lineHeight: `${this.props.height}px`}} font="" onClick={() => this.onPlus()} />
+        <IconComponent color="green-fg-dark" style={{...styles.icon, lineHeight: `${this.props.height}px`}} font="" onClick={() => this.onPlus()} />
       </div>
     );
   }
