@@ -78,19 +78,15 @@ export class AppComponent extends React.Component<Props, States> {
 
   private renderContent() {
     if (this.state.resize) return null;
-    return (
-      <div style={{ fontSize: this.state.font.size }}>
-        {this.state.init
-          ? <EnvimComponent {...this.state} />
-          : <SettingComponent opacity={this.state.opacity} onChangeOpacity={this.onChangeOpacity.bind(this)} />}
-      </div>
-    );
+    return this.state.init
+      ? <EnvimComponent {...this.state} />
+      : <SettingComponent opacity={this.state.opacity} onChangeOpacity={this.onChangeOpacity.bind(this)} />;
   }
 
   render() {
-    const opacity = 100 - this.state.opacity;
-    return (
-      <div style={{ ...this.state.window, opacity: opacity / 100 }}>{this.renderContent()}</div>
-    )
+    const opacity = (100 - this.state.opacity) / 100;
+    const fontSize = this.state.font.size;
+
+    return <div style={{ ...this.state.window, opacity, fontSize }}>{this.renderContent()}</div>;
   }
 }
