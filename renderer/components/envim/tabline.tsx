@@ -4,6 +4,8 @@ import { Emit } from "../../utils/emit";
 import { icons } from "../../utils/icons";
 import { font } from "../../utils/font";
 
+import { IconComponent } from "../icon";
+
 interface Props {
   width: number;
   height: number;
@@ -35,7 +37,7 @@ const styles = {
     borderBottom: "solid 2px #2295c5",
   },
   icon: {
-    padding: "0 8px",
+    padding: "0 4px",
   },
 };
 
@@ -84,8 +86,7 @@ export class TablineComponent extends React.Component<Props, States> {
 
   private getIcon(type: string) {
     const icon = icons.filter(icon => icon.type.indexOf(type) >= 0).pop();
-    const { size } = font.get();
-    return icon && (<i style={{color: icon.color, padding: "0 4px", fontSize: size}}>{icon.font}</i>);
+    return icon && <IconComponent color={icon.color} style={styles.icon} font={icon.font} />;
   }
 
   render() {
@@ -96,10 +97,10 @@ export class TablineComponent extends React.Component<Props, States> {
           <div key={i} className={`color-black ${tab.active ? "active" : "clickable"}`} style={this.getChildStayle(tab.active)} onClick={e => this.onSelect(e, i)}>
             { this.getIcon(tab.type) }
             <span style={styles.name}>{ tab.name }</span>
-            {tab.active || <i className={`color-red-fg ${tab.active ? "active" : "clickable"}`} style={{...styles.icon, fontSize: size}} onClick={e => this.onClose(e, i)}></i>}
+            {tab.active || <IconComponent color="red-fg" style={styles.icon} font="" onClick={e => this.onClose(e, i)} />}
           </div>
         ))}
-        <i className="color-green-fg-dark clickable" style={{...styles.icon, fontSize: size, lineHeight: `${this.props.height}px`}} onClick={() => this.onPlus()}></i>
+        <IconComponent color="green-fg-dark" style={{...styles.icon, lineHeight: `${this.props.height}px`}} font="" onClick={() => this.onPlus()} />
       </div>
     );
   }

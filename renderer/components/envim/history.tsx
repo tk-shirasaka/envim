@@ -5,6 +5,7 @@ import { Highlights } from "../../utils/highlight";
 import { notificates } from "../../utils/icons";
 import { font } from "../../utils/font";
 
+import { IconComponent } from "../icon";
 import { MessageComponent } from "./message";
 
 interface Props {
@@ -84,23 +85,15 @@ export class HistoryComponent extends React.Component<Props, States> {
     };
   }
 
-  private getIconStyle() {
-    const { size } = font.get();
-    return {
-      ...styles.icon,
-      fontSize: size + 8,
-    };
-  }
-
   render() {
     return this.state.histories.length === 0 ? null : (
       <div style={this.getScopeStyle()}>
         <div style={styles.actions}>
-          <i className="color-red-fg clickable" style={this.getIconStyle()} onClick={this.onClear.bind(this)}>ﰸ</i>
+          <IconComponent color="red-fg" style={styles.icon} font="ﰸ" onClick={this.onClear.bind(this)} />
           {notificates.filter(icon => icon.filter).map((icon, i) => (
-            <i className={`color-${icon.color}-fg ${icon.kinds === this.state.filter ? "active" : "clickable"}`} style={this.getIconStyle()} onClick={() => this.onFilter(icon.kinds)} key={i}>{ icon.font }</i>)
+            <IconComponent color={`${icon.color}-fg`} active={icon.kinds === this.state.filter} style={styles.icon} font={icon.font} onClick={() => this.onFilter(icon.kinds)} key={i} />)
           )}
-          <i className="color-black-fg clickable" style={this.getIconStyle()} onClick={() => this.onClose()}></i>
+          <IconComponent color="black-fg" style={styles.icon} font="" onClick={() => this.onClose()} />
         </div>
         {this.state.histories.map(({ kind, content }, i) => (
           (this.state.filter.length && this.state.filter.indexOf(kind) < 0) || <div key={i}><MessageComponent kind={kind} content={content} /></div>

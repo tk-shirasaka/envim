@@ -2,7 +2,8 @@ import React from "react";
 
 import { Highlights } from "../../utils/highlight";
 import { notificates } from "../../utils/icons";
-import { font } from "../../utils/font";
+
+import { IconComponent } from "../icon";
 
 interface Props {
   kind: string;
@@ -41,14 +42,9 @@ export class MessageComponent extends React.Component<Props, States> {
   }
 
   private getKind(kind: string) {
-    const { size } = font.get();
     const icon = notificates.filter(icon => icon.kinds.indexOf(kind) >= 0)[0];
-    const style = {
-      ...styles.kind,
-      fontSize: size + 8,
-    };
 
-    return <i className={`color-${icon.color} clickable`} style={style}>{ icon.font }</i>
+    return <IconComponent color={icon.color} style={styles.kind} font={icon.font} />;
   }
 
   private getMessageStyle(hl: number) {

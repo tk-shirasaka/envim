@@ -4,6 +4,8 @@ import { Emit } from "../utils/emit";
 import { Localstorage } from "../utils/localstorage";
 import { icons } from "../utils/icons";
 
+import { IconComponent } from "./icon";
+
 interface Props {
   opacity: number;
   onChangeOpacity: (e: ChangeEvent) => void,
@@ -23,7 +25,7 @@ const styles = {
     justifyContent: "center",
     alignItems: "center",
   },
-  i: {
+  icon: {
     margin: 8,
   },
   button: {
@@ -81,7 +83,7 @@ export class SettingComponent extends React.Component<Props, States> {
           <label>Transparent ({this.props.opacity}%)<input type="range" min="0" max="99" value={this.props.opacity} onChange={this.props.onChangeOpacity} /></label>
         </div>
         <div>
-          {icons.map((icon, i) => <i key={i} style={{color: icon.color, ...styles.i}}>{icon.font}</i>)}
+          {icons.map((icon, i) => <IconComponent color={icon.color} style={styles.icon} font={icon.font} key={i} />)}
         </div>
         <button className="color-blue clickable" style={styles.button}>Start</button>
       </form>
