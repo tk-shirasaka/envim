@@ -35,6 +35,7 @@ const styles = {
     display: "none",
   },
   icon: {
+    animation: "fadeIn .5s ease",
     position: positionF,
     right: 8,
     bottom: 0,
