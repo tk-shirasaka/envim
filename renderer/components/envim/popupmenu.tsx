@@ -20,6 +20,9 @@ const styles = {
   scope: {
     position,
     animation: "fadeIn .5s ease",
+  },
+  popup: {
+    overflow: "hidden",
     borderRadius: 4,
     boxShadow: "5px 5px 10px 0px #000",
   },
@@ -107,12 +110,14 @@ export class PopupmenuComponent extends React.Component<Props, States> {
 
     return this.state.items.length === 0 ? null : (
       <div style={this.getScopeStyle()}>
-        {this.state.items.slice(start, end).map(({ word, kind, menu }, i) => (
-          <div className={`color-black ${this.state.selected === i + start ? "active" : "clickable"}`} style={styles.line} onClick={() => this.onItem(i + start)} key={i}>
-            <div style={styles.column}>{ word } { menu }</div>
-            <div className={this.getKindStyle(kind)} style={styles.column}>{ kind }</div>
-          </div>
-        ))}
+        <div style={styles.popup}>
+          {this.state.items.slice(start, end).map(({ word, kind, menu }, i) => (
+            <div className={`color-black ${this.state.selected === i + start ? "active" : "clickable"}`} style={styles.line} onClick={() => this.onItem(i + start)} key={i}>
+              <div style={styles.column}>{ word } { menu }</div>
+              <div className={this.getKindStyle(kind)} style={styles.column}>{ kind }</div>
+            </div>
+          ))}
+        </div>
         {this.state.items[this.state.selected]?.info && <div className="color-black active" style={styles.info}>{ this.state.items[this.state.selected]?.info }</div>}
       </div>
     )
