@@ -50,7 +50,7 @@ export class Grid {
     const prev = this.getCell(row, col - 1);
     const cell = this.getCell(row, col);
 
-    if (cell.text === text && cell.hl === hl) return;
+    if (text && cell.text === text && cell.hl === hl) return;
 
     text || (prev.width = 2);
     hl < 0 && (hl = prev.hl);
