@@ -39,11 +39,12 @@ export class AppComponent extends React.Component<Props, States> {
   }
 
   private onResize() {
-    const timer = +setTimeout(() => {
-      this.setState({ resize: timer !== this.timer });
+    this.timer && clearTimeout(this.timer)
+    this.timer = +setTimeout(() => {
+      this.setState({ resize: false });
+      this.timer = 0;
     }, 200);
-    this.timer = timer;
-    this.setState({ window: { width: window.innerWidth, height: window.innerHeight } });
+    this.setState({ resize: true, window: { width: window.innerWidth, height: window.innerHeight } });
   }
 
   private onStart() {
