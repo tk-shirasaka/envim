@@ -44,7 +44,8 @@ const styles = {
     overflow: "hidden",
   },
   icon: {
-    padding: "0 4px",
+    position,
+    right: 4,
   },
 };
 
@@ -111,7 +112,7 @@ export class NotificateComponent extends React.Component<Props, States> {
         {this.state.messages.map(({ kind, content }, i) => (
           <div style={styles.message} onClick={() => this.onSelect(kind, content)} key={i}>
             <MessageComponent kind={kind} content={content} />
-            <IconComponent color="red" style={styles.icon} font="" onClick={e => this.onClose(e, i)} />
+            <IconComponent color="red-fg" style={styles.icon} font="" onClick={e => this.onClose(e, i)} />
           </div>
         ))}
       </div>
