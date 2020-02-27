@@ -2,8 +2,9 @@ import React from "react";
 
 import { ICell } from "common/interface";
 import { Emit } from "../../utils/emit";
-import { Highlights } from "../../utils/highlight";
 import { Context2D } from "../../utils/context2d";
+
+import { IconComponent } from "../icon";
 
 interface Props {
   width: number;
@@ -12,20 +13,32 @@ interface Props {
 
 interface States {
   visible: boolean;
+  hide: boolean;
 }
 
-const position: "absolute" = "absolute";
+const positionA: "absolute" = "absolute";
+const positionF: "fixed" = "fixed";
 const pointerEvents: "none" = "none";
-const style = {
-  position,
-  display: "block",
-  left: 0,
-  right: 0,
-  bottom: 0,
-  animation: "fadeIn .5s ease",
-  borderRadius: "4px 4px 0 0",
-  boxShadow: "0 0 10px 5px #000",
-  pointerEvents,
+const styles = {
+  canvas: {
+    position: positionA,
+    display: "block",
+    left: 0,
+    right: 0,
+    bottom: 0,
+    animation: "fadeIn .5s ease",
+    borderRadius: "4px 4px 0 0",
+    boxShadow: "0 0 10px 5px #000",
+    pointerEvents,
+  },
+  hide: {
+    display: "none",
+  },
+  icon: {
+    position: positionF,
+    right: 8,
+    bottom: 0,
+  },
 };
 
 export class CmdlineComponent extends React.Component<Props, States> {
@@ -34,7 +47,7 @@ export class CmdlineComponent extends React.Component<Props, States> {
   constructor(props: Props) {
     super(props);
 
-    this.state = { visible: false };
+    this.state = { visible: false, hide: false };
     Emit.on("cmdline:show", this.onCmdline.bind(this));
     Emit.on("cmdline:cursor", this.onCursor.bind(this));
     Emit.on("cmdline:flush", this.onFlush.bind(this));
@@ -54,7 +67,7 @@ export class CmdlineComponent extends React.Component<Props, States> {
   }
 
   private onCmdline() {
-    this.state.visible || this.setState({ visible: true });
+    this.state.visible || this.setState({ visible: true, hide: false });
   }
 
   private onCursor(cursor: { row: number, col: number, hl: number }) {
@@ -67,20 +80,26 @@ export class CmdlineComponent extends React.Component<Props, States> {
 
   private offCmdline() {
     delete(this.renderer);
-    this.state.visible && this.setState({ visible: false });
+    this.state.visible && this.setState({ visible: false, hide: false });
+  }
+
+  private toggleCmdline() {
+    Emit.share("envim:focus");
+    this.setState({ hide: !this.state.hide });
   }
 
   private getStyle() {
-    return {
-      ...style,
-      ...this.props,
-      background: Highlights.color(0, "background"),
-    };
+    const style = { ...styles.canvas, ...this.props };
+
+    return this.state.hide ? { ...styles.hide, style } : style;
   }
 
   render() {
     return this.state.visible === false ? null : (
-      <canvas style={this.getStyle()} width={this.props.width * 2} height={this.props.height * 2} ref="canvas"></canvas>
+      <>
+        <canvas style={this.getStyle()} width={this.props.width * 2} height={this.props.height * 2} ref="canvas"></canvas>
+        <IconComponent color="green-fg" style={styles.icon} font={this.state.hide ? "" : ""} onClick={this.toggleCmdline.bind(this)} />
+      </>
     );
   }
 }
