@@ -28,7 +28,7 @@ const styles = {
     bottom: 0,
     animation: "fadeIn .5s ease",
     borderRadius: "4px 4px 0 0",
-    boxShadow: "0 0 10px 5px #000",
+    boxShadow: "0 0 4px 0px",
     overflow: "auto",
   },
   actions: {
@@ -36,7 +36,6 @@ const styles = {
     top: 0,
     paddingRight: 8,
     textAlign,
-    background: "#dee1e6",
   },
   icon: {
     padding: "2px 4px",
@@ -74,18 +73,10 @@ export class HistoryComponent extends React.Component<Props, States> {
     this.setState({ histories });
   }
 
-  private getScopeStyle() {
-    return {
-      ...styles.scope,
-      ...this.props,
-      background: Highlights.color(0, "background"),
-    };
-  }
-
   render() {
     return this.state.histories.length === 0 ? null : (
-      <div style={this.getScopeStyle()}>
-        <div style={styles.actions}>
+      <div style={{...styles.scope, ...this.props, ...Highlights.style(0)}}>
+        <div className="color-white" style={styles.actions}>
           <IconComponent color="red-fg" style={styles.icon} font="ﰸ" onClick={this.onClear.bind(this)} />
           {notificates.filter(icon => icon.filter).map((icon, i) => (
             <IconComponent color={`${icon.color}-fg`} active={icon.kinds === this.state.filter} style={styles.icon} font={icon.font} onClick={() => this.onFilter(icon.kinds)} key={i} />)

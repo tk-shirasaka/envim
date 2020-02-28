@@ -24,7 +24,7 @@ const styles = {
   popup: {
     overflow: "hidden",
     borderRadius: 4,
-    boxShadow: "5px 5px 10px 0px #000",
+    boxShadow: "2px 2px 6px -2px",
   },
   line: {
     display: "flex",
@@ -39,7 +39,7 @@ const styles = {
     padding: 4,
     whiteSpace,
     borderRadius: 4,
-    boxShadow: "5px 5px 10px 0px #000",
+    boxShadow: "2px 2px 6px -2px",
   }
 };
 

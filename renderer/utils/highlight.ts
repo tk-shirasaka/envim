@@ -67,6 +67,13 @@ export class Highlights {
     return Highlights.hls[id][color] || Highlights.hls[0][color];
   }
 
+  static style(id: number, reverse: boolean = false) {
+    const background = Highlights.color(id, reverse ? "foreground" : "background");
+    const foreground = Highlights.color(id, reverse ? "background" : "foreground");
+
+    return { background, color: foreground, borderColor: foreground };
+  }
+
   static font(id: number) {
     return Highlights.hls[id].font();
   }

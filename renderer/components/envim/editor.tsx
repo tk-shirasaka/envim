@@ -1,10 +1,9 @@
 import React, { MouseEvent, WheelEvent } from "react";
 
-import { ICell, IHighlight } from "common/interface";
+import { ICell } from "common/interface";
 
 import { Emit } from "../../utils/emit";
 import { Context2D } from "../../utils/context2d";
-import { Highlights } from "../../utils/highlight";
 import { font } from "../../utils/font";
 
 interface Props {
@@ -32,7 +31,6 @@ export class EditorComponent extends React.Component<Props, States> {
 
     Emit.on("envim:ime", this.onIme.bind(this));
     Emit.on("envim:cursor", this.onCursor.bind(this));
-    Emit.on("envim:highlights", this.onHighlight.bind(this));
     Emit.on("envim:flush", this.onFlush.bind(this));
     Emit.send("envim:resize", ...this.getNvimSize(this.props.width, this.props.height));
   }
@@ -99,10 +97,6 @@ export class EditorComponent extends React.Component<Props, States> {
 
   private onCursor(cursor: { row: number, col: number, hl: number }) {
     this.renderer?.setCursor(cursor);
-  }
-
-  private onHighlight(highlights: {id: number, hl: IHighlight}[]) {
-    highlights.forEach(({id, hl}) => Highlights.setHighlight(id, hl));
   }
 
   private onFlush(cells: ICell[]) {

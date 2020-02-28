@@ -1,6 +1,7 @@
 import React from "react";
 
 import { ICell } from "common/interface";
+
 import { Emit } from "../../utils/emit";
 import { Context2D } from "../../utils/context2d";
 
@@ -28,7 +29,7 @@ const styles = {
     bottom: 0,
     animation: "fadeIn .5s ease",
     borderRadius: "4px 4px 0 0",
-    boxShadow: "0 0 10px 5px #000",
+    boxShadow: "0 0 4px 0px",
     pointerEvents,
   },
   hide: {

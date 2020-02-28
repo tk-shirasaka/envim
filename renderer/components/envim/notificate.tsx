@@ -28,7 +28,7 @@ const styles = {
     maxHeight: 100,
     marginBottom: 8,
     borderRadius: 4,
-    boxShadow: "5px 5px 10px 0px #000",
+    boxShadow: "2px 2px 6px -2px",
     overflow: "auto",
   },
   selected: {
@@ -40,7 +40,7 @@ const styles = {
     cursor: "pointer",
     animation: "fadeIn .5s ease",
     borderRadius: 4,
-    boxShadow: "5px 5px 10px 0px #000",
+    boxShadow: "2px 2px 6px -2px",
     overflow: "hidden",
   },
   icon: {

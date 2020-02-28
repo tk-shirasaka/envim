@@ -33,33 +33,18 @@ const styles = {
 
 export class MessageComponent extends React.Component<Props, States> {
 
-  private getContentStyle() {
-    return {
-      ...styles.content,
-      color: Highlights.color(0, "foreground"),
-      background: Highlights.color(0, "background"),
-    };
-  }
-
   private getKind(kind: string) {
     const icon = notificates.filter(icon => icon.kinds.indexOf(kind) >= 0)[0];
 
     return <IconComponent color={icon.color} style={styles.kind} font={icon.font} />;
   }
 
-  private getMessageStyle(hl: number) {
-    return {
-      color: Highlights.color(hl, "foreground"),
-      background: Highlights.color(hl, "background"),
-    };
-  }
-
   render() {
     return (
-      <div style={this.getContentStyle()}>
+      <div style={{...styles.content, ...Highlights.style(0)}}>
         {this.getKind(this.props.kind)}
         <pre style={styles.message}>
-          {this.props.content.map(([hl, message], i) => +hl === 0 ? message : <span style={this.getMessageStyle(+hl)} key={i}>{ message }</span>)}
+          {this.props.content.map(([hl, message], i) => +hl === 0 ? message : <span style={Highlights.style(+hl)} key={i}>{ message }</span>)}
         </pre>
       </div>
     );
