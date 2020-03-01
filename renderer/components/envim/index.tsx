@@ -66,7 +66,7 @@ export class EnvimComponent extends React.Component<Props, States> {
         <div style={{...style, ...editor}}>
           <EditorComponent {...editor} />
           <HistoryComponent {...footer} />
-          <CmdlineComponent {...footer} />
+          <CmdlineComponent />
           <PopupmenuComponent />
           <NotificateComponent />
         </div>

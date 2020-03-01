@@ -1,107 +1,125 @@
 import React from "react";
 
-import { ICell } from "common/interface";
-
 import { Emit } from "../../utils/emit";
-import { Context2D } from "../../utils/context2d";
-
-import { IconComponent } from "../icon";
+import { Highlights } from "../../utils/highlight";
 
 interface Props {
-  width: number;
-  height: number;
 }
 
 interface States {
-  visible: boolean;
-  hide: boolean;
+  line: number;
+  contents: { hl: number, reverse: boolean, c: string }[][];
+  pos: number;
+  prompt: string;
+  indent: number;
 }
 
-const positionA: "absolute" = "absolute";
-const positionF: "fixed" = "fixed";
+const position: "absolute" = "absolute";
 const pointerEvents: "none" = "none";
+const whiteSpace: "pre-wrap" = "pre-wrap";
 const styles = {
-  canvas: {
-    position: positionA,
-    display: "block",
+  scope: {
+    position,
+    display: "flex",
     left: 0,
     right: 0,
     bottom: 0,
+    padding: 4,
+    alignItems: "flex-end",
     animation: "fadeIn .5s ease",
     borderRadius: "4px 4px 0 0",
     boxShadow: "0 0 4px 0px",
     pointerEvents,
   },
-  hide: {
-    display: "none",
-  },
-  icon: {
-    animation: "fadeIn .5s ease",
-    position: positionF,
-    right: 8,
-    bottom: 0,
+  cmdline: {
+    whiteSpace,
   },
 };
 
 export class CmdlineComponent extends React.Component<Props, States> {
-  private renderer?: Context2D;
 
   constructor(props: Props) {
     super(props);
 
-    this.state = { visible: false, hide: false };
+    this.state = { line: 0, contents: [], pos: 0, prompt: "", indent: 0 };
     Emit.on("cmdline:show", this.onCmdline.bind(this));
     Emit.on("cmdline:cursor", this.onCursor.bind(this));
-    Emit.on("cmdline:flush", this.onFlush.bind(this));
+    Emit.on("cmdline:special", this.onSpecial.bind(this));
+    Emit.on("cmdline:contents", this.onContents.bind(this));
     Emit.on("cmdline:hide", this.offCmdline.bind(this));
-  }
-
-  componentDidUpdate() {
-    const ctx = (this.refs.canvas as HTMLCanvasElement)?.getContext("2d");
-
-    if (ctx) {
-      this.renderer = new Context2D(ctx);
-    }
   }
 
   componentWillUnmount() {
     Emit.clear(["cmdline:show", "cmdline:cursor", "cmdline:flush", "cmdline:hide"]);
   }
 
-  private onCmdline() {
-    this.state.visible || this.setState({ visible: true, hide: false });
+  private convertContent(content: string[][], pos: number, indent: number) {
+    let result: { hl: number, reverse: boolean, c: string; }[] = [];
+    let i = 0;
+
+    for (; i < indent; i++) {
+      result.push({ hl: 0, reverse: false, c: " " });
+    }
+    content.forEach(([hl, text]) => {
+      result = result.concat(text.split("").map(c => ({ hl: +hl, reverse: pos === i++, c })))
+    });
+    result.push({ hl: 0, reverse: pos === i, c: " " });
+
+    return result;
   }
 
-  private onCursor(cursor: { row: number, col: number, hl: number }) {
-    this.renderer?.setCursor(cursor);
+  private onCmdline(content: string[][], pos: number, prompt: string, indent: number) {
+    const contents = this.state.contents;
+    const line = Math.max(1, this.state.line);
+    pos += indent;
+
+    contents.splice(Math.max(0, line - 1), 1, this.convertContent(content, pos, indent));
+    this.setState({ line, contents, pos, prompt, indent })
   }
 
-  private onFlush(cells: ICell[]) {
-    this.renderer?.flush(cells);
+  private onCursor(pos: number) {
+    const contents = this.state.contents;
+    pos += this.state.indent;
+
+    contents[this.state.line - 1][this.state.pos].reverse = false;
+    contents[this.state.line - 1][pos].reverse = true;
+    this.setState({ contents, pos });
+  }
+
+  private onSpecial(c: string, shift: boolean) {
+    const contents = this.state.contents;
+    const pos = shift ? this.state.pos + 1 : this.state.pos;
+
+    shift || (contents[this.state.line - 1][this.state.pos].reverse = false);
+    contents[this.state.line - 1].splice(this.state.pos, 0, { hl: 0, c, reverse: true });
+    this.setState({ contents, pos });
+  }
+
+  private onContents(contents: string[][][]) {
+    const line = this.state.line + contents.length;
+    this.setState({ line, contents: [...contents.map(content => this.convertContent(content, -1, 0)), ...this.state.contents] });
   }
 
   private offCmdline() {
-    delete(this.renderer);
-    this.state.visible && this.setState({ visible: false, hide: false });
+    this.state.line && this.setState({ line: 0, contents: [] });
   }
 
-  private toggleCmdline() {
-    Emit.share("envim:focus");
-    this.setState({ hide: !this.state.hide });
-  }
-
-  private getStyle() {
-    const style = { ...styles.canvas, ...this.props };
-
-    return this.state.hide ? { ...styles.hide, style } : style;
+  private getScopeStyle() {
+    return { ...styles.scope, ...this.props, ...Highlights.style(0) };
   }
 
   render() {
-    return this.state.visible === false ? null : (
-      <>
-        <canvas style={this.getStyle()} width={this.props.width * 2} height={this.props.height * 2} ref="canvas"></canvas>
-        <IconComponent color="green-fg" style={styles.icon} font={this.state.hide ? "" : ""} onClick={this.toggleCmdline.bind(this)} />
-      </>
+    return this.state.line === 0 ? null : (
+      <div style={this.getScopeStyle()}>
+        <div className="color-lightblue-fg">{ this.state.prompt }</div>
+        <div>
+          {this.state.contents.map((content, i) =>
+            <div style={styles.cmdline} key={i}>
+              {content.map(({hl, reverse, c}, j) => (hl || reverse) ? <span style={Highlights.style(hl, reverse)} key={`${i}.${j}`}>{ c }</span> : c)}
+            </div>
+          )}
+        </div>
+      </div>
     );
   }
 }

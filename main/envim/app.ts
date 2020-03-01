@@ -2,11 +2,9 @@ import { Tabpage } from "neovim/lib/api/Tabpage";
 
 import { Emit } from "../emit";
 import { Grid } from "./grid";
-import { Cmdline } from "./cmdline";
 
 export class App {
   private grids: { [k: number]: Grid } = {};
-  private cmdline: Cmdline = new Cmdline;
   private window: { width: number; height: number; } = { width: 0, height: 0 };
 
   redraw(redraw: any[][]) {
@@ -112,7 +110,6 @@ export class App {
   private gridResize(grid: number, width: number, height: number) {
     this.window = { width, height };
     this.grids[grid] = new Grid(width, height);
-    this.cmdline.resize(width, height);
   }
 
   private defaultColorsSet(foreground: number, background: number, special: number) {
@@ -188,39 +185,30 @@ export class App {
   }
 
   private cmdlineShow(content: string[][], pos: number, prompt: string, indent: number) {
-    const { cursor, cells } = this.cmdline.show(content, pos, prompt, indent);
-    Emit.send("cmdline:show");
-    Emit.send("cmdline:cursor", cursor);
-    Emit.send("cmdline:flush", cells);
+    Emit.send("cmdline:show", content, pos, prompt, indent);
   }
 
   private cmdlinePos(pos: number) {
-    const { cursor, cells } = this.cmdline.pos(pos);
-    Emit.send("cmdline:cursor", cursor);
-    Emit.send("cmdline:flush", cells);
+    Emit.send("cmdline:cursor", pos);
   }
 
   private cmdlineSpecialChar(c: string, shift: boolean) {
-    const { cursor, cells } = this.cmdline.specialchar(c, shift);
-    Emit.send("cmdline:cursor", cursor);
-    Emit.send("cmdline:flush", cells);
+    Emit.send("cmdline:special", c, shift);
   }
 
   private cmdlineHide() {
-    this.cmdline.hide();
     Emit.send("cmdline:hide");
   }
 
   private cmdlineBlockShow(lines: string[][][]) {
-    this.cmdline.blockShow(lines);
+    Emit.send("cmdline:contents", lines);
   }
 
   private cmdlineBlockAppend(line: string[][]) {
-    this.cmdline.blockAppend(line);
+    Emit.send("cmdline:contents", [line]);
   }
 
   private cmdlineBlockHide() {
-    this.cmdline.blockHide();
     Emit.send("cmdline:hide");
   }
 
