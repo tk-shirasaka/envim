@@ -12,18 +12,27 @@
 
 @font-face {
   font-family: "Ricty Diminished Bold";
-  font-style: bold;
+  font-style: normal;
   src: url(fonts/RictyDiminished-Bold.ttf);
 }
 
 @font-face {
   font-family: "Nerd Font Bold";
-  font-style: bold;
+  font-style: normal;
   src: url(fonts/NerdFont-Bold.ttf);
 }
 
 @font-face {
   font-family: "Ricty Diminished Oblique";
-  font-style: oblique;
+  font-style: normal;
   src: url(fonts/RictyDiminished-Oblique.ttf);
+}
+
+.bold {
+  font-family: "Nerd Font Bold";
+}
+
+i {
+  font-style: normal;
+  font-family: Nerd Font;
 }

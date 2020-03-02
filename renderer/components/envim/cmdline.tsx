@@ -24,14 +24,17 @@ const styles = {
     left: 0,
     right: 0,
     bottom: 0,
-    padding: 4,
-    alignItems: "flex-end",
+    overflow: "hidden",
     animation: "fadeIn .5s ease",
     borderRadius: "4px 4px 0 0",
     boxShadow: "0 0 4px 0px",
     pointerEvents,
   },
+  prompt: {
+    padding: 4,
+  },
   cmdline: {
+    padding: 4,
     whiteSpace,
   },
 };
@@ -73,7 +76,7 @@ export class CmdlineComponent extends React.Component<Props, States> {
     const line = Math.max(1, this.state.line);
     pos += indent;
 
-    contents.splice(Math.max(0, line - 1), 1, this.convertContent(content, pos, indent));
+    contents.splice(line - 1, 1, this.convertContent(content, pos, indent));
     this.setState({ line, contents, pos, prompt, indent })
   }
 
@@ -96,7 +99,7 @@ export class CmdlineComponent extends React.Component<Props, States> {
   }
 
   private onContents(contents: string[][][]) {
-    const line = this.state.line + contents.length;
+    const line = Math.max(2, this.state.line + contents.length);
     this.setState({ line, contents: [...contents.map(content => this.convertContent(content, -1, 0)), ...this.state.contents] });
   }
 
@@ -111,10 +114,10 @@ export class CmdlineComponent extends React.Component<Props, States> {
   render() {
     return this.state.line === 0 ? null : (
       <div style={this.getScopeStyle()}>
-        <div className="color-lightblue-fg">{ this.state.prompt }</div>
-        <div>
+        <div className="bold color-lightblue" style={styles.prompt}>{ this.state.prompt }</div>
+        <div style={styles.cmdline}>
           {this.state.contents.map((content, i) =>
-            <div style={styles.cmdline} key={i}>
+            <div key={i}>
               {content.map(({hl, reverse, c}, j) => (hl || reverse) ? <span style={Highlights.style(hl, reverse)} key={`${i}.${j}`}>{ c }</span> : c)}
             </div>
           )}
