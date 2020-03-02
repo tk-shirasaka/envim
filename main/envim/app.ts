@@ -215,7 +215,7 @@ export class App {
   private popupmenuShow(items: string[][], selected: number, row: number, col: number, grid: number) {
     const height = Math.min(5, items.length);
     grid < 0 && (row = this.window.height - 1);
-    row = row + height > this.window.height ? row - height : row + 1;
+    row = row + height >= this.window.height ? row - height : row + 1;
     col = Math.min(col, this.window.width - 10);
 
     Emit.send("popupmenu:show", {
