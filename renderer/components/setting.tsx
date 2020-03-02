@@ -2,7 +2,6 @@ import React, { FormEvent, ChangeEvent } from "react";
 
 import { Emit } from "../utils/emit";
 import { Localstorage } from "../utils/localstorage";
-import { icons } from "../utils/icons";
 
 import { IconComponent } from "./icon";
 
@@ -71,6 +70,11 @@ export class SettingComponent extends React.Component<Props, States> {
       <form style={styles.scope} onSubmit={this.onSubmit.bind(this)}>
         <h1>Welcome To Envim!</h1>
         <div>
+          <IconComponent color="green-fg" style={styles.icon} font="" raito={3} />
+          <IconComponent color="white-fg" style={styles.icon} font="" />
+          <IconComponent color="lightblue-fg" style={styles.icon} font="" raito={3} />
+        </div>
+        <div>
           <label><input type="radio" value="command" checked={this.state.type === "command"} onChange={this.onToggle.bind(this)} />Command</label>
           <label><input type="radio" value="address" checked={this.state.type === "address"} onChange={this.onToggle.bind(this)} />Port</label>
         </div>
@@ -80,9 +84,6 @@ export class SettingComponent extends React.Component<Props, States> {
         }
         <div>
           <label>Transparent ({this.props.opacity}%)<input type="range" min="0" max="99" value={this.props.opacity} onChange={this.props.onChangeOpacity} /></label>
-        </div>
-        <div>
-          {icons.map((icon, i) => <IconComponent color={icon.color} style={styles.icon} font={icon.font} key={i} />)}
         </div>
         <button className="color-blue clickable" style={styles.button}>Start</button>
       </form>

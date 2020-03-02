@@ -6,6 +6,7 @@ interface Props {
   font: string;
   color: string;
   style: { [k: string]: number | string };
+  raito?: number;
   active?: boolean;
   onClick?: (...args: any[]) => void,
 }
@@ -19,7 +20,7 @@ export class IconComponent extends React.Component<Props, States> {
     const className = `color-${this.props.color} ${this.props.active ? "active" : this.props.onClick ? "clickable" : ""}`;
     const style = {
       ...this.props.style,
-      fontSize: size + 8,
+      fontSize: (this.props.raito || 1) * size + 8,
     };
 
     return (
