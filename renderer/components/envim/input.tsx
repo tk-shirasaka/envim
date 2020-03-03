@@ -18,19 +18,30 @@ const style = {
 };
 
 export class InputComponent extends React.Component<Props, States> {
+  private mode: "envim" | "cmdline" = "envim";
 
   constructor(props: Props) {
     super(props);
 
     Emit.on("envim:focus", this.onFocus.bind(this));
+    Emit.on("cmdline:show", this.onCmdline.bind(this));
+    Emit.on("cmdline:hide", this.offCmdline.bind(this));
   }
 
   componentWillUnmount() {
-    Emit.clear(["envim:focus"]);
+    Emit.clear(["envim:focus", "cmdline:show", "cmdline:hide"]);
   }
 
   private onFocus() {
     (this.refs.input as HTMLInputElement).focus();
+  }
+
+  private onCmdline() {
+    this.mode = "cmdline";
+  }
+
+  private offCmdline() {
+    this.mode = "envim";
   }
 
   private onKeyDown(e: KeyboardEvent) {
@@ -43,7 +54,7 @@ export class InputComponent extends React.Component<Props, States> {
     e.preventDefault();
     setTimeout(() => {
       if (input.value) {
-        Emit.share("envim:ime", input.value);
+        Emit.share(`${this.mode}:ime`, input.value);
       } else {
         Emit.share("envim:focus");
         code && Emit.send("envim:input", code);

@@ -45,6 +45,7 @@ export class CmdlineComponent extends React.Component<Props, States> {
     super(props);
 
     this.state = { cmdline: [], contents: [], pos: 0, prompt: "", indent: 0 };
+    Emit.on("cmdline:ime", this.onIme.bind(this));
     Emit.on("cmdline:show", this.onCmdline.bind(this));
     Emit.on("cmdline:cursor", this.onCursor.bind(this));
     Emit.on("cmdline:special", this.onSpecial.bind(this));
@@ -54,7 +55,7 @@ export class CmdlineComponent extends React.Component<Props, States> {
   }
 
   componentWillUnmount() {
-    Emit.clear(["cmdline:show", "cmdline:cursor", "cmdline:flush", "cmdline:hide"]);
+    Emit.clear(["cmdline:ime", "cmdline:show", "cmdline:cursor", "cmdline:flush", "cmdline:hide"]);
   }
 
   private convertContent(content: string[][], pos: number, indent: number) {
@@ -70,6 +71,15 @@ export class CmdlineComponent extends React.Component<Props, States> {
     result.push({ hl: 0, reverse: pos === i, c: " " });
 
     return result;
+  }
+
+  private onIme(text: string) {
+    const cmdline = this.state.cmdline;
+    const hl = cmdline[this.state.pos].hl;
+    const reverse = true
+
+    cmdline.splice(this.state.pos, text.length * 2, ...text.split("").map(c => ({ hl, reverse, c })));
+    this.setState({ cmdline })
   }
 
   private onCmdline(cmdline: string[][], pos: number, prompt: string, indent: number) {
