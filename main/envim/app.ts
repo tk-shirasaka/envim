@@ -201,15 +201,15 @@ export class App {
   }
 
   private cmdlineBlockShow(lines: string[][][]) {
-    Emit.send("cmdline:contents", lines);
+    Emit.send("cmdline:blockshow", lines);
   }
 
   private cmdlineBlockAppend(line: string[][]) {
-    Emit.send("cmdline:contents", [line]);
+    Emit.send("cmdline:blockshow", [line]);
   }
 
   private cmdlineBlockHide() {
-    Emit.send("cmdline:hide");
+    Emit.send("cmdline:blockhide");
   }
 
   private popupmenuShow(items: string[][], selected: number, row: number, col: number, grid: number) {

@@ -7,7 +7,7 @@ interface Props {
 }
 
 interface States {
-  line: number;
+  cmdline: { hl: number, reverse: boolean, c: string }[];
   contents: { hl: number, reverse: boolean, c: string }[][];
   pos: number;
   prompt: string;
@@ -44,12 +44,13 @@ export class CmdlineComponent extends React.Component<Props, States> {
   constructor(props: Props) {
     super(props);
 
-    this.state = { line: 0, contents: [], pos: 0, prompt: "", indent: 0 };
+    this.state = { cmdline: [], contents: [], pos: 0, prompt: "", indent: 0 };
     Emit.on("cmdline:show", this.onCmdline.bind(this));
     Emit.on("cmdline:cursor", this.onCursor.bind(this));
     Emit.on("cmdline:special", this.onSpecial.bind(this));
-    Emit.on("cmdline:contents", this.onContents.bind(this));
     Emit.on("cmdline:hide", this.offCmdline.bind(this));
+    Emit.on("cmdline:blockshow", this.onBlock.bind(this));
+    Emit.on("cmdline:blockhide", this.offBlock.bind(this));
   }
 
   componentWillUnmount() {
@@ -71,56 +72,63 @@ export class CmdlineComponent extends React.Component<Props, States> {
     return result;
   }
 
-  private onCmdline(content: string[][], pos: number, prompt: string, indent: number) {
-    const contents = this.state.contents;
-    const line = Math.max(1, this.state.line);
+  private onCmdline(cmdline: string[][], pos: number, prompt: string, indent: number) {
     pos += indent;
 
-    contents.splice(line - 1, 1, this.convertContent(content, pos, indent));
-    this.setState({ line, contents, pos, prompt, indent })
+    this.setState({ cmdline: this.convertContent(cmdline, pos, indent), pos, prompt, indent })
   }
 
   private onCursor(pos: number) {
-    const contents = this.state.contents;
+    const cmdline = this.state.cmdline;
     pos += this.state.indent;
 
-    contents[this.state.line - 1][this.state.pos].reverse = false;
-    contents[this.state.line - 1][pos].reverse = true;
-    this.setState({ contents, pos });
+    cmdline[this.state.pos].reverse = false;
+    cmdline[pos].reverse = true;
+    this.setState({ cmdline, pos });
   }
 
   private onSpecial(c: string, shift: boolean) {
-    const contents = this.state.contents;
+    const cmdline = this.state.cmdline;
     const pos = shift ? this.state.pos + 1 : this.state.pos;
 
-    shift || (contents[this.state.line - 1][this.state.pos].reverse = false);
-    contents[this.state.line - 1].splice(this.state.pos, 0, { hl: 0, c, reverse: true });
-    this.setState({ contents, pos });
-  }
-
-  private onContents(contents: string[][][]) {
-    const line = Math.max(2, this.state.line + contents.length);
-    this.setState({ line, contents: [...contents.map(content => this.convertContent(content, -1, 0)), ...this.state.contents] });
+    shift || (cmdline[this.state.pos].reverse = false);
+    cmdline.splice(this.state.pos, 0, { hl: 0, c, reverse: true });
+    this.setState({ cmdline, pos });
   }
 
   private offCmdline() {
-    this.state.line && this.setState({ line: 0, contents: [] });
+    this.state.contents.length || this.setState({ cmdline: [] });
+  }
+
+  private onBlock(lines: string[][][]) {
+    const contents = [
+      ...this.state.contents,
+      ...lines.map(line => this.convertContent(line, -1, 0)),
+    ];
+    this.setState({ contents });
+  }
+
+  private offBlock() {
+    this.setState({ contents: [], cmdline: [] });
   }
 
   private getScopeStyle() {
     return { ...styles.scope, ...this.props, ...Highlights.style(0) };
   }
 
+  renderCmdline(cmdline: { hl: number, reverse: boolean, c: string }[]) {
+    return cmdline.map(({hl, reverse, c}, i) => {
+      return (hl || reverse) ? <span style={Highlights.style(hl, reverse)} key={i}>{ c }</span> : c;
+    });
+  }
+
   render() {
-    return this.state.line === 0 ? null : (
+    return this.state.cmdline.length === 0 ? null : (
       <div style={this.getScopeStyle()}>
         <div className="bold color-lightblue" style={styles.prompt}>{ this.state.prompt }</div>
         <div style={styles.cmdline}>
-          {this.state.contents.map((content, i) =>
-            <div key={i}>
-              {content.map(({hl, reverse, c}, j) => (hl || reverse) ? <span style={Highlights.style(hl, reverse)} key={`${i}.${j}`}>{ c }</span> : c)}
-            </div>
-          )}
+          {this.state.contents.map((content, i) => <div key={i}>{ this.renderCmdline(content) }</div>)}
+          <div>{ this.renderCmdline(this.state.cmdline) }</div>
         </div>
       </div>
     );
