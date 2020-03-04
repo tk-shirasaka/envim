@@ -50,12 +50,10 @@ export class Grid {
     const prev = this.getCell(row, col - 1);
     const cell = this.getCell(row, col);
 
-    if (text && cell.text === text && cell.hl === hl) return;
-
     text || (prev.width = 2);
     hl < 0 && (hl = prev.hl);
     [ cell.row, cell.col, cell.text, cell.hl, cell.width ] = [ row, col, text, hl, text.length ];
-    this.flush[`${cell.row},${cell.col}`] = cell;
+    text && cell.text === text && cell.hl === hl && (this.flush[`${cell.row},${cell.col}`] = cell);
   }
 
   moveCell(srow: number, scol: number, trow: number, tcol: number) {

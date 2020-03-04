@@ -60,7 +60,6 @@ export class Context2D {
 
   flush(cells: ICell[]) {
     cells.forEach(cell => {
-      if (cell.width === 0) return;
       const [y, x] = [cell.row * this.font.height, cell.col * this.font.width];
       const reverse = (this.cursor.row === cell.row && this.cursor.col === cell.col);
       this.rect(x, y, cell.width, cell.hl, reverse);
