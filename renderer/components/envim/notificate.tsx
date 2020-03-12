@@ -45,7 +45,8 @@ const styles = {
   },
   icon: {
     position,
-    right: 4,
+    right: 0,
+    padding: 4,
   },
 };
 

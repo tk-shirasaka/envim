@@ -13,9 +13,8 @@ body {
 #app > div {
   background: $color-black;
   color: $color-white;
-  font-family: Ricty Diminished;
 }
 
-h1, h2, h3, h4, h5, h6 {
-  font-family: Ricty Diminished Bold;
+span, i {
+  display: inline-block;
 }

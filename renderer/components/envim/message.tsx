@@ -21,7 +21,7 @@ const styles = {
     height: "100%",
   },
   kind: {
-    padding: "0 8px",
+    padding: 4,
   },
   message: {
     margin: 0,

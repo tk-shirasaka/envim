@@ -85,9 +85,12 @@ export class AppComponent extends React.Component<Props, States> {
   }
 
   render() {
-    const opacity = (100 - this.state.opacity) / 100;
-    const fontSize = this.state.font.size;
+    const style = {
+      opacity: (100 - this.state.opacity) / 100,
+      fontSize: this.state.font.size,
+      lineHeight: `${this.state.font.height}px`,
+    };
 
-    return <div style={{ ...this.state.window, opacity, fontSize }}>{this.renderContent()}</div>;
+    return <div style={{ ...this.state.window, ...style }}>{this.renderContent()}</div>;
   }
 }

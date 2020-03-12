@@ -28,11 +28,14 @@
   src: url(fonts/RictyDiminished-Oblique.ttf);
 }
 
-.bold {
-  font-family: "Nerd Font Bold";
+body {
+  font-family: "Ricty Diminished", "Nerd Font";
+}
+
+h1, h2, h3, h4, h5, h6, .bold {
+  font-family: "Ricty Diminished Bold", "Nerd Font Bold";
 }
 
 i {
   font-style: normal;
-  font-family: Nerd Font;
 }
