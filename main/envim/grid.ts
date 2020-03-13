@@ -21,7 +21,6 @@ export class Grid {
       this.lines.push([]);
       for (let j = 0; j < width; j++) {
         const cell = this.getDefault(i, j)
-        this.flush[`${cell.row},${cell.col}`] = cell;
         this.lines[i].push(cell);
       }
     }
@@ -52,8 +51,8 @@ export class Grid {
 
     text || (prev.width = 2);
     hl < 0 && (hl = prev.hl);
+    (cell.text === text && cell.hl === hl) || (this.flush[`${cell.row},${cell.col}`] = cell);
     [ cell.row, cell.col, cell.text, cell.hl, cell.width ] = [ row, col, text, hl, text.length ];
-    text && cell.text === text && cell.hl === hl && (this.flush[`${cell.row},${cell.col}`] = cell);
   }
 
   moveCell(srow: number, scol: number, trow: number, tcol: number) {
