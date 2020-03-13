@@ -12,6 +12,8 @@ interface Props {
 
 interface States {
   tabs: { name: string; type: string; active: boolean }[];
+  qf: number;
+  lc: number;
 }
 
 const whiteSpace: "nowrap" = "nowrap";
@@ -43,7 +45,7 @@ const styles = {
 export class TablineComponent extends React.Component<Props, States> {
   constructor(props: Props) {
     super(props);
-    this.state = { tabs: [] }
+    this.state = { tabs: [], qf: 0, lc: 0 }
 
     Emit.on("envim:tabline", this.onTabline.bind(this));
   }
@@ -72,8 +74,8 @@ export class TablineComponent extends React.Component<Props, States> {
     this.onCommand("$tabnew");
   }
 
-  private onTabline(tabs: States["tabs"]) {
-    this.setState({ tabs });
+  private onTabline(tabs: States["tabs"], qf: number, lc: number) {
+    this.setState({ tabs, qf, lc });
   }
 
   private getChildStayle(active: boolean) {
@@ -88,6 +90,17 @@ export class TablineComponent extends React.Component<Props, States> {
     return icon && <IconComponent color={icon.color} style={styles.icon} font={icon.font} />;
   }
 
+  renderQuickfix(type: "qf" | "lc") {
+    const color = type === "qf" ? "red" : "yellow";
+    const command = type === "qf" ? "copen" : "lopen";
+
+    return this.state[type] === 0 ? null : (
+      <div className={`color-${color}-fg clickable`} onClick={() => this.onCommand(command)}>
+        <IconComponent color="none" style={{...styles.icon, lineHeight: `${this.props.height}px`}} font="" />{ this.state[type] }
+      </div>
+    );
+  }
+
   render() {
     return (
       <div style={{...this.props, ...styles.scope}}>
@@ -99,6 +112,9 @@ export class TablineComponent extends React.Component<Props, States> {
           </div>
         ))}
         <IconComponent color="green-fg" style={{...styles.icon, lineHeight: `${this.props.height}px`}} font="" onClick={() => this.onPlus()} />
+        <div className="space" />
+        { this.renderQuickfix("lc") }
+        { this.renderQuickfix("qf") }
       </div>
     );
   }

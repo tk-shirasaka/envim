@@ -170,18 +170,17 @@ export class App {
   }
 
   private async tablineUpdate(current: Tabpage, tabs: { tab: Tabpage, name: string }[]) {
-    const next: { name: string, type: string, active: boolean }[] = [];
+    const next: { name: string, type: string, active: boolean; }[] = [];
     for (let i = 0; i < tabs.length; i++) {
       const { tab, name } = tabs[i];
       const buffer = await tab.window.buffer;
       const type = await current.request("nvim_buf_get_option", [buffer.data, "filetype"])
-      next.push({
-        name,
-        type,
-        active: current.data === tab.data,
-      });
+      const active = current.data === tab.data;
+      next.push({ name, type, active });
     }
-    Emit.send("envim:tabline", next);
+    const qf = (await current.request("nvim_call_function", ["getqflist", [{size: 0}]])).size;
+    const lc = (await current.request("nvim_call_function", ["getloclist", [0, {size: 0}]])).size;
+    Emit.send("envim:tabline", next, qf, lc);
   }
 
   private cmdlineShow(content: string[][], pos: number, prompt: string, indent: number) {
@@ -265,7 +264,8 @@ export class App {
 
   private flush() {
     Object.values(this.grids).forEach(grid => {
-      Emit.send("envim:flush", grid.getFlush());
+      const flush = grid.getFlush();
+      flush.length && Emit.send("envim:flush", flush);
     });
   }
 }

@@ -17,4 +17,9 @@ body {
 
 span, i {
   display: inline-block;
+  vertical-align: middle;
+}
+
+.space {
+  flex-grow: 1;
 }

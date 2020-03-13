@@ -19,7 +19,6 @@ interface States {
 
 const positionA: "absolute" = "absolute";
 const positionS: "sticky" = "sticky";
-const textAlign: "right" = "right";
 const styles = {
   scope: {
     position: positionA,
@@ -33,9 +32,8 @@ const styles = {
   },
   actions: {
     position: positionS,
+    display: "flex",
     top: 0,
-    paddingRight: 8,
-    textAlign,
   },
   icon: {
     padding: "2px 4px",
@@ -78,6 +76,7 @@ export class HistoryComponent extends React.Component<Props, States> {
       <div style={{...styles.scope, ...this.props, ...Highlights.style(0)}}>
         <div className="color-white" style={styles.actions}>
           <IconComponent color="red-fg" style={styles.icon} font="ﰸ" onClick={this.onClear.bind(this)} />
+          <div className="space" />
           {notificates.filter(icon => icon.filter).map((icon, i) => (
             <IconComponent color={`${icon.color}-fg`} active={icon.kinds === this.state.filter} style={styles.icon} font={icon.font} onClick={() => this.onFilter(icon.kinds)} key={i} />)
           )}
