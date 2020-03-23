@@ -19,6 +19,8 @@ const whiteSpace: "pre" = "pre";
 const styles = {
   scope: {
     position,
+    display: "flex",
+    alignItems: "flex-start",
     animation: "fadeIn .5s ease",
   },
   popup: {
@@ -34,8 +36,7 @@ const styles = {
     padding: "1px 4px 0",
   },
   info: {
-    position,
-    margin: 4,
+    marginLeft: 4,
     padding: 4,
     whiteSpace,
     borderRadius: 4,
@@ -118,7 +119,7 @@ export class PopupmenuComponent extends React.Component<Props, States> {
             </div>
           ))}
         </div>
-        {this.state.items[this.state.selected]?.info && <div className="color-black active" style={styles.info}>{ this.state.items[this.state.selected]?.info }</div>}
+        {this.state.items[this.state.selected]?.info.replace(/^\s*$/, '') && <div className="color-black active" style={styles.info}>{ this.state.items[this.state.selected]?.info }</div>}
       </div>
     )
   }
