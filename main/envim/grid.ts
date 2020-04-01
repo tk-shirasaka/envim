@@ -61,9 +61,12 @@ export class Grid {
 
   getFlush() {
     const flush = this.flush;
+    const result: ICell[] = [];
 
     this.flush = {};
-    return Object.keys(flush).map(k => flush[k]);
+    Object.keys(flush).forEach(k => flush[k].width && result.push(flush[k]));
+
+    return result;
   }
 
   getLine(row: number, col: number, fn: (cell: ICell) => void) {

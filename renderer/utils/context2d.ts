@@ -66,7 +66,7 @@ export class Context2D {
       this.underline(x, y, cell.width, cell.hl);
       this.fontStyle(cell.hl);
       this.style(cell.hl, reverse ? "background" : "foreground");
-      this.ctx.fillText(cell.text, x, y);
+      this.ctx.fillText(cell.text, x, y, cell.width * this.font.width);
     });
   }
 }
