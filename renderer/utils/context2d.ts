@@ -64,6 +64,10 @@ export class Context2D {
       const reverse = (this.cursor.row === cell.row && this.cursor.col === cell.col);
       this.rect(x, y, cell.width, cell.hl, reverse);
       this.underline(x, y, cell.width, cell.hl);
+    });
+    cells.forEach(cell => {
+      const [y, x] = [cell.row * this.font.height, cell.col * this.font.width];
+      const reverse = (this.cursor.row === cell.row && this.cursor.col === cell.col);
       this.fontStyle(cell.hl);
       this.style(cell.hl, reverse ? "background" : "foreground");
       this.ctx.fillText(cell.text, x, y, cell.width * this.font.width);
