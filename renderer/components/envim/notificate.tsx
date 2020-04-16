@@ -67,7 +67,7 @@ export class NotificateComponent extends React.Component<Props, States> {
   private onMessage(group: number, kind: string, content: string[][], replace: boolean) {
     let messages: States["messages"] = [];
 
-    if (content.filter(([_, message]) => message.replace("\n", "")).length === 0) return;
+    if (content.filter(([_, message]) => message.replace(/\s/, "")).length === 0) return;
     if (replace) {
       messages = [
         ...this.state.messages.filter(message => message.group !== group),

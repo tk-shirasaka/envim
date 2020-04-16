@@ -76,7 +76,7 @@ export class App {
           this.popupmenuHide();
         break;
 
-        /** ext_popupmenu **/
+        /** ext_messages **/
         case "msg_show":
           r.forEach(r => this.msgShow(r[0], r[1], r[2]));
         break;
