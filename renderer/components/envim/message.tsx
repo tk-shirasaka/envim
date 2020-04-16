@@ -24,6 +24,7 @@ const styles = {
     padding: 4,
   },
   message: {
+    width: "100%",
     margin: 0,
     padding: 4,
     overflow: "auto",
