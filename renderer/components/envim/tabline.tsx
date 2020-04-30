@@ -78,16 +78,18 @@ export class TablineComponent extends React.Component<Props, States> {
     this.setState({ tabs, qf, lc });
   }
 
-  private getChildStayle(active: boolean) {
-    const base = { lineHeight: `${this.props.height}px` };
-    return active
-      ? {...base, ...styles.tab, ...styles.active}
-      : {...base, ...styles.tab};
+  private getTabStyle(active: boolean) {
+    return active ? {...styles.tab, ...styles.active} : styles.tab;
+  }
+
+  private getStyle(style: { [k: string]: number | string }) {
+    const lineHeight = `${this.props.height}px`;
+    return {...style, lineHeight};
   }
 
   private getIcon(type: string) {
     const icon = icons.filter(icon => icon.type.indexOf(type) >= 0).pop();
-    return icon && <IconComponent color={icon.color} style={styles.icon} font={icon.font} />;
+    return icon && <IconComponent color={icon.color} style={this.getStyle(styles.icon)} font={icon.font} />;
   }
 
   renderQuickfix(type: "qf" | "lc") {
@@ -105,10 +107,10 @@ export class TablineComponent extends React.Component<Props, States> {
     return (
       <div style={{...this.props, ...styles.scope}}>
         {this.state.tabs.map((tab, i) => (
-          <div key={i} className={`color-black ${tab.active ? "active" : "clickable"}`} style={this.getChildStayle(tab.active)} onClick={e => this.onSelect(e, i)}>
+          <div key={i} className={`color-black ${tab.active ? "active" : "clickable"}`} style={this.getTabStyle(tab.active)} onClick={e => this.onSelect(e, i)}>
             { this.getIcon(tab.type) }
-            <span style={styles.name}>{ tab.name }</span>
-            {tab.active || <IconComponent color="red-fg" style={styles.icon} font="" onClick={e => this.onClose(e, i)} />}
+            <span style={this.getStyle(styles.name)}>{ tab.name }</span>
+            {tab.active || <IconComponent color="red-fg" style={this.getStyle(styles.icon)} font="" onClick={e => this.onClose(e, i)} />}
           </div>
         ))}
         <IconComponent color="green-fg" style={{...styles.icon, lineHeight: `${this.props.height}px`}} font="" onClick={() => this.onPlus()} />

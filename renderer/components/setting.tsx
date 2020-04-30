@@ -25,7 +25,7 @@ const styles = {
     alignItems: "center",
   },
   icon: {
-    margin: 8,
+    margin: "0 8px",
   },
   button: {
     padding: ".2em .4em",
@@ -82,9 +82,7 @@ export class SettingComponent extends React.Component<Props, States> {
           ?  <label>Enter neovim command<input type="text" value={this.state.command} onChange={this.onChangeCommand.bind(this)} autoFocus={true} /></label>
           :  <label>Enter neovim address<input type="text" value={this.state.address} onChange={this.onChangePort.bind(this)} autoFocus={true} /></label>
         }
-        <div>
-          <label>Transparent ({this.props.opacity}%)<input type="range" min="0" max="99" value={this.props.opacity} onChange={this.props.onChangeOpacity} /></label>
-        </div>
+        <label>Transparent ({this.props.opacity}%)<input type="range" min="0" max="99" value={this.props.opacity} onChange={this.props.onChangeOpacity} /></label>
         <button className="color-blue clickable" style={styles.button}>Start</button>
       </form>
     );
