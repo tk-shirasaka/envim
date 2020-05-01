@@ -78,13 +78,19 @@ export class App {
 
         /** ext_messages **/
         case "msg_show":
-          r.forEach(r => this.msgShow(r[0], r[1], r[2]));
+          r.forEach(r => this.msgToggle(1, r[0], r[1], r[2]));
         break;
         case "msg_showmode":
-          this.msgShowmode(r[0][0]);
+          this.msgToggle(2, "", r[0][0], true);
+        break;
+        case "msg_showcmd":
+          this.msgToggle(3, "", r[0][0], true);
+        break;
+        case "msg_ruler":
+          this.msgToggle(4, "", r[0][0], true);
         break;
         case "msg_clear":
-          this.msgClear();
+          this.msgToggle(1, "", [], true);
         break;
         case "msg_history_show":
           this.msgHistoryShow(r[0][0]);
@@ -234,20 +240,12 @@ export class App {
     Emit.send("popupmenu:hide");
   }
 
-  private msgShow(kind: string, content: string[][], replace_last: boolean) {
-    Emit.send("messages:show", 1, kind, content, replace_last);
-  }
-
-  private msgShowmode(content: string[][]) {
+  private msgToggle(group: number, kind: string, content: string[][], replace_last: boolean) {
     if (content.length) {
-      Emit.send("messages:show", 2, "", content, true);
+      Emit.send("messages:show", group, kind, content, replace_last);
     } else {
-      Emit.send("messages:clear", 2);
+      Emit.send("messages:clear", group);
     }
-  }
-
-  private msgClear() {
-    Emit.send("messages:clear", 1);
   }
 
   private msgHistoryShow(contents: string[][][]) {
