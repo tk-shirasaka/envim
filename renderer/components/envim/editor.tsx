@@ -23,6 +23,7 @@ const style = {
 
 export class EditorComponent extends React.Component<Props, States> {
   private drag: boolean = false;
+  private mouse: boolean = false;
   private renderer?: Context2D;
   private offset?: { x: number, y: number };
 
@@ -31,6 +32,7 @@ export class EditorComponent extends React.Component<Props, States> {
 
     Emit.on("envim:ime", this.onIme.bind(this));
     Emit.on("envim:cursor", this.onCursor.bind(this));
+    Emit.on("envim:mouse", this.onMouse.bind(this));
     Emit.on("envim:flush", this.onFlush.bind(this));
     Emit.send("envim:resize", ...this.getNvimSize(this.props.width, this.props.height));
   }
@@ -51,7 +53,7 @@ export class EditorComponent extends React.Component<Props, States> {
   }
 
   componentWillUnmount() {
-    Emit.clear(["envim:ime", "envim:cursor", "envim:highlights", "envim:flush"]);
+    Emit.clear(["envim:ime", "envim:cursor", "envim:mouse", "envim:highlights", "envim:flush"]);
   }
 
   private getNvimSize(x: number, y: number) {
@@ -59,36 +61,37 @@ export class EditorComponent extends React.Component<Props, States> {
     return [Math.floor(x / width), Math.floor(y / height)];
   }
 
-  private onMouse(e: MouseEvent, button: string, action: string) {
+  private onMouseEvent(e: MouseEvent, button: string, action: string) {
+
     const { x, y } = this.offset || { x: 0, y: 0 };
     const [col, row] = this.getNvimSize(e.clientX - x, e.clientY - y);
 
     button === "left" && e.stopPropagation();
     button === "left" && e.preventDefault();
-    Emit.send("envim:mouse", button, action, row, col);
+    this.mouse && Emit.send("envim:mouse", button, action, row, col);
   }
 
   private onMouseDown(e: MouseEvent) {
     switch (e.button) {
       case 0:
         this.drag = true;
-        this.onMouse(e, "left", "press");
+        this.onMouseEvent(e, "left", "press");
         Emit.share("envim:focus");
       break;
     }
   }
 
   private onMouseMove(e: MouseEvent) {
-    this.drag && this.onMouse(e, "left", "drag");
+    this.drag && this.onMouseEvent(e, "left", "drag");
   }
 
   private onMouseUp(e: MouseEvent) {
     this.drag = false;
-    this.onMouse(e, "left", "release");
+    this.onMouseEvent(e, "left", "release");
   }
 
   private onMouseWheel(e: WheelEvent) {
-    this.onMouse(e, "wheel", e.deltaY < 0 ? "up" : "down");
+    this.onMouseEvent(e, "wheel", e.deltaY < 0 ? "up" : "down");
   }
 
   private onIme(text: string) {
@@ -97,6 +100,10 @@ export class EditorComponent extends React.Component<Props, States> {
 
   private onCursor(cursor: { row: number, col: number, hl: number }) {
     this.renderer?.setCursor(cursor);
+  }
+
+  private onMouse(mouse: boolean) {
+    this.mouse = mouse;
   }
 
   private onFlush(cells: ICell[]) {

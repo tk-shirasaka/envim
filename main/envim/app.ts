@@ -100,6 +100,12 @@ export class App {
         case "set_title":
           this.setTitle(r[0][0]);
         break;
+        case "mouse_on":
+          this.mouse(true);
+        break;
+        case "mouse_off":
+          this.mouse(false);
+        break;
         case "busy_start":
           this.busy(true);
         break;
@@ -254,6 +260,10 @@ export class App {
 
   private setTitle(title: string) {
     Emit.send("envim:title", title);
+  }
+
+  private mouse(mouse: boolean) {
+    Emit.send("envim:mouse", mouse);
   }
 
   private busy(busy: boolean) {
