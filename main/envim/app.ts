@@ -100,6 +100,9 @@ export class App {
         case "set_title":
           this.setTitle(r[0][0]);
         break;
+        case "option_set":
+          this.optionSet(r);
+        break;
         case "mouse_on":
           this.mouse(true);
         break;
@@ -260,6 +263,13 @@ export class App {
 
   private setTitle(title: string) {
     Emit.send("envim:title", title);
+  }
+
+  private optionSet(options: string[][]) {
+    const result: { [k: string]: boolean } = {};
+
+    options.forEach(option => result[option[0]] = !!option[1]);
+    Emit.send("envim:option", result);
   }
 
   private mouse(mouse: boolean) {

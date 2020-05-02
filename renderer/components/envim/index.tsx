@@ -19,9 +19,8 @@ interface Props {
 }
 
 interface States {
-  background: string;
-  color: string;
-  borderColor: string;
+  style: { background: string; color: string; borderColor: string; };
+  options: { [k: string]: boolean };
 }
 
 const position: "relative" = "relative"
@@ -34,9 +33,14 @@ export class EnvimComponent extends React.Component<Props, States> {
   constructor(props: Props) {
     super(props);
 
-    this.state = { background: "", color: "", borderColor: "" };
+    this.state = { style: { background: "", color: "", borderColor: "" }, options: {} };
     Emit.on("envim:highlights", this.onHighlight.bind(this));
     Emit.on("envim:title", this.onTitle.bind(this));
+    Emit.on("envim:option", this.onOption.bind(this));
+  }
+
+  componentWillUnmount() {
+    Emit.clear(["envim:highlights", "envim:title", "envim:option"]);
   }
 
   private onHighlight(highlights: {id: number, hl: IHighlight}[]) {
@@ -45,7 +49,7 @@ export class EnvimComponent extends React.Component<Props, States> {
 
       if (id === 0) {
         const style = Highlights.style(id);
-        JSON.stringify(this.state) === JSON.stringify(style) || this.setState(style);
+        JSON.stringify(this.state.style) === JSON.stringify(style) || this.setState({ style });
       }
     });
   }
@@ -54,21 +58,26 @@ export class EnvimComponent extends React.Component<Props, States> {
     document.title = title || 'Envim';
   }
 
+  private onOption(options: { [k: string]: boolean }) {
+    this.setState({ options: Object.assign(options, this.state.options) });
+  }
+
   render() {
     const { height } = this.props.font;
-    const editor = { width: this.props.window.width, height: Math.floor((this.props.window.height - height - 4) / height) * height };
-    const header = { width: this.props.window.width, height: this.props.window.height - editor.height };
-    const footer = { width: this.props.window.width, height: Math.min(editor.height, height * 15) };
+    const { width } = this.props.window;
+    const header = { width, height: this.state.options.ext_tabline ? height + 4 + (this.props.window.height - 4) % height : 0 };
+    const editor = { width, height: this.props.window.height - header.height };
+    const footer = { width, height: Math.min(editor.height, height * 15) };
 
     return (
-      <div style={this.state}>
-        <TablineComponent {...header} />
+      <div style={this.state.style}>
+        { this.state.options.ext_tabline ? <TablineComponent {...header} /> : null }
         <div style={{...style, ...editor}}>
           <EditorComponent {...editor} />
-          <HistoryComponent {...footer} />
-          <CmdlineComponent />
-          <PopupmenuComponent />
-          <NotificateComponent />
+          { this.state.options.ext_messages ? <HistoryComponent {...footer} /> : null }
+          { this.state.options.ext_cmdline ? <CmdlineComponent /> : null }
+          { this.state.options.ext_popupmenu ? <PopupmenuComponent /> : null }
+          { this.state.options.ext_messages ? <NotificateComponent /> : null }
         </div>
         <InputComponent />
       </div>

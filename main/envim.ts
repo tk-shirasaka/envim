@@ -11,7 +11,7 @@ import { Clipboard } from "./envim/clipboard";
 export class Envim {
   private nvim = new NeovimClient;
   private app = new App;
-  private attached: boolean = false;
+  private state: { attached: boolean; width: number; height: number } = { attached: false, width: 0, height: 0 };
   private connect: { process?: ChildProcess; socket?: Socket; } = {}
 
   constructor() {
@@ -75,9 +75,12 @@ export class Envim {
       ext_popupmenu: true,
       ext_messages: true,
     };
-    this.attached || await this.nvim.request("nvim_ui_attach", [width, height, options]);
-    await this.nvim.uiTryResize(width, height);
-    this.attached = true;
+    if (!this.state.attached) {
+      await this.nvim.request("nvim_ui_attach", [width, height, options]);
+    } else if (this.state.width !== width || this.state.height !== height){
+      await this.nvim.uiTryResize(width, height);
+    }
+    this.state = { attached: true, width, height };
   }
 
   private async onMouse(button: string, action: string, row: number, col: number) {
@@ -107,7 +110,7 @@ export class Envim {
   }
 
   private onDisconnect() {
-    this.attached = false;
+    this.state.attached = false;
     setMenu(false);
     Emit.send("app:stop");
   }
