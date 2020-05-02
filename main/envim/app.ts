@@ -176,7 +176,7 @@ export class App {
     delete(this.grids[grid]);
   }
 
-  gridCursorGoto(grid: number, row: number, col: number) {
+  private gridCursorGoto(grid: number, row: number, col: number) {
     Emit.send("envim:cursor", this.grids[grid].setCursorPos(row, col));
   }
 
