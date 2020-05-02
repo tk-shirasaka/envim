@@ -53,7 +53,7 @@ export class EditorComponent extends React.Component<Props, States> {
   }
 
   componentWillUnmount() {
-    Emit.clear(["envim:ime", "envim:cursor", "envim:mouse", "envim:highlights", "envim:flush"]);
+    Emit.clear(["envim:ime", "envim:cursor", "envim:mouse", "envim:flush"]);
   }
 
   private getNvimSize(x: number, y: number) {

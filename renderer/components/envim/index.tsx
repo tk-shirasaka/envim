@@ -35,6 +35,7 @@ export class EnvimComponent extends React.Component<Props, States> {
 
     this.state = { style: { background: "", color: "", borderColor: "" }, options: {} };
     Emit.on("envim:highlights", this.onHighlight.bind(this));
+    Emit.on("envim:hlgroup", this.onHlGroup.bind(this));
     Emit.on("envim:title", this.onTitle.bind(this));
     Emit.on("envim:option", this.onOption.bind(this));
   }
@@ -52,6 +53,10 @@ export class EnvimComponent extends React.Component<Props, States> {
         JSON.stringify(this.state.style) === JSON.stringify(style) || this.setState({ style });
       }
     });
+  }
+
+  private onHlGroup(groups: {id: number, name: string}[]) {
+    groups.forEach(({id, name}) => Highlights.setName(id, name));
   }
 
   private onTitle(title: string) {

@@ -1,6 +1,7 @@
 import { IHighlight } from "common/interface";
 
 class Highlight {
+  public name: string = "";
   public foreground: string = "";
   public background: string = "";
   public special: string = "";
@@ -55,6 +56,10 @@ export class Highlights {
 
   static setHighlight(id: number, hl: IHighlight) {
     Highlights.hls[id] = new Highlight(hl);
+  }
+
+  static setName(id: number, name: string) {
+    Highlights.hls[id].name = name;
   }
 
   static color(id: number, type: "foreground" | "background" | "special") {
