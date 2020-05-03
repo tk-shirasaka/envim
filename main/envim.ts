@@ -11,7 +11,7 @@ import { Clipboard } from "./envim/clipboard";
 export class Envim {
   private nvim = new NeovimClient;
   private app = new App;
-  private state: { attached: boolean; width: number; height: number } = { attached: false, width: 0, height: 0 };
+  private state: { attached: boolean; width: number; height: number, options: { [k: string]: boolean } } = { attached: false, width: 0, height: 0, options: {} };
   private connect: { process?: ChildProcess; socket?: Socket; } = {}
 
   constructor() {
@@ -25,7 +25,7 @@ export class Envim {
     process.on("uncaughtException", this.onError.bind(this));
   }
 
-  private async onAttach(type: string, value: string) {
+  private async onAttach(type: string, value: string, options: { [k: string]: boolean }) {
     let reader, writer;
 
     switch (type) {
@@ -41,6 +41,7 @@ export class Envim {
     }
 
     if (reader && writer) {
+      this.state.options = options;
       this.nvim = new NeovimClient;
       this.nvim.attach({ reader, writer });
       this.nvim.setClientInfo("Envim", { major: 0, minor: 0, patch: 1, prerelease: "dev" }, "ui", {}, {})
@@ -68,19 +69,13 @@ export class Envim {
   }
 
   private async onResize(width: number, height: number) {
-    const options = {
-      ext_linegrid: true,
-      ext_tabline: true,
-      ext_cmdline: true,
-      ext_popupmenu: true,
-      ext_messages: true,
-    };
+    const options = { ...{ ext_linegrid: true }, ...this.state.options };
     if (!this.state.attached) {
       await this.nvim.request("nvim_ui_attach", [width, height, options]);
     } else if (this.state.width !== width || this.state.height !== height){
       await this.nvim.uiTryResize(width, height);
     }
-    this.state = { attached: true, width, height };
+    this.state = { attached: true, width, height, options };
   }
 
   private async onMouse(button: string, action: string, row: number, col: number) {
