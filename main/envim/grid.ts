@@ -20,7 +20,9 @@ export class Grid {
     for (let i = 0; i < height; i++) {
       this.lines.push([]);
       for (let j = 0; j < width; j++) {
-        this.lines[i].push(this.getDefault(i, j));
+        const cell = this.getDefault(i, j);
+        this.lines[i].push(cell);
+        this.flush[`${cell.row},${cell.col}`] = cell;
       }
     }
   }
