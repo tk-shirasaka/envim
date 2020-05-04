@@ -34,14 +34,14 @@ export class EnvimComponent extends React.Component<Props, States> {
     super(props);
 
     this.state = { style: { background: "", color: "", borderColor: "" }, options: {} };
-    Emit.on("envim:highlights", this.onHighlight.bind(this));
-    Emit.on("envim:hlgroup", this.onHlGroup.bind(this));
+    Emit.on("highlight:set", this.onHighlight.bind(this));
+    Emit.on("highlight:name", this.onHlGroup.bind(this));
     Emit.on("envim:title", this.onTitle.bind(this));
     Emit.on("envim:option", this.onOption.bind(this));
   }
 
   componentWillUnmount() {
-    Emit.clear(["envim:highlights", "envim:title", "envim:option"]);
+    Emit.clear(["highlight:set", "highlight:name", "envim:title", "envim:option"]);
   }
 
   private onHighlight(highlights: {id: number, hl: IHighlight}[]) {

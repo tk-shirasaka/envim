@@ -47,11 +47,11 @@ export class TablineComponent extends React.Component<Props, States> {
     super(props);
     this.state = { tabs: [], qf: 0, lc: 0 }
 
-    Emit.on("envim:tabline", this.onTabline.bind(this));
+    Emit.on("tabline:update", this.onTabline.bind(this));
   }
 
   componentWillUnmount() {
-    Emit.clear(["envim:tabline"]);
+    Emit.clear(["tabline:update"]);
   }
 
   private onCommand(command: string, e: MouseEvent | null = null) {

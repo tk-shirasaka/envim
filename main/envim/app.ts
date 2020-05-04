@@ -131,7 +131,7 @@ export class App {
   }
 
   private defaultColorsSet(foreground: number, background: number, special: number) {
-    Emit.send("envim:highlights", [{id: 0, hl: {
+    Emit.send("highlight:set", [{id: 0, hl: {
       foreground,
       background,
       special,
@@ -147,12 +147,12 @@ export class App {
 
   private hlAttrDefine(highlights: any[]) {
     highlights = highlights.map(([id, rgb]) => ({id, hl: rgb}));
-    Emit.send("envim:highlights", highlights);
+    Emit.send("highlight:set", highlights);
   }
 
   private hlGroupSet(hlgroup: any[]) {
     hlgroup = hlgroup.map(([name, id]) => ({id: +id, name}));
-    Emit.send("envim:hlgroup", hlgroup);
+    Emit.send("highlight:name", hlgroup);
   }
 
   private gridLine(grid: number, row: number, col: number, cells: string[][]) {
@@ -177,7 +177,7 @@ export class App {
   }
 
   private gridCursorGoto(grid: number, row: number, col: number) {
-    Emit.send("envim:cursor", this.grids[grid].setCursorPos(row, col));
+    Emit.send("grid:cursor", this.grids[grid].setCursorPos(row, col));
   }
 
   private gridScroll(grid: number, top: number, bottom: number, left: number, right: number, rows: number, cols: number) {
@@ -203,7 +203,7 @@ export class App {
     }
     const qf = (await current.request("nvim_call_function", ["getqflist", [{size: 0}]])).size;
     const lc = (await current.request("nvim_call_function", ["getloclist", [0, {size: 0}]])).size;
-    Emit.send("envim:tabline", next, qf, lc);
+    Emit.send("tabline:update", next, qf, lc);
   }
 
   private cmdlineShow(content: string[][], pos: number, prompt: string, indent: number) {

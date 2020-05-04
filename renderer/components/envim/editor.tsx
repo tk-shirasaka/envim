@@ -31,7 +31,7 @@ export class EditorComponent extends React.Component<Props, States> {
     super(props);
 
     Emit.on("envim:ime", this.onIme.bind(this));
-    Emit.on("envim:cursor", this.onCursor.bind(this));
+    Emit.on("grid:cursor", this.onCursor.bind(this));
     Emit.on("envim:mouse", this.onMouse.bind(this));
     Emit.on("envim:flush", this.onFlush.bind(this));
     Emit.send("envim:resize", ...this.getNvimSize(this.props.width, this.props.height));
@@ -53,7 +53,7 @@ export class EditorComponent extends React.Component<Props, States> {
   }
 
   componentWillUnmount() {
-    Emit.clear(["envim:ime", "envim:cursor", "envim:mouse", "envim:flush"]);
+    Emit.clear(["envim:ime", "grid:cursor", "envim:mouse", "envim:flush"]);
   }
 
   private getNvimSize(x: number, y: number) {
