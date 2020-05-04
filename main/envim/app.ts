@@ -2,9 +2,11 @@ import { Tabpage } from "neovim/lib/api/Tabpage";
 
 import { Emit } from "../emit";
 import { Grid } from "./grid";
+import { Messages } from "./messages";
 
 export class App {
   private grids: { [k: number]: Grid } = {};
+  private messages: Messages = new Messages;
   private window: { width: number; height: number; } = { width: 0, height: 0 };
 
   redraw(redraw: any[][]) {
@@ -81,22 +83,22 @@ export class App {
 
         /** ext_messages **/
         case "msg_show":
-          r.forEach(r => this.msgToggle(1, r[0], r[1], r[2]));
+          this.msgShow(1, r);
         break;
         case "msg_showmode":
-          this.msgToggle(2, "", r[0][0], true);
+          this.msgShow(2, [["", r[0][0], true]]);
         break;
         case "msg_showcmd":
-          this.msgToggle(3, "", r[0][0], true);
+          this.msgShow(3, [["", r[0][0], true]]);
         break;
         case "msg_ruler":
-          this.msgToggle(4, "", r[0][0], true);
+          this.msgShow(4, [["", r[0][0], true]]);
         break;
         case "msg_clear":
-          this.msgToggle(1, "", [], true);
+          this.msgShow(1, [["", [], true]]);
         break;
         case "msg_history_show":
-          this.msgHistoryShow(r[0][0]);
+          this.msgShow(0, r[0][0]);
         break;
 
         /** default **/
@@ -257,16 +259,18 @@ export class App {
     Emit.send("popupmenu:hide");
   }
 
-  private msgToggle(group: number, kind: string, content: string[][], replace_last: boolean) {
-    if (content.length) {
-      Emit.send("messages:show", group, kind, content, replace_last);
-    } else {
-      Emit.send("messages:clear", group);
-    }
-  }
+  private msgShow(group: number, contents: any[]) {
+    const type = group === 0 ? "history" : "notificate";
 
-  private msgHistoryShow(contents: string[][][]) {
-    Emit.send("messages:history", contents.map(([kind, content]) => ({ kind, content })));
+    contents.forEach(([kind, messages, replace_last]) => {
+      if (messages.length) {
+        this.messages.set(group, kind, messages, replace_last);
+      } else {
+        this.messages.clear(group);
+      }
+    });
+
+    Emit.send(`messages:${type}`, this.messages.get(type));
   }
 
   private setTitle(title: string) {

@@ -18,3 +18,9 @@ export interface IHighlight {
   undercurl?: boolean,
   blend?: number,
 }
+
+export interface IMessage {
+  group: number;
+  kind: string;
+  contents: { hl: number, content: string }[];
+}

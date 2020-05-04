@@ -1,5 +1,7 @@
 import React from "react";
 
+import { IMessage } from "../../../common/interface";
+
 import { Emit } from "../../utils/emit";
 import { Highlights } from "../../utils/highlight";
 import { notificates } from "../../utils/icons";
@@ -14,7 +16,7 @@ interface Props {
 
 interface States {
   filter: string[],
-  histories: { kind: string, content: string[][] }[];
+  messages: IMessage[];
 }
 
 const positionA: "absolute" = "absolute";
@@ -45,7 +47,7 @@ export class HistoryComponent extends React.Component<Props, States> {
   constructor(props: Props) {
     super(props);
 
-    this.state = { filter: [], histories: [] };
+    this.state = { filter: [], messages: [] };
     Emit.on("envim:focus", this.onClose.bind(this));
     Emit.on("messages:history", this.onHistory.bind(this));
   }
@@ -56,7 +58,7 @@ export class HistoryComponent extends React.Component<Props, States> {
 
   private onClear() {
     Emit.send("envim:command", "messages clear");
-    this.setState({ histories: [] });
+    this.setState({ messages: [] });
   }
 
   private onFilter(kinds: string[]) {
@@ -64,15 +66,15 @@ export class HistoryComponent extends React.Component<Props, States> {
   }
 
   private onClose() {
-    this.setState({ histories: [] });
+    this.setState({ messages: [] });
   }
 
-  private onHistory(histories: States["histories"]) {
-    this.setState({ histories });
+  private onHistory(messages: IMessage[]) {
+    this.setState({ messages });
   }
 
   render() {
-    return this.state.histories.length === 0 ? null : (
+    return this.state.messages.length === 0 ? null : (
       <div style={{...styles.scope, ...this.props, ...Highlights.style(0)}}>
         <div className="color-white" style={styles.actions}>
           <IconComponent color="red-fg" style={styles.icon} font="ﰸ" onClick={this.onClear.bind(this)} />
@@ -82,8 +84,8 @@ export class HistoryComponent extends React.Component<Props, States> {
           )}
           <IconComponent color="black-fg" style={styles.icon} font="" onClick={this.onClose.bind(this)} />
         </div>
-        {this.state.histories.map(({ kind, content }, i) => (
-          (this.state.filter.length && this.state.filter.indexOf(kind) < 0) || <div key={i}><MessageComponent kind={kind} content={content} /></div>
+        {this.state.messages.map((message, i) => (
+          (this.state.filter.length && this.state.filter.indexOf(message.kind) < 0) || <div key={i}><MessageComponent {...message} /></div>
         ))}
       </div>
     );

@@ -1,7 +1,9 @@
 import React, { MouseEvent } from "react";
 
+import { IMessage } from "../../../common/interface";
+
 import { Emit } from "../../utils/emit";
-import { icons } from "../../utils/icons";
+import { icons, notificates } from "../../utils/icons";
 
 import { IconComponent } from "../icon";
 
@@ -14,6 +16,8 @@ interface States {
   tabs: { name: string; type: string; active: boolean }[];
   qf: number;
   lc: number;
+  messages: IMessage[];
+  message: boolean;
 }
 
 const whiteSpace: "nowrap" = "nowrap";
@@ -45,13 +49,14 @@ const styles = {
 export class TablineComponent extends React.Component<Props, States> {
   constructor(props: Props) {
     super(props);
-    this.state = { tabs: [], qf: 0, lc: 0 }
+    this.state = { tabs: [], qf: 0, lc: 0, messages: [], message: true };
 
     Emit.on("tabline:update", this.onTabline.bind(this));
+    Emit.on("messages:notificate", this.onMessage.bind(this));
   }
 
   componentWillUnmount() {
-    Emit.clear(["tabline:update"]);
+    Emit.clear(["tabline:update", "messages:notificate"]);
   }
 
   private onCommand(command: string, e: MouseEvent | null = null) {
@@ -74,8 +79,21 @@ export class TablineComponent extends React.Component<Props, States> {
     this.onCommand("$tabnew");
   }
 
+  private toggleMessage(e: MouseEvent) {
+    e.stopPropagation();
+    e.preventDefault();
+
+    Emit.share("messages:status", !this.state.message);
+    Emit.share("envim:focus");
+    this.setState({ message: !this.state.message });
+  }
+
   private onTabline(tabs: States["tabs"], qf: number, lc: number) {
     this.setState({ tabs, qf, lc });
+  }
+
+  private onMessage(messages: IMessage[]) {
+    this.setState({ messages });
   }
 
   private getTabStyle(active: boolean) {
@@ -92,13 +110,25 @@ export class TablineComponent extends React.Component<Props, States> {
     return icon && <IconComponent color={icon.color} style={this.getStyle(styles.icon)} font={icon.font} />;
   }
 
-  renderQuickfix(type: "qf" | "lc") {
+  private renderQuickfix(type: "qf" | "lc") {
     const color = type === "qf" ? "red" : "yellow";
     const command = type === "qf" ? "copen" : "lopen";
 
     return this.state[type] === 0 ? null : (
       <div className={`color-${color}-fg clickable`} onClick={() => this.onCommand(command)}>
         <IconComponent color="none" style={{...styles.icon, lineHeight: `${this.props.height}px`}} font="" />{ this.state[type] }
+      </div>
+    );
+  }
+
+  private renderNotify() {
+    const i = this.state.messages.length;
+    const kind = this.state.messages.filter(({ group }) => group === 1).pop()?.kind || "";
+    const color = notificates.filter(icon => icon.kinds.indexOf(kind) >= 0)[0].color;
+    const icon = this.state.message ? "" : "";
+    return i === 0 ? null : (
+      <div className={`color-${color}-fg clickable`} onClick={this.toggleMessage.bind(this)}>
+      <IconComponent color="none" style={{...styles.icon, lineHeight: `${this.props.height}px`}} font={icon} />{ this.state.message ? "" : i }
       </div>
     );
   }
@@ -117,6 +147,7 @@ export class TablineComponent extends React.Component<Props, States> {
         <div className="space" />
         { this.renderQuickfix("lc") }
         { this.renderQuickfix("qf") }
+        { this.renderNotify() }
       </div>
     );
   }

@@ -1,16 +1,18 @@
-import React, { MouseEvent } from "react";
+import React from "react";
+
+import { IMessage } from "../../../common/interface";
 
 import { Emit } from "../../utils/emit";
 
-import { IconComponent } from "../icon";
 import { MessageComponent } from "./message";
 
 interface Props {
 }
 
 interface States {
-  messages: { group: number, kind: string, content: string[][] }[];
-  selected: { kind: string, content: string[][] } | null;
+  messages: IMessage[];
+  selected: IMessage | null;
+  message: boolean;
 }
 
 const position: "absolute" = "absolute";
@@ -55,43 +57,25 @@ export class NotificateComponent extends React.Component<Props, States> {
   constructor(props: Props) {
     super(props);
 
-    this.state = { messages: [], selected: null };
-    Emit.on("messages:show", this.onMessage.bind(this));
-    Emit.on("messages:clear", this.offMessage.bind(this));
+    this.state = { messages: [], selected: null, message: true };
+    Emit.on("messages:notificate", this.onMessage.bind(this));
+    Emit.on("messages:status", this.toggleMessage.bind(this));
   }
 
   componentWillUnmount() {
-    Emit.clear(["messages:show", "messages:clear"]);
+    Emit.clear(["messages:notificate", "messages:status"]);
   }
 
-  private onMessage(group: number, kind: string, content: string[][], replace: boolean) {
-    let messages: States["messages"] = [];
-
-    if (content.filter(([_, message]) => message.replace(/\s/, "")).length === 0) return;
-    if (replace) {
-      messages = [
-        ...this.state.messages.filter(message => message.group !== group),
-        ...this.state.messages.filter(message => message.group === group).splice(0, -1),
-        { group, kind, content }
-      ];
-    } else {
-      const i = this.state.messages.length - 1;
-      messages = [...this.state.messages];
-      if (i < 0 || messages[i].group !== group || messages[i].kind !== kind) {
-        messages.push({ group, kind, content });
-      } else if (JSON.stringify(messages[i].content) !== JSON.stringify(content)) {
-        messages[i].content = [...messages[i].content, ["0", "\n"], ...content];
-      }
-    }
+  private onMessage(messages: IMessage[]) {
     this.setState({ messages });
   }
 
-  private offMessage(group: number) {
-    this.setState({ messages: this.state.messages.filter(message => message.group !== group) });
+  private toggleMessage(message: boolean) {
+    this.setState({ message });
   }
 
-  private onSelect(kind: string, content: string[][]) {
-    this.setState({ selected: { kind, content } })
+  private onSelect(selected: IMessage) {
+    this.setState({ selected })
   }
 
   private offSelect() {
@@ -99,21 +83,12 @@ export class NotificateComponent extends React.Component<Props, States> {
     this.setState({ selected: null })
   }
 
-  private onClose(e: MouseEvent, i: number) {
-    e.stopPropagation();
-    e.preventDefault();
-    Emit.share("envim:focus");
-    this.state.messages.splice(i, 1);
-    this.setState({ messages: this.state.messages, selected: null });
-  }
-
   private renderMessages() {
     return this.state.messages.length === 0 ? null : (
       <div style={styles.notificate}>
-        {this.state.messages.map(({ kind, content }, i) => (
-          <div style={styles.message} onClick={() => this.onSelect(kind, content)} key={i}>
-            <MessageComponent kind={kind} content={content} />
-            <IconComponent color="red-fg" style={styles.icon} font="" onClick={e => this.onClose(e, i)} />
+        {this.state.messages.map((message, i) => (
+          <div style={styles.message} onClick={() => this.onSelect(message)} key={i}>
+            <MessageComponent {...message} />
           </div>
         ))}
       </div>
@@ -129,6 +104,7 @@ export class NotificateComponent extends React.Component<Props, States> {
   }
 
   render() {
+    if (!this.state.message) return null;
     return this.state.selected ? this.renderSelected() : this.renderMessages();
   }
 }

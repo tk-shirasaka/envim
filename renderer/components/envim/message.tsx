@@ -1,14 +1,13 @@
 import React from "react";
 
+import { IMessage } from "../../../common/interface";
+
 import { Highlights } from "../../utils/highlight";
 import { notificates } from "../../utils/icons";
 
 import { IconComponent } from "../icon";
 
-interface Props {
-  kind: string;
-  content: string[][];
-}
+type Props = IMessage;
 
 interface States {
 }
@@ -45,7 +44,7 @@ export class MessageComponent extends React.Component<Props, States> {
       <div style={{...styles.content, ...Highlights.style(0)}}>
         {this.getKind(this.props.kind)}
         <pre style={styles.message}>
-          {this.props.content.map(([hl, message], i) => +hl === 0 ? message : <span style={Highlights.style(+hl)} key={i}>{ message }</span>)}
+          {this.props.contents.map(({hl, content}, i) => hl === 0 ? content : <span style={Highlights.style(hl)} key={i}>{ content }</span>)}
         </pre>
       </div>
     );
