@@ -15,6 +15,7 @@ class Message {
     } else {
       this.messages = [...this.messages, { group, kind, contents }];
     }
+    setTimeout(() => this.messages.shift(), 3000);
   }
 
   clear() {
