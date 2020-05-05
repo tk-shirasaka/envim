@@ -12,9 +12,9 @@ interface Props {
 
 interface States {
   type: "command" | "address";
-  command: string;
-  address: string;
-  options: { [k: string]: boolean; }
+  path: string;
+  options: { [k: string]: boolean; };
+  others: { [k: string]: boolean; };
 }
 
 const flexDirection: "column" = "column";
@@ -38,7 +38,10 @@ const styles = {
 
 export class SettingComponent extends React.Component<Props, States> {
   private ls: Localstorage<States> = new Localstorage<States>("setting", {
-    type: "command", command: "", address: "", options: { ext_cmdline: true, ext_tabline: true, ext_popupmenu: true, ext_messages: true },
+    type: "command",
+    path: "",
+    options: { ext_cmdline: true, ext_tabline: true, ext_popupmenu: true, ext_messages: true },
+    others: { notify: true },
   });
 
   constructor(props: Props) {
@@ -49,17 +52,12 @@ export class SettingComponent extends React.Component<Props, States> {
 
   private onToggleType(e: ChangeEvent) {
     const type = (e.target as HTMLInputElement).value === "command" ? "command" : "address";
-    this.setState({type: type});
+    this.setState({ type });
   }
 
-  private onChangeCommand(e: ChangeEvent) {
-    const command = (e.target as HTMLInputElement).value;
-    this.setState({ command });
-  }
-
-  private onChangePort(e: ChangeEvent) {
-    const address = (e.target as HTMLInputElement).value;
-    this.setState({ address });
+  private onChangePath(e: ChangeEvent) {
+    const path = (e.target as HTMLInputElement).value;
+    this.setState({ path });
   }
 
   private onToggleOption(e: ChangeEvent) {
@@ -69,11 +67,18 @@ export class SettingComponent extends React.Component<Props, States> {
     this.setState({ options });
   }
 
+  private onToggleOther(e: ChangeEvent) {
+    const input = e.target as HTMLInputElement;
+    const others = this.state.others;
+    others[input.name] = input.checked;
+    this.setState({ others });
+  }
+
   private onSubmit(e: FormEvent) {
     e.stopPropagation();
     e.preventDefault();
     this.ls.set(this.state);
-    Emit.send("envim:attach", this.state.type, this.state[this.state.type], this.state.options);
+    Emit.send("envim:attach", this.state.type, this.state.path, this.state.options);
   }
 
   render() {
@@ -85,20 +90,24 @@ export class SettingComponent extends React.Component<Props, States> {
           <IconComponent color="white-fg" style={styles.icon} font="" />
           <IconComponent color="lightblue-fg" style={styles.icon} font="" raito={3} />
         </div>
+
+        <h3>Path to neovim</h3>
         <div>
           <label><input type="radio" value="command" checked={this.state.type === "command"} onChange={this.onToggleType.bind(this)} />Command</label>
           <label><input type="radio" value="address" checked={this.state.type === "address"} onChange={this.onToggleType.bind(this)} />Port</label>
         </div>
-        {this.state.type === "command"
-          ?  <label>Enter neovim command<input type="text" value={this.state.command} onChange={this.onChangeCommand.bind(this)} autoFocus={true} /></label>
-          :  <label>Enter neovim address<input type="text" value={this.state.address} onChange={this.onChangePort.bind(this)} autoFocus={true} /></label>
-        }
+        <label>Enter neovim path<input type="text" value={this.state.path} onChange={this.onChangePath.bind(this)} autoFocus={true} /></label>
         <label>Transparent ({this.props.opacity}%)<input type="range" min="0" max="99" value={this.props.opacity} onChange={this.props.onChangeOpacity} /></label>
+
         <h3>Options</h3>
-        <label><input type="checkbox" name="ext_cmdline" checked={this.state.options.ext_cmdline} onChange={this.onToggleOption.bind(this)} />ext_cmdline</label>
-        <label><input type="checkbox" name="ext_tabline" checked={this.state.options.ext_tabline} onChange={this.onToggleOption.bind(this)} />ext_tabline</label>
-        <label><input type="checkbox" name="ext_popupmenu" checked={this.state.options.ext_popupmenu} onChange={this.onToggleOption.bind(this)} />ext_popupmenu</label>
-        <label><input type="checkbox" name="ext_messages" checked={this.state.options.ext_messages} onChange={this.onToggleOption.bind(this)} />ext_messages</label>
+        { Object.keys(this.state.options).map((key, i) => (
+          <label key={i}><input type="checkbox" name={key} checked={this.state.options[key]} onChange={this.onToggleOption.bind(this)} />{ key }</label>
+        ))}
+
+        <h3>Others</h3>
+        { Object.keys(this.state.others).map((key, i) => (
+          <label key={i}><input type="checkbox" name={key} checked={this.state.others[key]} onChange={this.onToggleOther.bind(this)} />{ key }</label>
+        ))}
 
         <button className="color-blue clickable" style={styles.button}>Start</button>
       </form>

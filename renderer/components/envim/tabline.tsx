@@ -3,6 +3,7 @@ import React, { MouseEvent } from "react";
 import { IMessage } from "../../../common/interface";
 
 import { Emit } from "../../utils/emit";
+import { Localstorage } from "../../utils/localstorage";
 import { icons, notificates } from "../../utils/icons";
 
 import { IconComponent } from "../icon";
@@ -13,11 +14,11 @@ interface Props {
 }
 
 interface States {
-  tabs: { name: string; type: string; active: boolean }[];
+  tabs: { name: string; type: string; active: boolean; }[];
   qf: number;
   lc: number;
   messages: IMessage[];
-  message: boolean;
+  setting: { others: { notify: boolean; } };
 }
 
 const whiteSpace: "nowrap" = "nowrap";
@@ -47,9 +48,11 @@ const styles = {
 };
 
 export class TablineComponent extends React.Component<Props, States> {
+  private ls: Localstorage<States["setting"]> = new Localstorage<States["setting"]>("setting", { others: { notify: true } });
+
   constructor(props: Props) {
     super(props);
-    this.state = { tabs: [], qf: 0, lc: 0, messages: [], message: true };
+    this.state = { tabs: [], qf: 0, lc: 0, messages: [], setting: this.ls.get() };
 
     Emit.on("tabline:update", this.onTabline.bind(this));
     Emit.on("messages:notificate", this.onMessage.bind(this));
@@ -79,13 +82,17 @@ export class TablineComponent extends React.Component<Props, States> {
     this.onCommand("$tabnew");
   }
 
-  private toggleMessage(e: MouseEvent) {
+  private toggleNotify(e: MouseEvent) {
+    const setting = this.state.setting;
+    setting.others.notify = !setting.others.notify;
+
     e.stopPropagation();
     e.preventDefault();
 
-    Emit.share("messages:status", !this.state.message);
+    Emit.share("setting:notify", setting);
     Emit.share("envim:focus");
-    this.setState({ message: !this.state.message });
+    this.ls.set(setting);
+    this.setState({ setting });
   }
 
   private onTabline(tabs: States["tabs"], qf: number, lc: number) {
@@ -125,10 +132,11 @@ export class TablineComponent extends React.Component<Props, States> {
     const i = this.state.messages.length;
     const kind = this.state.messages.filter(({ group }) => group === 1).pop()?.kind || "";
     const color = notificates.filter(icon => icon.kinds.indexOf(kind) >= 0)[0].color;
-    const icon = this.state.message ? "" : "";
+    const notify = this.state.setting.others.notify;
+    const icon = notify ? "" : "";
     return i === 0 ? null : (
-      <div className={`color-${color}-fg clickable`} onClick={this.toggleMessage.bind(this)}>
-      <IconComponent color="none" style={{...styles.icon, lineHeight: `${this.props.height}px`}} font={icon} />{ this.state.message ? "" : i }
+      <div className={`color-${color}-fg clickable`} onClick={this.toggleNotify.bind(this)}>
+      <IconComponent color="none" style={{...styles.icon, lineHeight: `${this.props.height}px`}} font={icon} />{ notify ? "" : i }
       </div>
     );
   }
