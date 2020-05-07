@@ -113,7 +113,7 @@ export class TablineComponent extends React.Component<Props, States> {
   }
 
   private getIcon(type: string) {
-    const icon = icons.filter(icon => icon.type.indexOf(type) >= 0).pop();
+    const icon = icons.filter(icon => type.search(icon.type) >= 0).shift();
     return icon && <IconComponent color={icon.color} style={this.getStyle(styles.icon)} font={icon.font} />;
   }
 
