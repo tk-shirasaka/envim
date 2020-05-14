@@ -4,6 +4,7 @@ import { IHighlight } from "common/interface";
 
 import { Emit } from "../../utils/emit";
 import { Highlights } from "../../utils/highlight";
+import { Setting } from "../../utils/setting";
 
 import { TablineComponent } from "./tabline";
 import { EditorComponent } from "./editor";
@@ -15,7 +16,6 @@ import { InputComponent } from "./input";
 
 interface Props {
   window: { width: number; height: number; };
-  font: { width: number; height: number; size: number; };
 }
 
 interface States {
@@ -68,7 +68,7 @@ export class EnvimComponent extends React.Component<Props, States> {
   }
 
   render() {
-    const { height } = this.props.font;
+    const { height } = Setting.font;
     const { width } = this.props.window;
     const header = { width, height: this.state.options.ext_tabline ? height + 4 + (this.props.window.height - 4) % height : 0 };
     const editor = { width, height: this.props.window.height - header.height };

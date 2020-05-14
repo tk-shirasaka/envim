@@ -1,6 +1,6 @@
 import React from "react";
 
-import { font } from "../utils/font";
+import { Setting } from "../utils/setting";
 
 interface Props {
   font: string;
@@ -16,7 +16,7 @@ interface States {
 
 export class IconComponent extends React.Component<Props, States> {
   render() {
-    const { size } = font.get();
+    const { size } = Setting.font;
     const className = `color-${this.props.color} ${this.props.active ? "active" : this.props.onClick ? "clickable" : ""}`;
     const height = (this.props.raito || 1) * size;
     const style = {fontSize: height + 8, lineHeight: `${height + 1}px`, ...this.props.style};

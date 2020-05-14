@@ -43,7 +43,6 @@ const styles = {
 };
 
 export class HistoryComponent extends React.Component<Props, States> {
-
   constructor(props: Props) {
     super(props);
 

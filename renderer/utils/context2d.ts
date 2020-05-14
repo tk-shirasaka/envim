@@ -1,7 +1,7 @@
 import { ICell } from "common/interface";
 
 import { Highlights } from "./highlight";
-import { font } from "./font";
+import { Setting } from "./setting";
 
 export class Context2D {
   private cursor: { row: number, col: number, hl: number } = { row: 0, col: 0, hl: 0 };
@@ -10,7 +10,8 @@ export class Context2D {
   constructor(
     private ctx: CanvasRenderingContext2D,
   ) {
-    this.setFont();
+    const { size, width, height } = Setting.font;
+    this.font = { size: size * 2, width: width * 2, height: height * 2 };
   }
 
   private style(hl: number, type: "foreground" | "background") {
@@ -39,11 +40,6 @@ export class Context2D {
     this.ctx.clearRect(x, y, width * this.font.width, this.font.height);
     this.style(hl, reverse ? "foreground" : "background");
     this.ctx.fillRect(x, y, width * this.font.width, this.font.height);
-  }
-
-  setFont() {
-    const { size, width, height } = font.get();
-    this.font = { size: size * 2, width: width * 2, height: height * 2 };
   }
 
   setCursor(cursor: { row: number, col: number, hl: number }) {

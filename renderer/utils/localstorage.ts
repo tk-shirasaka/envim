@@ -6,7 +6,7 @@ export class Localstorage<T> {
     const item = localStorage.getItem(key);
 
     this.key = key;
-    this.item = item ? JSON.parse(item) : init;
+    this.item = Object.assign(init, item ? JSON.parse(item) : {});
   }
 
   get() {

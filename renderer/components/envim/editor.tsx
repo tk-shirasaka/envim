@@ -4,7 +4,7 @@ import { ICell } from "common/interface";
 
 import { Emit } from "../../utils/emit";
 import { Context2D } from "../../utils/context2d";
-import { font } from "../../utils/font";
+import { Setting } from "../../utils/setting";
 
 interface Props {
   width: number;
@@ -48,7 +48,6 @@ export class EditorComponent extends React.Component<Props, States> {
   }
 
   componentDidUpdate() {
-    this.renderer?.setFont();
     Emit.send("envim:resize", ...this.getNvimSize(this.props.width, this.props.height));
   }
 
@@ -57,7 +56,7 @@ export class EditorComponent extends React.Component<Props, States> {
   }
 
   private getNvimSize(x: number, y: number) {
-    const { width, height } = font.get();
+    const { width, height } = Setting.font;
     return [Math.floor(x / width), Math.floor(y / height)];
   }
 

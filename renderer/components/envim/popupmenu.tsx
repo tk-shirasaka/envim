@@ -1,7 +1,7 @@
 import React from "react";
 
 import { Emit } from "../../utils/emit";
-import { font } from "../../utils/font";
+import { Setting } from "../../utils/setting";
 
 interface Props {
 }
@@ -45,7 +45,6 @@ const styles = {
 };
 
 export class PopupmenuComponent extends React.Component<Props, States> {
-
   constructor(props: Props) {
     super(props);
 
@@ -84,7 +83,7 @@ export class PopupmenuComponent extends React.Component<Props, States> {
   }
 
   private getScopeStyle() {
-    const { size, width, height } = font.get();
+    const { size, width, height } = Setting.font;
     return {
       ...styles.scope,
       top: this.state.row * height,

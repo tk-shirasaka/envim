@@ -3,7 +3,7 @@ import React, { MouseEvent } from "react";
 import { IMessage } from "../../../common/interface";
 
 import { Emit } from "../../utils/emit";
-import { Localstorage } from "../../utils/localstorage";
+import { Setting } from "../../utils/setting";
 import { icons, notificates } from "../../utils/icons";
 
 import { IconComponent } from "../icon";
@@ -18,7 +18,7 @@ interface States {
   qf: number;
   lc: number;
   messages: IMessage[];
-  setting: { others: { notify: boolean; } };
+  setting: { [k: string]: boolean; };
 }
 
 const whiteSpace: "nowrap" = "nowrap";
@@ -48,11 +48,9 @@ const styles = {
 };
 
 export class TablineComponent extends React.Component<Props, States> {
-  private ls: Localstorage<States["setting"]> = new Localstorage<States["setting"]>("setting", { others: { notify: true } });
-
   constructor(props: Props) {
     super(props);
-    this.state = { tabs: [], qf: 0, lc: 0, messages: [], setting: this.ls.get() };
+    this.state = { tabs: [], qf: 0, lc: 0, messages: [], setting: Setting.others };
 
     Emit.on("tabline:update", this.onTabline.bind(this));
     Emit.on("messages:notificate", this.onMessage.bind(this));
@@ -83,15 +81,13 @@ export class TablineComponent extends React.Component<Props, States> {
   }
 
   private toggleNotify(e: MouseEvent) {
-    const setting = this.state.setting;
-    setting.others.notify = !setting.others.notify;
+    const setting = { ...Setting.others, notify: !this.state.setting.notify };
 
     e.stopPropagation();
     e.preventDefault();
 
-    Emit.share("setting:notify", setting);
+    Setting.others = setting;
     Emit.share("envim:focus");
-    this.ls.set(setting);
     this.setState({ setting });
   }
 
@@ -132,7 +128,7 @@ export class TablineComponent extends React.Component<Props, States> {
     const i = this.state.messages.length;
     const kind = this.state.messages.filter(({ group }) => group === 1).pop()?.kind || "";
     const color = notificates.filter(icon => icon.kinds.indexOf(kind) >= 0)[0].color;
-    const notify = this.state.setting.others.notify;
+    const notify = this.state.setting.notify;
     const icon = notify ? "" : "";
     return i === 0 ? null : (
       <div className={`color-${color}-fg clickable`} onClick={this.toggleNotify.bind(this)}>

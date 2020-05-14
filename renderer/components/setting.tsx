@@ -1,18 +1,18 @@
 import React, { FormEvent, ChangeEvent } from "react";
 
 import { Emit } from "../utils/emit";
-import { Localstorage } from "../utils/localstorage";
+import { Setting } from "../utils/setting";
 
 import { IconComponent } from "./icon";
 
 interface Props {
-  opacity: number;
-  onChangeOpacity: (e: ChangeEvent) => void,
 }
 
 interface States {
   type: "command" | "address";
   path: string;
+  font: { width: number; height: number; size: number; };
+  opacity: number;
   options: { [k: string]: boolean; };
   others: { [k: string]: boolean; };
 }
@@ -37,33 +37,42 @@ const styles = {
 };
 
 export class SettingComponent extends React.Component<Props, States> {
-  private ls: Localstorage<States> = new Localstorage<States>("setting", {
-    type: "command",
-    path: "",
-    options: { ext_cmdline: true, ext_tabline: true, ext_popupmenu: true, ext_messages: true },
-    others: { notify: true },
-  });
-
   constructor(props: Props) {
     super(props);
-    this.state = this.ls.get();
+    this.state = { ...Setting.get() };
     document.title = 'Envim';
   }
 
   private onToggleType(e: ChangeEvent) {
     const type = (e.target as HTMLInputElement).value === "command" ? "command" : "address";
+    Setting.type = type;
     this.setState({ type });
   }
 
   private onChangePath(e: ChangeEvent) {
     const path = (e.target as HTMLInputElement).value;
+    Setting.path = path;
     this.setState({ path });
+  }
+
+  private onChangeFont(e: ChangeEvent) {
+    const size = +(e.target as HTMLInputElement).value;
+    const font = { size: size, width: size / 2, height: size + 1 };
+    Setting.font = font;
+    this.setState({ font });
+  }
+
+  private onChangeOpacity(e: ChangeEvent) {
+    const opacity = +(e.target as HTMLInputElement).value;
+    Setting.opacity = opacity;
+    this.setState({ opacity });
   }
 
   private onToggleOption(e: ChangeEvent) {
     const input = e.target as HTMLInputElement;
     const options = this.state.options;
     options[input.name] = input.checked;
+    Setting.options = options;
     this.setState({ options });
   }
 
@@ -71,13 +80,13 @@ export class SettingComponent extends React.Component<Props, States> {
     const input = e.target as HTMLInputElement;
     const others = this.state.others;
     others[input.name] = input.checked;
+    Setting.others = others;
     this.setState({ others });
   }
 
   private onSubmit(e: FormEvent) {
     e.stopPropagation();
     e.preventDefault();
-    this.ls.set(this.state);
     Emit.send("envim:attach", this.state.type, this.state.path, this.state.options);
   }
 
@@ -97,7 +106,8 @@ export class SettingComponent extends React.Component<Props, States> {
           <label><input type="radio" value="address" checked={this.state.type === "address"} onChange={this.onToggleType.bind(this)} />Port</label>
         </div>
         <label>Enter neovim path<input type="text" value={this.state.path} onChange={this.onChangePath.bind(this)} autoFocus={true} /></label>
-        <label>Transparent ({this.props.opacity}%)<input type="range" min="0" max="99" value={this.props.opacity} onChange={this.props.onChangeOpacity} /></label>
+        <label>Font Size ({this.state.font.size}px)<input type="range" min="5" max="20" value={this.state.font.size} onChange={this.onChangeFont.bind(this)} /></label>
+        <label>Transparent ({this.state.opacity}%)<input type="range" min="0" max="99" value={this.state.opacity} onChange={this.onChangeOpacity.bind(this)} /></label>
 
         <h3>Options</h3>
         { Object.keys(this.state.options).map((key, i) => (

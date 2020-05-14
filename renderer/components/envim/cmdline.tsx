@@ -40,7 +40,6 @@ const styles = {
 };
 
 export class CmdlineComponent extends React.Component<Props, States> {
-
   constructor(props: Props) {
     super(props);
 

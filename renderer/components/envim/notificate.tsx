@@ -3,7 +3,7 @@ import React from "react";
 import { IMessage } from "../../../common/interface";
 
 import { Emit } from "../../utils/emit";
-import { Localstorage } from "../../utils/localstorage";
+import { Setting } from "../../utils/setting";
 
 import { MessageComponent } from "./message";
 
@@ -13,7 +13,7 @@ interface Props {
 interface States {
   messages: IMessage[];
   selected: IMessage | null;
-  setting: { others: { notify: boolean; } };
+  setting: { [k: string]: boolean; };
 }
 
 const position: "absolute" = "absolute";
@@ -54,26 +54,24 @@ const styles = {
 };
 
 export class NotificateComponent extends React.Component<Props, States> {
-  private ls: Localstorage<States["setting"]> = new Localstorage<States["setting"]>("setting", { others: { notify: true } });
-
   constructor(props: Props) {
     super(props);
 
-    this.state = { messages: [], selected: null, setting: this.ls.get() };
+    this.state = { messages: [], selected: null, setting: Setting.others };
     Emit.on("messages:notificate", this.onMessage.bind(this));
-    Emit.on("setting:notify", this.toggleNotify.bind(this));
+    Emit.on("setting:others", this.toggleNotify.bind(this));
   }
 
   componentWillUnmount() {
-    Emit.clear(["messages:notificate", "setting:notify"]);
+    Emit.clear(["messages:notificate", "setting:others"]);
   }
 
   private onMessage(messages: IMessage[]) {
     this.setState({ messages });
   }
 
-  private toggleNotify(setting: States["setting"]) {
-    this.setState({ setting });
+  private toggleNotify() {
+    this.setState({ setting: Setting.others });
   }
 
   private onSelect(selected: IMessage) {
@@ -106,7 +104,7 @@ export class NotificateComponent extends React.Component<Props, States> {
   }
 
   render() {
-    if (!this.state.setting.others.notify) return null;
+    if (!this.state.setting.notify) return null;
     return this.state.selected ? this.renderSelected() : this.renderMessages();
   }
 }
