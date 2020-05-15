@@ -63,7 +63,7 @@ export class EditorComponent extends React.Component<Props, States> {
   private onMouseEvent(e: MouseEvent, button: string, action: string) {
 
     const { x, y } = this.offset || { x: 0, y: 0 };
-    const [col, row] = this.getNvimSize(e.clientX - x, e.clientY - y);
+    const [col, row] = this.getNvimSize(e.nativeEvent.offsetX - x, e.nativeEvent.offsetY - y);
 
     button === "left" && e.stopPropagation();
     button === "left" && e.preventDefault();
