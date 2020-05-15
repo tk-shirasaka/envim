@@ -1,5 +1,6 @@
 $color-white: #ececec;
 $color-black: #333435;
+$color-gray: #7f8084;
 $color-blue: #2295c5;
 $color-lightblue: #69aab9;
 $color-green: #79d691;
@@ -46,6 +47,7 @@ $color-purple: #9e7ec1;
 
 @include make-color-all("white", $color-black, $color-white);
 @include make-color-all("black", $color-white, $color-black);
+@include make-color-all("gray", $color-black, $color-gray);
 @include make-color-all("blue", $color-white, $color-blue);
 @include make-color-all("lightblue", $color-black, $color-lightblue);
 @include make-color-all("green", $color-black, $color-green);
