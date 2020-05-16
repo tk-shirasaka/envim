@@ -29,7 +29,11 @@
 }
 
 h1, h2, h3, h4, h5, h6, .bold {
-  font-family: "Ricty Diminished Bold", "Nerd Font Bold";
+  font-family: "Ricty Diminished Bold", "Nerd Font Bold" !important;
+}
+
+.italic {
+  font-family: "Ricty Diminished Oblique" !important;
 }
 
 :not(h1):not(h2):not(h3):not(h4):not(h5):not(h6):not(.bold) {

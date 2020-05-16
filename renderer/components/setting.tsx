@@ -26,7 +26,7 @@ const styles = {
     alignItems: "center",
   },
   icon: {
-    margin: "0 8px",
+    margin: "0 6px",
   },
   button: {
     marginTop: "1em",
@@ -107,6 +107,11 @@ export class SettingComponent extends React.Component<Props, States> {
         </div>
         <label>Enter neovim path<input type="text" value={this.state.path} onChange={this.onChangePath.bind(this)} autoFocus={true} /></label>
         <label>Font Size ({this.state.font.size}px)<input type="range" min="5" max="20" value={this.state.font.size} onChange={this.onChangeFont.bind(this)} /></label>
+        <div>
+          <span><IconComponent color="white-fg" style={styles.icon} font="" /> Normal</span>,
+          <span className="bold"><IconComponent color="white-fg" style={styles.icon} font="" /> Bold</span>,
+          <span className="italic"><IconComponent color="white-fg" style={styles.icon} font="" /> Italic</span>
+        </div>
         <label>Transparent ({this.state.opacity}%)<input type="range" min="0" max="99" value={this.state.opacity} onChange={this.onChangeOpacity.bind(this)} /></label>
 
         <h3>Options</h3>
