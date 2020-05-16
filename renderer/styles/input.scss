@@ -11,7 +11,11 @@ input {
     color: inherit;
     background: none;
     border: none;
-    border-bottom: solid 2px $color-blue;
+    border-bottom: solid 2px $color-gray;
+
+    &:focus {
+      border-bottom: solid 2px $color-blue;
+    }
   }
 
   &[type=radio] {
@@ -35,7 +39,11 @@ input {
       margin-top: -5px;
       border: none;
       border-radius: 6px;
-      background: $color-blue;
+      background: $color-gray;
+
+      &:hover {
+        background: $color-blue;
+      }
     }
 
     &::-webkit-slider-runnable-track {

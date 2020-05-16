@@ -114,24 +114,27 @@ export class TablineComponent extends React.Component<Props, States> {
   }
 
   private renderQuickfix(type: "qf" | "lc") {
-    const color = type === "qf" ? "red" : "yellow";
+    const color = this.state[type] ? { qf: "red", lc: "yellow" }[type] : "gray";
+    const suffix = this.state[type] ? " clickable" : "-fg";
     const command = type === "qf" ? "copen" : "lopen";
 
-    return this.state[type] === 0 ? null : (
-      <div className={`color-${color}-fg clickable`} onClick={() => this.onCommand(command)}>
-        <IconComponent color="none" style={{...styles.icon, lineHeight: `${this.props.height}px`}} font="" />{ this.state[type] }
+    return (
+      <div className={`color-${color}${suffix}`} style={styles.icon} onClick={() => this.state[type] && this.onCommand(command)}>
+        <IconComponent color="none" style={this.getStyle(styles.icon)} font="" />{ this.state[type] }
       </div>
     );
   }
 
   private renderNotify() {
     const messages = this.state.messages.filter(({ group }) => group === 1);
-    const kind = [ ...messages ].pop()?.kind || " ";
-    const color = notificates.filter(icon => icon.kinds.indexOf(kind) >= 0)[0]?.color || "gray";
+    const kind = [ ...messages ].pop()?.kind || "";
+    const color = messages.length ? notificates.filter(icon => icon.kinds.indexOf(kind) >= 0)[0].color : "gray";
+    const suffix = messages.filter(({ group }) => group === 1).length ? "" : "-fg";
     const icon = this.state.setting.notify ? "" : "";
+
     return (
-      <div className={`color-${color}-fg clickable`} onClick={this.toggleNotify.bind(this)}>
-        <IconComponent color="none" style={{...styles.icon, lineHeight: `${this.props.height}px`}} font={icon} />{ messages.length }
+      <div className={`color-${color}${suffix} clickable`} style={styles.icon} onClick={this.toggleNotify.bind(this)}>
+        <IconComponent color="none" style={this.getStyle(styles.icon)} font={icon} />{ messages.length }
       </div>
     );
   }

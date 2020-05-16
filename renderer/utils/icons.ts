@@ -5,6 +5,7 @@ export const icons = [
   { font: "", color: "lightblue-fg", name: "Perl", type: "perl" },
   { font: "", color: "yellow-fg", name: "Python", type: "python" },
   { font: "", color: "red-fg", name: "Ruty", type: "ruby" },
+  { font: "", color: "lightblue-fg", name: "Lua", type: "lua" },
   { font: "", color: "red-fg", name: "HTML", type: "html" },
   { font: "", color: "lightblue-fg", name: "CSS", type: /(css)|(scss)|(less)/ },
   { font: "", color: "green-fg", name: "Vim", type: "vim" },
@@ -23,4 +24,5 @@ export const notificates = [
   { font: "", color: "red", kinds: ["emsg", "echoerr", "lua_error", "rpc_error"], filter: true},
   { font: "", color: "purple", kinds: ["confirm", "confirm_sub"], filter: false},
   { font: "", color: "pink", kinds: ["return_prompt"], filter: false},
+  { font: "", color: "gray", kinds: ["mode", "command", "ruler"], filter: false},
 ];

@@ -86,13 +86,13 @@ export class App {
           this.msgShow(1, r);
         break;
         case "msg_showmode":
-          this.msgShow(2, [["", r[0][0], true]]);
+          this.msgShow(2, [["mode", r[0][0], true]]);
         break;
         case "msg_showcmd":
-          this.msgShow(3, [["", r[0][0], true]]);
+          this.msgShow(3, [["command", r[0][0], true]]);
         break;
         case "msg_ruler":
-          this.msgShow(4, [["", r[0][0], true]]);
+          this.msgShow(4, [["ruler", r[0][0], true]]);
         break;
         case "msg_clear":
           this.msgShow(1, [["", [], true]]);
