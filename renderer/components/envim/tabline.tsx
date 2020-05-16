@@ -125,12 +125,13 @@ export class TablineComponent extends React.Component<Props, States> {
   }
 
   private renderNotify() {
-    const kind = this.state.messages.filter(({ group }) => group === 1).pop()?.kind || " ";
+    const messages = this.state.messages.filter(({ group }) => group === 1);
+    const kind = [ ...messages ].pop()?.kind || " ";
     const color = notificates.filter(icon => icon.kinds.indexOf(kind) >= 0)[0]?.color || "gray";
     const icon = this.state.setting.notify ? "" : "";
     return (
       <div className={`color-${color}-fg clickable`} onClick={this.toggleNotify.bind(this)}>
-        <IconComponent color="none" style={{...styles.icon, lineHeight: `${this.props.height}px`}} font={icon} />{this.state.messages.length }
+        <IconComponent color="none" style={{...styles.icon, lineHeight: `${this.props.height}px`}} font={icon} />{ messages.length }
       </div>
     );
   }
