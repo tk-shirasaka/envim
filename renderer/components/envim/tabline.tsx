@@ -127,14 +127,16 @@ export class TablineComponent extends React.Component<Props, States> {
 
   private renderNotify() {
     const messages = this.state.messages.filter(({ group }) => group === 1);
-    const kind = [ ...messages ].pop()?.kind || "";
+    const last = [ ...messages ].pop();
+    const kind = last?.kind || "";
     const color = messages.length ? notificates.filter(icon => icon.kinds.indexOf(kind) >= 0)[0].color : "gray";
     const suffix = messages.filter(({ group }) => group === 1).length ? "" : "-fg";
     const icon = this.state.setting.notify ? "" : "";
+    const message = this.state.setting.notify ? messages.length : last?.contents.map(({ content }, i) => i < 5 && content).join("");
 
     return (
-      <div className={`color-${color}${suffix} clickable`} style={styles.icon} onClick={this.toggleNotify.bind(this)}>
-        <IconComponent color="none" style={this.getStyle(styles.icon)} font={icon} />{ messages.length }
+      <div className={`color-${color}${suffix} clickable`} style={styles.name} onClick={this.toggleNotify.bind(this)}>
+        <IconComponent color="none" style={this.getStyle(styles.icon)} font={icon} />{ message }
       </div>
     );
   }
