@@ -83,8 +83,8 @@ export class EnvimComponent extends React.Component<Props, States> {
           { this.state.options.ext_cmdline ? <CmdlineComponent /> : null }
           { this.state.options.ext_popupmenu ? <PopupmenuComponent /> : null }
           { this.state.options.ext_messages ? <NotificateComponent /> : null }
+          <InputComponent />
         </div>
-        <InputComponent />
       </div>
     );
   }

@@ -30,7 +30,6 @@ export class EditorComponent extends React.Component<Props, States> {
   constructor(props: Props) {
     super(props);
 
-    Emit.on("envim:ime", this.onIme.bind(this));
     Emit.on("grid:cursor", this.onCursor.bind(this));
     Emit.on("envim:mouse", this.onMouse.bind(this));
     Emit.on("envim:flush", this.onFlush.bind(this));
@@ -52,7 +51,7 @@ export class EditorComponent extends React.Component<Props, States> {
   }
 
   componentWillUnmount() {
-    Emit.clear(["envim:ime", "grid:cursor", "envim:mouse", "envim:flush"]);
+    Emit.clear(["grid:cursor", "envim:mouse", "envim:flush"]);
   }
 
   private getNvimSize(x: number, y: number) {
@@ -91,10 +90,6 @@ export class EditorComponent extends React.Component<Props, States> {
 
   private onMouseWheel(e: WheelEvent) {
     this.onMouseEvent(e, "wheel", e.deltaY < 0 ? "up" : "down");
-  }
-
-  private onIme(text: string) {
-    this.renderer?.text(text);
   }
 
   private onCursor(cursor: { row: number, col: number, hl: number }) {

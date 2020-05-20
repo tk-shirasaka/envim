@@ -46,14 +46,6 @@ export class Context2D {
     this.cursor = cursor;
   }
 
-  text(text: string) {
-    const limit = text.length * 2;
-
-    this.rect(this.cursor.col * this.font.width, this.cursor.row * this.font.height, limit, this.cursor.hl, true);
-    this.style(this.cursor.hl, "background");
-    this.ctx.fillText(text, this.cursor.col * this.font.width, this.cursor.row * this.font.height);
-  }
-
   flush(cells: ICell[]) {
     cells.forEach(cell => {
       const [y, x] = [cell.row * this.font.height, cell.col * this.font.width];
