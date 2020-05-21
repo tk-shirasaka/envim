@@ -22,6 +22,7 @@ interface States {
 }
 
 const whiteSpace: "nowrap" = "nowrap";
+const direction: "rtl" = "rtl";
 const styles = {
   scope: {
     display: "flex",
@@ -38,9 +39,17 @@ const styles = {
     textOverflow: "ellipsis",
     overflow: "hidden",
     whiteSpace,
+    direction,
   },
   active: {
     borderBottom: "solid 2px #2295c5",
+  },
+  notify: {
+    maxWidth: 300,
+    padding: "0 4px",
+    textOverflow: "ellipsis",
+    overflow: "hidden",
+    whiteSpace,
   },
   icon: {
     padding: "0 4px",
@@ -108,7 +117,7 @@ export class TablineComponent extends React.Component<Props, States> {
     return {...style, lineHeight};
   }
 
-  private getIcon(type: string) {
+  private renderIcon(type: string) {
     const icon = icons.filter(icon => type.search(icon.type) >= 0).shift();
     return icon && <IconComponent color={icon.color} style={this.getStyle(styles.icon)} font={icon.font} />;
   }
@@ -132,10 +141,10 @@ export class TablineComponent extends React.Component<Props, States> {
     const color = messages.length ? notificates.filter(icon => icon.kinds.indexOf(kind) >= 0)[0].color : "gray";
     const suffix = messages.filter(({ group }) => group === 1).length ? "" : "-fg";
     const icon = this.state.setting.notify ? "" : "";
-    const message = this.state.setting.notify ? messages.length : last?.contents.map(({ content }, i) => i < 5 && content).join("");
+    const message = this.state.setting.notify ? messages.length : last?.contents.map(({ content }, i) => i < 5 ? content : "").join("");
 
     return (
-      <div className={`color-${color}${suffix} clickable`} style={styles.name} onClick={this.toggleNotify.bind(this)}>
+      <div className={`color-${color}${suffix} clickable`} style={styles.notify} onClick={this.toggleNotify.bind(this)}>
         <IconComponent color="none" style={this.getStyle(styles.icon)} font={icon} />{ message }
       </div>
     );
@@ -146,7 +155,7 @@ export class TablineComponent extends React.Component<Props, States> {
       <div style={{...this.props, ...styles.scope}}>
         {this.state.tabs.map((tab, i) => (
           <div key={i} className={`color-black ${tab.active ? "active" : "clickable"}`} style={this.getTabStyle(tab.active)} onClick={e => this.onSelect(e, i)}>
-            { this.getIcon(tab.type) }
+            { this.renderIcon(tab.type) }
             <span style={this.getStyle(styles.name)}>{ tab.name }</span>
             {tab.active || <IconComponent color="red-fg" style={this.getStyle(styles.icon)} font="" onClick={e => this.onClose(e, i)} />}
           </div>
