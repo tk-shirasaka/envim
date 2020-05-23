@@ -7,12 +7,15 @@ export class Grid {
   private width :number = 0;
   private height: number = 0;
   private cursor: { row: number, col: number } = { row: 0, col: 0 };
+  private offset: { row: number, col: number } = { row: 0, col: 0 };
 
   constructor(width :number, height: number) {
     this.resize(width, height);
   }
 
   resize(width :number, height: number) {
+    if (this.width === width && this.height === height) return;
+
     this.width = width;
     this.height = height;
     this.lines = [];
@@ -27,6 +30,10 @@ export class Grid {
     }
   }
 
+  getSize() {
+    return { width: this.width, height: this.height };
+  }
+
   setCursorPos(row: number, col: number) {
     const prev = this.getCell(this.cursor.row, this.cursor.col);
     const cell = this.getCell(row, col);
@@ -36,6 +43,14 @@ export class Grid {
     this.cursor = { row, col };
 
     return this.busy ? { col: -1, row: -1, hl: 0 } : { col, row, hl: cell.hl };
+  }
+
+  setOffsetPos(row: number, col: number) {
+    this.offset = { row, col };
+  }
+
+  getOffsetPos() {
+    return this.offset;
   }
 
   getDefault(row: number, col: number) {

@@ -4,11 +4,19 @@ import { ICell } from "common/interface";
 
 import { Emit } from "../../utils/emit";
 import { Context2D } from "../../utils/context2d";
-import { Setting } from "../../utils/setting";
+import { y2Row, x2Col } from "../../utils/size";
 
 interface Props {
-  width: number;
-  height: number;
+  grid: number;
+  mouse: boolean;
+  style: {
+    width: number;
+    height: number;
+    top: number;
+    left: number;
+    zIndex?: number;
+    cursor?: "text" | "not-allowed";
+  };
 }
 
 interface States {
@@ -18,55 +26,44 @@ const position: "absolute" = "absolute";
 const style = {
   position,
   cursor: "text",
-  display: "block",
+  boxShadow: "0px 2px 8px -6px",
 };
 
 export class EditorComponent extends React.Component<Props, States> {
   private drag: boolean = false;
-  private mouse: boolean = false;
   private renderer?: Context2D;
-  private offset?: { x: number, y: number };
 
   constructor(props: Props) {
     super(props);
 
-    Emit.on("grid:cursor", this.onCursor.bind(this));
-    Emit.on("envim:mouse", this.onMouse.bind(this));
-    Emit.on("envim:flush", this.onFlush.bind(this));
-    Emit.send("envim:resize", ...this.getNvimSize(this.props.width, this.props.height));
+    Emit.on(`cursor:${this.props.grid}`, this.onCursor.bind(this));
+    Emit.on(`flush:${this.props.grid}`, this.onFlush.bind(this));
+    Emit.send("envim:resize", this.props.grid, x2Col(this.props.style.width), y2Row(this.props.style.height));
   }
 
   componentDidMount() {
     const canvas = this.refs.canvas as HTMLCanvasElement;
     const ctx = canvas.getContext("2d");
     if (ctx) {
-      const { x, y } = canvas.getBoundingClientRect();
       this.renderer = new Context2D(ctx);
-      this.offset = { x, y };
     }
   }
 
-  componentDidUpdate() {
-    Emit.send("envim:resize", ...this.getNvimSize(this.props.width, this.props.height));
+  componentDidUpdate(props: Props) {
+    if (props.style.width === this.props.style.width && props.style.height === this.props.style.height) return;
+    Emit.send("envim:resize", this.props.grid, x2Col(this.props.style.width), y2Row(this.props.style.height));
   }
 
   componentWillUnmount() {
-    Emit.clear(["grid:cursor", "envim:mouse", "envim:flush"]);
-  }
-
-  private getNvimSize(x: number, y: number) {
-    const { width, height } = Setting.font;
-    return [Math.floor(x / width), Math.floor(y / height)];
+    Emit.clear([`cursor:${this.props.grid}`, `flush:${this.props.grid}`]);
   }
 
   private onMouseEvent(e: MouseEvent, button: string, action: string) {
-
-    const { x, y } = this.offset || { x: 0, y: 0 };
-    const [col, row] = this.getNvimSize(e.nativeEvent.offsetX - x, e.nativeEvent.offsetY - y);
+    const [col, row] = [ x2Col(e.nativeEvent.offsetX), y2Row(e.nativeEvent.offsetY) ];
 
     button === "left" && e.stopPropagation();
     button === "left" && e.preventDefault();
-    this.mouse && Emit.send("envim:mouse", button, action, row, col);
+    this.props.mouse && Emit.send("envim:mouse", this.props.grid, button, action, row, col);
   }
 
   private onMouseDown(e: MouseEvent) {
@@ -96,22 +93,18 @@ export class EditorComponent extends React.Component<Props, States> {
     this.renderer?.setCursor(cursor);
   }
 
-  private onMouse(mouse: boolean) {
-    this.mouse = mouse;
-  }
-
   private onFlush(cells: ICell[]) {
     this.renderer?.flush(cells);
   }
 
   render() {
     return (
-      <canvas style={{...this.props, ...style}} width={this.props.width * 2} height={this.props.height * 2} ref="canvas"
+      <canvas style={{ ...style, ...this.props.style }} width={this.props.style.width * 2} height={this.props.style.height * 2} ref="canvas"
         onMouseDown={this.onMouseDown.bind(this)}
         onMouseMove={this.onMouseMove.bind(this)}
         onMouseUp={this.onMouseUp.bind(this)}
         onWheel={this.onMouseWheel.bind(this)}
-        />
+      />
     );
   }
 }

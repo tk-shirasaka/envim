@@ -15,7 +15,7 @@ const defaultSetting: ISetting = {
   path: "",
   font: { size: 16, width: 8, height: 17 },
   opacity: 0,
-  options: { ext_cmdline: true, ext_tabline: true, ext_popupmenu: true, ext_messages: true },
+  options: { ext_multigrid: true, ext_cmdline: true, ext_tabline: true, ext_popupmenu: true, ext_messages: true },
   others: { notify: true },
 };
 

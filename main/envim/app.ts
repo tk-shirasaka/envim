@@ -7,7 +7,6 @@ import { Messages } from "./messages";
 export class App {
   private grids: { [k: number]: Grid } = {};
   private messages: Messages = new Messages;
-  private window: { width: number; height: number; } = { width: 0, height: 0 };
 
   redraw(redraw: any[][]) {
     redraw.forEach(r => {
@@ -40,6 +39,20 @@ export class App {
         break;
         case "grid_scroll":
           this.gridScroll(r[0][0], r[0][1], r[0][2], r[0][3], r[0][4], r[0][5], r[0][6]);
+        break;
+
+        /** ext_multigrid **/
+        case "win_pos":
+          this.winPos(r[0][0], "NW", 1, r[0][2], r[0][3], true);
+        break;
+        case "win_float_pos":
+          this.winPos(r[0][0], r[0][2], r[0][3], r[0][4], r[0][5], r[0][6]);
+        break;
+        case "win_hide":
+          this.winHide(r[0][0]);
+        break;
+        case "win_close":
+          this.winClose(r[0][0]);
         break;
 
         /** ext_tabline **/
@@ -128,8 +141,11 @@ export class App {
   }
 
   private gridResize(grid: number, width: number, height: number) {
-    this.window = { width, height };
-    this.grids[grid] = new Grid(width, height);
+    if (this.grids[grid]) {
+      this.grids[grid].resize(width, height);
+    } else {
+      this.grids[grid] = new Grid(width, height);
+    }
   }
 
   private defaultColorsSet(foreground: number, background: number, special: number) {
@@ -176,10 +192,11 @@ export class App {
 
   private gridDestory(grid: number) {
     delete(this.grids[grid]);
+    Emit.send("win:close", grid);
   }
 
   private gridCursorGoto(grid: number, row: number, col: number) {
-    Emit.send("grid:cursor", this.grids[grid].setCursorPos(row, col));
+    Emit.send(`cursor:${grid}`, this.grids[grid]?.setCursorPos(row, col));
   }
 
   private gridScroll(grid: number, top: number, bottom: number, left: number, right: number, rows: number, cols: number) {
@@ -192,6 +209,26 @@ export class App {
       if (!check(trow, tcol)) return;
       this.grids[grid].moveCell(srow, scol, trow, tcol);
     });
+  }
+
+  private winPos(grid: number, anchor: string, pgrid: number, row: number, col: number, focusable: boolean) {
+    if (this.grids[grid] && this.grids[pgrid]) {
+      const { width, height } = this.grids[grid].getSize();
+
+      const top = anchor[0] === "N" ? row : height - row;
+      const left = anchor[1] === "W" ? col : width - col;
+
+      this.grids[grid].setOffsetPos(top, left);
+      Emit.send("win:pos", grid, width, height, top, left, focusable);
+    }
+  }
+
+  private winHide(grid: number) {
+    Emit.send("win:hide", grid);
+  }
+
+  private winClose(grid: number) {
+    Emit.send("win:close", grid);
   }
 
   private async tablineUpdate(current: Tabpage, tabs: { tab: Tabpage, name: string }[]) {
@@ -238,9 +275,15 @@ export class App {
 
   private popupmenuShow(items: string[][], selected: number, row: number, col: number, grid: number) {
     const height = Math.min(5, items.length);
-    grid < 0 && (row = this.window.height - 1);
-    row = row + height >= this.window.height ? row - height : row + 1;
-    col = Math.min(col, this.window.width - 10);
+    const offset = this.grids[grid]?.getOffsetPos() || { row: 0, col: 0 };
+    const parent = this.grids[1].getSize();
+
+    row += offset.row;
+    col += offset.col;
+
+    grid < 0 && (row = parent.height - 2);
+    row = row + height >= parent.height ? row - height : row + 1;
+    col = Math.min(col, parent.width - 10);
 
     Emit.send("popupmenu:show", {
       items: items.map(([ word, kind, menu, info ]) => ({ word, kind, menu, info })),
@@ -293,9 +336,9 @@ export class App {
   }
 
   private flush() {
-    Object.values(this.grids).forEach(grid => {
-      const flush = grid.getFlush();
-      flush.length && Emit.send("envim:flush", flush);
+    Object.keys(this.grids).forEach(grid => {
+      const flush = this.grids[+grid].getFlush();
+      flush.length && Emit.send(`flush:${grid}`, flush);
     });
   }
 }

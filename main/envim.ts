@@ -68,18 +68,21 @@ export class Envim {
     }
   }
 
-  private async onResize(width: number, height: number) {
-    const options = { ...{ ext_linegrid: true }, ...this.state.options };
+  private async onResize(grid: number, width: number, height: number) {
+    const options: { [k: string]: boolean } = { ...{ ext_linegrid: true }, ...this.state.options };
+
     if (!this.state.attached) {
       await this.nvim.request("nvim_ui_attach", [width, height, options]);
     } else if (this.state.width !== width || this.state.height !== height){
-      await this.nvim.uiTryResize(width, height);
+      options.ext_multigrid
+        ? await this.nvim.uiTryResizeGrid(grid, width, height)
+        : await this.nvim.uiTryResize(width, height);
     }
     this.state = { attached: true, width, height, options };
   }
 
-  private async onMouse(button: string, action: string, row: number, col: number) {
-    await this.nvim.inputMouse(button, action, "", 0, row, col);
+  private async onMouse(grid: number, button: string, action: string, row: number, col: number) {
+    await this.nvim.inputMouse(button, action, "", grid, row, col);
   }
 
   private async onInput(input: string) {
