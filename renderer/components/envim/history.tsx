@@ -19,11 +19,11 @@ interface States {
   messages: IMessage[];
 }
 
-const positionA: "absolute" = "absolute";
+const positionF: "fixed" = "fixed";
 const positionS: "sticky" = "sticky";
 const styles = {
   scope: {
-    position: positionA,
+    position: positionF,
     left: 0,
     right: 0,
     bottom: 0,

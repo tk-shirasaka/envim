@@ -14,7 +14,7 @@ interface States {
   indent: number;
 }
 
-const position: "absolute" = "absolute";
+const position: "fixed" = "fixed";
 const pointerEvents: "none" = "none";
 const whiteSpace: "pre-wrap" = "pre-wrap";
 const styles = {

@@ -41,7 +41,7 @@ const positionA: "absolute" = "absolute"
 const styles = {
   editor: {
     position: positionR,
-    overflow: "hidden",
+    overflow: "auto",
   },
   grid: {
     position: positionA,
