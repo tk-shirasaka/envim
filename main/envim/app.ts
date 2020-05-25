@@ -215,8 +215,8 @@ export class App {
     if (this.grids[grid] && this.grids[pgrid]) {
       const { width, height } = this.grids[grid].getSize();
 
-      const top = anchor[0] === "N" ? row : height - row;
-      const left = anchor[1] === "W" ? col : width - col;
+      const top = anchor[0] === "N" ? row : row - height;
+      const left = anchor[1] === "W" ? col : col - width;
 
       this.grids[grid].setOffsetPos(top, left);
       Emit.send("win:pos", grid, width, height, top, left, focusable);
