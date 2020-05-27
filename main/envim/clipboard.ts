@@ -11,15 +11,15 @@ export class Clipboard {
     nvim.command([
       `let g:clipboard = {`,
         `  "name": "envim",`,
-      `  "copy": {`,
+        `  "copy": {`,
         `     "+": {lines, regtype -> rpcnotify(${channelId}, "envim_clipboard", lines, regtype)},`,
         `     "*": {lines, regtype -> rpcnotify(${channelId}, "envim_clipboard", lines, regtype)},`,
         `   },`,
         `  "paste": {`,
-          `     "+": {-> rpcrequest(${channelId}, "envim_clipboard")},`,
-          `     "*": {-> rpcrequest(${channelId}, "envim_clipboard")},`,
-          `  },`,
-          `}`,
+        `     "+": {-> rpcrequest(${channelId}, "envim_clipboard")},`,
+        `     "*": {-> rpcrequest(${channelId}, "envim_clipboard")},`,
+        `  },`,
+        `}`,
     ].join(""));
     nvim.command("unlet g:loaded_clipboard_provider")
     nvim.command("runtime autoload/provider/clipboard.vim")
