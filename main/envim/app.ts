@@ -184,10 +184,8 @@ export class App {
   }
 
   private gridClear(grid: number) {
-    this.grids[grid].getLines(0, true, ({ row, col }) => {
-      const { text, hl } = this.grids[grid].getDefault(row, col);
-      this.grids[grid].setCell(row, col, text, hl);
-    });
+    const { width, height } = this.grids[grid].getSize();
+    this.grids[grid] = new Grid(width, height);
   }
 
   private gridDestory(grid: number) {

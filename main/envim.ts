@@ -42,6 +42,7 @@ export class Envim {
 
     if (reader && writer) {
       this.state.options = options;
+      this.app = new App;
       this.nvim = new NeovimClient;
       this.nvim.attach({ reader, writer });
       this.nvim.setClientInfo("Envim", { major: 0, minor: 0, patch: 1, prerelease: "dev" }, "ui", {}, {})
@@ -68,15 +69,15 @@ export class Envim {
     }
   }
 
-  private async onResize(grid: number, width: number, height: number) {
+  private onResize(grid: number, width: number, height: number) {
     const options: { [k: string]: boolean } = { ...{ ext_linegrid: true }, ...this.state.options };
 
     if (!this.state.attached) {
-      await this.nvim.request("nvim_ui_attach", [width, height, options]);
+      this.nvim.request("nvim_ui_attach", [width, height, options]);
     } else if (this.state.width !== width || this.state.height !== height){
       options.ext_multigrid
-        ? await this.nvim.uiTryResizeGrid(grid, width, height)
-        : await this.nvim.uiTryResize(width, height);
+        ? this.nvim.uiTryResizeGrid(grid, width, height)
+        : this.nvim.uiTryResize(width, height);
     }
     this.state = { attached: true, width, height, options };
   }
