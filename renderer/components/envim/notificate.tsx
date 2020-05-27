@@ -71,7 +71,7 @@ export class NotificateComponent extends React.Component<Props, States> {
   }
 
   private toggleNotify() {
-    this.setState({ setting: Setting.others });
+    this.setState({ setting: Setting.others, selected: null });
   }
 
   private onSelect(selected: IMessage) {
