@@ -43,13 +43,13 @@ export class App {
 
         /** ext_multigrid **/
         case "win_pos":
-          this.winPos(r[0][0], "NW", 1, r[0][2], r[0][3], true);
+          r.forEach(r => this.winPos(r[0], "NW", 1, r[2], r[3], true));
         break;
         case "win_float_pos":
-          this.winPos(r[0][0], r[0][2], r[0][3], r[0][4], r[0][5], r[0][6]);
+          r.forEach(r => this.winPos(r[0], r[2], r[3], r[4], r[5], r[6]));
         break;
         case "win_hide":
-          this.winHide(r[0][0]);
+          r.forEach(r => this.winHide(r[0]));
         break;
         case "win_close":
           this.winClose(r[0][0]);
