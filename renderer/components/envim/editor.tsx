@@ -38,7 +38,7 @@ export class EditorComponent extends React.Component<Props, States> {
 
     Emit.on(`cursor:${this.props.grid}`, this.onCursor.bind(this));
     Emit.on(`flush:${this.props.grid}`, this.onFlush.bind(this));
-    Emit.send("envim:resize", this.props.grid, x2Col(this.props.style.width), y2Row(this.props.style.height));
+    this.props.grid === 1 && Emit.send("envim:resize", this.props.grid, x2Col(this.props.style.width), y2Row(this.props.style.height));
   }
 
   componentDidMount() {
@@ -50,7 +50,7 @@ export class EditorComponent extends React.Component<Props, States> {
   }
 
   componentDidUpdate(props: Props) {
-    if (props.style.width === this.props.style.width && props.style.height === this.props.style.height) return;
+    if (this.props.grid > 1 || (props.style.width === this.props.style.width && props.style.height === this.props.style.height)) return;
     Emit.send("envim:resize", this.props.grid, x2Col(this.props.style.width), y2Row(this.props.style.height));
   }
 

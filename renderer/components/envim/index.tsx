@@ -41,7 +41,7 @@ const positionA: "absolute" = "absolute"
 const styles = {
   editor: {
     position: positionR,
-    overflow: "auto",
+    overflow: "hidden",
   },
   grid: {
     position: positionA,
@@ -94,15 +94,13 @@ export class EnvimComponent extends React.Component<Props, States> {
 
     const style = { width, height, top, left, cursor, zIndex };
 
-    let i = 0;
-    for (; i < grids.length; i++) {
-      if (grids[i].grid !== grid) continue;
-      if (JSON.stringify(grids[i]) === JSON.stringify({ grid, style })) break;
+    grids.some((item, i) => {
+      if (item.grid !== grid) return false;
 
       grids[i] = { grid, style };
-      break;
-    }
-    i === grids.length && grids.push({ grid, style });
+      return true;
+    }) || grids.push({ grid, style });
+
     this.setState({ grids });
   }
 

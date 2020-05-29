@@ -15,8 +15,18 @@ const defaultSetting: ISetting = {
   path: "",
   font: { size: 16, width: 8, height: 17 },
   opacity: 0,
-  options: { ext_multigrid: true, ext_cmdline: true, ext_tabline: true, ext_popupmenu: true, ext_messages: true },
-  others: { notify: true },
+  options: {
+    rgb: true,
+    override: true,
+    ext_multigrid: true,
+    ext_cmdline: true,
+    ext_tabline: true,
+    ext_popupmenu: true,
+    ext_messages: true
+  },
+  others: {
+    notify: false,
+  },
 };
 
 const ls: Localstorage<ISetting> = new Localstorage<ISetting>("setting", defaultSetting);

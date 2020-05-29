@@ -74,7 +74,7 @@ export class Envim {
 
     if (!this.state.attached) {
       this.nvim.request("nvim_ui_attach", [width, height, options]);
-    } else if (this.state.width !== width || this.state.height !== height){
+    } else if (this.state.width !== width || this.state.height !== height) {
       options.ext_multigrid
         ? this.nvim.uiTryResizeGrid(grid, width, height)
         : this.nvim.uiTryResize(width, height);
