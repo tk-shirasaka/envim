@@ -22,17 +22,14 @@ interface Props {
 interface States {
   style: { background: string; color: string; borderColor: string; };
   options: { [k: string]: boolean };
-  grids: {
-    grid: number;
-    style: {
-      width: number;
-      height: number;
-      top: number;
-      left: number;
-      zIndex: number;
-      cursor: "text" | "not-allowed";
-    };
-  }[];
+  grids: { [k: string]: {
+    width: number;
+    height: number;
+    top: number;
+    left: number;
+    zIndex: number;
+    cursor: "text" | "not-allowed";
+  }};
   mouse: boolean;
 }
 
@@ -54,7 +51,7 @@ export class EnvimComponent extends React.Component<Props, States> {
   constructor(props: Props) {
     super(props);
 
-    this.state = { style: { background: "", color: "", borderColor: "" }, options: {}, grids: [], mouse: false };
+    this.state = { style: { background: "", color: "", borderColor: "" }, options: {}, grids: {}, mouse: false };
     Emit.on("highlight:set", this.onHighlight.bind(this));
     Emit.on("highlight:name", this.onHlGroup.bind(this));
     Emit.on("win:pos", this.onWin.bind(this));
@@ -92,31 +89,24 @@ export class EnvimComponent extends React.Component<Props, States> {
     [ height, width ] = [ row2Y(height), col2X(width) ];
     [ top, left ] = [ row2Y(top), col2X(left) ];
 
-    const style = { width, height, top, left, cursor, zIndex };
-
-    grids.some((item, i) => {
-      if (item.grid !== grid) return false;
-
-      grids[i] = { grid, style };
-      return true;
-    }) || grids.push({ grid, style });
+    grids[grid] = { width, height, top, left, cursor, zIndex };
 
     this.setState({ grids });
   }
 
   private hideWin(grid: number) {
-    const grids = this.state.grids.map(item => {
-      if (item.grid !== grid) return item;
-      item.style.zIndex = -1;
+    const grids = this.state.grids;
 
-      return JSON.parse(JSON.stringify(item));
-    });
+    grids[grid].zIndex = -1;
 
-    this.setState({ grids: [...grids] });
+    this.setState({ grids });
   }
 
   private closeWin(grid: number) {
-    const grids = this.state.grids.filter(item => item.grid !== grid);
+    const grids = this.state.grids;
+
+    delete(grids[grid]);
+
     this.setState({ grids });
   }
 
@@ -145,8 +135,8 @@ export class EnvimComponent extends React.Component<Props, States> {
         { this.state.options.ext_tabline ? <TablineComponent {...header} /> : null }
         <div style={{...styles.editor, ...editor}}>
           <EditorComponent grid={1} mouse={this.state.mouse} style={{ ...editor, top: 0, left: 0 }} />
-          { this.state.grids.map(item => (
-            <EditorComponent key={item.grid} grid={item.grid} mouse={this.state.mouse} style={item.style} />
+          { Object.keys(this.state.grids).map(grid => (
+            <EditorComponent key={grid} grid={+grid} mouse={this.state.mouse} style={this.state.grids[+grid]} />
           )) }
           { this.state.options.ext_messages ? <HistoryComponent {...footer} /> : null }
           { this.state.options.ext_cmdline ? <CmdlineComponent /> : null }
