@@ -11,7 +11,6 @@ interface Props {
 interface States {
   init: boolean;
   resize: boolean;
-  opacity: number;
   font: { width: number; height: number; size: number; };
   window: { width: number; height: number; };
 }
@@ -27,7 +26,6 @@ export class AppComponent extends React.Component<Props, States> {
     Emit.on("app:start", this.onStart.bind(this));
     Emit.on("app:stop", this.onStop.bind(this));
     Emit.on("setting:font", this.onFont.bind(this));
-    Emit.on("setting:opacity", this.onOpacity.bind(this));
   }
 
   private onResize() {
@@ -52,11 +50,6 @@ export class AppComponent extends React.Component<Props, States> {
     this.setState({ font });
   }
 
-  private onOpacity() {
-    const opacity = Setting.opacity;
-    this.setState({ opacity });
-  }
-
   private renderContent() {
     if (this.state.resize) return null;
     return this.state.init
@@ -66,7 +59,6 @@ export class AppComponent extends React.Component<Props, States> {
 
   render() {
     const style = {
-      opacity: (100 - this.state.opacity) / 100,
       fontSize: this.state.font.size,
       lineHeight: `${this.state.font.height}px`,
     };

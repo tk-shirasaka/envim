@@ -73,7 +73,7 @@ export class Setting {
   }
 
   static set opacity(opacity: ISetting["opacity"]) {
-    Setting.set({ ...Setting.item, opacity }, "opacity");
+    Setting.set({ ...Setting.item, opacity });
   }
 
   static get options() {

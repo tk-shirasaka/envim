@@ -90,9 +90,16 @@ export class SettingComponent extends React.Component<Props, States> {
     Emit.send("envim:attach", this.state.type, this.state.path, this.state.options);
   }
 
+  private getStyle() {
+    return {
+      opacity: (100 - this.state.opacity) / 100,
+      ...styles.scope
+    };
+  }
+
   render() {
     return (
-      <form style={styles.scope} onSubmit={this.onSubmit.bind(this)}>
+      <form className="color-black" style={this.getStyle()} onSubmit={this.onSubmit.bind(this)}>
         <h1>Welcome To Envim!</h1>
         <div>
           <IconComponent color="green-fg" style={styles.icon} font="" raito={3} />

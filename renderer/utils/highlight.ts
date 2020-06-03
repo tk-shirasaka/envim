@@ -1,26 +1,25 @@
 import { IHighlight } from "common/interface";
+import { Setting } from "./setting";
 
 class Highlight {
   public name: string = "";
   public foreground: string = "";
   public background: string = "";
   public special: string = "";
-  public reverse: boolean = false;
   private type: "normal" | "bold" | "italic";
   private decorate: "none" | "strikethrough" | "underline" | "undercurl";
 
-  public blend: number;
-
   constructor(highlight: IHighlight) {
+    const alpha = (100 - Setting.opacity) / 100;
+
     if (highlight.reverse) {
-      highlight.foreground === undefined || (this.background = this.intToColor(highlight.foreground));
-      highlight.background === undefined || (this.foreground = this.intToColor(highlight.background));
+      highlight.foreground === undefined || (this.background = this.intToColor(highlight.foreground, alpha));
+      highlight.background === undefined || (this.foreground = this.intToColor(highlight.background, 1));
     } else {
-      highlight.foreground === undefined || (this.foreground = this.intToColor(highlight.foreground));
-      highlight.background === undefined || (this.background = this.intToColor(highlight.background));
+      highlight.foreground === undefined || (this.foreground = this.intToColor(highlight.foreground, 1));
+      highlight.background === undefined || (this.background = this.intToColor(highlight.background, alpha));
     }
-    highlight.special === undefined ||  (this.special = this.intToColor(highlight.special));
-    highlight.reverse && (this.reverse = true);
+    highlight.special === undefined ||  (this.special = this.intToColor(highlight.special, 1));
 
     this.type = "normal";
     if (highlight.bold) this.type = "bold";
@@ -30,12 +29,16 @@ class Highlight {
     if (highlight.strikethrough) this.decorate = "strikethrough";
     if (highlight.underline) this.decorate = "underline";
     if (highlight.undercurl) this.decorate = "undercurl";
-
-    this.blend = highlight.blend || 0;
   }
 
-  private intToColor(color: number) {
-    return `#${("000000" + color.toString(16)).slice(-6)}`;
+  private intToColor(color: number, a: number) {
+    const rgb = `${("000000" + color.toString(16)).slice(-6)}`;
+
+    const r = Number(`0x${rgb[0]}${rgb[1]}`)
+    const g = Number(`0x${rgb[2]}${rgb[3]}`)
+    const b = Number(`0x${rgb[4]}${rgb[5]}`)
+
+    return `rgba(${r}, ${g}, ${b}, ${a})`;
   }
 
   font() {
@@ -63,13 +66,7 @@ export class Highlights {
   }
 
   static color(id: number, type: "foreground" | "background" | "special") {
-    let color = type;
-
-    if (Highlights.hls[id].reverse) {
-      type === "foreground" && (color = "background");
-      type === "background" && (color = "foreground");
-    }
-    return Highlights.hls[id][color] || Highlights.hls[0][color];
+    return Highlights.hls[id][type] || Highlights.hls[0][type];
   }
 
   static style(id: number, reverse: boolean = false) {
