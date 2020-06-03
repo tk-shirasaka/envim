@@ -25,8 +25,7 @@ const styles = {
   },
   popup: {
     overflow: "hidden",
-    borderRadius: 4,
-    boxShadow: "2px 2px 6px -2px",
+    boxShadow: "8px 8px 4px 0 rgba(0, 0, 0, 0.6)",
   },
   line: {
     display: "flex",
@@ -39,8 +38,7 @@ const styles = {
     marginLeft: 4,
     padding: 4,
     whiteSpace,
-    borderRadius: 4,
-    boxShadow: "2px 2px 6px -2px",
+    boxShadow: "8px 8px 4px 0 rgba(0, 0, 0, 0.6)",
   }
 };
 

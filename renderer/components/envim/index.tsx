@@ -20,7 +20,6 @@ interface Props {
 }
 
 interface States {
-  style: { background: string; color: string; borderColor: string; };
   options: { [k: string]: boolean };
   grids: { [k: string]: {
     width: number;
@@ -51,7 +50,7 @@ export class EnvimComponent extends React.Component<Props, States> {
   constructor(props: Props) {
     super(props);
 
-    this.state = { style: { background: "", color: "", borderColor: "" }, options: {}, grids: {}, mouse: false };
+    this.state = { options: {}, grids: {}, mouse: false };
     Emit.on("highlight:set", this.onHighlight.bind(this));
     Emit.on("highlight:name", this.onHlGroup.bind(this));
     Emit.on("win:pos", this.onWin.bind(this));
@@ -69,11 +68,6 @@ export class EnvimComponent extends React.Component<Props, States> {
   private onHighlight(highlights: {id: number, hl: IHighlight}[]) {
     highlights.forEach(({id, hl}) => {
       Highlights.setHighlight(id, hl);
-
-      if (id === 0) {
-        const style = Highlights.style(id);
-        JSON.stringify(this.state.style) === JSON.stringify(style) || this.setState({ style });
-      }
     });
   }
 
@@ -131,7 +125,7 @@ export class EnvimComponent extends React.Component<Props, States> {
     const footer = { width, height: Math.min(editor.height, height * 15) };
 
     return (
-      <div style={this.state.style}>
+      <>
         { this.state.options.ext_tabline ? <TablineComponent {...header} /> : null }
         <div style={{...styles.editor, ...editor}}>
           <EditorComponent grid={1} mouse={this.state.mouse} style={{ ...editor, top: 0, left: 0 }} />
@@ -144,7 +138,7 @@ export class EnvimComponent extends React.Component<Props, States> {
           { this.state.options.ext_messages ? <NotificateComponent /> : null }
           <InputComponent />
         </div>
-      </div>
+      </>
     );
   }
 }

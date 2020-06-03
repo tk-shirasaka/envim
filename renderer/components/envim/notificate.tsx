@@ -31,7 +31,7 @@ const styles = {
     maxHeight: 100,
     marginBottom: 8,
     borderRadius: 4,
-    boxShadow: "2px 2px 6px -2px",
+    boxShadow: "8px 8px 4px 0 rgba(0, 0, 0, 0.6)",
     overflow: "auto",
   },
   selected: {
@@ -43,7 +43,7 @@ const styles = {
     cursor: "pointer",
     animation: "fadeIn .5s ease",
     borderRadius: 4,
-    boxShadow: "2px 2px 6px -2px",
+    boxShadow: "8px 8px 4px 0 rgba(0, 0, 0, 0.6)",
     overflow: "hidden",
   },
   icon: {

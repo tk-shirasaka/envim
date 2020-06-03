@@ -152,7 +152,7 @@ export class TablineComponent extends React.Component<Props, States> {
 
   render() {
     return (
-      <div style={{...this.props, ...styles.scope}}>
+      <div className="color-black" style={{...this.props, ...styles.scope}}>
         {this.state.tabs.map((tab, i) => (
           <div key={i} className={`color-black ${tab.active ? "active" : "clickable"}`} style={this.getTabStyle(tab.active)} onClick={e => this.onSelect(e, i)}>
             { this.renderIcon(tab.type) }

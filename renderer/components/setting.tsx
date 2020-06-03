@@ -20,6 +20,8 @@ interface States {
 const flexDirection: "column" = "column";
 const styles = {
   scope: {
+    width: "100%",
+    height: "100%",
     display: "flex",
     flexDirection,
     justifyContent: "center",

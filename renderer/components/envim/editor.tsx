@@ -26,7 +26,7 @@ const position: "absolute" = "absolute";
 const style = {
   position,
   cursor: "text",
-  boxShadow: "0px 2px 8px -6px",
+  boxShadow: "0 8px 8px 0 rgba(0, 0, 0, 0.6)",
 };
 
 export class EditorComponent extends React.Component<Props, States> {

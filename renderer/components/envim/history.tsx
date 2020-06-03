@@ -29,7 +29,7 @@ const styles = {
     bottom: 0,
     animation: "fadeIn .5s ease",
     borderRadius: "4px 4px 0 0",
-    boxShadow: "0 0 4px 0px",
+    boxShadow: "0 -8px 4px 0 rgba(0, 0, 0, 0.6)",
     overflow: "auto",
   },
   actions: {
