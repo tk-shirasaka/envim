@@ -14,7 +14,7 @@ interface Props {
     height: number;
     top: number;
     left: number;
-    zIndex?: number;
+    display?: "block" | "none";
     cursor?: "text" | "not-allowed";
   };
 }

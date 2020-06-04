@@ -26,7 +26,7 @@ interface States {
     height: number;
     top: number;
     left: number;
-    zIndex: number;
+    display?: "block" | "none";
     cursor: "text" | "not-allowed";
   }};
   mouse: boolean;
@@ -78,12 +78,12 @@ export class EnvimComponent extends React.Component<Props, States> {
   private onWin(grid: number, width: number, height: number, top: number, left: number, focusable: boolean) {
     const grids = this.state.grids;
     const cursor: "text" | "not-allowed" = focusable ? "text" : "not-allowed";
-    const zIndex = 0;
+    const display = "block";
 
     [ height, width ] = [ row2Y(height), col2X(width) ];
     [ top, left ] = [ row2Y(top), col2X(left) ];
 
-    grids[grid] = { width, height, top, left, cursor, zIndex };
+    grids[grid] = { width, height, top, left, cursor, display };
 
     this.setState({ grids });
   }
@@ -91,7 +91,7 @@ export class EnvimComponent extends React.Component<Props, States> {
   private hideWin(grid: number) {
     const grids = this.state.grids;
 
-    grids[grid].zIndex = -1;
+    grids[grid].display = "none";
 
     this.setState({ grids });
   }
