@@ -194,7 +194,10 @@ export class App {
   }
 
   private gridCursorGoto(grid: number, row: number, col: number) {
-    Emit.send(`cursor:${grid}`, this.grids[grid]?.setCursorPos(row, col));
+    Object.keys(this.grids).forEach(i => {
+      const args = +i == grid ? [row, col] : [ -1, -1 ];
+      Emit.send(`cursor:${i}`, this.grids[+i].setCursorPos(args[0], args[1]));
+    });
   }
 
   private gridScroll(grid: number, top: number, bottom: number, left: number, right: number, rows: number, cols: number) {
