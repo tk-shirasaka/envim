@@ -17,10 +17,11 @@ import { InputComponent } from "./input";
 
 interface Props {
   window: { width: number; height: number; };
+  options: { [k: string]: boolean };
+  mouse: boolean;
 }
 
 interface States {
-  options: { [k: string]: boolean };
   grids: { [k: string]: {
     width: number;
     height: number;
@@ -29,7 +30,6 @@ interface States {
     display?: "block" | "none";
     cursor: "text" | "not-allowed";
   }};
-  mouse: boolean;
 }
 
 const positionR: "relative" = "relative"
@@ -50,19 +50,16 @@ export class EnvimComponent extends React.Component<Props, States> {
   constructor(props: Props) {
     super(props);
 
-    this.state = { options: {}, grids: {}, mouse: false };
+    this.state = { grids: {} };
     Emit.on("highlight:set", this.onHighlight.bind(this));
     Emit.on("highlight:name", this.onHlGroup.bind(this));
     Emit.on("win:pos", this.onWin.bind(this));
     Emit.on("win:hide", this.hideWin.bind(this));
     Emit.on("win:close", this.closeWin.bind(this));
-    Emit.on("envim:title", this.onTitle.bind(this));
-    Emit.on("envim:mouse", this.onMouse.bind(this));
-    Emit.on("envim:option", this.onOption.bind(this));
   }
 
   componentWillUnmount() {
-    Emit.clear(["highlight:set", "highlight:name", "win:pos", "win:hide", "win:close", "envim:title", "envim:mouse", "envim:option"]);
+    Emit.clear(["highlight:set", "highlight:name", "win:pos", "win:hide", "win:close"]);
   }
 
   private onHighlight(highlights: {id: number, hl: IHighlight}[]) {
@@ -104,38 +101,26 @@ export class EnvimComponent extends React.Component<Props, States> {
     this.setState({ grids });
   }
 
-  private onTitle(title: string) {
-    document.title = title || 'Envim';
-  }
-
-  private onMouse(mouse: boolean) {
-    this.setState({ mouse });
-  }
-
-  private onOption(options: { [k: string]: boolean }) {
-    this.setState({ options: Object.assign(options, this.state.options) });
-  }
-
   render() {
     const { height } = Setting.font;
     const { width } = this.props.window;
-    const offset = this.state.options.ext_tabline ? height + 4 : 0;
+    const offset = this.props.options.ext_tabline ? height + 4 : 0;
     const editor = { width, height: row2Y(y2Row(this.props.window.height - offset)) };
     const header = { width, height: this.props.window.height - editor.height };
     const footer = { width, height: Math.min(editor.height, height * 15) };
 
     return (
       <>
-        { this.state.options.ext_tabline ? <TablineComponent {...header} /> : null }
+        { this.props.options.ext_tabline ? <TablineComponent {...header} /> : null }
         <div style={{...styles.editor, ...editor}}>
-          <EditorComponent grid={1} mouse={this.state.mouse} style={{ ...editor, top: 0, left: 0 }} />
+          <EditorComponent grid={1} mouse={this.props.mouse} style={{ ...editor, top: 0, left: 0 }} />
           { Object.keys(this.state.grids).map(grid => (
-            <EditorComponent key={grid} grid={+grid} mouse={this.state.mouse} style={this.state.grids[+grid]} />
+            <EditorComponent key={grid} grid={+grid} mouse={this.props.mouse} style={this.state.grids[+grid]} />
           )) }
-          { this.state.options.ext_messages ? <HistoryComponent {...footer} /> : null }
-          { this.state.options.ext_cmdline ? <CmdlineComponent /> : null }
-          { this.state.options.ext_popupmenu ? <PopupmenuComponent /> : null }
-          { this.state.options.ext_messages ? <NotificateComponent /> : null }
+          { this.props.options.ext_messages ? <HistoryComponent {...footer} /> : null }
+          { this.props.options.ext_cmdline ? <CmdlineComponent /> : null }
+          { this.props.options.ext_popupmenu ? <PopupmenuComponent /> : null }
+          { this.props.options.ext_messages ? <NotificateComponent /> : null }
           <InputComponent />
         </div>
       </>
