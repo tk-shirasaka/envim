@@ -29,7 +29,10 @@ export class Browser {
     setMenu(false);
     Browser.win = new BrowserWindow({
       transparent: true,
-      frame: process.platform !== "darwin",
+      resizable: true,
+      maximizable: true,
+      minimizable: true,
+      frame: process.platform === "linux",
       webPreferences: {
         nodeIntegration: true,
       },
