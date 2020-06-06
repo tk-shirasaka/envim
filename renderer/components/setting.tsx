@@ -105,13 +105,11 @@ export class SettingComponent extends React.Component<Props, States> {
   render() {
     return (
       <form className="color-black" style={this.getStyle()} onSubmit={this.onSubmit.bind(this)}>
+        <h1>Welcome To Envim!</h1>
         <div>
-          <h1>Welcome To Envim!</h1>
-          <div>
-            <IconComponent color="green-fg" style={styles.icon} font="" raito={3} />
-            <IconComponent color="white-fg" style={styles.icon} font="" />
-            <IconComponent color="lightblue-fg" style={styles.icon} font="" raito={3} />
-          </div>
+          <IconComponent color="green-fg" style={styles.icon} font="" raito={3} />
+          <IconComponent color="white-fg" style={styles.icon} font="" />
+          <IconComponent color="lightblue-fg" style={styles.icon} font="" raito={3} />
         </div>
 
         <div>
