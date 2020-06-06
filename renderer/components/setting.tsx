@@ -18,14 +18,17 @@ interface States {
 }
 
 const flexDirection: "column" = "column";
+const boxSizing: "border-box" = "border-box";
 const styles = {
   scope: {
     width: "100%",
     height: "100%",
+    padding: 8,
     display: "flex",
-    flexDirection,
-    justifyContent: "center",
     alignItems: "center",
+    overflow: "auto",
+    flexDirection,
+    boxSizing,
   },
   icon: {
     margin: "0 6px",
@@ -102,36 +105,42 @@ export class SettingComponent extends React.Component<Props, States> {
   render() {
     return (
       <form className="color-black" style={this.getStyle()} onSubmit={this.onSubmit.bind(this)}>
-        <h1>Welcome To Envim!</h1>
         <div>
-          <IconComponent color="green-fg" style={styles.icon} font="" raito={3} />
-          <IconComponent color="white-fg" style={styles.icon} font="" />
-          <IconComponent color="lightblue-fg" style={styles.icon} font="" raito={3} />
+          <h1>Welcome To Envim!</h1>
+          <div>
+            <IconComponent color="green-fg" style={styles.icon} font="" raito={3} />
+            <IconComponent color="white-fg" style={styles.icon} font="" />
+            <IconComponent color="lightblue-fg" style={styles.icon} font="" raito={3} />
+          </div>
         </div>
 
-        <h3>Path to neovim</h3>
         <div>
-          <label><input type="radio" value="command" checked={this.state.type === "command"} onChange={this.onToggleType.bind(this)} />Command</label>
-          <label><input type="radio" value="address" checked={this.state.type === "address"} onChange={this.onToggleType.bind(this)} />Port</label>
-        </div>
-        <label>Enter neovim path<input type="text" value={this.state.path} onChange={this.onChangePath.bind(this)} autoFocus={true} /></label>
-        <label>Font Size ({this.state.font.size}px)<input type="range" min="5" max="20" value={this.state.font.size} onChange={this.onChangeFont.bind(this)} /></label>
-        <div>
-          <span><IconComponent color="white-fg" style={styles.icon} font="" /> Normal</span>,
-          <span className="bold"><IconComponent color="white-fg" style={styles.icon} font="" /> Bold</span>,
-          <span className="italic"><IconComponent color="white-fg" style={styles.icon} font="" /> Italic</span>
-        </div>
-        <label>Transparent ({this.state.opacity}%)<input type="range" min="0" max="99" value={this.state.opacity} onChange={this.onChangeOpacity.bind(this)} /></label>
+          <h3>Neovim path</h3>
+          <div>
+            <label><input type="radio" value="command" checked={this.state.type === "command"} onChange={this.onToggleType.bind(this)} />Command</label>
+            <label><input type="radio" value="address" checked={this.state.type === "address"} onChange={this.onToggleType.bind(this)} />Port</label>
+          </div>
+          <label>Enter neovim path<input type="text" value={this.state.path} onChange={this.onChangePath.bind(this)} autoFocus={true} /></label>
 
-        <h3>Options</h3>
-        { Object.keys(this.state.options).map((key, i) => (
-          <label key={i}><input type="checkbox" name={key} checked={this.state.options[key]} onChange={this.onToggleOption.bind(this)} />{ key }</label>
-        ))}
+          <h3>Appearance</h3>
+          <label>Font Size ({this.state.font.size}px)<input type="range" min="5" max="20" value={this.state.font.size} onChange={this.onChangeFont.bind(this)} /></label>
+          <div>
+            <span><IconComponent color="white-fg" style={styles.icon} font="" /> Normal</span>,
+            <span className="bold"><IconComponent color="white-fg" style={styles.icon} font="" /> Bold</span>,
+            <span className="italic"><IconComponent color="white-fg" style={styles.icon} font="" /> Italic</span>
+          </div>
+          <label>Transparent ({this.state.opacity}%)<input type="range" min="0" max="99" value={this.state.opacity} onChange={this.onChangeOpacity.bind(this)} /></label>
 
-        <h3>Others</h3>
-        { Object.keys(this.state.others).map((key, i) => (
-          <label key={i}><input type="checkbox" name={key} checked={this.state.others[key]} onChange={this.onToggleOther.bind(this)} />{ key }</label>
-        ))}
+          <h3>Options</h3>
+          { Object.keys(this.state.options).map((key, i) => (
+            <label key={i}><input type="checkbox" name={key} checked={this.state.options[key]} onChange={this.onToggleOption.bind(this)} />{ key }</label>
+          ))}
+
+          <h3>Others</h3>
+          { Object.keys(this.state.others).map((key, i) => (
+            <label key={i}><input type="checkbox" name={key} checked={this.state.others[key]} onChange={this.onToggleOther.bind(this)} />{ key }</label>
+          ))}
+        </div>
 
         <button className="color-blue clickable" style={styles.button}>Start</button>
       </form>
