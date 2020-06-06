@@ -69,7 +69,7 @@ export class AppComponent extends React.Component<Props, States> {
   }
 
   private renderContent() {
-    if (this.state.resize) return null;
+    if (this.state.resize) return <div className="color-black" style={this.state.window}></div>;
     return this.state.init
       ? <EnvimComponent {...this.state} />
       : <SettingComponent />;
