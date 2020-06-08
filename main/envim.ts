@@ -23,6 +23,7 @@ export class Envim {
     Emit.on("envim:log", this.onLog.bind(this));
     Emit.on("envim:detach", this.onDetach.bind(this));
     process.on("uncaughtException", this.onError.bind(this));
+    process.on("unhandledRejection", this.onError.bind(this));
   }
 
   private async onAttach(type: string, value: string, options: { [k: string]: boolean }) {
