@@ -26,6 +26,7 @@ const position: "absolute" = "absolute";
 const style = {
   position,
   cursor: "text",
+  animation: "fadeIn .5s ease",
   boxShadow: "0 8px 8px 0 rgba(0, 0, 0, 0.6)",
 };
 

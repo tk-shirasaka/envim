@@ -21,10 +21,10 @@ const styles = {
     position,
     display: "flex",
     alignItems: "flex-start",
-    animation: "fadeIn .5s ease",
   },
   popup: {
     overflow: "hidden",
+    animation: "fadeIn .5s ease",
     boxShadow: "8px 8px 4px 0 rgba(0, 0, 0, 0.6)",
   },
   line: {
@@ -38,6 +38,7 @@ const styles = {
     marginLeft: 4,
     padding: 4,
     whiteSpace,
+    animation: "fadeIn .5s ease",
     boxShadow: "8px 8px 4px 0 rgba(0, 0, 0, 0.6)",
   }
 };

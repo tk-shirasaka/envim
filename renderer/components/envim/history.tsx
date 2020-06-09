@@ -27,7 +27,7 @@ const styles = {
     left: 0,
     right: 0,
     bottom: 0,
-    animation: "fadeIn .5s ease",
+    animation: "slideIn .5s ease",
     borderRadius: "4px 4px 0 0",
     boxShadow: "0 -8px 4px 0 rgba(0, 0, 0, 0.6)",
     overflow: "auto",

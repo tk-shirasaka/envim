@@ -25,7 +25,7 @@ const styles = {
   },
   message: {
     cursor: "pointer",
-    animation: "fadeIn .5s ease",
+    animation: "slideIn .5s ease",
     display: "flex",
     width: 300,
     maxHeight: 100,
@@ -41,7 +41,7 @@ const styles = {
     right: 10,
     bottom: 10,
     cursor: "pointer",
-    animation: "fadeIn .5s ease",
+    animation: "slideIn .5s ease",
     borderRadius: 4,
     boxShadow: "8px 8px 4px 0 rgba(0, 0, 0, 0.6)",
     overflow: "hidden",
