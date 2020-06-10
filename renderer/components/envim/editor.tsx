@@ -20,14 +20,28 @@ interface Props {
 }
 
 interface States {
+  init: boolean;
 }
 
 const position: "absolute" = "absolute";
-const style = {
-  position,
-  cursor: "text",
-  animation: "fadeIn .5s ease",
-  boxShadow: "0 8px 8px 0 rgba(0, 0, 0, 0.6)",
+const styles = {
+  scope: {
+    position,
+    cursor: "text",
+    animation: "fadeIn .5s ease",
+    boxShadow: "0 8px 8px 0 rgba(0, 0, 0, 0.6)",
+  },
+  loading: {
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    width: "100%",
+    height: "100%",
+  },
+  canvas: {
+    width: "100%",
+    height: "100%",
+  },
 };
 
 export class EditorComponent extends React.Component<Props, States> {
@@ -36,6 +50,7 @@ export class EditorComponent extends React.Component<Props, States> {
 
   constructor(props: Props) {
     super(props);
+    this.state = { init: false };
 
     Emit.on(`cursor:${this.props.grid}`, this.onCursor.bind(this));
     Emit.on(`flush:${this.props.grid}`, this.onFlush.bind(this));
@@ -94,17 +109,21 @@ export class EditorComponent extends React.Component<Props, States> {
   }
 
   private onFlush(cells: ICell[]) {
+    this.state.init || this.setState({ init: true });
     this.renderer?.flush(cells);
   }
 
   render() {
     return (
-      <canvas style={{ ...style, ...this.props.style }} width={this.props.style.width * 2} height={this.props.style.height * 2} ref="canvas"
-        onMouseDown={this.onMouseDown.bind(this)}
-        onMouseMove={this.onMouseMove.bind(this)}
-        onMouseUp={this.onMouseUp.bind(this)}
-        onWheel={this.onMouseWheel.bind(this)}
-      />
+      <div style={{ ...styles.scope, ...this.props.style }}>
+        { this.state.init || <div className="color-black" style={styles.loading}><span>Loading...</span></div> }
+        <canvas style={styles.canvas} width={this.props.style.width * 2} height={this.props.style.height * 2} ref="canvas"
+          onMouseDown={this.onMouseDown.bind(this)}
+          onMouseMove={this.onMouseMove.bind(this)}
+          onMouseUp={this.onMouseUp.bind(this)}
+          onWheel={this.onMouseWheel.bind(this)}
+        />
+      </div>
     );
   }
 }
