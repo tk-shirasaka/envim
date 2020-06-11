@@ -18,3 +18,8 @@ span, i {
 .space {
   flex-grow: 1;
 }
+
+.dragable {
+  -webkit-app-region: drag;
+  -webkit-user-select: none;
+}

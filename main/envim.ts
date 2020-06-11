@@ -3,7 +3,6 @@ import { spawn, ChildProcess } from "child_process";
 import { NeovimClient } from "neovim";
 import { Response } from "neovim/lib/host";
 
-import { setMenu } from "./menu";
 import { Emit } from "./emit";
 import { App } from "./envim/app";
 import { Clipboard } from "./envim/clipboard";
@@ -51,7 +50,6 @@ export class Envim {
       this.nvim.on("notification", this.onNotification.bind(this));
       this.nvim.on("disconnect", this.onDisconnect.bind(this));
       Clipboard.setup(this.nvim);
-      setMenu(true);
       Emit.send("app:start");
     }
   }
@@ -111,7 +109,6 @@ export class Envim {
 
   private onDisconnect() {
     this.state.attached = false;
-    setMenu(false);
     Emit.send("app:stop");
   }
 

@@ -16,7 +16,7 @@ import { NotificateComponent } from "./notificate";
 import { InputComponent } from "./input";
 
 interface Props {
-  window: { width: number; height: number; };
+  main: { width: number; height: number; };
   options: { [k: string]: boolean };
   mouse: boolean;
 }
@@ -103,10 +103,10 @@ export class EnvimComponent extends React.Component<Props, States> {
 
   render() {
     const { height } = Setting.font;
-    const { width } = this.props.window;
+    const { width } = this.props.main;
     const offset = this.props.options.ext_tabline ? height + 4 : 0;
-    const editor = { width, height: row2Y(y2Row(this.props.window.height - offset)) };
-    const header = { width, height: this.props.window.height - editor.height };
+    const editor = { width, height: row2Y(y2Row(this.props.main.height - offset)) };
+    const header = { width, height: this.props.main.height - editor.height };
     const footer = { width, height: Math.min(editor.height, height * 15) };
 
     return (

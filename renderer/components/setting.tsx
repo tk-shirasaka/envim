@@ -6,6 +6,8 @@ import { Setting } from "../utils/setting";
 import { IconComponent } from "./icon";
 
 interface Props {
+  width: number;
+  height: number;
 }
 
 interface States {
@@ -21,8 +23,6 @@ const flexDirection: "column" = "column";
 const boxSizing: "border-box" = "border-box";
 const styles = {
   scope: {
-    width: "100%",
-    height: "100%",
     padding: 8,
     display: "flex",
     alignItems: "center",
@@ -98,6 +98,7 @@ export class SettingComponent extends React.Component<Props, States> {
   private getStyle() {
     return {
       opacity: (100 - this.state.opacity) / 100,
+      ...this.props,
       ...styles.scope
     };
   }

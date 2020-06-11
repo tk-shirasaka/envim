@@ -2,6 +2,9 @@ import React from "react";
 
 import { Emit } from "../utils/emit";
 import { Setting } from "../utils/setting";
+import { x2Col, col2X } from "../utils/size";
+
+import { SidebarComponent } from "./sidebar";
 import { SettingComponent } from "./setting";
 import { EnvimComponent } from "./envim";
 
@@ -28,9 +31,18 @@ export class AppComponent extends React.Component<Props, States> {
     Emit.on("app:start", this.onStart.bind(this));
     Emit.on("app:stop", this.onStop.bind(this));
     Emit.on("setting:font", this.onFont.bind(this));
-    Emit.on("envim:title", this.onTitle.bind(this));
     Emit.on("envim:mouse", this.onMouse.bind(this));
     Emit.on("envim:option", this.onOption.bind(this));
+  }
+
+  private getSize() {
+    const side = { width: 0, height: this.state.window.height };
+    const main = { width: 0, height: this.state.window.height };
+
+    main.width = col2X(x2Col(this.state.window.width) - 3);
+    side.width = this.state.window.width - main.width;
+
+    return { side, main };
   }
 
   private onResize() {
@@ -47,17 +59,12 @@ export class AppComponent extends React.Component<Props, States> {
   }
 
   private onStop() {
-    this.onTitle("Envim");
     this.setState({ init: false, mouse: false, options: {} });
   }
 
   private onFont() {
     const font = Setting.font;
     this.setState({ font });
-  }
-
-  private onTitle(title: string) {
-    document.title = title;
   }
 
   private onMouse(mouse: boolean) {
@@ -69,10 +76,12 @@ export class AppComponent extends React.Component<Props, States> {
   }
 
   private renderContent() {
+    const { main } = this.getSize();
+
     if (this.state.resize) return <div className="color-black" style={this.state.window}></div>;
     return this.state.init
-      ? <EnvimComponent {...this.state} />
-      : <SettingComponent />;
+      ? <EnvimComponent main={main} {...this.state} />
+      : <SettingComponent {...main} />;
   }
 
   render() {
@@ -81,6 +90,13 @@ export class AppComponent extends React.Component<Props, States> {
       lineHeight: `${this.state.font.height}px`,
     };
 
-    return <div style={{ ...this.state.window, ...style }}>{this.renderContent()}</div>;
+    const { side } = this.getSize();
+
+    return (
+      <div style={{ ...this.state.window, ...style }}>
+        <SidebarComponent init={this.state.init} side={side} />
+        {this.renderContent()}
+      </div>
+    );
   }
 }

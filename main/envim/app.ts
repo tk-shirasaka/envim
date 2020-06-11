@@ -115,9 +115,6 @@ export class App {
         break;
 
         /** default **/
-        case "set_title":
-          this.setTitle(r[0][0]);
-        break;
         case "option_set":
           this.optionSet(r);
         break;
@@ -317,10 +314,6 @@ export class App {
     });
 
     Emit.send(`messages:${type}`, this.messages.get(type));
-  }
-
-  private setTitle(title: string) {
-    Emit.send("envim:title", title);
   }
 
   private optionSet(options: string[][]) {

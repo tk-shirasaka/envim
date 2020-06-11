@@ -26,13 +26,13 @@ export class Browser {
   private create() {
     if (Browser.win) return;
 
-    setMenu(false);
+    setMenu(app.isPackaged);
     Browser.win = new BrowserWindow({
       transparent: true,
       resizable: true,
       maximizable: true,
       minimizable: true,
-      frame: process.platform === "linux",
+      frame: false,
       webPreferences: {
         nodeIntegration: true,
       },
