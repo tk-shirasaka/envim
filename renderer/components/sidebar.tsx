@@ -12,14 +12,12 @@ interface Props {
 interface States {
 }
 
-const float: "left" = "left";
 const flexDirection: "column" = "column";
 const styles = {
   scope: {
     display: "flex",
     overflow: "hidden",
     flexDirection,
-    float,
   },
   icon: {
     paddingTop: 4,

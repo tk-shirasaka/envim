@@ -85,15 +85,10 @@ export class AppComponent extends React.Component<Props, States> {
   }
 
   render() {
-    const style = {
-      fontSize: this.state.font.size,
-      lineHeight: `${this.state.font.height}px`,
-    };
-
     const { side } = this.getSize();
 
     return (
-      <div style={{ ...this.state.window, ...style }}>
+      <div style={{ ...this.state.window, display: "flex" }}>
         <SidebarComponent init={this.state.init} side={side} />
         {this.renderContent()}
       </div>

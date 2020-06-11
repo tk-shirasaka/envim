@@ -30,6 +30,11 @@ const styles = {
     flexDirection,
     boxSizing,
   },
+  logo: {
+    fontSize: "4em",
+    lineHeight: "1em",
+    margin: "0 6px",
+  },
   icon: {
     margin: "0 6px",
   },
@@ -103,14 +108,30 @@ export class SettingComponent extends React.Component<Props, States> {
     };
   }
 
+  private renderFontExample() {
+    const style = {
+      padding: "4px 8px",
+      fontSize: this.state.font.size,
+      lineHeight: `${this.state.font.height}px`,
+    };
+
+    return (
+      <div style={style}>
+        <span><IconComponent color="white-fg" style={styles.icon} font="" /> Normal</span>,
+        <span className="bold"><IconComponent color="white-fg" style={styles.icon} font="" /> Bold</span>,
+        <span className="italic"><IconComponent color="white-fg" style={styles.icon} font="" /> Italic</span>
+      </div>
+    );
+  }
+
   render() {
     return (
       <form className="color-black" style={this.getStyle()} onSubmit={this.onSubmit.bind(this)}>
         <h1>Welcome To Envim!</h1>
         <div>
-          <IconComponent color="green-fg" style={styles.icon} font="" raito={3} />
+          <IconComponent color="green-fg" style={styles.logo} font=""/>
           <IconComponent color="white-fg" style={styles.icon} font="" />
-          <IconComponent color="lightblue-fg" style={styles.icon} font="" raito={3} />
+          <IconComponent color="lightblue-fg" style={styles.logo} font="" />
         </div>
 
         <div>
@@ -123,11 +144,7 @@ export class SettingComponent extends React.Component<Props, States> {
 
           <h3>Appearance</h3>
           <label>Font Size ({this.state.font.size}px)<input type="range" min="5" max="20" value={this.state.font.size} onChange={this.onChangeFont.bind(this)} /></label>
-          <div>
-            <span><IconComponent color="white-fg" style={styles.icon} font="" /> Normal</span>,
-            <span className="bold"><IconComponent color="white-fg" style={styles.icon} font="" /> Bold</span>,
-            <span className="italic"><IconComponent color="white-fg" style={styles.icon} font="" /> Italic</span>
-          </div>
+          {this.renderFontExample()}
           <label>Transparent ({this.state.opacity}%)<input type="range" min="0" max="99" value={this.state.opacity} onChange={this.onChangeOpacity.bind(this)} /></label>
 
           <h3>Options</h3>
