@@ -1,6 +1,7 @@
 import { app, BrowserWindow } from "electron";
 
 import { setMenu } from "./menu";
+import { Emit } from "./emit";
 
 export class Browser {
   static win?: BrowserWindow;
@@ -8,7 +9,8 @@ export class Browser {
   constructor() {
     app.on("ready", this.onReady.bind(this));
     app.on("activate", this.onActivate.bind(this));
-    app.on("window-all-closed", this.onWindowAllClosed.bind(this));
+    app.on("window-all-closed", this.onQuit.bind(this));
+    Emit.on("app:quit", this.onQuit.bind(this));
   }
 
   private onReady() {
@@ -19,8 +21,8 @@ export class Browser {
     setTimeout(this.create, 300);
   }
 
-  private onWindowAllClosed() {
-    if (process.platform !== "darwin") app.quit();
+  private onQuit() {
+    app.quit();
   }
 
   private create() {

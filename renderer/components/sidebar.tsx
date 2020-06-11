@@ -22,11 +22,17 @@ const styles = {
     float,
   },
   icon: {
-    margin: "auto",
+    paddingTop: 4,
+    textAlign: "center",
+    WebkitAppRegion: "no-drag",
   }
 };
 
 export class SidebarComponent extends React.Component<Props, States> {
+
+  private onQuit() {
+    Emit.send("app:quit");
+  }
 
   private onDetach() {
     Emit.send("envim:detach");
@@ -35,11 +41,12 @@ export class SidebarComponent extends React.Component<Props, States> {
   render() {
     return (
       <div className="color-black dragable" style={{ ...this.props.side, ...styles.scope }}>
+        <IconComponent color="red-fg" style={styles.icon} font="" onClick={this.onQuit.bind(this)} />
         <div className="space" />
         { this.props.init ? (
-          <IconComponent color="white-fg" style={styles.icon} font="" raito={2} onClick={this.onDetach.bind(this)} />
+          <IconComponent color="white-fg" style={styles.icon} font="" onClick={this.onDetach.bind(this)} />
         ) : (
-          <IconComponent color="gray-fg" style={styles.icon} font="" raito={2} />
+          <IconComponent color="gray-fg" style={styles.icon} font="" />
         ) }
       </div>
     );
