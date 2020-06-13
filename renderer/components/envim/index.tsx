@@ -104,15 +104,14 @@ export class EnvimComponent extends React.Component<Props, States> {
   render() {
     const { height, size } = Setting.font;
     const { width } = this.props.main;
-    const offset = this.props.options.ext_tabline ? height + 4 : 0;
-    const editor = { width, height: row2Y(y2Row(this.props.main.height - offset)) };
+    const editor = { width, height: row2Y(y2Row(this.props.main.height - 4) - 1) };
     const header = { width, height: this.props.main.height - editor.height };
     const footer = { width, height: Math.min(editor.height, height * 15) };
     const style = { fontSize: size, lineHeight: `${height}px` };
 
     return (
       <div style={style}>
-        { this.props.options.ext_tabline ? <TablineComponent {...header} /> : null }
+        <TablineComponent {...header} />
         <div style={{...styles.editor, ...editor}}>
           <EditorComponent grid={1} mouse={this.props.mouse} style={{ ...editor, top: 0, left: 0 }} />
           { Object.keys(this.state.grids).map(grid => (

@@ -82,7 +82,8 @@ export class TablineComponent extends React.Component<Props, States> {
   }
 
   private onClose(e: MouseEvent, i: number) {
-    this.onCommand(`tabclose ${i + 1}`, e);
+    const command = this.state.tabs.length > 1 ? `tabclose ${i + 1}` : "quit";
+    this.onCommand(command, e);
   }
 
   private onPlus() {
@@ -127,7 +128,7 @@ export class TablineComponent extends React.Component<Props, States> {
     const suffix = this.state[type] ? " clickable" : "-fg";
     const command = type === "qf" ? "copen" : "lopen";
 
-    return (
+    return this.state.tabs.length > 0 && (
       <div className={`color-${color}${suffix}`} style={styles.icon} onClick={() => this.state[type] && this.onCommand(command)}>
         <IconComponent color="none" style={this.getStyle(styles.icon)} font="" />{ this.state[type] }
       </div>
@@ -157,11 +158,11 @@ export class TablineComponent extends React.Component<Props, States> {
           <div key={i} className={`color-black ${tab.active ? "active" : "clickable"}`} style={this.getTabStyle(tab.active)} onClick={e => this.onSelect(e, i)}>
             { this.renderIcon(tab.type) }
             <span style={this.getStyle(styles.name)}>{ tab.name }</span>
-            {tab.active || <IconComponent color="red-fg" style={this.getStyle(styles.icon)} font="" onClick={e => this.onClose(e, i)} />}
+            <IconComponent color="red-fg" style={this.getStyle(styles.icon)} font="" onClick={e => this.onClose(e, i)} />
           </div>
         ))}
-        <IconComponent color="green-fg" style={{...styles.icon, lineHeight: `${this.props.height}px`}} font="" onClick={() => this.onPlus()} />
-        <div className="space" />
+        { this.state.tabs.length > 0 && <IconComponent color="green-fg" style={{...styles.icon, lineHeight: `${this.props.height}px`}} font="" onClick={() => this.onPlus()} /> }
+        <div className="space dragable" />
         { this.renderQuickfix("lc") }
         { this.renderQuickfix("qf") }
         { this.renderNotify() }

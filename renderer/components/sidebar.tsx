@@ -22,7 +22,6 @@ const styles = {
   icon: {
     paddingTop: 4,
     textAlign: "center",
-    WebkitAppRegion: "no-drag",
   }
 };
 
@@ -38,9 +37,9 @@ export class SidebarComponent extends React.Component<Props, States> {
 
   render() {
     return (
-      <div className="color-black dragable" style={{ ...this.props.side, ...styles.scope }}>
+      <div className="color-black" style={{ ...this.props.side, ...styles.scope }}>
         <IconComponent color="red-fg" style={styles.icon} font="" onClick={this.onQuit.bind(this)} />
-        <div className="space" />
+        <div className="space dragable" />
         { this.props.init ? (
           <IconComponent color="white-fg" style={styles.icon} font="" onClick={this.onDetach.bind(this)} />
         ) : (
