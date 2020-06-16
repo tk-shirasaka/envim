@@ -1,7 +1,14 @@
-@keyframes slideIn {
+@keyframes slideUp {
   from {
     opacity: 0;
     transform: translateY(20px);
+  }
+}
+
+@keyframes slideRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
   }
 }
 

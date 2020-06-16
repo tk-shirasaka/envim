@@ -13,11 +13,10 @@ interface States {
 }
 
 const whiteSpace: "pre-wrap" = "pre-wrap";
+const wordBreak: "break-all" = "break-all";
 const styles = {
   content: {
     display: "flex",
-    width: "100%",
-    height: "100%",
   },
   kind: {
     padding: 4,
@@ -28,6 +27,7 @@ const styles = {
     padding: 4,
     overflow: "auto",
     whiteSpace,
+    wordBreak,
   },
 };
 

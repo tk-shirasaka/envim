@@ -14,20 +14,20 @@ interface States {
   indent: number;
 }
 
-const position: "fixed" = "fixed";
+const position: "absolute" = "absolute";
 const pointerEvents: "none" = "none";
 const whiteSpace: "pre-wrap" = "pre-wrap";
+const wordBreak: "break-all" = "break-all";
 const styles = {
   scope: {
     position,
     display: "flex",
-    left: 0,
-    right: 0,
     bottom: 0,
+    width: "100%",
     overflow: "hidden",
-    animation: "slideIn .5s ease",
-    borderRadius: "4px 4px 0 0",
-    boxShadow: "0 -8px 4px 0 rgba(0, 0, 0, 0.6)",
+    animation: "slideUp .5s ease",
+    borderRadius: "4px 0 0 0",
+    boxShadow: "8px -8px 4px 0 rgba(0, 0, 0, 0.6)",
     pointerEvents,
   },
   prompt: {
@@ -36,6 +36,7 @@ const styles = {
   cmdline: {
     padding: 4,
     whiteSpace,
+    wordBreak,
   },
 };
 

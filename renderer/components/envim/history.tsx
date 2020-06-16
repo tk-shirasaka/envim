@@ -19,17 +19,15 @@ interface States {
   messages: IMessage[];
 }
 
-const positionF: "fixed" = "fixed";
+const positionF: "absolute" = "absolute";
 const positionS: "sticky" = "sticky";
 const styles = {
   scope: {
     position: positionF,
-    left: 0,
-    right: 0,
     bottom: 0,
-    animation: "slideIn .5s ease",
-    borderRadius: "4px 4px 0 0",
-    boxShadow: "0 -8px 4px 0 rgba(0, 0, 0, 0.6)",
+    animation: "slideUp .5s ease",
+    borderRadius: "4px 0 0 0",
+    boxShadow: "8px -8px 4px 0 rgba(0, 0, 0, 0.6)",
     overflow: "auto",
   },
   actions: {
@@ -84,7 +82,7 @@ export class HistoryComponent extends React.Component<Props, States> {
           <IconComponent color="black-fg" style={styles.icon} font="" onClick={this.onClose.bind(this)} />
         </div>
         {this.state.messages.map((message, i) => (
-          (this.state.filter.length && this.state.filter.indexOf(message.kind) < 0) || <div key={i}><MessageComponent {...message} /></div>
+          (this.state.filter.length && this.state.filter.indexOf(message.kind) < 0) || <MessageComponent {...message} key={i} />
         ))}
       </div>
     );

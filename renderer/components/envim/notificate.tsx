@@ -12,7 +12,6 @@ interface Props {
 
 interface States {
   messages: IMessage[];
-  selected: IMessage | null;
   setting: { [k: string]: boolean; };
 }
 
@@ -20,31 +19,13 @@ const position: "absolute" = "absolute";
 const styles = {
   notificate: {
     position,
-    top: 10,
-    right: 10,
-  },
-  message: {
-    cursor: "pointer",
-    animation: "slideIn .5s ease",
-    display: "flex",
+    right: 0,
     width: 300,
-    maxHeight: 100,
-    marginBottom: 8,
-    borderRadius: 4,
+    maxHeight: "100%",
+    animation: "slideRight .5s ease",
+    borderRadius: "0 0 0 4px",
     boxShadow: "8px 8px 4px 0 rgba(0, 0, 0, 0.6)",
     overflow: "auto",
-  },
-  selected: {
-    position,
-    top: 10,
-    left: 10,
-    right: 10,
-    bottom: 10,
-    cursor: "pointer",
-    animation: "slideIn .5s ease",
-    borderRadius: 4,
-    boxShadow: "8px 8px 4px 0 rgba(0, 0, 0, 0.6)",
-    overflow: "hidden",
   },
   icon: {
     position,
@@ -57,7 +38,7 @@ export class NotificateComponent extends React.Component<Props, States> {
   constructor(props: Props) {
     super(props);
 
-    this.state = { messages: [], selected: null, setting: Setting.others };
+    this.state = { messages: [], setting: Setting.others };
     Emit.on("messages:notificate", this.onMessage.bind(this));
     Emit.on("setting:others", this.toggleNotify.bind(this));
   }
@@ -71,40 +52,15 @@ export class NotificateComponent extends React.Component<Props, States> {
   }
 
   private toggleNotify() {
-    this.setState({ setting: Setting.others, selected: null });
-  }
-
-  private onSelect(selected: IMessage) {
-    this.setState({ selected })
-  }
-
-  private offSelect() {
-    Emit.share("envim:focus");
-    this.setState({ selected: null })
-  }
-
-  private renderMessages() {
-    return this.state.messages.length === 0 ? null : (
-      <div style={styles.notificate}>
-        {this.state.messages.map((message, i) => (
-          <div style={styles.message} onClick={() => this.onSelect(message)} key={i}>
-            <MessageComponent {...message} />
-          </div>
-        ))}
-      </div>
-    );
-  }
-
-  private renderSelected() {
-    return this.state.selected && (
-      <div style={styles.selected} onClick={() => this.offSelect()}>
-        <MessageComponent {...this.state.selected} />
-      </div>
-    );
+    this.setState({ setting: Setting.others });
   }
 
   render() {
     if (!this.state.setting.notify) return null;
-    return this.state.selected ? this.renderSelected() : this.renderMessages();
+    return !this.state.setting.notify || this.state.messages.length === 0 ? null : (
+      <div style={styles.notificate}>
+        {this.state.messages.map((message, i) => <MessageComponent {...message} key={i} />)}
+      </div>
+    );
   }
 }

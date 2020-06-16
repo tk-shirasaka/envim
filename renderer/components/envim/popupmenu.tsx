@@ -15,7 +15,8 @@ interface States {
 }
 
 const position: "absolute" = "absolute";
-const whiteSpace: "pre" = "pre";
+const whiteSpace: "pre-wrap" = "pre-wrap";
+const wordBreak: "break-all" = "break-all";
 const styles = {
   scope: {
     position,
@@ -38,6 +39,7 @@ const styles = {
     marginLeft: 4,
     padding: 4,
     whiteSpace,
+    wordBreak,
     animation: "fadeIn .5s ease",
     boxShadow: "8px 8px 4px 0 rgba(0, 0, 0, 0.6)",
   }
