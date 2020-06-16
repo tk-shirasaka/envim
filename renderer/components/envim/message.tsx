@@ -23,7 +23,6 @@ const styles = {
   },
   message: {
     width: "100%",
-    margin: 0,
     padding: 4,
     overflow: "auto",
     whiteSpace,
@@ -43,9 +42,9 @@ export class MessageComponent extends React.Component<Props, States> {
     return (
       <div style={{...styles.content, ...Highlights.style(0)}}>
         {this.getKind(this.props.kind)}
-        <pre style={styles.message}>
+        <div style={styles.message}>
           {this.props.contents.map(({hl, content}, i) => hl === 0 ? content : <span style={Highlights.style(hl)} key={i}>{ content }</span>)}
-        </pre>
+        </div>
       </div>
     );
   }

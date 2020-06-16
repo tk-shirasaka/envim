@@ -20,7 +20,7 @@ export class Context2D {
 
   private fontStyle(hl: number) {
     this.ctx.textBaseline = "top";
-    this.ctx.font = `${this.font.size}px ${Highlights.font(hl)}`;
+    this.ctx.font = Highlights.font(hl, this.font.size);
   }
 
   private underline(x: number, y: number, width: number, hl: number) {

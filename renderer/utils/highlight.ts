@@ -41,11 +41,11 @@ class Highlight {
     return `rgba(${r}, ${g}, ${b}, ${a})`;
   }
 
-  font() {
+  font(size: number) {
     return {
-      normal: "Ricty Diminished, Nerd Font",
-      bold: "Ricty Diminished Bold, Nerd Font Bold",
-      italic: "Ricty Diminished Oblique",
+      normal: `${size}px Ricty Diminished, Nerd Font`,
+      bold: `bold ${size}px Ricty Diminished, Nerd Font`,
+      italic:`italic ${size}px Ricty Diminished, Nerd Font`,
     }[this.type];
   }
 
@@ -76,8 +76,8 @@ export class Highlights {
     return { background, color: foreground, borderColor: foreground };
   }
 
-  static font(id: number) {
-    return Highlights.hls[id].font();
+  static font(id: number, size: number) {
+    return Highlights.hls[id].font(size);
   }
 
   static decoration(id: number) {
