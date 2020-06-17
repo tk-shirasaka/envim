@@ -32,6 +32,7 @@ const styles = {
     minWidth: 0,
     cursor: "default",
     borderBottom: 2,
+    borderRadius: "4px 4px 0 0",
   },
   name: {
     maxWidth: 300,
@@ -43,6 +44,8 @@ const styles = {
   },
   active: {
     borderBottom: "solid 2px #2295c5",
+    boxShadow: "0 0 4px 0 rgba(0, 0, 0, 0.6)",
+    zIndex: 1,
   },
   notify: {
     maxWidth: 300,
