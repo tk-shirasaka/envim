@@ -1,15 +1,25 @@
 @font-face {
   font-family: "Ricty Diminished";
-  src: url(fonts/RictyDiminished.ttf);
+  src: url(fonts/RictyDiminished-Regular.ttf);
 }
 
 @font-face {
   font-family: "Nerd Font";
-  src: url(fonts/NerdFont.ttf);
+  src: url(fonts/NerdFont-Regular.ttf);
+}
+
+@font-face {
+  font-family: "Ricty Diminished Bold";
+  src: url(fonts/RictyDiminished-Bold.ttf);
+}
+
+@font-face {
+  font-family: "Nerd Font Bold";
+  src: url(fonts/NerdFont-Bold.ttf);
 }
 
 h1, h2, h3, h4, h5, h6, .bold {
-  font-weight: bold !important;
+  font-family: "Ricty Diminished Bold", "Nerd Font Bold" !important;
 }
 
 .italic {
