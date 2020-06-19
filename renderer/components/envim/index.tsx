@@ -53,6 +53,7 @@ export class EnvimComponent extends React.Component<Props, States> {
     this.state = { grids: {} };
     Emit.on("highlight:set", this.onHighlight.bind(this));
     Emit.on("highlight:name", this.onHlGroup.bind(this));
+    Emit.on("grid:resize", this.onResize.bind(this));
     Emit.on("win:pos", this.onWin.bind(this));
     Emit.on("win:hide", this.hideWin.bind(this));
     Emit.on("win:close", this.closeWin.bind(this));
@@ -70,6 +71,19 @@ export class EnvimComponent extends React.Component<Props, States> {
 
   private onHlGroup(groups: {id: number, name: string}[]) {
     groups.forEach(({id, name}) => Highlights.setName(id, name));
+  }
+
+  private onResize(grid: number, width: number, height: number) {
+    if (this.state.grids[grid]) {
+      const grids = this.state.grids;
+      const { top, left, cursor, display } = grids[grid];
+
+      [ height, width ] = [ row2Y(height), col2X(width) ];
+
+      grids[grid] = { width, height, top, left, cursor, display };
+
+      this.setState({ grids });
+    }
   }
 
   private onWin(grid: number, width: number, height: number, top: number, left: number, focusable: boolean) {

@@ -14,7 +14,7 @@ export class Grid {
   }
 
   resize(width :number, height: number) {
-    if (this.width === width && this.height === height) return;
+    if (this.width === width && this.height === height) return false;
     const old = this.lines;
 
     this.width = width;
@@ -29,6 +29,8 @@ export class Grid {
         this.flush[`${cell.row},${cell.col}`] = cell;
       }
     }
+
+    return true;
   }
 
   getSize() {

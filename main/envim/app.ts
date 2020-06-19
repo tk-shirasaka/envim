@@ -139,7 +139,7 @@ export class App {
 
   private gridResize(grid: number, width: number, height: number) {
     if (this.grids[grid]) {
-      this.grids[grid].resize(width, height);
+      this.grids[grid].resize(width, height) && Emit.send("grid:resize", grid, width, height);
     } else {
       this.grids[grid] = new Grid(width, height);
     }
