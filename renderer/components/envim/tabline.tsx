@@ -29,6 +29,8 @@ const styles = {
   },
   tab: {
     display: "flex",
+    alignItems: "center",
+    marginTop: 4,
     minWidth: 0,
     cursor: "default",
     borderBottom: 2,
@@ -123,7 +125,7 @@ export class TablineComponent extends React.Component<Props, States> {
 
   private renderIcon(type: string) {
     const icon = icons.filter(icon => type.search(icon.type) >= 0).shift();
-    return icon && <IconComponent color={icon.color} style={this.getStyle(styles.icon)} font={icon.font} />;
+    return icon && <IconComponent color={icon.color} style={styles.icon} font={icon.font} />;
   }
 
   private renderQuickfix(type: "qf" | "lc") {
@@ -160,11 +162,11 @@ export class TablineComponent extends React.Component<Props, States> {
         {this.state.tabs.map((tab, i) => (
           <div key={i} className={`color-black ${tab.active ? "active" : "clickable"}`} style={this.getTabStyle(tab.active)} onClick={e => this.onSelect(e, i)}>
             { this.renderIcon(tab.type) }
-            <span style={this.getStyle(styles.name)}>{ tab.name }</span>
-            <IconComponent color="red-fg" style={this.getStyle(styles.icon)} font="" onClick={e => this.onClose(e, i)} />
+            <span style={styles.name}>{ tab.name }</span>
+            <IconComponent color="red-fg" style={styles.icon} font="" onClick={e => this.onClose(e, i)} />
           </div>
         ))}
-        { this.state.tabs.length > 0 && <IconComponent color="green-fg" style={{...styles.icon, lineHeight: `${this.props.height}px`}} font="" onClick={() => this.onPlus()} /> }
+        { this.state.tabs.length > 0 && <IconComponent color="green-fg" style={this.getStyle(styles.icon)} font="" onClick={() => this.onPlus()} /> }
         <div className="space dragable" />
         { this.renderQuickfix("lc") }
         { this.renderQuickfix("qf") }

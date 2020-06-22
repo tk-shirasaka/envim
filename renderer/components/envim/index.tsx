@@ -118,7 +118,7 @@ export class EnvimComponent extends React.Component<Props, States> {
   render() {
     const { height, size } = Setting.font;
     const { width } = this.props.main;
-    const editor = { width, height: row2Y(y2Row(this.props.main.height - 4) - 1) };
+    const editor = { width, height: row2Y(y2Row(this.props.main.height - 8) - 1) };
     const header = { width, height: this.props.main.height - editor.height };
     const footer = { width, height: Math.min(editor.height, height * 15) };
     const style = { fontSize: size, lineHeight: `${height}px` };
