@@ -19,11 +19,11 @@ const styles = {
     display: "flex",
   },
   kind: {
-    padding: 4,
+    padding: "2px 4px",
   },
   message: {
     width: "100%",
-    padding: 4,
+    padding: "2px 4px",
     overflow: "auto",
     whiteSpace,
     wordBreak,
