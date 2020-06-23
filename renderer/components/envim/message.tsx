@@ -17,6 +17,7 @@ const wordBreak: "break-all" = "break-all";
 const styles = {
   content: {
     display: "flex",
+    overflow: "hidden",
   },
   kind: {
     padding: "2px 4px",
@@ -24,7 +25,6 @@ const styles = {
   message: {
     width: "100%",
     padding: "2px 4px",
-    overflow: "auto",
     whiteSpace,
     wordBreak,
   },

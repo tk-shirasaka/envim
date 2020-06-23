@@ -53,7 +53,7 @@ export class CmdlineComponent extends React.Component<Props, States> {
   }
 
   componentWillUnmount() {
-    Emit.clear(["cmdline:ime", "cmdline:show", "cmdline:cursor", "cmdline:flush", "cmdline:hide"]);
+    Emit.clear(["cmdline:show", "cmdline:cursor", "cmdline:special", "cmdline:hide", "cmdline:blockshow", "cmdline:blockhide"]);
   }
 
   private convertContent(content: string[][], pos: number, indent: number) {

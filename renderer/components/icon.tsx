@@ -15,9 +15,9 @@ interface States {
 
 export class IconComponent extends React.Component<Props, States> {
   render() {
-    const { size } = Setting.font;
+    const { size, height } = Setting.font;
     const className = `color-${this.props.color} ${this.props.active ? "active" : this.props.onClick ? "clickable" : ""}`;
-    const style = {fontSize: size / 2 * 3, lineHeight: `${size + 1}px`, ...this.props.style};
+    const style = {fontSize: size / 2 * 3, lineHeight: `${height}px`, ...this.props.style};
 
     return (
       <i {...{ className, style }} onClick={this.props?.onClick}>

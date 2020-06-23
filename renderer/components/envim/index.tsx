@@ -60,7 +60,7 @@ export class EnvimComponent extends React.Component<Props, States> {
   }
 
   componentWillUnmount() {
-    Emit.clear(["highlight:set", "highlight:name", "win:pos", "win:hide", "win:close"]);
+    Emit.clear(["highlight:set", "highlight:name", "grid:resize", "win:pos", "win:hide", "win:close"]);
   }
 
   private onHighlight(highlights: {id: number, hl: IHighlight}[]) {

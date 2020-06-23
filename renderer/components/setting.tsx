@@ -50,7 +50,6 @@ export class SettingComponent extends React.Component<Props, States> {
   constructor(props: Props) {
     super(props);
     this.state = { ...Setting.get() };
-    document.title = 'Envim';
   }
 
   private onToggleType(e: ChangeEvent) {
