@@ -19,6 +19,14 @@ export interface IHighlight {
   blend?: number,
 }
 
+export interface ITab {
+  name: string;
+  active: boolean;
+  type: string;
+  edit: boolean;
+  protect: boolean;
+}
+
 export interface IMessage {
   group: number;
   kind: string;

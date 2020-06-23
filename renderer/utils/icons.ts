@@ -12,8 +12,8 @@ export const icons = [
   { font: "", color: "green-fg", name: "Shell", type: /(sh)|(zsh)/ },
   { font: "", color: "red-fg", name: "Git", type: /git/ },
   { font: "", color: "blue-fg", name: "Docker", type: /docker/i },
-  { font: "ﬥ", color: "white-fg", name: "JSON", type: "json" },
-  { font: "", color: "white-fg", name: "Config", type: /(yaml)|(toml)/ },
+  { font: "ﬥ", color: "gray-fg", name: "JSON", type: "json" },
+  { font: "", color: "gray-fg", name: "Config", type: /(yaml)|(toml)/ },
   { font: "", color: "pink-fg", name: "Help", type: "help" },
 ];
 

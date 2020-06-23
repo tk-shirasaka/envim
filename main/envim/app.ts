@@ -1,5 +1,7 @@
 import { Tabpage } from "neovim/lib/api/Tabpage";
 
+import { ITab } from "common/interface";
+
 import { Emit } from "../emit";
 import { Grid } from "./grid";
 import { Messages } from "./messages";
@@ -232,13 +234,16 @@ export class App {
   }
 
   private async tablineUpdate(current: Tabpage, tabs: { tab: Tabpage, name: string }[]) {
-    const next: { name: string, type: string, active: boolean; }[] = [];
+    const next: ITab[] = [];
     for (let i = 0; i < tabs.length; i++) {
       const { tab, name } = tabs[i];
       const buffer = await tab.window.buffer;
-      const type = await current.request("nvim_buf_get_option", [buffer.data, "filetype"])
       const active = current.data === tab.data;
-      next.push({ name, type, active });
+      const type = await current.request("nvim_buf_get_option", [buffer.data, "filetype"]);
+      const edit = await current.request("nvim_buf_get_option", [buffer.data, "modified"]);
+      const protect = !await current.request("nvim_buf_get_option", [buffer.data, "modifiable"]);
+
+      next.push({ name, active, type, edit, protect });
     }
     const qf = (await current.request("nvim_call_function", ["getqflist", [{size: 0}]])).size;
     const lc = (await current.request("nvim_call_function", ["getloclist", [0, {size: 0}]])).size;

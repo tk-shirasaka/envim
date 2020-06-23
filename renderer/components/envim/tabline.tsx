@@ -1,6 +1,6 @@
 import React, { MouseEvent } from "react";
 
-import { IMessage } from "../../../common/interface";
+import { ITab, IMessage } from "../../../common/interface";
 
 import { Emit } from "../../utils/emit";
 import { Setting } from "../../utils/setting";
@@ -14,7 +14,7 @@ interface Props {
 }
 
 interface States {
-  tabs: { name: string; type: string; active: boolean; }[];
+  tabs: ITab[];
   qf: number;
   lc: number;
   messages: IMessage[];
@@ -106,7 +106,7 @@ export class TablineComponent extends React.Component<Props, States> {
     this.setState({ setting });
   }
 
-  private onTabline(tabs: States["tabs"], qf: number, lc: number) {
+  private onTabline(tabs: ITab[], qf: number, lc: number) {
     this.setState({ tabs, qf, lc });
   }
 
@@ -160,7 +160,10 @@ export class TablineComponent extends React.Component<Props, States> {
     return (
       <div className="color-black" style={{...this.props, ...styles.scope}}>
         {this.state.tabs.map((tab, i) => (
+
           <div key={i} className={`color-black ${tab.active ? "active" : "clickable"}`} style={this.getTabStyle(tab.active)} onClick={e => this.onSelect(e, i)}>
+            { tab.protect && <IconComponent color="yellow-fg" style={styles.icon} font="" /> }
+            { tab.edit && <IconComponent color="gray-fg" style={styles.icon} font="" /> }
             { this.renderIcon(tab.type) }
             <span style={styles.name}>{ tab.name }</span>
             <IconComponent color="red-fg" style={styles.icon} font="" onClick={e => this.onClose(e, i)} />
