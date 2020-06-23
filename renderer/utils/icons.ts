@@ -15,6 +15,7 @@ export const icons = [
   { font: "ﬥ", color: "gray-fg", name: "JSON", type: "json" },
   { font: "", color: "gray-fg", name: "Config", type: /(yaml)|(toml)/ },
   { font: "", color: "pink-fg", name: "Help", type: "help" },
+  { font: "", color: "gray-fg", name: "File", type: /.*/ },
 ];
 
 export const notificates = [
