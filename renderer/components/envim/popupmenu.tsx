@@ -25,7 +25,6 @@ const styles = {
   },
   popup: {
     overflow: "hidden",
-    animation: "fadeIn .5s ease",
     boxShadow: "8px 8px 4px 0 rgba(0, 0, 0, 0.6)",
   },
   line: {
@@ -40,7 +39,6 @@ const styles = {
     padding: 4,
     whiteSpace,
     wordBreak,
-    animation: "fadeIn .5s ease",
     boxShadow: "8px 8px 4px 0 rgba(0, 0, 0, 0.6)",
   }
 };
@@ -111,7 +109,7 @@ export class PopupmenuComponent extends React.Component<Props, States> {
 
     return this.state.items.length === 0 ? null : (
       <div style={this.getScopeStyle()}>
-        <div style={styles.popup}>
+        <div className="animate fade-in" style={styles.popup}>
           {this.state.items.slice(start, end).map(({ word, kind, menu }, i) => (
             <div className={`color-black ${this.state.selected === i + start ? "active" : "clickable"}`} style={styles.line} onClick={() => this.onItem(i + start)} key={i}>
               <div style={styles.column}>{ word } { menu }</div>
@@ -119,7 +117,7 @@ export class PopupmenuComponent extends React.Component<Props, States> {
             </div>
           ))}
         </div>
-        {this.state.items[this.state.selected]?.info.replace(/^\s*$/, '') && <div className="color-black active" style={styles.info}>{ this.state.items[this.state.selected]?.info }</div>}
+        {this.state.items[this.state.selected]?.info.replace(/^\s*$/, '') && <div className="animate fade-in color-black active" style={styles.info}>{ this.state.items[this.state.selected]?.info }</div>}
       </div>
     )
   }

@@ -25,7 +25,6 @@ const styles = {
   scope: {
     position: positionF,
     bottom: 0,
-    animation: "slideUp .5s ease",
     borderRadius: "4px 0 0 0",
     boxShadow: "8px -8px 4px 0 rgba(0, 0, 0, 0.6)",
     overflow: "auto",
@@ -72,7 +71,7 @@ export class HistoryComponent extends React.Component<Props, States> {
 
   render() {
     return this.state.messages.length === 0 ? null : (
-      <div style={{...styles.scope, ...this.props, ...Highlights.style(0)}}>
+      <div className="animate slide-up" style={{...styles.scope, ...this.props, ...Highlights.style(0)}}>
         <div className="color-white" style={styles.actions}>
           <IconComponent color="red-fg" style={styles.icon} font="ﰸ" onClick={this.onClear.bind(this)} />
           <div className="space" />

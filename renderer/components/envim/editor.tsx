@@ -28,7 +28,6 @@ const styles = {
   scope: {
     position,
     cursor: "text",
-    animation: "fadeIn .5s ease",
     boxShadow: "0 8px 8px 0 rgba(0, 0, 0, 0.6)",
   },
   loading: {
@@ -115,7 +114,7 @@ export class EditorComponent extends React.Component<Props, States> {
 
   render() {
     return (
-      <div style={{ ...styles.scope, ...this.props.style }}>
+      <div className="animate fade-in" style={{ ...styles.scope, ...this.props.style }}>
         { this.state.init || <div className="color-black" style={styles.loading}><span>Loading...</span></div> }
         <canvas style={styles.canvas} width={this.props.style.width * 2} height={this.props.style.height * 2} ref="canvas"
           onMouseDown={this.onMouseDown.bind(this)}

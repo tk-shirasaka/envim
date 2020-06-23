@@ -25,7 +25,6 @@ const styles = {
     bottom: 0,
     width: "100%",
     overflow: "hidden",
-    animation: "slideUp .5s ease",
     borderRadius: "4px 0 0 0",
     boxShadow: "8px -8px 4px 0 rgba(0, 0, 0, 0.6)",
     pointerEvents,
@@ -124,7 +123,7 @@ export class CmdlineComponent extends React.Component<Props, States> {
 
   render() {
     return this.state.cmdline.length === 0 ? null : (
-      <div style={this.getScopeStyle()}>
+      <div className="animate slide-up" style={this.getScopeStyle()}>
         <div className="bold color-lightblue" style={styles.prompt}>{ this.state.prompt }</div>
         <div style={styles.cmdline}>
           {this.state.contents.map((content, i) => <div key={i}>{ this.renderCmdline(content) }</div>)}

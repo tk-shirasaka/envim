@@ -22,7 +22,6 @@ const styles = {
     right: 0,
     width: 300,
     maxHeight: "100%",
-    animation: "slideRight .5s ease",
     borderRadius: "0 0 0 4px",
     boxShadow: "8px 8px 4px 0 rgba(0, 0, 0, 0.6)",
     overflow: "auto",
@@ -58,7 +57,7 @@ export class NotificateComponent extends React.Component<Props, States> {
   render() {
     if (!this.state.setting.notify) return null;
     return !this.state.setting.notify || this.state.messages.length === 0 ? null : (
-      <div style={styles.notificate}>
+      <div className="animate slide-right" style={styles.notificate}>
         {this.state.messages.map((message, i) => <MessageComponent {...message} key={i} />)}
       </div>
     );

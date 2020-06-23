@@ -1,13 +1,29 @@
+.animate {
+  animation-duration: .5s;
+  animation-timing-function:  ease-out;
+
+  &.slide-right {
+    animation-name: slideRight, fadeIn;
+  }
+
+  &.slide-up {
+    animation-name: slideUp, fadeIn;
+  }
+
+  &.fade-in {
+    animation-name: fadeIn;
+  }
+}
+
+
 @keyframes slideUp {
   from {
-    opacity: 0;
     transform: translateY(100%);
   }
 }
 
 @keyframes slideRight {
   from {
-    opacity: 0;
     transform: translateX(100%);
   }
 }
