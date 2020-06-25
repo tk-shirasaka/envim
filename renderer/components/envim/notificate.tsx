@@ -56,7 +56,7 @@ export class NotificateComponent extends React.Component<Props, States> {
 
   render() {
     if (!this.state.setting.notify) return null;
-    return !this.state.setting.notify || this.state.messages.length === 0 ? null : (
+    return this.state.setting.notify && this.state.messages.length > 0 && (
       <div className="animate slide-right" style={styles.notificate}>
         {this.state.messages.map((message, i) => <MessageComponent {...message} key={i} />)}
       </div>

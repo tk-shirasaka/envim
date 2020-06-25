@@ -70,13 +70,13 @@ export class HistoryComponent extends React.Component<Props, States> {
   }
 
   render() {
-    return this.state.messages.length === 0 ? null : (
+    return this.state.messages.length > 0 && (
       <div className="animate slide-up" style={{...styles.scope, ...this.props, ...Highlights.style(0)}}>
         <div className="color-white" style={styles.actions}>
           <IconComponent color="red-fg" style={styles.icon} font="ﰸ" onClick={this.onClear.bind(this)} />
           <div className="space" />
           {notificates.filter(icon => icon.filter).map((icon, i) => (
-            <IconComponent color={`${icon.color}-fg`} active={icon.kinds === this.state.filter} style={styles.icon} font={icon.font} onClick={() => this.onFilter(icon.kinds)} key={i} />)
+            <IconComponent color={`${icon.color}-fg-light`} active={icon.kinds === this.state.filter} style={styles.icon} font={icon.font} onClick={() => this.onFilter(icon.kinds)} key={i} />)
           )}
           <IconComponent color="black-fg" style={styles.icon} font="" onClick={this.onClose.bind(this)} />
         </div>

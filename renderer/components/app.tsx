@@ -89,7 +89,7 @@ export class AppComponent extends React.Component<Props, States> {
 
     return (
       <div style={{ ...this.state.window, display: "flex" }}>
-        <SidebarComponent init={this.state.init} side={side} />
+        <SidebarComponent side={side} />
         {this.renderContent()}
       </div>
     );

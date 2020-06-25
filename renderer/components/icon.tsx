@@ -6,6 +6,8 @@ interface Props {
   font: string;
   color: string;
   style: { [k: string]: number | string };
+  text?: number | string;
+  animation?: string;
   active?: boolean;
   onClick?: (...args: any[]) => void,
 }
@@ -13,16 +15,31 @@ interface Props {
 interface States {
 }
 
+const styles = {
+  scope: {
+    display: "inline-block",
+  },
+  text: {
+    display: "inline-block",
+    paddingLeft: 4,
+  },
+};
+
 export class IconComponent extends React.Component<Props, States> {
   render() {
     const { size, height } = Setting.font;
-    const className = `color-${this.props.color} ${this.props.active ? "active" : this.props.onClick ? "clickable" : ""}`;
-    const style = {fontSize: size / 2 * 3, lineHeight: `${height}px`, ...this.props.style};
+    const classes = [`color-${this.props.color}`];
+    const style = {fontSize: size / 2 * 3, lineHeight: `${height}px`};
+
+    this.props.active && classes.push("active");
+    this.props.onClick && classes.push("clickable");
+    this.props.animation && classes.push(`animate ${this.props.animation}`);
 
     return (
-      <i {...{ className, style }} onClick={this.props?.onClick}>
-        { this.props.font }
-      </i>
+      <div className={classes.join(" ")} style={{...styles.scope, ...this.props.style}} onClick={this.props?.onClick}>
+        <i style={style}>{ this.props.font }</i>
+        { this.props.text && <div style={styles.text}>{ this.props.text }</div> }
+      </div>
     )
   }
 }

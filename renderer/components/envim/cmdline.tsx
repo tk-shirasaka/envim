@@ -122,7 +122,7 @@ export class CmdlineComponent extends React.Component<Props, States> {
   }
 
   render() {
-    return this.state.cmdline.length === 0 ? null : (
+    return this.state.cmdline.length > 0 && (
       <div className="animate slide-up" style={this.getScopeStyle()}>
         <div className="bold color-lightblue" style={styles.prompt}>{ this.state.prompt }</div>
         <div style={styles.cmdline}>

@@ -131,10 +131,10 @@ export class EnvimComponent extends React.Component<Props, States> {
           { Object.keys(this.state.grids).map(grid => (
             <EditorComponent key={grid} grid={+grid} mouse={this.props.mouse} style={this.state.grids[+grid]} />
           )) }
-          { this.props.options.ext_messages ? <HistoryComponent {...footer} /> : null }
-          { this.props.options.ext_cmdline ? <CmdlineComponent /> : null }
-          { this.props.options.ext_popupmenu ? <PopupmenuComponent /> : null }
-          { this.props.options.ext_messages ? <NotificateComponent /> : null }
+          { this.props.options.ext_messages && <HistoryComponent {...footer} /> }
+          { this.props.options.ext_cmdline && <CmdlineComponent /> }
+          { this.props.options.ext_popupmenu && <PopupmenuComponent /> }
+          { this.props.options.ext_messages && <NotificateComponent /> }
           <InputComponent />
         </div>
       </div>

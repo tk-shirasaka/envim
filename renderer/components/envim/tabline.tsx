@@ -106,11 +106,16 @@ export class TablineComponent extends React.Component<Props, States> {
     this.setState({ setting });
   }
 
+  private onDetach() {
+    Emit.send("envim:detach");
+  }
+
   private onTabline(tabs: ITab[], qf: number, lc: number) {
     this.setState({ tabs, qf, lc });
   }
 
   private onMessage(messages: IMessage[]) {
+    messages = messages.filter(({ group }) => group === 1);
     this.setState({ messages });
   }
 
@@ -129,31 +134,19 @@ export class TablineComponent extends React.Component<Props, States> {
   }
 
   private renderQuickfix(type: "qf" | "lc") {
-    const color = this.state[type] ? { qf: "red", lc: "yellow" }[type] : "gray";
-    const suffix = this.state[type] ? " clickable" : "-fg";
+    const color = { qf: "red", lc: "yellow" }[type];
     const command = type === "qf" ? "copen" : "lopen";
 
-    return this.state.tabs.length > 0 && (
-      <div className={`color-${color}${suffix}`} style={styles.icon} onClick={() => this.state[type] && this.onCommand(command)}>
-        <IconComponent color="none" style={this.getStyle(styles.icon)} font="" />{ this.state[type] }
-      </div>
-    );
+    return <IconComponent color={`${color}-fg-dark`} style={this.getStyle(styles.icon)} font="" text={this.state[type]} animation="fade-in" onClick={() => this.onCommand(command)} />;
   }
 
   private renderNotify() {
-    const messages = this.state.messages.filter(({ group }) => group === 1);
-    const last = [ ...messages ].pop();
+    const last = [ ...this.state.messages ].pop();
     const kind = last?.kind || "";
-    const color = messages.length ? notificates.filter(icon => icon.kinds.indexOf(kind) >= 0)[0].color : "gray";
-    const suffix = messages.filter(({ group }) => group === 1).length ? "" : "-fg";
-    const icon = this.state.setting.notify ? "" : "";
-    const message = this.state.setting.notify ? messages.length : last?.contents.map(({ content }, i) => i < 5 ? content : "").join("");
+    const color = notificates.filter(icon => icon.kinds.indexOf(kind) >= 0)[0].color;
+    const message = this.state.setting.notify ? "" : last?.contents.map(({ content }, i) => i < 5 ? content : "").join("");
 
-    return (
-      <div className={`color-${color}${suffix} clickable`} style={styles.notify} onClick={this.toggleNotify.bind(this)}>
-        <IconComponent color="none" style={this.getStyle(styles.icon)} font={icon} />{ message }
-      </div>
-    );
+    return <IconComponent color={`${color}-fg-dark`} style={this.getStyle(styles.notify)} font="" text={message} animation="fade-in" onClick={this.toggleNotify.bind(this)} />;
   }
 
   render() {
@@ -168,11 +161,12 @@ export class TablineComponent extends React.Component<Props, States> {
             <IconComponent color="red-fg" style={styles.icon} font="" onClick={e => this.onClose(e, i)} />
           </div>
         ))}
-        { this.state.tabs.length > 0 && <IconComponent color="green-fg" style={this.getStyle(styles.icon)} font="" onClick={() => this.onPlus()} /> }
+        { this.state.tabs.length > 0 && <IconComponent color="green-fg" style={this.getStyle(styles.icon)} font="" onClick={this.onPlus.bind(this)} /> }
         <div className="space dragable" />
-        { this.renderQuickfix("lc") }
-        { this.renderQuickfix("qf") }
-        { this.renderNotify() }
+        { this.state.lc > 0 && this.renderQuickfix("lc") }
+        { this.state.qf > 0 && this.renderQuickfix("qf") }
+        { this.state.messages.length > 0 && this.renderNotify() }
+        <IconComponent color="black" style={this.getStyle(styles.icon)} font="" onClick={this.onDetach.bind(this)} />
       </div>
     );
   }
