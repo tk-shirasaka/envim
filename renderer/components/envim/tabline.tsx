@@ -30,11 +30,12 @@ const styles = {
   tab: {
     display: "flex",
     alignItems: "center",
-    marginTop: 4,
+    margin: "4px 4px 0 0",
     minWidth: 0,
     cursor: "default",
     borderBottom: 2,
     borderRadius: "4px 4px 0 0",
+    boxShadow: "0 0 4px 0 rgba(0, 0, 0, 0.6)",
   },
   name: {
     maxWidth: 300,
@@ -46,7 +47,6 @@ const styles = {
   },
   active: {
     borderBottom: "solid 2px #2295c5",
-    boxShadow: "0 0 4px 0 rgba(0, 0, 0, 0.6)",
     zIndex: 1,
   },
   notify: {
@@ -153,7 +153,7 @@ export class TablineComponent extends React.Component<Props, States> {
     return (
       <div className="color-black" style={{...this.props, ...styles.scope}}>
         {this.state.tabs.map((tab, i) => (
-          <div key={i} className={`color-black ${tab.active ? "active" : "clickable"}`} style={this.getTabStyle(tab.active)} onClick={e => this.onSelect(e, i)}>
+          <div key={i} className={`animate fade-in color-black ${tab.active ? "active" : "clickable"}`} style={this.getTabStyle(tab.active)} onClick={e => this.onSelect(e, i)}>
             { this.renderIcon(tab.type) }
             <span style={styles.name}>{ tab.name }</span>
             { tab.edit && <IconComponent color="gray-fg" style={styles.icon} font="" /> }

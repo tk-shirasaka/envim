@@ -20,6 +20,10 @@
 
 h1, h2, h3, h4, h5, h6, .bold {
   font-family: "Ricty Diminished Bold", "Nerd Font Bold" !important;
+
+  * {
+    font-family: "Ricty Diminished Bold", "Nerd Font Bold" !important;
+  }
 }
 
 .italic {
