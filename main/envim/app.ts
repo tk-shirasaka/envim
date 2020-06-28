@@ -98,22 +98,22 @@ export class App {
 
         /** ext_messages **/
         case "msg_show":
-          this.msgShow(1, r);
+          this.msgShow("notificate", r);
         break;
         case "msg_showmode":
-          this.msgShow(2, [["mode", r[0][0], true]]);
+          this.msgShow("mode", [["mode", r[0][0], true]]);
         break;
         case "msg_showcmd":
-          this.msgShow(3, [["command", r[0][0], true]]);
+          this.msgShow("command", [["command", r[0][0], true]]);
         break;
         case "msg_ruler":
-          this.msgShow(4, [["ruler", r[0][0], true]]);
+          this.msgShow("ruler", [["ruler", r[0][0], true]]);
         break;
         case "msg_clear":
-          this.msgShow(1, [["", [], true]]);
+          this.msgShow("notificate", [["", [], true]]);
         break;
         case "msg_history_show":
-          this.msgShow(0, r[0][0]);
+          this.msgShow("history", r[0][0]);
         break;
 
         /** default **/
@@ -307,9 +307,7 @@ export class App {
     Emit.send("popupmenu:hide");
   }
 
-  private msgShow(group: number, contents: any[]) {
-    const type = group === 0 ? "history" : "notificate";
-
+  private msgShow(group: string, contents: any[]) {
     contents.forEach(([kind, messages, replace_last]) => {
       if (messages.length) {
         this.messages.set(group, kind, messages, replace_last);
@@ -318,7 +316,7 @@ export class App {
       }
     });
 
-    Emit.send(`messages:${type}`, this.messages.get(type));
+    Emit.send(`messages:${group}`, this.messages.get(group));
   }
 
   private optionSet(options: string[][]) {

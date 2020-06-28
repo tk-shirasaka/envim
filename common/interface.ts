@@ -28,7 +28,6 @@ export interface ITab {
 }
 
 export interface IMessage {
-  group: number;
   kind: string;
   contents: { hl: number, content: string }[];
 }

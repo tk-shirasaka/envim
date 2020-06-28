@@ -1,4 +1,4 @@
-import React from "react";
+import React, { MouseEvent } from "react";
 
 import { IMessage } from "../../../common/interface";
 
@@ -25,6 +25,7 @@ const styles = {
     borderRadius: "0 0 0 4px",
     boxShadow: "8px 8px 4px 0 rgba(0, 0, 0, 0.6)",
     overflow: "auto",
+    cursor: "pointer",
   },
   icon: {
     position,
@@ -39,7 +40,7 @@ export class NotificateComponent extends React.Component<Props, States> {
 
     this.state = { messages: [], setting: Setting.others };
     Emit.on("messages:notificate", this.onMessage.bind(this));
-    Emit.on("setting:others", this.toggleNotify.bind(this));
+    Emit.on("setting:others", this.onNotify.bind(this));
   }
 
   componentWillUnmount() {
@@ -50,14 +51,25 @@ export class NotificateComponent extends React.Component<Props, States> {
     this.setState({ messages });
   }
 
-  private toggleNotify() {
+  private onNotify() {
     this.setState({ setting: Setting.others });
+  }
+
+  private offNotify(e: MouseEvent) {
+    const setting = { ...this.state.setting, notify: false };
+
+    e.stopPropagation();
+    e.preventDefault();
+
+    Setting.others = setting;
+    Emit.share("envim:focus");
+    this.setState({ setting });
   }
 
   render() {
     if (!this.state.setting.notify) return null;
     return this.state.setting.notify && this.state.messages.length > 0 && (
-      <div className="animate slide-right" style={styles.notificate}>
+      <div className="animate slide-right" style={styles.notificate} onClick={this.offNotify.bind(this)}>
         {this.state.messages.map((message, i) => <MessageComponent {...message} key={i} />)}
       </div>
     );

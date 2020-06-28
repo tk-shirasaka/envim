@@ -25,5 +25,6 @@ export const notificates = [
   { font: "", color: "red", kinds: ["emsg", "echoerr", "lua_error", "rpc_error"], filter: true},
   { font: "", color: "purple", kinds: ["confirm", "confirm_sub"], filter: false},
   { font: "", color: "pink", kinds: ["return_prompt"], filter: false},
-  { font: "", color: "gray", kinds: ["mode", "command", "ruler"], filter: false},
+  { font: "", color: "gray", kinds: ["mode", "command"], filter: false},
+  { font: "", color: "gray", kinds: ["ruler"], filter: false},
 ];

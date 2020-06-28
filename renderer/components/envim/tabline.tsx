@@ -17,7 +17,10 @@ interface States {
   tabs: ITab[];
   qf: number;
   lc: number;
-  messages: IMessage[];
+  notificate: IMessage | null;
+  mode: IMessage | null;
+  command: IMessage | null;
+  ruler: IMessage | null;
   setting: { [k: string]: boolean; };
 }
 
@@ -64,17 +67,21 @@ const styles = {
 export class TablineComponent extends React.Component<Props, States> {
   constructor(props: Props) {
     super(props);
-    this.state = { tabs: [], qf: 0, lc: 0, messages: [], setting: Setting.others };
+    this.state = { tabs: [], qf: 0, lc: 0, notificate: null, mode: null, command: null, ruler: null, setting: Setting.others };
 
     Emit.on("tabline:update", this.onTabline.bind(this));
-    Emit.on("messages:notificate", this.onMessage.bind(this));
+    Emit.on("messages:notificate", this.onNotificate.bind(this));
+    Emit.on("messages:mode", this.onMode.bind(this));
+    Emit.on("messages:command", this.onCommand.bind(this));
+    Emit.on("messages:ruler", this.onRuler.bind(this));
+    Emit.on("setting:others", this.offNotify.bind(this));
   }
 
   componentWillUnmount() {
-    Emit.clear(["tabline:update", "messages:notificate"]);
+    Emit.clear(["tabline:update", "messages:notificate", "messages:mode", "messages:command", "messages:ruler", "setting:others"]);
   }
 
-  private onCommand(command: string, e: MouseEvent | null = null) {
+  private runCommand(command: string, e: MouseEvent | null = null) {
     e?.stopPropagation();
     e?.preventDefault();
 
@@ -83,20 +90,20 @@ export class TablineComponent extends React.Component<Props, States> {
   }
 
   private onSelect(e: MouseEvent, i: number) {
-    this.onCommand(`tabnext ${i + 1}`, e);
+    this.runCommand(`tabnext ${i + 1}`, e);
   }
 
   private onClose(e: MouseEvent, i: number) {
     const command = this.state.tabs.length > 1 ? `tabclose ${i + 1}` : "quit";
-    this.onCommand(command, e);
+    this.runCommand(command, e);
   }
 
   private onPlus() {
-    this.onCommand("$tabnew");
+    this.runCommand("$tabnew");
   }
 
-  private toggleNotify(e: MouseEvent) {
-    const setting = { ...Setting.others, notify: !this.state.setting.notify };
+  private onNotify(e: MouseEvent) {
+    const setting = { ...Setting.others, notify: true };
 
     e.stopPropagation();
     e.preventDefault();
@@ -104,6 +111,10 @@ export class TablineComponent extends React.Component<Props, States> {
     Setting.others = setting;
     Emit.share("envim:focus");
     this.setState({ setting });
+  }
+
+  private offNotify() {
+    this.setState({ setting: Setting.others });
   }
 
   private onDetach() {
@@ -114,9 +125,20 @@ export class TablineComponent extends React.Component<Props, States> {
     this.setState({ tabs, qf, lc });
   }
 
-  private onMessage(messages: IMessage[]) {
-    messages = messages.filter(({ group }) => group === 1);
-    this.setState({ messages });
+  private onNotificate(notificate: IMessage[]) {
+    this.setState({ notificate: [ ...notificate ].pop() || null });
+  }
+
+  private onMode(mode: IMessage[]) {
+    this.setState({ mode: [ ...mode ].pop() || null });
+  }
+
+  private onCommand(command: IMessage[]) {
+    this.setState({ command: [ ...command ].pop() || null });
+  }
+
+  private onRuler(ruler: IMessage[]) {
+    this.setState({ ruler: [ ...ruler ].pop() || null });
   }
 
   private getTabStyle(active: boolean) {
@@ -137,16 +159,19 @@ export class TablineComponent extends React.Component<Props, States> {
     const color = { qf: "red", lc: "yellow" }[type];
     const command = type === "qf" ? "copen" : "lopen";
 
-    return <IconComponent color={`${color}-fg-dark`} style={this.getStyle(styles.icon)} font="" text={this.state[type]} animation="fade-in" onClick={() => this.onCommand(command)} />;
+    return <IconComponent color={`${color}-fg-dark`} style={this.getStyle(styles.icon)} font="" text={this.state[type]} animation="fade-in" onClick={() => this.runCommand(command)} />;
   }
 
-  private renderNotify() {
-    const last = [ ...this.state.messages ].pop();
-    const kind = last?.kind || "";
-    const color = notificates.filter(icon => icon.kinds.indexOf(kind) >= 0)[0].color;
-    const message = this.state.setting.notify ? "" : last?.contents.map(({ content }, i) => i < 5 ? content : "").join("");
+  private renderNotify(message: IMessage, notify: boolean) {
+    const kind = message.kind;
+    const { color, font } = notificates.filter(icon => icon.kinds.indexOf(kind) >= 0)[0];
+    const text = message.contents.map(({ content }, i) => i < 5 ? content : "").join("");
 
-    return <IconComponent color={`${color}-fg-dark`} style={this.getStyle(styles.notify)} font="" text={message} animation="fade-in" onClick={this.toggleNotify.bind(this)} />;
+    return notify ? (
+      <IconComponent color={`${color}-fg-dark`} style={this.getStyle(styles.notify)} font={font} text={text} animation="fade-in" onClick={this.onNotify.bind(this)} />
+    ) : (
+      <IconComponent color={`${color}-fg-dark`} style={this.getStyle(styles.notify)} font={font} text={text} animation="fade-in" />
+    );
   }
 
   render() {
@@ -165,7 +190,10 @@ export class TablineComponent extends React.Component<Props, States> {
         <div className="space dragable" />
         { this.state.lc > 0 && this.renderQuickfix("lc") }
         { this.state.qf > 0 && this.renderQuickfix("qf") }
-        { this.state.messages.length > 0 && this.renderNotify() }
+        { this.state.ruler && this.renderNotify(this.state.ruler, false) }
+        { this.state.command && this.renderNotify(this.state.command, false) }
+        { this.state.mode && this.renderNotify(this.state.mode, false) }
+        { !this.state.setting.notify && this.state.notificate && this.renderNotify(this.state.notificate, true) }
         <IconComponent color="black" style={this.getStyle(styles.icon)} font="" onClick={this.onDetach.bind(this)} />
       </div>
     );
