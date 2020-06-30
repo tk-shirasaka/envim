@@ -308,6 +308,7 @@ export class App {
   }
 
   private msgShow(group: string, contents: any[]) {
+    group === "history" && this.messages.clear(group);
     contents.forEach(([kind, messages, replace_last]) => {
       if (messages.length) {
         this.messages.set(group, kind, messages, replace_last);
