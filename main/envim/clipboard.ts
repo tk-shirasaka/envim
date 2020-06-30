@@ -10,18 +10,18 @@ export class Clipboard {
     const channelId = await nvim.channelId;
     nvim.command([
       `let g:clipboard = {`,
-        `  "name": "envim",`,
-        `  "copy": {`,
-        `     "+": {lines, regtype -> rpcnotify(${channelId}, "envim_clipboard", lines, regtype)},`,
-        `     "*": {lines, regtype -> rpcnotify(${channelId}, "envim_clipboard", lines, regtype)},`,
-        `   },`,
-        `  "paste": {`,
-        `     "+": {-> rpcrequest(${channelId}, "envim_clipboard")},`,
-        `     "*": {-> rpcrequest(${channelId}, "envim_clipboard")},`,
-        `  },`,
-        `}`,
+      `  "name": "envim",`,
+      `  "copy": {`,
+      `     "+": {lines, regtype -> rpcnotify(${channelId}, "envim_clipboard", lines, regtype)},`,
+      `     "*": {lines, regtype -> rpcnotify(${channelId}, "envim_clipboard", lines, regtype)},`,
+      `   },`,
+      `  "paste": {`,
+      `     "+": {-> rpcrequest(${channelId}, "envim_clipboard")},`,
+      `     "*": {-> rpcrequest(${channelId}, "envim_clipboard")},`,
+      `  },`,
+      `}`,
     ].join(""));
-    nvim.command("unlet g:loaded_clipboard_provider")
+    nvim.command("unlet! g:loaded_clipboard_provider")
     nvim.command("runtime autoload/provider/clipboard.vim")
   }
 
