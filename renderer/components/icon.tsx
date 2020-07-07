@@ -29,7 +29,7 @@ export class IconComponent extends React.Component<Props, States> {
   render() {
     const { size, height } = Setting.font;
     const classes = [`color-${this.props.color}`];
-    const style = {fontSize: size / 2 * 3, lineHeight: `${height}px`};
+    const style = { fontSize: size / 2 * 3, lineHeight: `${height}px` };
 
     this.props.active && classes.push("active");
     this.props.onClick && classes.push("clickable");

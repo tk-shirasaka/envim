@@ -34,7 +34,7 @@ input {
 
     &:checked:before {
       content: "綠";
-      color: $color-green;
+      color: $color-blue;
     }
   }
 
@@ -53,7 +53,7 @@ input {
 
     &:checked:before {
       content: "";
-      color: $color-green;
+      color: $color-blue;
     }
   }
 
