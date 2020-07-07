@@ -1,3 +1,4 @@
+import { dialog } from "electron";
 import { createConnection, Socket } from "net";
 import { spawn, ChildProcess } from "child_process";
 import { NeovimClient } from "neovim";
@@ -112,7 +113,12 @@ export class Envim {
     Emit.send("app:stop");
   }
 
-  private onError() {
+  private onError(e: Error | any) {
+    if (e instanceof Error) {
+      dialog.showErrorBox('Error', `${e.message}\n${e.stack || ""}`);
+    } else if (e instanceof String) {
+      dialog.showErrorBox('Error', e.toString());
+    }
     this.onDisconnect();
   }
 }
