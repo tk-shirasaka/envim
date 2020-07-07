@@ -20,12 +20,41 @@ input {
   }
 
   &[type=radio] {
-    margin: 0 8px;
+    margin: 0 12px;
+    width: 0;
+
+    &:before {
+      display: inline-block;
+      margin: -4px;
+      font-size: 1.5rem;
+      cursor: pointer;
+      content: "祿";
+      color: $color-white;
+    }
+
+    &:checked:before {
+      content: "綠";
+      color: $color-green;
+    }
   }
 
   &[type=checkbox] {
-    margin: 0 8px;
-    vertical-align: middle;
+    margin: 0 12px;
+    width: 0;
+
+    &:before {
+      display: inline-block;
+      margin: -4px;
+      font-size: 1.5rem;
+      cursor: pointer;
+      content: "";
+      color: $color-white;
+    }
+
+    &:checked:before {
+      content: "";
+      color: $color-green;
+    }
   }
 
   &[type=range] {
