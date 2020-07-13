@@ -2,15 +2,18 @@ import React, { KeyboardEvent, CompositionEvent } from "react";
 
 import { Emit } from "../../utils/emit";
 import { keycode } from "../../utils/keycode";
-import { Setting } from "../../utils/setting";
 import { Highlights } from "../../utils/highlight";
+import { row2Y, col2X } from "../../utils/size";
 
 interface Props {
 }
 
 interface States {
-  cursor: { row: number, col: number, hl: number };
-  composition: number;
+  top: number;
+  left: number;
+  width: number;
+  color: string;
+  background: string;
 }
 
 const position: "absolute" = "absolute";
@@ -32,7 +35,7 @@ export class InputComponent extends React.Component<Props, States> {
   constructor(props: Props) {
     super(props);
 
-    this.state = { cursor: { row: 0, col: 0, hl: 0 }, composition: -1 };
+    this.state = { top: 0, left: 0, width: -1, color: "none", background: "none"  };
     Emit.on("envim:focus", this.onFocus.bind(this));
     Emit.on("grid:cursor", this.onCursor.bind(this));
   }
@@ -45,8 +48,12 @@ export class InputComponent extends React.Component<Props, States> {
     (this.refs.input as HTMLInputElement).focus();
   }
 
-  private onCursor(cursor: States["cursor"]) {
-    this.setState({ cursor });
+  private onCursor(cursor: { row: number; col: number; hl: number }) {
+    const top = row2Y(cursor.row);
+    const left = col2X(cursor.col);
+    const color = Highlights.color(cursor.hl, "background");
+    const background = Highlights.color(cursor.hl, "foreground");
+    this.setState({ top, left, color, background });
   }
 
   private onKeyDown(e: KeyboardEvent) {
@@ -58,8 +65,8 @@ export class InputComponent extends React.Component<Props, States> {
     e.stopPropagation();
     e.preventDefault();
     setTimeout(() => {
-      if (this.state.composition >= 0) {
-        this.setState({ composition: input.value.length });
+      if (this.state.width >= 0) {
+        this.setState({ width: col2X(input.value.length * 2) });
       } else {
         Emit.share("envim:focus");
         code && Emit.send("envim:input", code);
@@ -68,7 +75,7 @@ export class InputComponent extends React.Component<Props, States> {
   }
 
   private onCompositionStart() {
-    this.setState({ composition: 0 });
+    this.setState({ width: 0 });
   }
 
   private onCompositionEnd(e: CompositionEvent) {
@@ -76,20 +83,13 @@ export class InputComponent extends React.Component<Props, States> {
 
     Emit.send("envim:input", input.value);
     input.value = "";
-    this.setState({ composition: -1 });
+    this.setState({ width: -1 });
   }
 
   private getStyle() {
-    if (this.state.composition >= 0) {
-      const top = this.state.cursor.row * Setting.font.height;
-      const left = this.state.cursor.col * Setting.font.width;
-      const width = this.state.composition * Setting.font.width * 2;
-      const color = Highlights.color(this.state.cursor.hl, "background");
-      const background = Highlights.color(this.state.cursor.hl, "foreground");
-      return { ...styles.common, top, left, width, color, background };
-    } else {
-      return { ...styles.common, ...styles.normal };
-    }
+    return this.state.width >= 0
+      ? { ...styles.common, ...this.state }
+      : { ...styles.common, ...styles.normal };
   }
 
   render() {

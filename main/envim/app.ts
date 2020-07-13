@@ -197,6 +197,8 @@ export class App {
       const args = +i == grid ? [row, col] : [ -1, -1 ];
       Emit.send(`cursor:${i}`, this.grids[+i].setCursorPos(args[0], args[1]));
     });
+
+    if (this.grids[grid]) Emit.send("grid:cursor", this.grids[grid].getCursorPos());
   }
 
   private gridScroll(grid: number, top: number, bottom: number, left: number, right: number, rows: number, cols: number) {

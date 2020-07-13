@@ -48,6 +48,14 @@ export class Grid {
     return this.busy ? { col: -1, row: -1, hl: 0 } : { col, row, hl: cell.hl };
   }
 
+  getCursorPos() {
+    const { hl } = this.getCell(this.cursor.row, this.cursor.col);
+    const row = this.cursor.row + this.offset.row;
+    const col = this.cursor.col + this.offset.col;
+
+    return { col, row, hl };
+  }
+
   setOffsetPos(row: number, col: number) {
     this.offset = { row, col };
   }
