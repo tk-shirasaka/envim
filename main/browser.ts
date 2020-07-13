@@ -28,12 +28,10 @@ export class Browser {
   private create() {
     if (Browser.win) return;
 
-    setMenu(app.isPackaged);
+    setMenu();
     Browser.win = new BrowserWindow({
       transparent: true,
       resizable: true,
-      maximizable: true,
-      minimizable: true,
       frame: false,
       webPreferences: {
         nodeIntegration: true,
