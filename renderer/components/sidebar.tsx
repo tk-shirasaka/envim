@@ -34,6 +34,7 @@ export class SidebarComponent extends React.Component<Props, States> {
     return (
       <div className="color-black" style={{ ...this.props.side, ...styles.scope }}>
         <IconComponent color="red-fg" style={styles.icon} font="" onClick={this.onQuit.bind(this)} />
+        <div className="space dragable" />
       </div>
     );
   }
