@@ -9,9 +9,7 @@ class Highlight {
   private type: "normal" | "bold" | "italic";
   private decorate: "none" | "strikethrough" | "underline" | "undercurl";
 
-  constructor(highlight: IHighlight) {
-    const alpha = (100 - Setting.opacity) / 100;
-
+  constructor(highlight: IHighlight, alpha: number) {
     if (highlight.reverse) {
       highlight.foreground === undefined || (this.background = this.intToColor(highlight.foreground, alpha));
       highlight.background === undefined || (this.foreground = this.intToColor(highlight.background, 1));
@@ -38,7 +36,7 @@ class Highlight {
     const g = Number(`0x${rgb[2]}${rgb[3]}`)
     const b = Number(`0x${rgb[4]}${rgb[5]}`)
 
-    return `rgba(${r}, ${g}, ${b}, ${a})`;
+    return a < 1 ? `rgba(${r}, ${g}, ${b}, ${a})` : `#${rgb}`;
   }
 
   font(size: number) {
@@ -58,7 +56,9 @@ export class Highlights {
   private static hls: { [k: number]: Highlight } = {};
 
   static setHighlight(id: number, hl: IHighlight) {
-    Highlights.hls[id] = new Highlight(hl);
+    const alpha = id ? 1 : (100 - Setting.opacity) / 100;
+
+    Highlights.hls[id] = new Highlight(hl, alpha);
   }
 
   static setName(id: number, name: string) {
