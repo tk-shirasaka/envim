@@ -45,7 +45,9 @@ const styles = {
 
 export class EditorComponent extends React.Component<Props, States> {
   private drag: boolean = false;
+  private ctx?: CanvasRenderingContext2D;
   private renderer?: Context2D;
+  private capture?: ImageData;
 
   constructor(props: Props) {
     super(props);
@@ -60,16 +62,30 @@ export class EditorComponent extends React.Component<Props, States> {
     const canvas = this.refs.canvas as HTMLCanvasElement;
     const ctx = canvas.getContext("2d");
     if (ctx) {
+      this.ctx = ctx;
       this.renderer = new Context2D(ctx);
     }
   }
 
   componentDidUpdate() {
     this.props.grid === 1 && Emit.send("envim:resize", this.props.grid, x2Col(this.props.style.width), y2Row(this.props.style.height));
+    if (this.ctx && this.capture) {
+      this.ctx.putImageData(this.capture, 0, 0);
+      delete(this.capture);
+    }
   }
 
   componentWillUnmount() {
     Emit.clear([`cursor:${this.props.grid}`, `flush:${this.props.grid}`]);
+  }
+
+  shouldComponentUpdate(props: Props) {
+    const prev = this.props.style;
+    const next = props.style;
+    if (this.ctx && (prev.width !== next.width || prev.height !== next.height)) {
+      this.capture = this.ctx.getImageData(0, 0, Math.max(prev.width, next.width) * 2, Math.max(prev.height, next.height) * 2);
+    }
+    return true;
   }
 
   private onMouseEvent(e: MouseEvent, button: string, action: string) {
