@@ -17,6 +17,7 @@ export class Envim {
   constructor() {
     Emit.on("envim:attach", this.onAttach.bind(this));
     Emit.on("envim:resize", this.onResize.bind(this));
+    Emit.on("envim:api", this.onApi.bind(this));
     Emit.on("envim:mouse", this.onMouse.bind(this));
     Emit.on("envim:input", this.onInput.bind(this));
     Emit.on("envim:command", this.onCommand.bind(this));
@@ -73,13 +74,17 @@ export class Envim {
     const options: { [k: string]: boolean } = { ...{ ext_linegrid: true }, ...this.state.options };
 
     if (!this.state.attached) {
-      this.nvim.request("nvim_ui_attach", [width, height, options]);
+      this.onApi("nvim_ui_attach", [width, height, options])
     } else if (this.state.width !== width || this.state.height !== height) {
       options.ext_multigrid
         ? this.nvim.uiTryResizeGrid(grid, width, height)
         : this.nvim.uiTryResize(width, height);
     }
     this.state = { attached: true, width, height, options };
+  }
+
+  private async onApi(fname: string, args: any[]) {
+    await this.nvim.request(fname, args);
   }
 
   private async onMouse(grid: number, button: string, action: string, row: number, col: number) {

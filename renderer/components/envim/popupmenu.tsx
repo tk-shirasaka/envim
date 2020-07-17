@@ -2,6 +2,7 @@ import React from "react";
 
 import { Emit } from "../../utils/emit";
 import { Setting } from "../../utils/setting";
+import { row2Y, col2X } from "../../utils/size";
 
 interface Props {
 }
@@ -44,6 +45,8 @@ const styles = {
 };
 
 export class PopupmenuComponent extends React.Component<Props, States> {
+  private maxline: number = 5;
+
   constructor(props: Props) {
     super(props);
 
@@ -57,15 +60,32 @@ export class PopupmenuComponent extends React.Component<Props, States> {
     Emit.clear(["popupmenu:show", "popupmenu:select", "popupmenu:hide"]);
   }
 
+  private getItems(state: States) {
+    const { start } = state;
+    const end = Math.min(state.items.length, start + this.maxline);
+
+    return state.items.slice(start, end)
+  }
+
+  private sendPum(state: States) {
+    const { row, col } = state;
+    const items = this.getItems(state);
+    const width = Math.max(...items.map(({ word, menu, kind }) => [word, menu, kind].filter(str => str).join(" ").length))
+
+    Emit.send("envim:api", "nvim_ui_pum_set_bounds", [width, items.length, row, col]);
+  }
+
   private onPopupmenu(state: States) {
+    this.sendPum(state);
     this.setState(state);
   }
 
   private onSelect(selected: number) {
-    const start = this.state.start <= selected && selected <= this.state.start + 4
+    const start = this.state.start <= selected && selected <= this.state.start + this.maxline - 1
       ? this.state.start
-      : Math.max(0, Math.min(this.state.items.length - 5, this.state.start - this.state.selected + selected));
+      : Math.max(0, Math.min(this.state.items.length - this.maxline, this.state.start - this.state.selected + selected));
 
+    this.sendPum({ ...this.state, selected, start });
     this.setState({ selected, start });
   }
 
@@ -82,11 +102,11 @@ export class PopupmenuComponent extends React.Component<Props, States> {
   }
 
   private getScopeStyle() {
-    const { size, width, height } = Setting.font;
+    const { size } = Setting.font;
     return {
       ...styles.scope,
-      top: this.state.row * height,
-      left: this.state.col * width,
+      top: row2Y(this.state.row),
+      left: col2X(this.state.col),
       fontSize: size - 1,
     };
   }
@@ -105,12 +125,12 @@ export class PopupmenuComponent extends React.Component<Props, States> {
 
   render() {
     const { start } = this.state;
-    const end = Math.min(this.state.items.length, start + 5);
+    const items = this.getItems(this.state);
 
-    return this.state.items.length === 0 ? null : (
+    return items.length === 0 ? null : (
       <div style={this.getScopeStyle()}>
         <div className="animate fade-in" style={styles.popup}>
-          {this.state.items.slice(start, end).map(({ word, kind, menu }, i) => (
+          {items.map(({ word, kind, menu }, i) => (
             <div className={`color-black ${this.state.selected === i + start ? "active" : "clickable"}`} style={styles.line} onClick={() => this.onItem(i + start)} key={i}>
               <div style={styles.column}>{ word } { menu }</div>
               <div className={this.getKindStyle(kind)} style={styles.column}>{ kind }</div>
