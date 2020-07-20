@@ -16,7 +16,6 @@ interface States {
   resize: boolean;
   font: { width: number; height: number; size: number; };
   window: { width: number; height: number; };
-  options: { [k: string]: boolean };
   mouse: boolean;
 }
 
@@ -25,14 +24,13 @@ export class AppComponent extends React.Component<Props, States> {
 
   constructor(props: Props) {
     super(props);
-    this.state = { ...Setting.get(), init: false, resize: false, window: { width: window.innerWidth, height: window.innerHeight }, options: {}, mouse: false };
+    this.state = { ...Setting.get(), init: false, resize: false, window: { width: window.innerWidth, height: window.innerHeight }, mouse: false };
 
     window.addEventListener("resize", this.onResize.bind(this));
     Emit.on("app:start", this.onStart.bind(this));
     Emit.on("app:stop", this.onStop.bind(this));
     Emit.on("setting:font", this.onFont.bind(this));
     Emit.on("envim:mouse", this.onMouse.bind(this));
-    Emit.on("envim:option", this.onOption.bind(this));
   }
 
   private getSize() {
@@ -59,7 +57,7 @@ export class AppComponent extends React.Component<Props, States> {
   }
 
   private onStop() {
-    this.setState({ init: false, mouse: false, options: {} });
+    this.setState({ init: false, mouse: false });
   }
 
   private onFont() {
@@ -69,10 +67,6 @@ export class AppComponent extends React.Component<Props, States> {
 
   private onMouse(mouse: boolean) {
     this.setState({ mouse });
-  }
-
-  private onOption(options: { [k: string]: boolean }) {
-    this.setState({ options: Object.assign(options, this.state.options) });
   }
 
   private renderContent() {

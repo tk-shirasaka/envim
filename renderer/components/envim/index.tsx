@@ -17,7 +17,6 @@ import { InputComponent } from "./input";
 
 interface Props {
   main: { width: number; height: number; };
-  options: { [k: string]: boolean };
   mouse: boolean;
 }
 
@@ -131,10 +130,10 @@ export class EnvimComponent extends React.Component<Props, States> {
           { Object.keys(this.state.grids).map(grid => (
             <EditorComponent key={grid} grid={+grid} mouse={this.props.mouse} style={this.state.grids[+grid]} />
           )) }
-          { this.props.options.ext_messages && <HistoryComponent {...footer} /> }
-          { this.props.options.ext_cmdline && <CmdlineComponent /> }
-          { this.props.options.ext_popupmenu && <PopupmenuComponent /> }
-          { this.props.options.ext_messages && <NotificateComponent /> }
+          <HistoryComponent {...footer} />
+          <CmdlineComponent />
+          <PopupmenuComponent />
+          <NotificateComponent />
           <InputComponent />
         </div>
       </div>
