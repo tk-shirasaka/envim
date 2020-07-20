@@ -89,17 +89,12 @@ export class TablineComponent extends React.Component<Props, States> {
     Emit.share("envim:focus");
   }
 
-  private onSelect(e: MouseEvent, i: number) {
-    this.runCommand(`tabnext ${i + 1}`, e);
-  }
+  private runInput(input: string, e: MouseEvent | null = null) {
+    e?.stopPropagation();
+    e?.preventDefault();
 
-  private onClose(e: MouseEvent, i: number) {
-    const command = this.state.tabs.length > 1 ? `tabclose ${i + 1}` : "quit";
-    this.runCommand(command, e);
-  }
-
-  private onPlus() {
-    this.runCommand("$tabnew");
+    Emit.send("envim:input", input);
+    Emit.share("envim:focus");
   }
 
   private onNotify(e: MouseEvent) {
@@ -178,22 +173,25 @@ export class TablineComponent extends React.Component<Props, States> {
     return (
       <div className="color-black" style={{...this.props, ...styles.scope}}>
         {this.state.tabs.map((tab, i) => (
-          <div key={i} className={`animate fade-in color-black ${tab.active ? "active" : "clickable"}`} style={this.getTabStyle(tab.active)} onClick={e => this.onSelect(e, i)}>
+          <div key={i} className={`animate fade-in color-black ${tab.active ? "active" : "clickable"}`} style={this.getTabStyle(tab.active)} onClick={e => this.runCommand(`tabnext ${i + 1}`, e)}>
             { this.renderIcon(tab.type) }
             <span style={styles.name}>{ tab.name }</span>
             { tab.edit && <IconComponent color="gray-fg" style={styles.icon} font="" /> }
             { tab.protect && <IconComponent color="yellow-fg" style={styles.icon} font="" /> }
-            <IconComponent color="red-fg" style={styles.icon} font="" onClick={e => this.onClose(e, i)} />
+            <IconComponent color="red-fg" style={styles.icon} font="" onClick={e => this.runCommand(this.state.tabs.length > 1 ? `tabclose ${i + 1}` : "quit", e)} />
           </div>
         ))}
-        { this.state.tabs.length > 0 && <IconComponent color="green-fg" style={this.getStyle(styles.icon)} font="" onClick={this.onPlus.bind(this)} /> }
+        { this.state.tabs.length > 0 && <IconComponent color="green-fg" style={this.getStyle(styles.icon)} font="" onClick={e => this.runCommand("$tabnew", e)} /> }
         <div className="space dragable" />
-        { this.state.lc > 0 && this.renderQuickfix("lc") }
-        { this.state.qf > 0 && this.renderQuickfix("qf") }
         { this.state.ruler && this.renderNotify(this.state.ruler, false) }
         { this.state.command && this.renderNotify(this.state.command, false) }
         { this.state.mode && this.renderNotify(this.state.mode, false) }
         { !this.state.setting.notify && this.state.notificate && this.renderNotify(this.state.notificate, true) }
+        { this.state.lc > 0 && this.renderQuickfix("lc") }
+        { this.state.qf > 0 && this.renderQuickfix("qf") }
+        <IconComponent color="black" style={this.getStyle(styles.icon)} font="" onClick={e => this.runInput("<esc>:", e)} />
+        <IconComponent color="black" style={this.getStyle(styles.icon)} font="" onClick={e => this.runInput("<esc>/", e)} />
+        <IconComponent color="black" style={this.getStyle(styles.icon)} font="ﮠ" onClick={e => this.runInput("<esc>:messages<cr>", e)} />
         <IconComponent color="black" style={this.getStyle(styles.icon)} font="" onClick={this.onDetach.bind(this)} />
       </div>
     );
