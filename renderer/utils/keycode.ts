@@ -21,16 +21,6 @@ export const keycode = (e: KeyboardEvent) => {
     case "PageUp": return "<PageUp>";
     case "PageDown": return "<PageDown>";
     case "Help": return "<Help>";
-    case "CapsLock": return "";
-    case "Alphanumeric": return "";
-    case "NonConvert": return "";
-    case "Convert": return "";
-    case "HiraganaKatakana": return "";
-    case "Clear": return "";
-    case "NumLock": return "";
-    case "Control": return "";
-    case "Shift": return "";
-    case "Alt": return "";
     case "F1": return "<F1>";
     case "F2": return "<F2>";
     case "F3": return "<F3>";
@@ -45,7 +35,7 @@ export const keycode = (e: KeyboardEvent) => {
     case "F12": return "<F12>";
   }
 
-  if (keyCode === 229) return "";
+  if (keyCode === 229 || key.length > 1) return "";
   if (ctrlKey && key === "|") return "<C-\\>";
   if (ctrlKey) return `<C-${key}>`;
   if (altKey) return `<A-${key}>`;
