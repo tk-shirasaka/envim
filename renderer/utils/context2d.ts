@@ -4,7 +4,7 @@ import { Highlights } from "./highlight";
 import { Setting } from "./setting";
 
 export class Context2D {
-  private cursor: { row: number, col: number, hl: number } = { row: 0, col: 0, hl: 0 };
+  private cursor: { row: number, col: number, hl: number } = { row: -1, col: -1, hl: 0 };
   private font: { size: number; width: number; height: number; } = { size: 0, width: 0, height: 0 };
 
   constructor(

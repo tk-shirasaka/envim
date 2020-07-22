@@ -6,7 +6,7 @@ export class Grid {
   private flush: { [k: string]: ICell } = {};
   private width :number = 0;
   private height: number = 0;
-  private cursor: { row: number, col: number } = { row: 0, col: 0 };
+  private cursor: { row: number, col: number } = { row: -1, col: -1 };
   private offset: { row: number, col: number } = { row: 0, col: 0 };
 
   constructor(width :number, height: number) {
