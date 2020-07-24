@@ -294,7 +294,7 @@ export class App {
     col = Math.min(col, parent.width - 10);
 
     Emit.send("popupmenu:show", {
-      items: items.map(([ word, kind, menu, info ]) => ({ word, kind, menu, info })),
+      items: items.map(([ word, kind, menu ]) => ({ word, kind, menu })),
       selected,
       start: 0,
       row,

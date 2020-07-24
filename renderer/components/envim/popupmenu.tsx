@@ -8,7 +8,7 @@ interface Props {
 }
 
 interface States {
-  items: { word: string, kind: string, menu: string, info: string }[];
+  items: { word: string, kind: string, menu: string }[];
   start: number;
   selected: number;
   row: number;
@@ -16,15 +16,9 @@ interface States {
 }
 
 const position: "absolute" = "absolute";
-const whiteSpace: "pre-wrap" = "pre-wrap";
-const wordBreak: "break-all" = "break-all";
 const styles = {
   scope: {
     position,
-    display: "flex",
-    alignItems: "flex-start",
-  },
-  popup: {
     overflow: "hidden",
     boxShadow: "8px 8px 4px 0 rgba(0, 0, 0, 0.6)",
   },
@@ -35,13 +29,6 @@ const styles = {
   column: {
     padding: "1px 4px 0",
   },
-  info: {
-    marginLeft: 4,
-    padding: 4,
-    whiteSpace,
-    wordBreak,
-    boxShadow: "8px 8px 4px 0 rgba(0, 0, 0, 0.6)",
-  }
 };
 
 export class PopupmenuComponent extends React.Component<Props, States> {
@@ -128,16 +115,13 @@ export class PopupmenuComponent extends React.Component<Props, States> {
     const items = this.getItems(this.state);
 
     return items.length === 0 ? null : (
-      <div style={this.getScopeStyle()}>
-        <div className="animate fade-in" style={styles.popup}>
-          {items.map(({ word, kind, menu }, i) => (
-            <div className={`color-black ${this.state.selected === i + start ? "active" : "clickable"}`} style={styles.line} onClick={() => this.onItem(i + start)} key={i}>
-              <div style={styles.column}>{ word } { menu }</div>
-              <div className={this.getKindStyle(kind)} style={styles.column}>{ kind }</div>
-            </div>
-          ))}
-        </div>
-        {this.state.items[this.state.selected]?.info.replace(/^\s*$/, '') && <div className="animate fade-in color-black active" style={styles.info}>{ this.state.items[this.state.selected]?.info }</div>}
+      <div className="animate fade-in" style={this.getScopeStyle()}>
+        {items.map(({ word, kind, menu }, i) => (
+          <div className={`color-black ${this.state.selected === i + start ? "active" : "clickable"}`} style={styles.line} onClick={() => this.onItem(i + start)} key={i}>
+            <div style={styles.column}>{ word } { menu }</div>
+            <div className={this.getKindStyle(kind)} style={styles.column}>{ kind }</div>
+          </div>
+        ))}
       </div>
     )
   }
