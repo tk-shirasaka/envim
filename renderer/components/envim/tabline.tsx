@@ -89,14 +89,6 @@ export class TablineComponent extends React.Component<Props, States> {
     Emit.share("envim:focus");
   }
 
-  private runInput(input: string, e: MouseEvent | null = null) {
-    e?.stopPropagation();
-    e?.preventDefault();
-
-    Emit.send("envim:input", input);
-    Emit.share("envim:focus");
-  }
-
   private onNotify(e: MouseEvent) {
     const setting = { ...Setting.others, notify: true };
 
@@ -189,9 +181,7 @@ export class TablineComponent extends React.Component<Props, States> {
         { !this.state.setting.notify && this.state.notificate && this.renderNotify(this.state.notificate, true) }
         { this.state.lc > 0 && this.renderQuickfix("lc") }
         { this.state.qf > 0 && this.renderQuickfix("qf") }
-        <IconComponent color="black" style={this.getStyle(styles.icon)} font="" onClick={e => this.runInput("<esc>:", e)} />
-        <IconComponent color="black" style={this.getStyle(styles.icon)} font="" onClick={e => this.runInput("<esc>/", e)} />
-        <IconComponent color="black" style={this.getStyle(styles.icon)} font="ﮠ" onClick={e => this.runInput("<esc>:messages<cr>", e)} />
+        <IconComponent color="black" style={this.getStyle(styles.icon)} font="ﮠ" onClick={e => this.runCommand("messages", e)} />
         <IconComponent color="black" style={this.getStyle(styles.icon)} font="" onClick={this.onDetach.bind(this)} />
       </div>
     );
