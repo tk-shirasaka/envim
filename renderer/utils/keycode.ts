@@ -1,45 +1,51 @@
 import { KeyboardEvent } from "react";
 
-export const keycode = (e: KeyboardEvent) => {
-  const { keyCode, key, ctrlKey, altKey, metaKey } = e;
-
-  switch (key) {
-    case "¥": return "\\";
-    case "<": return "<LT>";
-    case "Escape": return "<Esc>";
-    case "Backspace": return "<BS>";
-    case "Insert": return "<Insert>";
-    case "Delete": return "<Del>";
-    case "Tab": return "<Tab>";
-    case "Enter": return "<CR>";
-    case "ArrowUp": return "<Up>";
-    case "ArrowDown": return "<Down>";
-    case "ArrowLeft": return "<Left>";
-    case "ArrowRight": return "<Right>";
-    case "Home": return "<Home>";
-    case "End": return "<End>";
-    case "PageUp": return "<PageUp>";
-    case "PageDown": return "<PageDown>";
-    case "Help": return "<Help>";
-    case "F1": return "<F1>";
-    case "F2": return "<F2>";
-    case "F3": return "<F3>";
-    case "F4": return "<F4>";
-    case "F5": return "<F5>";
-    case "F6": return "<F6>";
-    case "F7": return "<F7>";
-    case "F8": return "<F8>";
-    case "F9": return "<F9>";
-    case "F10": return "<F10>";
-    case "F11": return "<F11>";
-    case "F12": return "<F12>";
-  }
-
-  if (keyCode === 229 || key.length > 1) return "";
-  if (ctrlKey && key === "|") return "<C-\\>";
+const getKey = (key: string, e: KeyboardEvent, wrap: boolean) => {
+  const { ctrlKey, altKey, metaKey, shiftKey } = e;
   if (ctrlKey) return `<C-${key}>`;
   if (altKey) return `<A-${key}>`;
   if (metaKey) return `<D-${key}>`;
-
+  if (wrap) return shiftKey ? `<S-${key}>` : `<${key}>`;
   return key;
+};
+
+export const keycode = (e: KeyboardEvent) => {
+  const { keyCode, key, ctrlKey } = e;
+
+  switch (key) {
+    case "¥": return "\\";
+    case "<": return getKey("LT", e, true);
+    case "Escape": return getKey("Esc", e, true);
+    case "Backspace": return getKey("BS", e, true);
+    case "Insert": return getKey("Insert", e, true);
+    case "Delete": return getKey("Del", e, true);
+    case "Tab": return getKey("Tab", e, true);
+    case "Enter": return getKey("CR", e, true);
+    case "ArrowUp": return getKey("Up", e, true);
+    case "ArrowDown": return getKey("Down", e, true);
+    case "ArrowLeft": return getKey("Left", e, true);
+    case "ArrowRight": return getKey("Right", e, true);
+    case "Home": return getKey("Home", e, true);
+    case "End": return getKey("End", e, true);
+    case "PageUp": return getKey("PageUp", e, true);
+    case "PageDown": return getKey("PageDown", e, true);
+    case "Help": return getKey("Help", e, true);
+    case "F1": return getKey("F1", e, true);
+    case "F2": return getKey("F2", e, true);
+    case "F3": return getKey("F3", e, true);
+    case "F4": return getKey("F4", e, true);
+    case "F5": return getKey("F5", e, true);
+    case "F6": return getKey("F6", e, true);
+    case "F7": return getKey("F7", e, true);
+    case "F8": return getKey("F8", e, true);
+    case "F9": return getKey("F9", e, true);
+    case "F10": return getKey("F10", e, true);
+    case "F11": return getKey("F11", e, true);
+    case "F12": return getKey("F12", e, true);
+  }
+
+  if (keyCode === 229 || key.length > 1) return "";
+  if (ctrlKey && key === "|") return getKey("\\", e, true);
+
+  return getKey(key, e, false);
 };
