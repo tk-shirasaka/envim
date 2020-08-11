@@ -78,11 +78,15 @@ export class Grid {
 
   setCell(row: number, col: number, text: string, hl: number) {
     const prev = this.getCell(row, col - 1);
+    const next = this.getCell(row, col + 1);
     const cell = this.getCell(row, col);
 
     text || (prev.width = 2);
     hl < 0 && (hl = prev.hl);
-    (cell.text === text && cell.hl === hl) || (this.flush[`${cell.row},${cell.col}`] = cell);
+    if (cell.text !== text || cell.hl !== hl) {
+      this.flush[`${cell.row},${cell.col}`] = cell;
+      this.flush[`${next.row},${next.col}`] = next;
+    };
     [ cell.row, cell.col, cell.text, cell.hl, cell.width ] = [ row, col, text, hl, text.length ];
   }
 
