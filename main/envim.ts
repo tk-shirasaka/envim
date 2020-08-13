@@ -22,7 +22,6 @@ export class Envim {
     Emit.on("envim:input", this.onInput.bind(this));
     Emit.on("envim:command", this.onCommand.bind(this));
     Emit.on("envim:log", this.onLog.bind(this));
-    Emit.on("envim:detach", this.onDetach.bind(this));
     process.on("uncaughtException", this.onError.bind(this));
     process.on("unhandledRejection", this.onError.bind(this));
   }
@@ -104,13 +103,6 @@ export class Envim {
       log = JSON.stringify(log);
     }
     this.nvim.outWriteLine(log);
-  }
-
-  private async onDetach() {
-    await this.nvim.uiDetach();
-    this.connect.process?.kill();
-    this.connect.socket?.end("");
-    this.connect = {};
   }
 
   private onDisconnect() {

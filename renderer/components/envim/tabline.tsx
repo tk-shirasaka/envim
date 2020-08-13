@@ -25,7 +25,6 @@ interface States {
 }
 
 const whiteSpace: "nowrap" = "nowrap";
-const direction: "rtl" = "rtl";
 const styles = {
   scope: {
     display: "flex",
@@ -45,8 +44,8 @@ const styles = {
     padding: "0 4px",
     textOverflow: "ellipsis",
     overflow: "hidden",
+    lineHeight: 0,
     whiteSpace,
-    direction,
   },
   active: {
     borderBottom: "solid 2px #2295c5",
@@ -104,10 +103,6 @@ export class TablineComponent extends React.Component<Props, States> {
     this.setState({ setting: Setting.others });
   }
 
-  private onDetach() {
-    Emit.send("envim:detach");
-  }
-
   private onTabline(tabs: ITab[], qf: number, lc: number) {
     this.setState({ tabs, qf, lc });
   }
@@ -137,9 +132,9 @@ export class TablineComponent extends React.Component<Props, States> {
     return {...style, lineHeight};
   }
 
-  private renderIcon(type: string) {
-    const icon = icons.filter(icon => type.search(icon.type) >= 0).shift();
-    return icon && <IconComponent color={icon.color} style={styles.icon} font={icon.font} />;
+  private renderName(tab: ITab) {
+    const icon = icons.filter(icon => tab.type.search(icon.type) >= 0).shift();
+    return icon && <IconComponent color={icon.color} style={styles.name} font={icon.font} text={tab.name.replace(/([^\/])[^\/]*\//g, "$1/")} />;
   }
 
   private renderQuickfix(type: "qf" | "lc") {
@@ -166,14 +161,13 @@ export class TablineComponent extends React.Component<Props, States> {
       <div className="color-black" style={{...this.props, ...styles.scope}}>
         {this.state.tabs.map((tab, i) => (
           <div key={i} className={`animate fade-in color-black ${tab.active ? "active" : "clickable"}`} style={this.getTabStyle(tab.active)} onClick={e => this.runCommand(`tabnext ${i + 1}`, e)}>
-            { this.renderIcon(tab.type) }
-            <span style={styles.name}>{ tab.name }</span>
+            { this.renderName(tab) }
             { tab.edit && <IconComponent color="gray-fg" style={styles.icon} font="" /> }
             { tab.protect && <IconComponent color="yellow-fg" style={styles.icon} font="" /> }
-            <IconComponent color="red-fg" style={styles.icon} font="" onClick={e => this.runCommand(this.state.tabs.length > 1 ? `tabclose ${i + 1}` : "quit", e)} />
+            <IconComponent color="red-fg" style={styles.icon} font="" onClick={e => this.runCommand(this.state.tabs.length > 1 ? `tabclose! ${i + 1}` : "quit", e)} />
           </div>
         ))}
-        { this.state.tabs.length > 0 && <IconComponent color="green-fg" style={this.getStyle(styles.icon)} font="" onClick={e => this.runCommand("$tabnew", e)} /> }
+        { this.state.tabs.length > 0 && <IconComponent color="green-fg" style={this.getStyle(styles.icon)} font="" onClick={e => this.runCommand("tabnew", e)} /> }
         <div className="space dragable" />
         { this.state.ruler && this.renderNotify(this.state.ruler, false) }
         { this.state.command && this.renderNotify(this.state.command, false) }
@@ -182,7 +176,6 @@ export class TablineComponent extends React.Component<Props, States> {
         { this.state.lc > 0 && this.renderQuickfix("lc") }
         { this.state.qf > 0 && this.renderQuickfix("qf") }
         <IconComponent color="black" style={this.getStyle(styles.icon)} font="ﮠ" onClick={e => this.runCommand("messages", e)} />
-        <IconComponent color="black" style={this.getStyle(styles.icon)} font="" onClick={this.onDetach.bind(this)} />
       </div>
     );
   }
