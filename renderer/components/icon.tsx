@@ -20,7 +20,7 @@ const styles = {
     display: "inline-block",
   },
   text: {
-    display: "inline-block",
+    display: "inline",
     paddingLeft: 4,
   },
 };
