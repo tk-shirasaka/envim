@@ -81,7 +81,7 @@ export class InputComponent extends React.Component<Props, States> {
   private onCompositionEnd(e: CompositionEvent) {
     const input = e.target as HTMLInputElement;
 
-    Emit.send("envim:input", input.value);
+    input.value && Emit.send("envim:input", input.value);
     input.value = "";
     this.setState({ width: -1 });
   }
