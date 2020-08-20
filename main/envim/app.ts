@@ -182,6 +182,7 @@ export class App {
   private gridClear(grid: number) {
     const { width, height } = this.grids[grid].getSize();
     this.grids[grid] = new Grid(width, height);
+    Emit.send(`clear:${grid}`);
   }
 
   private gridDestory(grid: number) {

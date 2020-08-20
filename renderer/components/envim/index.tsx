@@ -5,7 +5,7 @@ import { IHighlight } from "common/interface";
 import { Emit } from "../../utils/emit";
 import { Highlights } from "../../utils/highlight";
 import { Setting } from "../../utils/setting";
-import { y2Row, row2Y, col2X } from "../../utils/size";
+import { y2Row, x2Col, row2Y, col2X } from "../../utils/size";
 
 import { TablineComponent } from "./tabline";
 import { EditorComponent } from "./editor";
@@ -27,7 +27,7 @@ interface States {
     top: number;
     left: number;
     display?: "block" | "none";
-    cursor: "text" | "not-allowed";
+    cursor: "pointer" | "not-allowed";
   }};
 }
 
@@ -46,9 +46,15 @@ const styles = {
 };
 
 export class EnvimComponent extends React.Component<Props, States> {
+   private main: { fontSize: number; lineHeight: string; } = { fontSize: 0, lineHeight: "" };
+   private editor: { width: number; height: number; } = { width: 0, height: 0 };
+   private header: { width: number; height: number; } = { width: 0, height: 0 };
+   private footer: { width: number; height: number; } = { width: 0, height: 0 };
+
   constructor(props: Props) {
     super(props);
 
+    this.setSize();
     this.state = { grids: {} };
     Emit.on("highlight:set", this.onHighlight.bind(this));
     Emit.on("highlight:name", this.onHlGroup.bind(this));
@@ -56,16 +62,26 @@ export class EnvimComponent extends React.Component<Props, States> {
     Emit.on("win:pos", this.onWin.bind(this));
     Emit.on("win:hide", this.hideWin.bind(this));
     Emit.on("win:close", this.closeWin.bind(this));
+    Emit.send("envim:resize", x2Col(this.editor.width), y2Row(this.editor.height));
   }
 
   componentWillUnmount() {
     Emit.clear(["highlight:set", "highlight:name", "grid:resize", "win:pos", "win:hide", "win:close"]);
   }
 
+  private setSize() {
+    const font  = Setting.font;
+    this.main = { fontSize: font.size, lineHeight: `${font.height}px` };
+    this.editor = { width: this.props.main.width, height: row2Y(y2Row(this.props.main.height - 8) - 1) };
+    this.header = { width: this.props.main.width, height: this.props.main.height - this.editor.height };
+    this.footer = { width: this.props.main.width, height: Math.min(this.editor.height, font.height * 15) };
+  }
+
   private onHighlight(highlights: {id: number, hl: IHighlight}[]) {
     highlights.forEach(({id, hl}) => {
       Highlights.setHighlight(id, hl);
     });
+    Object.keys(this.state.grids).length === 0 && this.onWin(1, x2Col(this.editor.width), y2Row(this.editor.height), 0, 0, true)
   }
 
   private onHlGroup(groups: {id: number, name: string}[]) {
@@ -87,7 +103,7 @@ export class EnvimComponent extends React.Component<Props, States> {
 
   private onWin(grid: number, width: number, height: number, top: number, left: number, focusable: boolean) {
     const grids = this.state.grids;
-    const cursor: "text" | "not-allowed" = focusable ? "text" : "not-allowed";
+    const cursor: "pointer" | "not-allowed" = focusable ? "pointer" : "not-allowed";
     const display = "block";
 
     [ height, width ] = [ row2Y(height), col2X(width) ];
@@ -115,22 +131,14 @@ export class EnvimComponent extends React.Component<Props, States> {
   }
 
   render() {
-    const { height, size } = Setting.font;
-    const { width } = this.props.main;
-    const editor = { width, height: row2Y(y2Row(this.props.main.height - 8) - 1) };
-    const header = { width, height: this.props.main.height - editor.height };
-    const footer = { width, height: Math.min(editor.height, height * 15) };
-    const style = { fontSize: size, lineHeight: `${height}px` };
-
     return (
-      <div style={style}>
-        <TablineComponent {...header} />
-        <div style={{...styles.editor, ...editor}}>
-          <EditorComponent grid={1} mouse={this.props.mouse} style={{ ...editor, top: 0, left: 0 }} />
-          { Object.keys(this.state.grids).map(grid => (
+      <div style={this.main}>
+        <TablineComponent {...this.header} />
+        <div style={{...styles.editor, ...this.editor}}>
+          { Object.keys(this.state.grids).length === 0 ? <div className="color-bg" style={this.editor}>Loading...</div> : Object.keys(this.state.grids).map(grid => (
             <EditorComponent key={grid} grid={+grid} mouse={this.props.mouse} style={this.state.grids[+grid]} />
           )) }
-          <HistoryComponent {...footer} />
+          <HistoryComponent {...this.footer} />
           <CmdlineComponent />
           <PopupmenuComponent />
           <NotificateComponent />

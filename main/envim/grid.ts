@@ -24,13 +24,8 @@ export class Grid {
     for (let i = 0; i < height; i++) {
       this.lines.push([]);
       for (let j = 0; j < width; j++) {
-        if (old[i] && old[i][j]) {
-          this.lines[i].push(old[i][j]);
-        } else {
-          const cell = this.getDefault(i, j);
-          this.lines[i].push(cell);
-          this.flush[`${cell.row},${cell.col}`] = cell;
-        }
+        const cell = old[i] && old[i][j] ? old[i][j] : this.getDefault(i, j);
+        this.lines[i].push(cell);
       }
     }
 

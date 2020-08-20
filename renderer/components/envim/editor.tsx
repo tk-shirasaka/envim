@@ -15,32 +15,19 @@ interface Props {
     top: number;
     left: number;
     display?: "block" | "none";
-    cursor?: "text" | "not-allowed";
+    cursor?: "pointer" | "not-allowed";
   };
 }
 
 interface States {
-  init: boolean;
 }
 
 const position: "absolute" = "absolute";
-const styles = {
-  scope: {
-    position,
-    cursor: "text",
-    boxShadow: "0 8px 8px 0 rgba(0, 0, 0, 0.6)",
-  },
-  loading: {
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    width: "100%",
-    height: "100%",
-  },
-  canvas: {
-    width: "100%",
-    height: "100%",
-  },
+const style = {
+  position,
+  boxShadow: "0 8px 8px 0 rgba(0, 0, 0, 0.6)",
+  width: "100%",
+  height: "100%",
 };
 
 export class EditorComponent extends React.Component<Props, States> {
@@ -51,11 +38,10 @@ export class EditorComponent extends React.Component<Props, States> {
 
   constructor(props: Props) {
     super(props);
-    this.state = { init: false };
 
     Emit.on(`cursor:${this.props.grid}`, this.onCursor.bind(this));
+    Emit.on(`clear:${this.props.grid}`, this.onClear.bind(this));
     Emit.on(`flush:${this.props.grid}`, this.onFlush.bind(this));
-    this.props.grid === 1 && Emit.send("envim:resize", this.props.grid, x2Col(this.props.style.width), y2Row(this.props.style.height));
   }
 
   componentDidMount() {
@@ -64,26 +50,27 @@ export class EditorComponent extends React.Component<Props, States> {
     if (ctx) {
       this.ctx = ctx;
       this.renderer = new Context2D(ctx);
+      this.renderer.clear(this.props.style.width, this.props.style.height);
     }
   }
 
   componentDidUpdate() {
-    this.props.grid === 1 && Emit.send("envim:resize", this.props.grid, x2Col(this.props.style.width), y2Row(this.props.style.height));
     if (this.ctx && this.capture) {
+      this.renderer?.clear(this.props.style.width, this.props.style.height);
       this.ctx.putImageData(this.capture, 0, 0);
       delete(this.capture);
     }
   }
 
   componentWillUnmount() {
-    Emit.clear([`cursor:${this.props.grid}`, `flush:${this.props.grid}`]);
+    Emit.clear([`cursor:${this.props.grid}`, `clear:${this.props.grid}`, `flush:${this.props.grid}`]);
   }
 
   shouldComponentUpdate(props: Props) {
     const prev = this.props.style;
     const next = props.style;
     if (this.ctx && (prev.width !== next.width || prev.height !== next.height)) {
-      this.capture = this.ctx.getImageData(0, 0, Math.max(prev.width, next.width) * 2, Math.max(prev.height, next.height) * 2);
+      this.capture = this.ctx.getImageData(0, 0, Math.min(prev.width, next.width) * 2, Math.min(prev.height, next.height) * 2);
     }
     return true;
   }
@@ -123,22 +110,22 @@ export class EditorComponent extends React.Component<Props, States> {
     this.renderer?.setCursor(cursor);
   }
 
+  private onClear() {
+    this.renderer?.clear(this.props.style.width, this.props.style.height);
+  }
+
   private onFlush(cells: ICell[]) {
-    this.state.init || this.setState({ init: true });
     this.renderer?.flush(cells);
   }
 
   render() {
     return (
-      <div className="animate fade-in" style={{ ...styles.scope, ...this.props.style }}>
-        { this.state.init || <div className="color-black" style={styles.loading}><span>Loading...</span></div> }
-        <canvas style={styles.canvas} width={this.props.style.width * 2} height={this.props.style.height * 2} ref="canvas"
-          onMouseDown={this.onMouseDown.bind(this)}
-          onMouseMove={this.onMouseMove.bind(this)}
-          onMouseUp={this.onMouseUp.bind(this)}
-          onWheel={this.onMouseWheel.bind(this)}
-        />
-      </div>
+      <canvas className="animate fade-in" style={{...style, ...this.props.style}} width={this.props.style.width * 2} height={this.props.style.height * 2} ref="canvas"
+        onMouseDown={this.onMouseDown.bind(this)}
+        onMouseMove={this.onMouseMove.bind(this)}
+        onMouseUp={this.onMouseUp.bind(this)}
+        onWheel={this.onMouseWheel.bind(this)}
+      />
     );
   }
 }

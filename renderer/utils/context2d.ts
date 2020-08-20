@@ -46,6 +46,12 @@ export class Context2D {
     this.cursor = cursor;
   }
 
+  clear(width: number, height: number) {
+    this.style(0, "background");
+    this.ctx.clearRect(0, 0, width * 2, height * 2);
+    this.ctx.fillRect(0, 0, width * 2, height * 2);
+  }
+
   flush(cells: ICell[]) {
     cells.forEach(cell => {
       const [y, x] = [cell.row * this.font.height, cell.col * this.font.width];
