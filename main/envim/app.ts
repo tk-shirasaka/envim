@@ -9,6 +9,7 @@ import { Messages } from "./messages";
 export class App {
   private grids: { [k: number]: Grid } = {};
   private messages: Messages = new Messages;
+  private timer: number = 0;
 
   redraw(redraw: any[][]) {
     redraw.forEach(r => {
@@ -333,9 +334,14 @@ export class App {
   }
 
   private flush() {
-    Object.keys(this.grids).forEach(grid => {
-      const flush = this.grids[+grid].getFlush();
-      flush.length && Emit.send(`flush:${grid}`, flush);
+    const timer = (new Date).getTime();
+    this.timer = timer;
+    setTimeout(() => {
+      if (timer !== this.timer) return;
+      Object.keys(this.grids).forEach(grid => {
+        const flush = this.grids[+grid].getFlush();
+        flush.length && Emit.send(`flush:${grid}`, flush);
+      });
     });
   }
 }
