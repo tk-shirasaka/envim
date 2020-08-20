@@ -10,14 +10,9 @@ class Highlight {
   private decorate: "none" | "strikethrough" | "underline" | "undercurl";
 
   constructor(highlight: IHighlight, alpha: number) {
-    if (highlight.reverse) {
-      highlight.foreground === undefined || (this.background = this.intToColor(highlight.foreground, alpha));
-      highlight.background === undefined || (this.foreground = this.intToColor(highlight.background, 1));
-    } else {
-      highlight.foreground === undefined || (this.foreground = this.intToColor(highlight.foreground, 1));
-      highlight.background === undefined || (this.background = this.intToColor(highlight.background, alpha));
-    }
-    highlight.special === undefined ||  (this.special = this.intToColor(highlight.special, 1));
+    this.background = this.intToColor(highlight.reverse ? highlight.foreground : highlight.background, alpha);
+    this.foreground = this.intToColor(highlight.reverse ? highlight.background : highlight.foreground, 1);
+    this.special = this.intToColor(highlight.special, 1);
 
     this.type = "normal";
     if (highlight.bold) this.type = "bold";
@@ -29,7 +24,9 @@ class Highlight {
     if (highlight.undercurl) this.decorate = "undercurl";
   }
 
-  private intToColor(color: number, a: number) {
+  private intToColor(color: number | undefined, a: number) {
+    if (color === undefined) return "";
+
     const rgb = `${("000000" + color.toString(16)).slice(-6)}`;
 
     const r = Number(`0x${rgb[0]}${rgb[1]}`)
