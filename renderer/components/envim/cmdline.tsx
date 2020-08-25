@@ -56,30 +56,41 @@ export class CmdlineComponent extends React.Component<Props, States> {
     Emit.clear(["cmdline:show", "cmdline:cursor", "cmdline:special", "cmdline:hide", "cmdline:blockshow", "cmdline:blockhide"]);
   }
 
-  private convertContent(content: string[][], pos: number, indent: number) {
-    let result: { hl: number, reverse: boolean, c: string; }[] = [];
+  private getPos(cmdline: States["cmdline"], pos: number) {
+    let result = 0;
+    for (; pos >= 0; result++) {
+      pos -= encodeURIComponent(cmdline[result].c).replace(/%../g, "x").length;
+    }
+    return result - 1;
+  }
+
+  private convertContent(content: string[][], indent: number) {
+    let result: States["cmdline"] = [];
     let i = 0;
 
     for (; i < indent; i++) {
       result.push({ hl: 0, reverse: false, c: " " });
     }
     content.forEach(([hl, text]) => {
-      result = result.concat(text.split("").map(c => ({ hl: +hl, reverse: pos === i++, c })))
+      result = result.concat(text.split("").map(c => ({ hl: +hl, reverse: false, c })))
     });
-    result.push({ hl: 0, reverse: pos === i, c: " " });
+    result.push({ hl: 0, reverse: false, c: " " });
 
     return result;
   }
 
-  private onCmdline(cmdline: string[][], pos: number, prompt: string, indent: number) {
-    pos += indent;
+  private onCmdline(cmd: string[][], pos: number, prompt: string, indent: number) {
+    const cmdline = this.convertContent(cmd, indent)
 
-    this.setState({ cmdline: this.convertContent(cmdline, pos, indent), pos, prompt, indent })
+    pos = this.getPos(cmdline, pos + indent);
+    cmdline[pos].reverse = true;
+
+    this.setState({ cmdline, pos, prompt, indent })
   }
 
   private onCursor(pos: number) {
     const cmdline = this.state.cmdline;
-    pos += this.state.indent;
+    pos = this.getPos(cmdline, pos + this.state.indent);
 
     cmdline[this.state.pos].reverse = false;
     cmdline[pos].reverse = true;
@@ -102,7 +113,7 @@ export class CmdlineComponent extends React.Component<Props, States> {
   private onBlock(lines: string[][][]) {
     const contents = [
       ...this.state.contents,
-      ...lines.map(line => this.convertContent(line, -1, 0)),
+      ...lines.map(line => this.convertContent(line, 0)),
     ];
     this.setState({ contents });
   }
@@ -115,7 +126,7 @@ export class CmdlineComponent extends React.Component<Props, States> {
     return { ...styles.scope, ...this.props, ...Highlights.style(0) };
   }
 
-  renderCmdline(cmdline: { hl: number, reverse: boolean, c: string }[]) {
+  renderCmdline(cmdline: States["cmdline"]) {
     return cmdline.map(({hl, reverse, c}, i) => {
       return (hl || reverse) ? <span style={Highlights.style(hl, reverse)} key={i}>{ c }</span> : c;
     });
