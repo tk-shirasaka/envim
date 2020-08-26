@@ -126,8 +126,9 @@ export class CmdlineComponent extends React.Component<Props, States> {
     return { ...styles.scope, ...this.props, ...Highlights.style(0) };
   }
 
-  renderCmdline(cmdline: States["cmdline"]) {
+  private renderCmdline(cmdline: States["cmdline"]) {
     return cmdline.map(({hl, reverse, c}, i) => {
+      c = c.charCodeAt(0) < 0x20 ? `^${String.fromCharCode(c.charCodeAt(0) + 0x40)}` : c;
       return (hl || reverse) ? <span style={Highlights.style(hl, reverse)} key={i}>{ c }</span> : c;
     });
   }
