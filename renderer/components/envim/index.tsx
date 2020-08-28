@@ -27,7 +27,7 @@ interface States {
     top: number;
     left: number;
     display?: "block" | "none";
-    cursor: "pointer" | "not-allowed";
+    cursor: "default" | "not-allowed";
   }};
 }
 
@@ -103,7 +103,7 @@ export class EnvimComponent extends React.Component<Props, States> {
 
   private onWin(grid: number, width: number, height: number, top: number, left: number, focusable: boolean) {
     const grids = this.state.grids;
-    const cursor: "pointer" | "not-allowed" = focusable ? "pointer" : "not-allowed";
+    const cursor: "default" | "not-allowed" = focusable ? "default" : "not-allowed";
     const display = "block";
 
     [ height, width ] = [ row2Y(height), col2X(width) ];

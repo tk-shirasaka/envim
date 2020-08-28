@@ -285,13 +285,12 @@ export class App {
 
   private popupmenuShow(items: string[][], selected: number, row: number, col: number, grid: number) {
     const height = Math.min(5, items.length);
-    const offset = this.grids[grid]?.getOffsetPos() || { row: 0, col: 0 };
+    const offset = this.grids[grid]?.getOffsetPos() || { row: 1, col: this.grids[1].getSize().width * 0.1 + 5 };
     const parent = this.grids[1].getSize();
 
     row += offset.row;
     col += offset.col;
 
-    grid < 0 && (row = parent.height - 2);
     row = row + height >= parent.height ? row - height : row + 1;
     col = Math.min(col, parent.width - 10);
 

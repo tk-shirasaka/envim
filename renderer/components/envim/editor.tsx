@@ -15,7 +15,7 @@ interface Props {
     top: number;
     left: number;
     display?: "block" | "none";
-    cursor?: "pointer" | "not-allowed";
+    cursor?: "default" | "not-allowed";
   };
 }
 

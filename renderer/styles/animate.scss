@@ -10,6 +10,10 @@
     animation-name: slideUp, fadeIn;
   }
 
+  &.slide-down {
+    animation-name: slideDown, fadeIn;
+  }
+
   &.fade-in {
     animation-name: fadeIn;
   }
@@ -19,6 +23,12 @@
 @keyframes slideUp {
   from {
     transform: translateY(100%);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-100%);
   }
 }
 

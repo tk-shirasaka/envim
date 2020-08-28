@@ -2,6 +2,7 @@ import React from "react";
 
 import { Emit } from "../../utils/emit";
 import { Highlights } from "../../utils/highlight";
+import { Setting } from "../../utils/setting";
 
 interface Props {
 }
@@ -16,24 +17,22 @@ interface States {
 
 const position: "absolute" = "absolute";
 const pointerEvents: "none" = "none";
-const whiteSpace: "pre-wrap" = "pre-wrap";
+const whiteSpace: "break-spaces" = "break-spaces";
 const wordBreak: "break-all" = "break-all";
 const styles = {
   scope: {
     position,
     display: "flex",
-    bottom: 0,
-    width: "100%",
+    left: "10%",
+    right: "10%",
     overflow: "hidden",
-    borderRadius: "4px 0 0 0",
-    boxShadow: "8px -8px 4px 0 rgba(0, 0, 0, 0.6)",
+    borderRadius: "0 0 4px 4px",
+    boxShadow: "8px 8px 4px 0 rgba(0, 0, 0, 0.6)",
     pointerEvents,
   },
-  prompt: {
-    padding: 4,
-  },
+  prompt: {},
   cmdline: {
-    padding: 4,
+    marginLeft: 0,
     whiteSpace,
     wordBreak,
   },
@@ -123,7 +122,11 @@ export class CmdlineComponent extends React.Component<Props, States> {
   }
 
   private getScopeStyle() {
-    return { ...styles.scope, ...this.props, ...Highlights.style(0) };
+    return { top: -Setting.font.width, ...styles.scope };
+  }
+
+  private getCmdlineStyle(style: object) {
+    return { margin: Setting.font.width, marginTop: Setting.font.height, padding: Setting.font.width, ...style };
   }
 
   private renderCmdline(cmdline: States["cmdline"]) {
@@ -135,9 +138,9 @@ export class CmdlineComponent extends React.Component<Props, States> {
 
   render() {
     return this.state.cmdline.length > 0 && (
-      <div className="animate slide-up" style={this.getScopeStyle()}>
-        <div className="bold color-lightblue" style={styles.prompt}>{ this.state.prompt }</div>
-        <div style={styles.cmdline}>
+      <div className="color-black animate slide-down" style={this.getScopeStyle()}>
+        <div className="bold" style={this.getCmdlineStyle(styles.prompt)}>{ this.state.prompt }</div>
+        <div className="space" style={this.getCmdlineStyle({ ...styles.cmdline, ...Highlights.style(0) })}>
           {this.state.contents.map((content, i) => <div key={i}>{ this.renderCmdline(content) }</div>)}
           <div>{ this.renderCmdline(this.state.cmdline) }</div>
         </div>
