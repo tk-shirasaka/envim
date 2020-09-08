@@ -52,8 +52,8 @@ class Highlight {
 export class Highlights {
   private static hls: { [k: number]: Highlight } = {};
 
-  static setHighlight(id: number, hl: IHighlight) {
-    const alpha = id ? 1 : (100 - Setting.opacity) / 100;
+  static setHighlight(id: number, ui: boolean, hl: IHighlight) {
+    const alpha = ui ? (100 - Setting.opacity) / 100 : 1;
 
     Highlights.hls[id] = new Highlight(hl, alpha);
   }

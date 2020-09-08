@@ -22,7 +22,8 @@ const defaultSetting: ISetting = {
     ext_cmdline: true,
     ext_tabline: true,
     ext_popupmenu: true,
-    ext_messages: true
+    ext_messages: true,
+    ext_hlstate: true,
   },
   others: {
     notify: false,

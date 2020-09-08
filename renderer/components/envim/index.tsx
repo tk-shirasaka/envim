@@ -77,9 +77,9 @@ export class EnvimComponent extends React.Component<Props, States> {
     this.footer = { width: this.props.main.width, height: Math.min(this.editor.height, font.height * 15) };
   }
 
-  private onHighlight(highlights: {id: number, hl: IHighlight}[]) {
-    highlights.forEach(({id, hl}) => {
-      Highlights.setHighlight(id, hl);
+  private onHighlight(highlights: {id: number, ui: boolean, hl: IHighlight}[]) {
+    highlights.forEach(({id, ui, hl}) => {
+      Highlights.setHighlight(id, ui, hl);
     });
     Object.keys(this.state.grids).length === 0 && this.onWin(1, x2Col(this.editor.width), y2Row(this.editor.height), 0, 0, true)
   }

@@ -146,7 +146,7 @@ export class App {
   }
 
   private defaultColorsSet(foreground: number, background: number, special: number) {
-    Emit.send("highlight:set", [{id: 0, hl: {
+    Emit.send("highlight:set", [{id: 0, ui: true, hl: {
       foreground,
       background,
       special,
@@ -161,7 +161,7 @@ export class App {
   }
 
   private hlAttrDefine(highlights: any[]) {
-    highlights = highlights.map(([id, rgb]) => ({id, hl: rgb}));
+    highlights = highlights.map(([id, rgb, _, info]) => ({id, ui: info.pop()?.kind === "ui", hl: rgb }));
     Emit.send("highlight:set", highlights);
   }
 
