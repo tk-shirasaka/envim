@@ -135,7 +135,7 @@ export class EnvimComponent extends React.Component<Props, States> {
       <div style={this.main}>
         <TablineComponent {...this.header} />
         <div style={{...styles.editor, ...this.editor}}>
-          { Object.keys(this.state.grids).length === 0 ? <div className="color-bg" style={this.editor}>Loading...</div> : Object.keys(this.state.grids).map(grid => (
+          { Object.keys(this.state.grids).length === 0 ? <div className="color-black" style={this.editor}>Loading...</div> : Object.keys(this.state.grids).map(grid => (
             <EditorComponent key={grid} grid={+grid} mouse={this.props.mouse} style={this.state.grids[+grid]} />
           )) }
           <HistoryComponent {...this.footer} />
