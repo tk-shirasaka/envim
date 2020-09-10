@@ -14,8 +14,9 @@ export const icons = [
   { font: "", color: "blue-fg", name: "Docker", type: /docker/i },
   { font: "ﬥ", color: "gray-fg", name: "JSON", type: "json" },
   { font: "", color: "gray-fg", name: "Config", type: /(yaml)|(toml)/ },
+  { font: "", color: "yellow-fg", name: "SQL", type: "sql" },
   { font: "", color: "pink-fg", name: "Help", type: "help" },
-  { font: "", color: "gray-fg", name: "File", type: /.*/ },
+  { font: "", color: "gray-fg", name: "File", type: /.*/ },
 ];
 
 export const notificates = [
