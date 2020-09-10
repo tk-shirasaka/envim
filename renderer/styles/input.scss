@@ -15,7 +15,11 @@ input {
     border-bottom: solid 2px $color-gray;
 
     &:focus {
-      border-bottom: solid 2px $color-blue;
+      border-color: $color-blue;
+    }
+
+    &:hover {
+      border-color: lighten($color-blue, 10%);
     }
   }
 
@@ -36,6 +40,10 @@ input {
       content: "綠";
       color: $color-blue;
     }
+
+    &:hover:before {
+      color: lighten($color-blue, 10%);
+    }
   }
 
   &[type=checkbox] {
@@ -54,6 +62,10 @@ input {
     &:checked:before {
       content: "";
       color: $color-blue;
+    }
+
+    &:hover:before {
+      color: lighten($color-blue, 10%);
     }
   }
 
@@ -83,6 +95,10 @@ input {
       border-radius: 2px;
       background: $color-white;
       cursor: pointer;
+
+      &:hover {
+        background: $color-blue;
+      }
     }
   }
 }
