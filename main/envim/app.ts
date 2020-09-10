@@ -285,7 +285,7 @@ export class App {
 
   private popupmenuShow(items: string[][], selected: number, row: number, col: number, grid: number) {
     const height = Math.min(5, items.length);
-    const offset = this.grids[grid]?.getOffsetPos() || { row: 1, col: this.grids[1].getSize().width * 0.1 + 5 };
+    const offset = this.grids[grid]?.getOffsetPos() || { row: 1, col: this.grids[1].getSize().width * 0.1 + 3 };
     const parent = this.grids[1].getSize();
 
     row += offset.row;

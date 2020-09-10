@@ -29,11 +29,13 @@ const styles = {
     borderRadius: "0 0 4px 4px",
     boxShadow: "8px 8px 4px 0 rgba(0, 0, 0, 0.6)",
     pointerEvents,
-  },
-  prompt: {},
-  cmdline: {
-    marginLeft: 0,
     whiteSpace,
+  },
+  prompt: {
+    paddingRight: 0,
+  },
+  cmdline: {
+    paddingLeft: 0,
     wordBreak,
   },
 };
@@ -122,11 +124,12 @@ export class CmdlineComponent extends React.Component<Props, States> {
   }
 
   private getScopeStyle() {
-    return { top: -Setting.font.width, ...styles.scope };
+    const { width, height } = Setting.font;
+    return { top: -width, padding: width, paddingTop: height, ...styles.scope };
   }
 
   private getCmdlineStyle(style: object) {
-    return { margin: Setting.font.width, marginTop: Setting.font.height, padding: Setting.font.width, ...style };
+    return { padding: Setting.font.width, ...Highlights.style(0), ...style };
   }
 
   private renderCmdline(cmdline: States["cmdline"]) {
@@ -140,7 +143,7 @@ export class CmdlineComponent extends React.Component<Props, States> {
     return this.state.cmdline.length > 0 && (
       <div className="color-black animate slide-down" style={this.getScopeStyle()}>
         <div className="bold" style={this.getCmdlineStyle(styles.prompt)}>{ this.state.prompt }</div>
-        <div className="space" style={this.getCmdlineStyle({ ...styles.cmdline, ...Highlights.style(0) })}>
+        <div className="space" style={this.getCmdlineStyle(styles.cmdline)}>
           {this.state.contents.map((content, i) => <div key={i}>{ this.renderCmdline(content) }</div>)}
           <div>{ this.renderCmdline(this.state.cmdline) }</div>
         </div>
