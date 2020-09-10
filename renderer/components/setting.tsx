@@ -144,7 +144,7 @@ export class SettingComponent extends React.Component<Props, States> {
           <h3>Appearance</h3>
           <label>Font Size ({this.state.font.size}px)<input type="range" min="5" max="20" value={this.state.font.size} onChange={this.onChangeFont.bind(this)} /></label>
           {this.renderFontExample()}
-          <label>Transparent ({this.state.opacity}%)<input type="range" min="0" max="99" value={this.state.opacity} onChange={this.onChangeOpacity.bind(this)} /></label>
+          <label>Transparent ({this.state.opacity}%)<input type="range" min="0" max="50" value={this.state.opacity} onChange={this.onChangeOpacity.bind(this)} /></label>
 
           <h3>Options</h3>
           { Object.keys(this.state.options).map((key, i) => (
