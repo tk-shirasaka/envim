@@ -19,6 +19,7 @@ const position: "absolute" = "absolute";
 const styles = {
   notificate: {
     position,
+    zIndex: 10,
     right: 0,
     width: 300,
     maxHeight: "100%",

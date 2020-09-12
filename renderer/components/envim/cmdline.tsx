@@ -22,6 +22,7 @@ const wordBreak: "break-all" = "break-all";
 const styles = {
   scope: {
     position,
+    zIndex: 10,
     display: "flex",
     left: "10%",
     right: "10%",

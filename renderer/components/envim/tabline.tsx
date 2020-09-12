@@ -48,8 +48,8 @@ const styles = {
     whiteSpace,
   },
   active: {
+    zIndex: 10,
     borderBottom: "solid 2px #2295c5",
-    zIndex: 1,
   },
   notify: {
     maxWidth: 300,

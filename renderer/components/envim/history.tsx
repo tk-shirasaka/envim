@@ -24,6 +24,7 @@ const positionS: "sticky" = "sticky";
 const styles = {
   scope: {
     position: positionF,
+    zIndex: 10,
     bottom: 0,
     borderRadius: "4px 0 0 0",
     boxShadow: "8px -8px 4px 0 rgba(0, 0, 0, 0.6)",

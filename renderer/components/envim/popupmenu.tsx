@@ -18,6 +18,7 @@ interface States {
 const position: "absolute" = "absolute";
 const styles = {
   scope: {
+    zIndex: 10,
     position,
     overflow: "hidden",
     boxShadow: "8px 8px 4px 0 rgba(0, 0, 0, 0.6)",

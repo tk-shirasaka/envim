@@ -10,6 +10,7 @@ interface Props {
   grid: number;
   mouse: boolean;
   style: {
+    zIndex: number;
     width: number;
     height: number;
     top: number;

@@ -22,6 +22,7 @@ interface Props {
 
 interface States {
   grids: { [k: string]: {
+    zIndex: number;
     width: number;
     height: number;
     top: number;
@@ -81,7 +82,7 @@ export class EnvimComponent extends React.Component<Props, States> {
     highlights.forEach(({id, ui, hl}) => {
       Highlights.setHighlight(id, ui, hl);
     });
-    Object.keys(this.state.grids).length === 0 && this.onWin(1, x2Col(this.editor.width), y2Row(this.editor.height), 0, 0, true)
+    Object.keys(this.state.grids).length === 0 && this.onWin(1, x2Col(this.editor.width), y2Row(this.editor.height), 0, 0, true, 0)
   }
 
   private onHlGroup(groups: {id: number, name: string}[]) {
@@ -91,17 +92,17 @@ export class EnvimComponent extends React.Component<Props, States> {
   private onResize(grid: number, width: number, height: number) {
     if (this.state.grids[grid]) {
       const grids = this.state.grids;
-      const { top, left, cursor, display } = grids[grid];
+      const { top, left, cursor, display, zIndex } = grids[grid];
 
       [ height, width ] = [ row2Y(height), col2X(width) ];
 
-      grids[grid] = { width, height, top, left, cursor, display };
+      grids[grid] = { width, height, top, left, cursor, display, zIndex };
 
       this.setState({ grids });
     }
   }
 
-  private onWin(grid: number, width: number, height: number, top: number, left: number, focusable: boolean) {
+  private onWin(grid: number, width: number, height: number, top: number, left: number, focusable: boolean, zIndex: number) {
     const grids = this.state.grids;
     const cursor: "default" | "not-allowed" = focusable ? "default" : "not-allowed";
     const display = "block";
@@ -109,7 +110,7 @@ export class EnvimComponent extends React.Component<Props, States> {
     [ height, width ] = [ row2Y(height), col2X(width) ];
     [ top, left ] = [ row2Y(top), col2X(left) ];
 
-    grids[grid] = { width, height, top, left, cursor, display };
+    grids[grid] = { width, height, top, left, cursor, display, zIndex };
 
     this.setState({ grids });
   }

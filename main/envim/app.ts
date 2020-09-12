@@ -46,10 +46,10 @@ export class App {
 
         /** ext_multigrid **/
         case "win_pos":
-          r.forEach(r => this.winPos(r[0], "NW", 1, r[2], r[3], r[4], r[5], true));
+          r.forEach(r => this.winPos(r[0], "NW", 1, r[2], r[3], r[4], r[5], true, 1));
         break;
         case "win_float_pos":
-          r.forEach(r => this.winPos(r[0], r[2], r[3], r[4], r[5], 0, 0, r[6]));
+          r.forEach(r => this.winPos(r[0], r[2], r[3], r[4], r[5], 0, 0, r[6], 2));
         break;
         case "win_hide":
           r.forEach(r => this.winHide(r[0]));
@@ -212,7 +212,7 @@ export class App {
     });
   }
 
-  private winPos(grid: number, anchor: string, pgrid: number, row: number, col: number, width: number, height: number, focusable: boolean) {
+  private winPos(grid: number, anchor: string, pgrid: number, row: number, col: number, width: number, height: number, focusable: boolean, zIndex: number) {
     if (this.grids[grid] && this.grids[pgrid]) {
       const current = this.grids[grid].getSize();
       width = width || current.width;
@@ -222,7 +222,7 @@ export class App {
       const left = anchor[1] === "W" ? col : col - width;
 
       this.grids[grid].setOffsetPos(top, left);
-      Emit.send("win:pos", grid, width, height, top, left, focusable);
+      Emit.send("win:pos", grid, width, height, top, left, focusable, zIndex);
     }
   }
 
