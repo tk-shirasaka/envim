@@ -28,7 +28,7 @@ const styles = {
     justifyContent: "space-between",
   },
   column: {
-    padding: "1px 4px 0",
+    padding: "0 4px",
   },
 };
 
@@ -90,12 +90,13 @@ export class PopupmenuComponent extends React.Component<Props, States> {
   }
 
   private getScopeStyle() {
-    const { size } = Setting.font;
+    const { size, height } = Setting.font;
     return {
       ...styles.scope,
       top: row2Y(this.state.row),
-      left: col2X(this.state.col),
-      fontSize: size - 1,
+      left: col2X(this.state.col) - 4,
+      fontSize: size,
+      lineHeight: `${height}px`,
     };
   }
 
