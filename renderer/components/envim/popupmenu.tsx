@@ -58,7 +58,7 @@ export class PopupmenuComponent extends React.Component<Props, States> {
   private sendPum(state: States) {
     const { row, col } = state;
     const items = this.getItems(state);
-    const width = Math.max(...items.map(({ word, menu, kind }) => [word, menu, kind].filter(str => str).join(" ").length))
+    const width = Math.max(...items.map(({ word, menu, kind }) => [word, menu, kind].filter(str => str).join(" ").length)) + 1;
 
     Emit.send("envim:api", "nvim_ui_pum_set_bounds", [width, items.length, row, col]);
   }
