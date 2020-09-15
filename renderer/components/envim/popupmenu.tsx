@@ -16,19 +16,18 @@ interface States {
 }
 
 const position: "absolute" = "absolute";
+const whiteSpace: "break-spaces" = "break-spaces";
 const styles = {
   scope: {
     zIndex: 10,
     position,
     overflow: "hidden",
     boxShadow: "8px 8px 4px 0 rgba(0, 0, 0, 0.6)",
+    whiteSpace,
   },
   line: {
     display: "flex",
     justifyContent: "space-between",
-  },
-  column: {
-    padding: "0 4px",
   },
 };
 
@@ -58,7 +57,7 @@ export class PopupmenuComponent extends React.Component<Props, States> {
   private sendPum(state: States) {
     const { row, col } = state;
     const items = this.getItems(state);
-    const width = Math.max(...items.map(({ word, menu, kind }) => [word, menu, kind].filter(str => str).join(" ").length)) + 1;
+    const width = Math.max(...items.map(({ word, menu, kind }) => [word, menu, kind].join("").length)) + 5;
 
     Emit.send("envim:api", "nvim_ui_pum_set_bounds", [width, items.length, row, col]);
   }
@@ -90,11 +89,11 @@ export class PopupmenuComponent extends React.Component<Props, States> {
   }
 
   private getScopeStyle() {
-    const { size, height } = Setting.font;
+    const { size, height, width } = Setting.font;
     return {
       ...styles.scope,
       top: row2Y(this.state.row),
-      left: col2X(this.state.col) - 4,
+      left: col2X(this.state.col) - width,
       fontSize: size,
       lineHeight: `${height}px`,
     };
@@ -115,13 +114,14 @@ export class PopupmenuComponent extends React.Component<Props, States> {
   render() {
     const { start } = this.state;
     const items = this.getItems(this.state);
+    const column = { padding: `0 ${Setting.font.width}px` };
 
     return items.length === 0 ? null : (
       <div className="animate fade-in" style={this.getScopeStyle()}>
         {items.map(({ word, kind, menu }, i) => (
           <div className={`color-black ${this.state.selected === i + start ? "active" : "clickable"}`} style={styles.line} onClick={() => this.onItem(i + start)} key={i}>
-            <div style={styles.column}>{ word } { menu }</div>
-            <div className={this.getKindStyle(kind)} style={styles.column}>{ kind }</div>
+            <div style={column}>{ word } { menu }</div>
+            <div className={this.getKindStyle(kind)} style={column}>{ kind }</div>
           </div>
         ))}
       </div>
