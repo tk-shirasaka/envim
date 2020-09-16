@@ -215,11 +215,12 @@ export class App {
   private winPos(grid: number, anchor: string, pgrid: number, row: number, col: number, width: number, height: number, focusable: boolean, zIndex: number) {
     if (this.grids[grid] && this.grids[pgrid]) {
       const current = this.grids[grid].getSize();
+      const offset = this.grids[pgrid].getOffsetPos();
       width = width || current.width;
       height = height || current.height;
 
-      const top = anchor[0] === "N" ? row : row - height;
-      const left = anchor[1] === "W" ? col : col - width;
+      const top = offset.row + (anchor[0] === "N" ? row : row - height);
+      const left = offset.col + (anchor[1] === "W" ? col : col - width);
 
       this.grids[grid].setOffsetPos(top, left);
       Emit.send("win:pos", grid, width, height, top, left, focusable, zIndex);
