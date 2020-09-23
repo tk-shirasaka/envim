@@ -47,10 +47,11 @@ const styles = {
 };
 
 export class EnvimComponent extends React.Component<Props, States> {
-   private main: { fontSize: number; lineHeight: string; } = { fontSize: 0, lineHeight: "" };
-   private editor: { width: number; height: number; } = { width: 0, height: 0 };
-   private header: { width: number; height: number; } = { width: 0, height: 0 };
-   private footer: { width: number; height: number; } = { width: 0, height: 0 };
+  private timer: number = 0;
+  private main: { fontSize: number; lineHeight: string; } = { fontSize: 0, lineHeight: "" };
+  private editor: { width: number; height: number; } = { width: 0, height: 0 };
+  private header: { width: number; height: number; } = { width: 0, height: 0 };
+  private footer: { width: number; height: number; } = { width: 0, height: 0 };
 
   constructor(props: Props) {
     super(props);
@@ -64,6 +65,14 @@ export class EnvimComponent extends React.Component<Props, States> {
     Emit.on("win:hide", this.hideWin.bind(this));
     Emit.on("win:close", this.closeWin.bind(this));
     Emit.send("envim:resize", x2Col(this.editor.width), y2Row(this.editor.height));
+  }
+
+  componentDidUpdate() {
+    this.setSize();
+    this.timer && clearTimeout(this.timer)
+    this.timer = +setTimeout(() => {
+      Emit.send("envim:resize", x2Col(this.editor.width), y2Row(this.editor.height));
+    }, 200);
   }
 
   componentWillUnmount() {

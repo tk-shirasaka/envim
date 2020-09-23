@@ -73,7 +73,7 @@ export class Envim {
     const options: { [k: string]: boolean } = { ...{ ext_linegrid: true }, ...this.state.options };
 
     if (!this.state.attached) {
-    this.onApi("nvim_ui_attach", [width, height, options])
+      this.onApi("nvim_ui_attach", [width, height, options])
     } else if (this.state.width !== width || this.state.height !== height) {
       options.ext_multigrid
         ? this.nvim.uiTryResizeGrid(1, width, height)

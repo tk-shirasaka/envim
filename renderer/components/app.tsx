@@ -13,18 +13,15 @@ interface Props {
 
 interface States {
   init: boolean;
-  resize: boolean;
   font: { width: number; height: number; size: number; };
   window: { width: number; height: number; };
   mouse: boolean;
 }
 
 export class AppComponent extends React.Component<Props, States> {
-  private timer: number = 0;
-
   constructor(props: Props) {
     super(props);
-    this.state = { ...Setting.get(), init: false, resize: false, window: { width: window.innerWidth, height: window.innerHeight }, mouse: false };
+    this.state = { ...Setting.get(), init: false, window: { width: window.innerWidth, height: window.innerHeight }, mouse: false };
 
     window.addEventListener("resize", this.onResize.bind(this));
     Emit.on("app:start", this.onStart.bind(this));
@@ -44,12 +41,7 @@ export class AppComponent extends React.Component<Props, States> {
   }
 
   private onResize() {
-    this.timer && clearTimeout(this.timer)
-    this.timer = +setTimeout(() => {
-      this.setState({ resize: false });
-      this.timer = 0;
-    }, 200);
-    this.setState({ resize: true, window: { width: window.innerWidth, height: window.innerHeight } });
+    this.setState({ window: { width: window.innerWidth, height: window.innerHeight } });
   }
 
   private onStart() {
@@ -72,7 +64,6 @@ export class AppComponent extends React.Component<Props, States> {
   private renderContent() {
     const { main } = this.getSize();
 
-    if (this.state.resize) return <div className="color-black" style={this.state.window}></div>;
     return this.state.init
       ? <EnvimComponent main={main} {...this.state} />
       : <SettingComponent {...main} />;
