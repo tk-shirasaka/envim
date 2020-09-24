@@ -22,7 +22,8 @@ export interface IHighlight {
 export interface ITab {
   name: string;
   active: boolean;
-  type: string;
+  filetype: string;
+  buftype: string;
   edit: boolean;
   protect: boolean;
 }

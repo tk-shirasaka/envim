@@ -133,7 +133,7 @@ export class TablineComponent extends React.Component<Props, States> {
   }
 
   private renderName(tab: ITab) {
-    const icon = icons.filter(icon => tab.type.search(icon.type) >= 0).shift();
+    const icon = icons.filter(icon => tab.filetype.search(icon.type) >= 0 || tab.buftype.search(icon.type) >= 0).shift();
     return icon && <IconComponent color={icon.color} style={styles.name} font={icon.font} text={tab.name.replace(/([^\/])[^\/]*\//g, "$1/")} />;
   }
 

@@ -239,16 +239,16 @@ export class App {
     const next: ITab[] = [];
     for (let i = 0; i < tabs.length; i++) {
       const { tab, name } = tabs[i];
-      try {
+
+      if (tab && await tab.valid) {
         const buffer = await tab.window.buffer;
         const active = current.data === tab.data;
-        const type = await current.request("nvim_buf_get_option", [buffer.data, "filetype"]);
+        const filetype = await current.request("nvim_buf_get_option", [buffer.data, "filetype"]);
+        const buftype = await current.request("nvim_buf_get_option", [buffer.data, "buftype"]);
         const edit = await current.request("nvim_buf_get_option", [buffer.data, "modified"]);
         const protect = !await current.request("nvim_buf_get_option", [buffer.data, "modifiable"]);
 
-        next.push({ name, active, type, edit, protect });
-      } catch(e) {
-        Emit.share("envim:log", e);
+        next.push({ name, active, filetype, buftype, edit, protect });
       }
     }
     const qf = (await current.request("nvim_call_function", ["getqflist", [{size: 0}]])).size;
