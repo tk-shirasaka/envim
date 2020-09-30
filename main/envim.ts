@@ -11,10 +11,11 @@ import { Clipboard } from "./envim/clipboard";
 export class Envim {
   private nvim = new NeovimClient;
   private app = new App;
-  private state: { attached: boolean; width: number; height: number, options: { [k: string]: boolean } } = { attached: false, width: 0, height: 0, options: {} };
+  private state: { width: number; height: number, options: { [k: string]: boolean } } = { width: 0, height: 0, options: {} };
   private connect: { process?: ChildProcess; socket?: Socket; } = {}
 
   constructor() {
+    Emit.on("envim:connect", this.onConnect.bind(this));
     Emit.on("envim:attach", this.onAttach.bind(this));
     Emit.on("envim:resize", this.onResize.bind(this));
     Emit.on("envim:api", this.onApi.bind(this));
@@ -26,7 +27,7 @@ export class Envim {
     process.on("unhandledRejection", this.onError.bind(this));
   }
 
-  private async onAttach(type: string, value: string, options: { [k: string]: boolean }) {
+  private async onConnect(type: string, value: string, options: { [k: string]: boolean }) {
     let reader, writer;
 
     switch (type) {
@@ -69,17 +70,22 @@ export class Envim {
     }
   }
 
-  private onResize(width: number, height: number) {
+  private onAttach(width: number, height: number) {
     const options: { [k: string]: boolean } = { ...{ ext_linegrid: true }, ...this.state.options };
 
-    if (!this.state.attached) {
-      this.onApi("nvim_ui_attach", [width, height, options])
-    } else if (this.state.width !== width || this.state.height !== height) {
+    this.onApi("nvim_ui_attach", [width, height, options])
+    this.state = { width, height, options };
+  }
+
+  private onResize(grid: number, width: number, height: number) {
+    const options: { [k: string]: boolean } = { ...{ ext_linegrid: true }, ...this.state.options };
+
+    if (this.state.width !== width || this.state.height !== height) {
       options.ext_multigrid
-        ? this.nvim.uiTryResizeGrid(1, width, height)
+        ? this.nvim.uiTryResizeGrid(grid, width, height)
         : this.nvim.uiTryResize(width, height);
     }
-    this.state = { attached: true, width, height, options };
+    this.state = { width, height, options };
   }
 
   private async onApi(fname: string, args: any[]) {
@@ -106,7 +112,6 @@ export class Envim {
   }
 
   private onDisconnect() {
-    this.state.attached = false;
     Emit.send("app:stop");
   }
 

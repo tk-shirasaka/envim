@@ -25,9 +25,6 @@ export class App {
         case "hl_attr_define":
           this.hlAttrDefine(r);
         break;
-        case "hl_group_set":
-          this.hlGroupSet(r);
-        break;
         case "grid_line":
           r.forEach(r => this.gridLine(r[0], r[1], r[2], r[3]));
         break;
@@ -163,11 +160,6 @@ export class App {
   private hlAttrDefine(highlights: any[]) {
     highlights = highlights.map(([id, rgb, _, info]) => ({id, ui: info.pop()?.kind === "ui", hl: rgb }));
     Emit.send("highlight:set", highlights);
-  }
-
-  private hlGroupSet(hlgroup: any[]) {
-    hlgroup = hlgroup.map(([name, id]) => ({id: +id, name}));
-    Emit.send("highlight:name", hlgroup);
   }
 
   private gridLine(grid: number, row: number, col: number, cells: string[][]) {

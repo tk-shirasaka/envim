@@ -2,7 +2,6 @@ import { IHighlight } from "common/interface";
 import { Setting } from "./setting";
 
 class Highlight {
-  public name: string = "";
   public foreground: string = "";
   public background: string = "";
   public special: string = "";
@@ -56,10 +55,6 @@ export class Highlights {
     const alpha = ui ? (100 - Setting.opacity) / 100 : 1;
 
     Highlights.hls[id] = new Highlight(hl, alpha);
-  }
-
-  static setName(id: number, name: string) {
-    Highlights.hls[id].name = name;
   }
 
   static color(id: number, type: "foreground" | "background" | "special") {

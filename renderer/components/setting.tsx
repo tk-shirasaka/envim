@@ -96,7 +96,7 @@ export class SettingComponent extends React.Component<Props, States> {
   private onSubmit(e: FormEvent) {
     e.stopPropagation();
     e.preventDefault();
-    Emit.send("envim:attach", this.state.type, this.state.path, this.state.options);
+    Emit.send("envim:connect", this.state.type, this.state.path, this.state.options);
   }
 
   private getStyle() {

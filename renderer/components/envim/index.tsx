@@ -59,24 +59,23 @@ export class EnvimComponent extends React.Component<Props, States> {
     this.setSize();
     this.state = { grids: {} };
     Emit.on("highlight:set", this.onHighlight.bind(this));
-    Emit.on("highlight:name", this.onHlGroup.bind(this));
     Emit.on("grid:resize", this.onResize.bind(this));
     Emit.on("win:pos", this.onWin.bind(this));
     Emit.on("win:hide", this.hideWin.bind(this));
     Emit.on("win:close", this.closeWin.bind(this));
-    Emit.send("envim:resize", x2Col(this.editor.width), y2Row(this.editor.height));
+    Emit.send("envim:attach", x2Col(this.editor.width), y2Row(this.editor.height));
   }
 
   componentDidUpdate() {
     this.setSize();
     this.timer && clearTimeout(this.timer)
     this.timer = +setTimeout(() => {
-      Emit.send("envim:resize", x2Col(this.editor.width), y2Row(this.editor.height));
+      Emit.send("envim:resize", 1, x2Col(this.editor.width), y2Row(this.editor.height));
     }, 200);
   }
 
   componentWillUnmount() {
-    Emit.clear(["highlight:set", "highlight:name", "grid:resize", "win:pos", "win:hide", "win:close"]);
+    Emit.clear(["highlight:set", "grid:resize", "win:pos", "win:hide", "win:close"]);
   }
 
   private setSize() {
@@ -92,10 +91,6 @@ export class EnvimComponent extends React.Component<Props, States> {
       Highlights.setHighlight(id, ui, hl);
     });
     Object.keys(this.state.grids).length === 0 && this.onWin(1, x2Col(this.editor.width), y2Row(this.editor.height), 0, 0, true, 0)
-  }
-
-  private onHlGroup(groups: {id: number, name: string}[]) {
-    groups.forEach(({id, name}) => Highlights.setName(id, name));
   }
 
   private onResize(grid: number, width: number, height: number) {
