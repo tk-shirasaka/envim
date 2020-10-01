@@ -16,8 +16,6 @@ const defaultSetting: ISetting = {
   font: { size: 16, width: 8, height: 17 },
   opacity: 0,
   options: {
-    rgb: true,
-    override: true,
     ext_multigrid: true,
     ext_cmdline: true,
     ext_tabline: true,
@@ -26,7 +24,7 @@ const defaultSetting: ISetting = {
     ext_hlstate: true,
   },
   others: {
-    notify: false,
+    notify: true,
   },
 };
 

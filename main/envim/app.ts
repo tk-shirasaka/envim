@@ -115,12 +115,6 @@ export class App {
         break;
 
         /** default **/
-        case "mouse_on":
-          this.mouse(true);
-        break;
-        case "mouse_off":
-          this.mouse(false);
-        break;
         case "busy_start":
           this.busy(true);
         break;
@@ -232,7 +226,7 @@ export class App {
     for (let i = 0; i < tabs.length; i++) {
       const { tab, name } = tabs[i];
 
-      if (tab && await tab.valid) {
+      if (tab && await tab.valid && await tab.window.valid) {
         const buffer = await tab.window.buffer;
         const active = current.data === tab.data;
         const filetype = await current.request("nvim_buf_get_option", [buffer.data, "filetype"]);
@@ -315,10 +309,6 @@ export class App {
     });
 
     Emit.send(`messages:${group}`, this.messages.get(group));
-  }
-
-  private mouse(mouse: boolean) {
-    Emit.send("envim:mouse", mouse);
   }
 
   private busy(busy: boolean) {

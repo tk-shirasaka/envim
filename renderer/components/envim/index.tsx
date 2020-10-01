@@ -16,8 +16,8 @@ import { NotificateComponent } from "./notificate";
 import { InputComponent } from "./input";
 
 interface Props {
-  main: { width: number; height: number; };
-  mouse: boolean;
+  width: number;
+  height: number;
 }
 
 interface States {
@@ -81,9 +81,9 @@ export class EnvimComponent extends React.Component<Props, States> {
   private setSize() {
     const font  = Setting.font;
     this.main = { fontSize: font.size, lineHeight: `${font.height}px` };
-    this.editor = { width: this.props.main.width, height: row2Y(y2Row(this.props.main.height - 8) - 1) };
-    this.header = { width: this.props.main.width, height: this.props.main.height - this.editor.height };
-    this.footer = { width: this.props.main.width, height: Math.min(this.editor.height, font.height * 15) };
+    this.editor = { width: this.props.width, height: row2Y(y2Row(this.props.height - 8) - 1) };
+    this.header = { width: this.props.width, height: this.props.height - this.editor.height };
+    this.footer = { width: this.props.width, height: Math.min(this.editor.height, font.height * 15) };
   }
 
   private onHighlight(highlights: {id: number, ui: boolean, hl: IHighlight}[]) {
@@ -99,7 +99,6 @@ export class EnvimComponent extends React.Component<Props, States> {
       const { top, left, cursor, display, zIndex } = grids[grid];
 
       [ height, width ] = [ row2Y(height), col2X(width) ];
-
       grids[grid] = { width, height, top, left, cursor, display, zIndex };
 
       this.setState({ grids });
@@ -141,7 +140,7 @@ export class EnvimComponent extends React.Component<Props, States> {
         <TablineComponent {...this.header} />
         <div style={{...styles.editor, ...this.editor}}>
           { Object.keys(this.state.grids).length === 0 ? <div className="color-black" style={this.editor}>Loading...</div> : Object.keys(this.state.grids).map(grid => (
-            <EditorComponent key={grid} grid={+grid} mouse={this.props.mouse} style={this.state.grids[+grid]} />
+            <EditorComponent key={grid} grid={+grid} style={this.state.grids[+grid]} />
           )) }
           <HistoryComponent {...this.footer} />
           <CmdlineComponent />

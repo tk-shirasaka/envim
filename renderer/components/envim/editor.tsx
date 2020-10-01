@@ -8,7 +8,6 @@ import { y2Row, x2Col } from "../../utils/size";
 
 interface Props {
   grid: number;
-  mouse: boolean;
   style: {
     zIndex: number;
     width: number;
@@ -81,7 +80,7 @@ export class EditorComponent extends React.Component<Props, States> {
 
     button === "left" && e.stopPropagation();
     button === "left" && e.preventDefault();
-    this.props.mouse && Emit.send("envim:mouse", this.props.grid, button, action, row, col);
+    Emit.send("envim:mouse", this.props.grid, button, action, row, col);
   }
 
   private onMouseDown(e: MouseEvent) {

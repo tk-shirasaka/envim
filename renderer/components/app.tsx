@@ -15,19 +15,17 @@ interface States {
   init: boolean;
   font: { width: number; height: number; size: number; };
   window: { width: number; height: number; };
-  mouse: boolean;
 }
 
 export class AppComponent extends React.Component<Props, States> {
   constructor(props: Props) {
     super(props);
-    this.state = { ...Setting.get(), init: false, window: { width: window.innerWidth, height: window.innerHeight }, mouse: false };
+    this.state = { ...Setting.get(), init: false, window: { width: window.innerWidth, height: window.innerHeight } };
 
     window.addEventListener("resize", this.onResize.bind(this));
     Emit.on("app:start", this.onStart.bind(this));
     Emit.on("app:stop", this.onStop.bind(this));
     Emit.on("setting:font", this.onFont.bind(this));
-    Emit.on("envim:mouse", this.onMouse.bind(this));
   }
 
   private getSize() {
@@ -49,7 +47,7 @@ export class AppComponent extends React.Component<Props, States> {
   }
 
   private onStop() {
-    this.setState({ init: false, mouse: false });
+    this.setState({ init: false });
   }
 
   private onFont() {
@@ -57,25 +55,16 @@ export class AppComponent extends React.Component<Props, States> {
     this.setState({ font });
   }
 
-  private onMouse(mouse: boolean) {
-    this.setState({ mouse });
-  }
-
-  private renderContent() {
-    const { main } = this.getSize();
-
-    return this.state.init
-      ? <EnvimComponent main={main} {...this.state} />
-      : <SettingComponent {...main} />;
-  }
-
   render() {
-    const { side } = this.getSize();
+    const { main, side } = this.getSize();
 
     return (
       <div style={{ ...this.state.window, display: "flex" }}>
         <SidebarComponent side={side} />
-        {this.renderContent()}
+        { this.state.init
+            ? <EnvimComponent {...main} />
+            : <SettingComponent {...main} />
+        }
       </div>
     );
   }

@@ -11,7 +11,7 @@ import { Clipboard } from "./envim/clipboard";
 export class Envim {
   private nvim = new NeovimClient;
   private app = new App;
-  private state: { width: number; height: number, options: { [k: string]: boolean } } = { width: 0, height: 0, options: {} };
+  private options: { [k: string]: boolean }  = {};
   private connect: { process?: ChildProcess; socket?: Socket; } = {}
 
   constructor() {
@@ -43,7 +43,7 @@ export class Envim {
     }
 
     if (reader && writer) {
-      this.state.options = options;
+      this.options = options;
       this.app = new App;
       this.nvim = new NeovimClient;
       this.nvim.attach({ reader, writer });
@@ -71,21 +71,13 @@ export class Envim {
   }
 
   private onAttach(width: number, height: number) {
-    const options: { [k: string]: boolean } = { ...{ ext_linegrid: true }, ...this.state.options };
+    const options: { [k: string]: boolean } = { ...{ ext_linegrid: true }, ...this.options };
 
     this.onApi("nvim_ui_attach", [width, height, options])
-    this.state = { width, height, options };
   }
 
   private onResize(grid: number, width: number, height: number) {
-    const options: { [k: string]: boolean } = { ...{ ext_linegrid: true }, ...this.state.options };
-
-    if (this.state.width !== width || this.state.height !== height) {
-      options.ext_multigrid
-        ? this.nvim.uiTryResizeGrid(grid, width, height)
-        : this.nvim.uiTryResize(width, height);
-    }
-    this.state = { width, height, options };
+    this.nvim.uiTryResizeGrid(grid, width, height)
   }
 
   private async onApi(fname: string, args: any[]) {
