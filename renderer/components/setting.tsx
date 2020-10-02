@@ -31,7 +31,7 @@ const styles = {
     boxSizing,
   },
   logo: {
-    fontSize: "4em",
+    fontSize: "2em",
     lineHeight: "1em",
     margin: "0 6px",
   },

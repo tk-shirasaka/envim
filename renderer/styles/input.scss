@@ -30,7 +30,6 @@ input {
     &:before {
       display: inline-block;
       margin: -4px;
-      font-size: 1.5rem;
       cursor: pointer;
       content: "祿";
       color: $color-white;
@@ -53,7 +52,6 @@ input {
     &:before {
       display: inline-block;
       margin: -4px;
-      font-size: 1.5rem;
       cursor: pointer;
       content: "";
       color: $color-white;

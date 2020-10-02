@@ -64,7 +64,7 @@ export class Context2D {
       const reverse = (this.cursor.row === cell.row && this.cursor.col === cell.col);
       this.fontStyle(cell.hl);
       this.style(cell.hl, reverse ? "background" : "foreground");
-      this.ctx.fillText(cell.text, x, y, cell.width * this.font.width);
+      this.ctx.fillText(cell.text, x, y);
     });
   }
 }

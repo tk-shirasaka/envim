@@ -1,28 +1,28 @@
 @font-face {
-  font-family: "Ricty Diminished";
-  src: url(fonts/RictyDiminished-Regular.ttf);
+  font-family: "Normal";
+  src: url(fonts/HackGenNerd-Regular.ttf);
 }
 
 @font-face {
   font-family: "Nerd Font";
-  src: url(fonts/NerdFont-Regular.otf);
+  src: url(fonts/HackGenNerd-Regular.ttf);
 }
 
 @font-face {
-  font-family: "Ricty Diminished Bold";
-  src: url(fonts/RictyDiminished-Bold.ttf);
+  font-family: "Normal Bold";
+  src: url(fonts/HackGenNerd-Bold.ttf);
 }
 
 @font-face {
   font-family: "Nerd Font Bold";
-  src: url(fonts/NerdFont-Bold.otf);
+  src: url(fonts/HackGenNerd-Bold.ttf);
 }
 
 h1, h2, h3, h4, h5, h6, .bold {
-  font-family: "Ricty Diminished Bold", "Nerd Font Bold" !important;
+  font-family: "Normal Bold", "Nerd Font Bold" !important;
 
   * {
-    font-family: "Ricty Diminished Bold", "Nerd Font Bold" !important;
+    font-family: "Normal Bold", "Nerd Font Bold" !important;
   }
 }
 
@@ -31,7 +31,7 @@ h1, h2, h3, h4, h5, h6, .bold {
 }
 
 :not(h1):not(h2):not(h3):not(h4):not(h5):not(h6):not(.bold) {
-  font-family: "Ricty Diminished", "Nerd Font";
+  font-family: "Normal", "Nerd Font";
   font-style: normal;
   font-size: inherit;
   line-height: inherit;
