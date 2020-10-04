@@ -164,10 +164,10 @@ export class TablineComponent extends React.Component<Props, States> {
             { this.renderName(tab) }
             { tab.edit && <IconComponent color="gray-fg" style={styles.icon} font="" /> }
             { tab.protect && <IconComponent color="yellow-fg" style={styles.icon} font="" /> }
-            <IconComponent color="red-fg" style={styles.icon} font="" onClick={e => this.runCommand(this.state.tabs.length > 1 ? `tabclose! ${i + 1}` : "quit", e)} />
+            <IconComponent color="red-fg" style={styles.icon} font="" onClick={e => this.runCommand(this.state.tabs.length > 1 ? `tabclose! ${i + 1}` : "quit", e)} />
           </div>
         ))}
-        { this.state.tabs.length > 0 && <IconComponent color="green-fg" style={this.getStyle(styles.icon)} font="" onClick={e => this.runCommand("tabnew", e)} /> }
+        { this.state.tabs.length > 0 && <IconComponent color="green-fg" style={this.getStyle(styles.icon)} font="" onClick={e => this.runCommand("tabnew", e)} /> }
         <div className="space dragable" />
         { this.state.ruler && this.renderNotify(this.state.ruler, false) }
         { this.state.command && this.renderNotify(this.state.command, false) }
