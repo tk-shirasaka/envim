@@ -225,9 +225,9 @@ export class App {
     const next: ITab[] = [];
     for (let i = 0; i < tabs.length; i++) {
       const { tab, name } = tabs[i];
+      const buffer = await tab.window.buffer.catch(() => null);
 
-      if (tab && await tab.valid && await tab.window.valid) {
-        const buffer = await tab.window.buffer;
+      if (buffer) {
         const active = current.data === tab.data;
         const filetype = await current.request("nvim_buf_get_option", [buffer.data, "filetype"]);
         const buftype = await current.request("nvim_buf_get_option", [buffer.data, "buftype"]);
