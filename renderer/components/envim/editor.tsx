@@ -39,7 +39,6 @@ export class EditorComponent extends React.Component<Props, States> {
   constructor(props: Props) {
     super(props);
 
-    Emit.on(`cursor:${this.props.grid}`, this.onCursor.bind(this));
     Emit.on(`clear:${this.props.grid}`, this.onClear.bind(this));
     Emit.on(`flush:${this.props.grid}`, this.onFlush.bind(this));
   }
@@ -63,7 +62,7 @@ export class EditorComponent extends React.Component<Props, States> {
   }
 
   componentWillUnmount() {
-    Emit.clear([`cursor:${this.props.grid}`, `clear:${this.props.grid}`, `flush:${this.props.grid}`]);
+    Emit.clear([`clear:${this.props.grid}`, `flush:${this.props.grid}`]);
   }
 
   shouldComponentUpdate(props: Props) {
@@ -104,10 +103,6 @@ export class EditorComponent extends React.Component<Props, States> {
 
   private onMouseWheel(e: WheelEvent) {
     this.onMouseEvent(e, "wheel", e.deltaY < 0 ? "up" : "down");
-  }
-
-  private onCursor(cursor: { row: number, col: number, hl: number }) {
-    this.renderer?.setCursor(cursor);
   }
 
   private onClear() {

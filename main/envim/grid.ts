@@ -1,12 +1,10 @@
 import { ICell } from "common/interface";
 
 export class Grid {
-  private busy: boolean = false;
   private lines: ICell[][] = [];
   private flush: { [k: string]: ICell } = {};
   private width :number = 0;
   private height: number = 0;
-  private cursor: { row: number, col: number } = { row: -1, col: -1 };
   private offset: { row: number, col: number } = { row: 0, col: 0 };
 
   constructor(width :number, height: number) {
@@ -36,23 +34,12 @@ export class Grid {
     return { width: this.width, height: this.height };
   }
 
-  setCursorPos(row: number, col: number) {
-    const prev = this.getCell(this.cursor.row, this.cursor.col);
-    const cell = this.getCell(row, col);
+  getCursorPos(row: number, col: number) {
+    const { width, hl } = this.getCell(row, col);
+    row += this.offset.row;
+    col += this.offset.col;
 
-    this.flush[`${prev.row},${prev.col}`] = prev;
-    this.flush[`${cell.row},${cell.col}`] = cell;
-    this.cursor = { row, col };
-
-    return this.busy ? { col: -1, row: -1, hl: 0 } : { col, row, hl: cell.hl };
-  }
-
-  getCursorPos() {
-    const { hl } = this.getCell(this.cursor.row, this.cursor.col);
-    const row = this.cursor.row + this.offset.row;
-    const col = this.cursor.col + this.offset.col;
-
-    return { col, row, hl };
+    return { col, row, width, hl };
   }
 
   setOffsetPos(row: number, col: number) {
@@ -112,9 +99,5 @@ export class Grid {
     for (let i = row; i < this.height; i++) {
       this.getLine(offset + row + i * direction, 0, fn);
     }
-  }
-
-  setBusy(busy: boolean) {
-    this.busy = busy
   }
 }

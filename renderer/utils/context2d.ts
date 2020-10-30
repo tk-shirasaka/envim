@@ -4,7 +4,6 @@ import { Highlights } from "./highlight";
 import { Setting } from "./setting";
 
 export class Context2D {
-  private cursor: { row: number, col: number, hl: number } = { row: -1, col: -1, hl: 0 };
   private font: { size: number; width: number; height: number; } = { size: 0, width: 0, height: 0 };
 
   constructor(
@@ -36,14 +35,10 @@ export class Context2D {
     }
   }
 
-  private rect(x: number, y: number, width: number, hl: number, reverse: boolean) {
+  private rect(x: number, y: number, width: number, hl: number) {
     this.ctx.clearRect(x, y, width * this.font.width, this.font.height);
-    this.style(hl, reverse ? "foreground" : "background");
+    this.style(hl, "background");
     this.ctx.fillRect(x, y, width * this.font.width, this.font.height);
-  }
-
-  setCursor(cursor: { row: number, col: number, hl: number }) {
-    this.cursor = cursor;
   }
 
   clear(width: number, height: number) {
@@ -55,16 +50,14 @@ export class Context2D {
   flush(cells: ICell[]) {
     cells.forEach(cell => {
       const [y, x] = [cell.row * this.font.height, cell.col * this.font.width];
-      const reverse = (this.cursor.row === cell.row && this.cursor.col === cell.col);
-      this.rect(x, y, cell.width, cell.hl, reverse);
+      this.rect(x, y, cell.width, cell.hl);
       this.underline(x, y, cell.width, cell.hl);
     });
     cells.forEach(cell => {
       const [y, x] = [cell.row * this.font.height, cell.col * this.font.width];
-      const reverse = (this.cursor.row === cell.row && this.cursor.col === cell.col);
       this.fontStyle(cell.hl);
-      this.style(cell.hl, reverse ? "background" : "foreground");
-      this.ctx.fillText(cell.text, x, y);
+      this.style(cell.hl, "foreground");
+      this.ctx.fillText(cell.text, x, y + 1);
     });
   }
 }
