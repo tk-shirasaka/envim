@@ -54,6 +54,8 @@ export class Context2D {
       this.underline(x, y, cell.width, cell.hl);
     });
     cells.forEach(cell => {
+      if (cell.text === ' ') return;
+
       const [y, x] = [cell.row * this.font.height, cell.col * this.font.width];
       this.fontStyle(cell.hl);
       this.style(cell.hl, "foreground");
