@@ -7,6 +7,9 @@ export const setMenu = () => {
       submenu: [
         { role: "about" },
         { type: "separator" },
+        { role: "copy" },
+        { role: "paste" },
+        { type: "separator" },
         { role: "togglefullscreen" },
         { role: "reload" },
       ],

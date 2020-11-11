@@ -45,12 +45,11 @@ export class HistoryComponent extends React.Component<Props, States> {
     super(props);
 
     this.state = { filter: [], messages: [] };
-    Emit.on("envim:focus", this.onClose.bind(this));
     Emit.on("messages:history", this.onHistory.bind(this));
   }
 
   componentWillUnmount() {
-    Emit.clear(["envim:focus", "messages:history"]);
+    Emit.clear(["messages:history"]);
   }
 
   private onClear() {
