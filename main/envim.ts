@@ -84,8 +84,8 @@ export class Envim {
     await this.nvim.request(fname, args);
   }
 
-  private async onMouse(grid: number, button: string, action: string, row: number, col: number) {
-    await this.nvim.inputMouse(button, action, "", grid, row, col);
+  private async onMouse(grid: number, button: string, action: string, modifier: string, row: number, col: number) {
+    await this.nvim.inputMouse(button, action, modifier, grid, row, col);
   }
 
   private async onInput(input: string) {

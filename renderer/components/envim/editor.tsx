@@ -31,6 +31,7 @@ const style = {
 };
 
 export class EditorComponent extends React.Component<Props, States> {
+  private timmer: number = 0;
   private drag: boolean = false;
   private ctx?: CanvasRenderingContext2D;
   private renderer?: Context2D;
@@ -74,35 +75,41 @@ export class EditorComponent extends React.Component<Props, States> {
     return true;
   }
 
-  private onMouseEvent(e: MouseEvent, button: string, action: string) {
+  private onMouseEvent(e: MouseEvent, action: string, wheel: boolean = false) {
     const [col, row] = [ x2Col(e.nativeEvent.offsetX), y2Row(e.nativeEvent.offsetY) ];
+    const button = wheel ? "wheel" : ["left", "middle", "right"][e.button] || "left";
+    const modiffier = [];
 
-    button === "left" && e.stopPropagation();
-    button === "left" && e.preventDefault();
-    Emit.send("envim:mouse", this.props.grid, button, action, row, col);
+    e.stopPropagation();
+    e.preventDefault();
+
+    e.ctrlKey && modiffier.push("C");
+    e.altKey && modiffier.push("A");
+
+    Emit.send("envim:mouse", this.props.grid, button, action, modiffier.join("-"), row, col);
   }
 
   private onMouseDown(e: MouseEvent) {
-    switch (e.button) {
-      case 0:
-        this.drag = true;
-        this.onMouseEvent(e, "left", "press");
-        Emit.share("envim:focus");
-      break;
+    if (e.button === 0) {
+      this.timmer = +setTimeout(() => this.drag = true, 100);
     }
+    this.onMouseEvent(e, "press");
+    Emit.share("envim:focus");
   }
 
   private onMouseMove(e: MouseEvent) {
-    this.drag && this.onMouseEvent(e, "left", "drag");
+    this.drag && this.onMouseEvent(e, "drag");
   }
 
   private onMouseUp(e: MouseEvent) {
+    clearTimeout(this.timmer);
+
+    this.drag && this.onMouseEvent(e, "release");
     this.drag = false;
-    this.onMouseEvent(e, "left", "release");
   }
 
   private onMouseWheel(e: WheelEvent) {
-    this.onMouseEvent(e, "wheel", e.deltaY < 0 ? "up" : "down");
+    this.onMouseEvent(e, e.deltaY < 0 ? "up" : "down", true);
   }
 
   private onClear() {
