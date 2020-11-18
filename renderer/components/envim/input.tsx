@@ -15,6 +15,7 @@ interface States {
 }
 
 const position: "absolute" = "absolute";
+const pointerEvents: "none" = "none";
 const style = {
   zIndex: 10,
   position,
@@ -24,6 +25,7 @@ const style = {
   margin: 0,
   opacity: 0.6,
   caretColor: "transparent",
+  pointerEvents,
 };
 
 export class InputComponent extends React.Component<Props, States> {

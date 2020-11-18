@@ -90,9 +90,9 @@ export class EditorComponent extends React.Component<Props, States> {
   }
 
   private onMouseDown(e: MouseEvent) {
-    if (e.button === 0) {
-      this.timmer = +setTimeout(() => this.drag = true, 100);
-    }
+    clearTimeout(this.timmer);
+    this.timmer = +setTimeout(() => this.drag = true, 200);
+
     this.onMouseEvent(e, "press");
     Emit.share("envim:focus");
   }
