@@ -80,9 +80,10 @@ export class EditorComponent extends React.Component<Props, States> {
     const button = wheel ? "wheel" : ["left", "middle", "right"][e.button] || "left";
     const modiffier = [];
 
-    e.stopPropagation();
-    e.preventDefault();
+    wheel || e.stopPropagation();
+    wheel || e.preventDefault();
 
+    e.shiftKey && modiffier.push("S");
     e.ctrlKey && modiffier.push("C");
     e.altKey && modiffier.push("A");
 
@@ -109,7 +110,11 @@ export class EditorComponent extends React.Component<Props, States> {
   }
 
   private onMouseWheel(e: WheelEvent) {
-    this.onMouseEvent(e, e.deltaY < 0 ? "up" : "down", true);
+    if (Math.abs(e.deltaY) < Math.abs(e.deltaX)) {
+      this.onMouseEvent(e, e.deltaX < 0 ? "left" : "right", true);
+    } else {
+      this.onMouseEvent(e, e.deltaY < 0 ? "up" : "down", true);
+    }
   }
 
   private onClear() {
