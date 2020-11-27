@@ -2,15 +2,12 @@ import { dialog } from "electron";
 import { createConnection, Socket } from "net";
 import { spawn, ChildProcess } from "child_process";
 import { NeovimClient } from "neovim";
-import { Response } from "neovim/lib/host";
 
 import { Emit } from "./emit";
 import { App } from "./envim/app";
-import { Clipboard } from "./envim/clipboard";
 
 export class Envim {
   private nvim = new NeovimClient;
-  private app = new App;
   private options: { [k: string]: boolean }  = {};
   private connect: { process?: ChildProcess; socket?: Socket; } = {}
 
@@ -44,29 +41,12 @@ export class Envim {
 
     if (reader && writer) {
       this.options = options;
-      this.app = new App;
       this.nvim = new NeovimClient;
       this.nvim.attach({ reader, writer });
       this.nvim.setClientInfo("Envim", { major: 0, minor: 0, patch: 1, prerelease: "dev" }, "ui", {}, {})
-      this.nvim.on("request", this.onRequest.bind(this));
-      this.nvim.on("notification", this.onNotification.bind(this));
       this.nvim.on("disconnect", this.onDisconnect.bind(this));
-      Clipboard.setup(this.nvim);
+      new App(this.nvim);
       Emit.send("app:start");
-    }
-  }
-
-  private onRequest(method: string, args: any, res: Response) {
-    switch (method) {
-      case "envim_clipboard": return Clipboard.paste(res);
-    }
-    console.log({ method, args });
-  }
-
-  private onNotification(method: string, args: any) {
-    switch (method) {
-      case "redraw" :return this.app.redraw(args);
-      case "envim_clipboard": return Clipboard.copy(args[0], args[1]);
     }
   }
 

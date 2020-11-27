@@ -1,6 +1,6 @@
 import React, { MouseEvent } from "react";
 
-import { ITab, IMessage } from "../../../common/interface";
+import { ITab, IMessage, IMenu } from "../../../common/interface";
 
 import { Emit } from "../../utils/emit";
 import { Setting } from "../../utils/setting";
@@ -15,6 +15,7 @@ interface Props {
 
 interface States {
   tabs: ITab[];
+  menus: IMenu[];
   qf: number;
   lc: number;
   notificate: IMessage | null;
@@ -25,6 +26,8 @@ interface States {
 }
 
 const whiteSpace: "nowrap" = "nowrap";
+const positionR: "relative" = "relative";
+const positionA: "absolute" = "absolute";
 const styles = {
   scope: {
     display: "flex",
@@ -58,7 +61,22 @@ const styles = {
     overflow: "hidden",
     whiteSpace,
   },
-  icon: {
+  menu: {
+    display: "flex",
+    position: positionR,
+    alignItems: "center",
+    padding: 4,
+    minWidth: 0,
+    borderRight: "solid 1px #646079",
+  },
+  submenu: {
+    zIndex: 10,
+    position: positionA,
+    right: 0,
+    boxShadow: "8px 8px 4px 0 rgba(0, 0, 0, 0.6)",
+    whiteSpace,
+  },
+  space: {
     padding: "0 4px",
   },
 };
@@ -66,9 +84,10 @@ const styles = {
 export class TablineComponent extends React.Component<Props, States> {
   constructor(props: Props) {
     super(props);
-    this.state = { tabs: [], qf: 0, lc: 0, notificate: null, mode: null, command: null, ruler: null, setting: Setting.others };
+    this.state = { tabs: [], menus: [], qf: 0, lc: 0, notificate: null, mode: null, command: null, ruler: null, setting: Setting.others };
 
     Emit.on("tabline:update", this.onTabline.bind(this));
+    Emit.on("menu:update", this.onMenu.bind(this));
     Emit.on("messages:notificate", this.onNotificate.bind(this));
     Emit.on("messages:mode", this.onMode.bind(this));
     Emit.on("messages:command", this.onCommand.bind(this));
@@ -77,7 +96,7 @@ export class TablineComponent extends React.Component<Props, States> {
   }
 
   componentWillUnmount() {
-    Emit.clear(["tabline:update", "messages:notificate", "messages:mode", "messages:command", "messages:ruler", "setting:others"]);
+    Emit.clear(["tabline:update", "menu:update", "messages:notificate", "messages:mode", "messages:command", "messages:ruler", "setting:others"]);
   }
 
   private runCommand(command: string, e: MouseEvent | null = null) {
@@ -103,8 +122,27 @@ export class TablineComponent extends React.Component<Props, States> {
     this.setState({ setting: Setting.others });
   }
 
+  private toggleMenu(i: number, e: MouseEvent) {
+    const menus = this.state.menus.map((menu, j) => ({ ...menu, active: i !== j || menu.active ? false : true }));
+
+    e.stopPropagation();
+    e.preventDefault();
+
+    this.setState({ menus });
+  }
+
+  private runMenu(i: number, command: string, e: MouseEvent) {
+    this.toggleMenu(i, e);
+    this.runCommand(command);
+  }
+
   private onTabline(tabs: ITab[], qf: number, lc: number) {
     this.setState({ tabs, qf, lc });
+  }
+
+  private onMenu(menus: IMenu[]) {
+    menus = menus.filter(menu => !menu.hidden).map(menu => ({ ...menu, submenus: menu.submenus?.filter(submenu => !submenu.submenus && !submenu.hidden) }));
+    this.setState({ menus });
   }
 
   private onNotificate(notificate: IMessage[]) {
@@ -141,7 +179,7 @@ export class TablineComponent extends React.Component<Props, States> {
     const color = { qf: "red", lc: "yellow" }[type];
     const command = type === "qf" ? "copen" : "lopen";
 
-    return <IconComponent color={`${color}-fg-dark`} style={this.getStyle(styles.icon)} font="" text={this.state[type]} animation="fade-in" onClick={() => this.runCommand(command)} />;
+    return <IconComponent color={`${color}-fg-dark`} style={this.getStyle(styles.space)} font="" text={this.state[type]} animation="fade-in" onClick={() => this.runCommand(command)} />;
   }
 
   private renderNotify(message: IMessage, notify: boolean) {
@@ -156,18 +194,29 @@ export class TablineComponent extends React.Component<Props, States> {
     );
   }
 
+  private renderSubmenu(i: number, menu: IMenu) {
+    const style = { top: this.props.height, ...styles.submenu };
+    return !menu.active ? null : (
+      <div className="animate fade-in" style={style}>
+        { menu.submenus?.map((submenu, j) => (
+          <div key={j} className="color-black clickable" style={styles.space} onClick={e => this.runMenu(i, `emenu ${menu.name.replace(/\./g, "\\.")}.${submenu.name.replace(/\./g, "\\.")}`, e)}>{ submenu.name }</div>
+        ))}
+      </div>
+    );
+  }
+
   render() {
     return (
       <div className="color-black" style={{...this.props, ...styles.scope}}>
         {this.state.tabs.map((tab, i) => (
           <div key={i} className={`animate fade-in color-black ${tab.active ? "active" : "clickable"}`} style={this.getTabStyle(tab.active)} onClick={e => this.runCommand(`tabnext ${i + 1}`, e)}>
             { this.renderName(tab) }
-            { tab.edit && <IconComponent color="gray-fg" style={styles.icon} font="" /> }
-            { tab.protect && <IconComponent color="yellow-fg" style={styles.icon} font="" /> }
-            <IconComponent color="red-fg" style={styles.icon} font="" onClick={e => this.runCommand(this.state.tabs.length > 1 ? `tabclose! ${i + 1}` : "quit", e)} />
+            { tab.edit && <IconComponent color="gray-fg" style={styles.space} font="" /> }
+            { tab.protect && <IconComponent color="yellow-fg" style={styles.space} font="" /> }
+            <IconComponent color="red-fg" style={styles.space} font="" onClick={e => this.runCommand(this.state.tabs.length > 1 ? `tabclose! ${i + 1}` : "quit", e)} />
           </div>
         ))}
-        { this.state.tabs.length > 0 && <IconComponent color="green-fg" style={this.getStyle(styles.icon)} font="" onClick={e => this.runCommand("tabnew", e)} /> }
+        { this.state.tabs.length > 0 && <IconComponent color="green-fg" style={this.getStyle(styles.space)} font="" onClick={e => this.runCommand("tabnew", e)} /> }
         <div className="space dragable" />
         { this.state.ruler && this.renderNotify(this.state.ruler, false) }
         { this.state.command && this.renderNotify(this.state.command, false) }
@@ -175,7 +224,13 @@ export class TablineComponent extends React.Component<Props, States> {
         { !this.state.setting.notify && this.state.notificate && this.renderNotify(this.state.notificate, true) }
         { this.state.lc > 0 && this.renderQuickfix("lc") }
         { this.state.qf > 0 && this.renderQuickfix("qf") }
-        <IconComponent color="black" style={this.getStyle(styles.icon)} font="ﮠ" onClick={e => this.runCommand("messages", e)} />
+        { this.state.menus.map((menu, i) => (
+          <div key={i} className={`color-black ${menu.active ? "active" : "clickable"}`} style={styles.menu} onClick={e => this.toggleMenu(i, e)}>
+            { menu.name }
+            { this.renderSubmenu(i, menu) }
+          </div>
+        ))}
+        <IconComponent color="black" style={this.getStyle(styles.space)} font="ﮠ" onClick={e => this.runCommand("messages", e)} />
       </div>
     );
   }

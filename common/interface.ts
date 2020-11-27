@@ -32,3 +32,10 @@ export interface IMessage {
   kind: string;
   contents: { hl: number, content: string }[];
 }
+
+export interface IMenu {
+  name: string;
+  active: boolean;
+  hidden: boolean;
+  submenus?: IMenu[];
+}

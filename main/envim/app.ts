@@ -1,8 +1,11 @@
+import { NeovimClient } from "neovim";
+import { Response } from "neovim/lib/host";
 import { Tabpage } from "neovim/lib/api/Tabpage";
 
 import { ITab } from "common/interface";
 
 import { Emit } from "../emit";
+import { Clipboard } from "./clipboard";
 import { Grid } from "./grid";
 import { Messages } from "./messages";
 
@@ -10,6 +13,26 @@ export class App {
   private grids: { [k: number]: Grid } = {};
   private messages: Messages = new Messages;
   private timer: number = 0;
+
+  constructor(private nvim: NeovimClient) {
+    Clipboard.setup(this.nvim);
+    nvim.on("request", this.onRequest.bind(this));
+    nvim.on("notification", this.onNotification.bind(this));
+  }
+
+  private onRequest(method: string, args: any, res: Response) {
+    switch (method) {
+      case "envim_clipboard": return Clipboard.paste(res);
+    }
+    console.log({ method, args });
+  }
+
+  private onNotification(method: string, args: any) {
+    switch (method) {
+      case "redraw" :return this.redraw(args);
+      case "envim_clipboard": return Clipboard.copy(args[0], args[1]);
+    }
+  }
 
   redraw(redraw: any[][]) {
     redraw.forEach(r => {
@@ -121,6 +144,9 @@ export class App {
         case "busy_stop":
           this.busy(false);
         break;
+        case "update_menu":
+          this.menu();
+        break;
         case "flush":
           this.flush();
         break;
@@ -224,16 +250,16 @@ export class App {
 
       if (buffer) {
         const active = current.data === tab.data;
-        const filetype = await current.request("nvim_buf_get_option", [buffer.data, "filetype"]);
-        const buftype = await current.request("nvim_buf_get_option", [buffer.data, "buftype"]);
-        const edit = await current.request("nvim_buf_get_option", [buffer.data, "modified"]);
-        const protect = !await current.request("nvim_buf_get_option", [buffer.data, "modifiable"]);
+        const filetype = await this.nvim.request("nvim_buf_get_option", [buffer.data, "filetype"]);
+        const buftype = await this.nvim.request("nvim_buf_get_option", [buffer.data, "buftype"]);
+        const edit = await this.nvim.request("nvim_buf_get_option", [buffer.data, "modified"]);
+        const protect = !await this.nvim.request("nvim_buf_get_option", [buffer.data, "modifiable"]);
 
         next.push({ name, active, filetype, buftype, edit, protect });
       }
     }
-    const qf = (await current.request("nvim_call_function", ["getqflist", [{size: 0}]])).size;
-    const lc = (await current.request("nvim_call_function", ["getloclist", [0, {size: 0}]])).size;
+    const qf = (await this.nvim.request("nvim_call_function", ["getqflist", [{size: 0}]])).size;
+    const lc = (await this.nvim.request("nvim_call_function", ["getloclist", [0, {size: 0}]])).size;
     Emit.send("tabline:update", next, qf, lc);
   }
 
@@ -308,6 +334,11 @@ export class App {
 
   private busy(busy: boolean) {
     Emit.send("grid:busy", busy);
+  }
+
+  private async menu() {
+    const menus = await this.nvim.call("menu_get", [""]);
+    Emit.send("menu:update", menus);
   }
 
   private flush() {
