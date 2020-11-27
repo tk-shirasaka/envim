@@ -2,7 +2,7 @@ import { NeovimClient } from "neovim";
 import { Response } from "neovim/lib/host";
 import { Tabpage } from "neovim/lib/api/Tabpage";
 
-import { ITab } from "common/interface";
+import { ITab, IMode } from "common/interface";
 
 import { Emit } from "../emit";
 import { Clipboard } from "./clipboard";
@@ -12,12 +12,14 @@ import { Messages } from "./messages";
 export class App {
   private grids: { [k: number]: Grid } = {};
   private messages: Messages = new Messages;
+  private modes: IMode[] = [];
   private timer: number = 0;
 
   constructor(private nvim: NeovimClient) {
     Clipboard.setup(this.nvim);
     nvim.on("request", this.onRequest.bind(this));
     nvim.on("notification", this.onNotification.bind(this));
+    this.menu();
   }
 
   private onRequest(method: string, args: any, res: Response) {
@@ -138,6 +140,12 @@ export class App {
         break;
 
         /** default **/
+        case "mode_info_set":
+          this.modeInfoSet(r[0][1]);
+        break;
+        case "mode_change":
+          this.modeChange(r[0][1]);
+        break;
         case "busy_start":
           this.busy(true);
         break;
@@ -330,6 +338,14 @@ export class App {
     });
 
     Emit.send(`messages:${group}`, this.messages.get(group));
+  }
+
+  private modeInfoSet(modes: IMode[]) {
+    this.modes = modes;
+  }
+
+  private modeChange(index: number) {
+    Emit.send("mode:change", this.modes[index]);
   }
 
   private busy(busy: boolean) {

@@ -1,6 +1,6 @@
 import React, { MouseEvent } from "react";
 
-import { ITab, IMessage, IMenu } from "../../../common/interface";
+import { ITab, IMessage, IMode, IMenu } from "../../../common/interface";
 
 import { Emit } from "../../utils/emit";
 import { Setting } from "../../utils/setting";
@@ -16,12 +16,10 @@ interface Props {
 interface States {
   tabs: ITab[];
   menus: IMenu[];
+  mode?: IMode;
   qf: number;
   lc: number;
-  notificate: IMessage | null;
-  mode: IMessage | null;
-  command: IMessage | null;
-  ruler: IMessage | null;
+  message: { notificate?: IMessage; mode?: IMessage; command?: IMessage; ruler?: IMessage; };
   setting: { [k: string]: boolean; };
 }
 
@@ -84,10 +82,11 @@ const styles = {
 export class TablineComponent extends React.Component<Props, States> {
   constructor(props: Props) {
     super(props);
-    this.state = { tabs: [], menus: [], qf: 0, lc: 0, notificate: null, mode: null, command: null, ruler: null, setting: Setting.others };
+    this.state = { tabs: [], menus: [], qf: 0, lc: 0, message: {}, setting: Setting.others };
 
     Emit.on("tabline:update", this.onTabline.bind(this));
     Emit.on("menu:update", this.onMenu.bind(this));
+    Emit.on("mode:change", this.changeMode.bind(this));
     Emit.on("messages:notificate", this.onNotificate.bind(this));
     Emit.on("messages:mode", this.onMode.bind(this));
     Emit.on("messages:command", this.onCommand.bind(this));
@@ -96,7 +95,7 @@ export class TablineComponent extends React.Component<Props, States> {
   }
 
   componentWillUnmount() {
-    Emit.clear(["tabline:update", "menu:update", "messages:notificate", "messages:mode", "messages:command", "messages:ruler", "setting:others"]);
+    Emit.clear(["tabline:update", "menu:update", "mode:change", "messages:notificate", "messages:mode", "messages:command", "messages:ruler", "setting:others"]);
   }
 
   private runCommand(command: string, e: MouseEvent | null = null) {
@@ -145,20 +144,35 @@ export class TablineComponent extends React.Component<Props, States> {
     this.setState({ menus });
   }
 
-  private onNotificate(notificate: IMessage[]) {
-    this.setState({ notificate: [ ...notificate ].pop() || null });
+  private changeMode(mode: IMode) {
+    this.setState({ mode });
   }
 
-  private onMode(mode: IMessage[]) {
-    this.setState({ mode: [ ...mode ].pop() || null });
+  private onMessage(type: "notificate" | "mode" | "command" | "ruler", messages: IMessage[]) {
+    const message = this.state.message;
+
+    if (messages.length) {
+      message[type] = messages.pop();
+    } else {
+      delete(message[type]);
+    }
+    this.setState({ message });
   }
 
-  private onCommand(command: IMessage[]) {
-    this.setState({ command: [ ...command ].pop() || null });
+  private onNotificate(messages: IMessage[]) {
+    this.onMessage("notificate", messages);
   }
 
-  private onRuler(ruler: IMessage[]) {
-    this.setState({ ruler: [ ...ruler ].pop() || null });
+  private onMode(messages: IMessage[]) {
+    this.onMessage("mode", messages);
+  }
+
+  private onCommand(messages: IMessage[]) {
+    this.onMessage("command", messages);
+  }
+
+  private onRuler(messages: IMessage[]) {
+    this.onMessage("ruler", messages);
   }
 
   private getTabStyle(active: boolean) {
@@ -196,11 +210,13 @@ export class TablineComponent extends React.Component<Props, States> {
 
   private renderSubmenu(i: number, menu: IMenu) {
     const style = { top: this.props.height, ...styles.submenu };
-    return !menu.active ? null : (
+    const sname = this.state.mode?.short_name;
+    return !sname || !menu.active ? null : (
       <div className="animate fade-in" style={style}>
-        { menu.submenus?.map((submenu, j) => (
-          <div key={j} className="color-black clickable" style={styles.space} onClick={e => this.runMenu(i, `emenu ${menu.name.replace(/\./g, "\\.")}.${submenu.name.replace(/\./g, "\\.")}`, e)}>{ submenu.name }</div>
-        ))}
+        { menu.submenus?.map((submenu, j) => {
+          const command = `emenu ${menu.name.replace(/([\. ])/g, "\\$1")}.${submenu.name.replace(/([\. ])/g, "\\$1")}`;
+          return submenu.mappings[sname]?.enabled && <div key={j} className="color-black clickable" style={styles.space} onClick={e => this.runMenu(i, command, e)}>{ submenu.name }</div>
+        })}
       </div>
     );
   }
@@ -218,10 +234,10 @@ export class TablineComponent extends React.Component<Props, States> {
         ))}
         { this.state.tabs.length > 0 && <IconComponent color="green-fg" style={this.getStyle(styles.space)} font="" onClick={e => this.runCommand("tabnew", e)} /> }
         <div className="space dragable" />
-        { this.state.ruler && this.renderNotify(this.state.ruler, false) }
-        { this.state.command && this.renderNotify(this.state.command, false) }
-        { this.state.mode && this.renderNotify(this.state.mode, false) }
-        { !this.state.setting.notify && this.state.notificate && this.renderNotify(this.state.notificate, true) }
+        { this.state.message.ruler && this.renderNotify(this.state.message.ruler, false) }
+        { this.state.message.command && this.renderNotify(this.state.message.command, false) }
+        { this.state.message.mode && this.renderNotify(this.state.message.mode, false) }
+        { !this.state.setting.notify && this.state.message.notificate && this.renderNotify(this.state.message.notificate, true) }
         { this.state.lc > 0 && this.renderQuickfix("lc") }
         { this.state.qf > 0 && this.renderQuickfix("qf") }
         { this.state.menus.map((menu, i) => (

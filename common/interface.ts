@@ -33,9 +33,15 @@ export interface IMessage {
   contents: { hl: number, content: string }[];
 }
 
+export interface IMode {
+  name: string;
+  short_name: string;
+}
+
 export interface IMenu {
   name: string;
   active: boolean;
   hidden: boolean;
+  mappings: { [k: string]: { enabled: boolean; } };
   submenus?: IMenu[];
 }
