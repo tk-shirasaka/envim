@@ -17,8 +17,6 @@ interface States {
   tabs: ITab[];
   menus: IMenu[];
   mode?: IMode;
-  qf: number;
-  lc: number;
   message: { notificate?: IMessage; mode?: IMessage; command?: IMessage; ruler?: IMessage; };
   setting: { [k: string]: boolean; };
 }
@@ -65,7 +63,7 @@ const styles = {
     alignItems: "center",
     padding: 4,
     minWidth: 0,
-    borderRight: "solid 1px #646079",
+    borderLeft: "solid 1px #646079",
   },
   submenu: {
     zIndex: 10,
@@ -82,7 +80,7 @@ const styles = {
 export class TablineComponent extends React.Component<Props, States> {
   constructor(props: Props) {
     super(props);
-    this.state = { tabs: [], menus: [], qf: 0, lc: 0, message: {}, setting: Setting.others };
+    this.state = { tabs: [], menus: [], message: {}, setting: Setting.others };
 
     Emit.on("tabline:update", this.onTabline.bind(this));
     Emit.on("menu:update", this.onMenu.bind(this));
@@ -122,7 +120,8 @@ export class TablineComponent extends React.Component<Props, States> {
   }
 
   private toggleMenu(i: number, e: MouseEvent) {
-    const menus = this.state.menus.map((menu, j) => ({ ...menu, active: i !== j || menu.active ? false : true }));
+    const menus = this.state.menus
+    menus[i].active = menus[i].active ? false : true;
 
     e.stopPropagation();
     e.preventDefault();
@@ -135,8 +134,8 @@ export class TablineComponent extends React.Component<Props, States> {
     this.runCommand(command);
   }
 
-  private onTabline(tabs: ITab[], qf: number, lc: number) {
-    this.setState({ tabs, qf, lc });
+  private onTabline(tabs: ITab[]) {
+    this.setState({ tabs });
   }
 
   private onMenu(menus: IMenu[]) {
@@ -189,13 +188,6 @@ export class TablineComponent extends React.Component<Props, States> {
     return icon && <IconComponent color={icon.color} style={styles.name} font={icon.font} text={tab.name.replace(/([^\/])[^\/]*\//g, "$1/")} />;
   }
 
-  private renderQuickfix(type: "qf" | "lc") {
-    const color = { qf: "red", lc: "yellow" }[type];
-    const command = type === "qf" ? "copen" : "lopen";
-
-    return <IconComponent color={`${color}-fg-dark`} style={this.getStyle(styles.space)} font="" text={this.state[type]} animation="fade-in" onClick={() => this.runCommand(command)} />;
-  }
-
   private renderNotify(message: IMessage, notify: boolean) {
     const kind = message.kind;
     const { color, font } = notificates.filter(icon => icon.kinds.indexOf(kind) >= 0)[0];
@@ -238,15 +230,12 @@ export class TablineComponent extends React.Component<Props, States> {
         { this.state.message.command && this.renderNotify(this.state.message.command, false) }
         { this.state.message.mode && this.renderNotify(this.state.message.mode, false) }
         { !this.state.setting.notify && this.state.message.notificate && this.renderNotify(this.state.message.notificate, true) }
-        { this.state.lc > 0 && this.renderQuickfix("lc") }
-        { this.state.qf > 0 && this.renderQuickfix("qf") }
         { this.state.menus.map((menu, i) => (
-          <div key={i} className={`color-black ${menu.active ? "active" : "clickable"}`} style={styles.menu} onClick={e => this.toggleMenu(i, e)}>
+          <div key={i} className={`color-black ${menu.active ? "active" : "clickable"}`} style={styles.menu} onMouseEnter={e => this.toggleMenu(i, e)} onMouseLeave={e => this.toggleMenu(i, e)}>
             { menu.name }
             { this.renderSubmenu(i, menu) }
           </div>
         ))}
-        <IconComponent color="black" style={this.getStyle(styles.space)} font="ﮠ" onClick={e => this.runCommand("messages", e)} />
       </div>
     );
   }

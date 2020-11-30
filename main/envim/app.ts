@@ -266,9 +266,7 @@ export class App {
         next.push({ name, active, filetype, buftype, edit, protect });
       }
     }
-    const qf = (await this.nvim.request("nvim_call_function", ["getqflist", [{size: 0}]])).size;
-    const lc = (await this.nvim.request("nvim_call_function", ["getloclist", [0, {size: 0}]])).size;
-    Emit.send("tabline:update", next, qf, lc);
+    Emit.send("tabline:update", next);
   }
 
   private cmdlineShow(content: string[][], pos: number, prompt: string, indent: number) {
