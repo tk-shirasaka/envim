@@ -31,7 +31,7 @@ const style = {
 };
 
 export class EditorComponent extends React.Component<Props, States> {
-  private timmer: number = 0;
+  private timer: number = 0;
   private drag: boolean = false;
   private ctx?: CanvasRenderingContext2D;
   private renderer?: Context2D;
@@ -91,8 +91,8 @@ export class EditorComponent extends React.Component<Props, States> {
   }
 
   private onMouseDown(e: MouseEvent) {
-    clearTimeout(this.timmer);
-    this.timmer = +setTimeout(() => this.drag = true, 200);
+    clearTimeout(this.timer);
+    this.timer = +setTimeout(() => this.drag = true, 200);
 
     this.onMouseEvent(e, "press");
     Emit.share("envim:focus");
@@ -103,7 +103,7 @@ export class EditorComponent extends React.Component<Props, States> {
   }
 
   private onMouseUp(e: MouseEvent) {
-    clearTimeout(this.timmer);
+    clearTimeout(this.timer);
 
     this.drag && this.onMouseEvent(e, "release");
     this.drag = false;

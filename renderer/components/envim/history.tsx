@@ -40,6 +40,8 @@ const styles = {
 };
 
 export class HistoryComponent extends React.Component<Props, States> {
+  private timer: number = 0;
+
   constructor(props: Props) {
     super(props);
 
@@ -51,23 +53,26 @@ export class HistoryComponent extends React.Component<Props, States> {
     Emit.clear(["messages:history"]);
   }
 
-  private onClear() {
-    Emit.send("envim:command", "messages clear");
-    this.setState({ messages: [] });
-  }
-
   private onClose() {
+    Emit.send("envim:command", "messages clear");
+
+    clearTimeout(this.timer);
     this.setState({ messages: [] });
+    this.timer = 0;
   }
 
   private onHistory(messages: IMessage[]) {
-    if (this.state.messages.length === 0 && messages.length > 0) {
-      const id = setInterval(() => {
+    if (this.state.messages.length === 0 && messages.length) {
+      const timer = +setInterval(() => {
         this.state.messages.length
-          ?  Emit.send("envim:command", "messages")
-          : clearInterval(id);
-
+          ? Emit.send("envim:command", "messages")
+          : clearInterval(timer);
       }, 500);
+      this.timer = timer;
+    }
+
+    if (messages.length && this.state.messages.length !== messages.length) {
+      setTimeout(() => (this.refs.bottom as HTMLDivElement).scrollIntoView({ behavior: "smooth" }), 500);
     }
     this.setState({ messages });
   }
@@ -77,12 +82,12 @@ export class HistoryComponent extends React.Component<Props, States> {
       <div className="animate slide-up" style={{...styles.scope, ...this.props, ...Highlights.style(0)}}>
         <div className="color-white" style={styles.actions}>
           <div className="space" />
-          <IconComponent color="red-fg" style={styles.icon} font="ﰸ" onClick={this.onClear.bind(this)} />
-          <IconComponent color="black-fg" style={styles.icon} font="" onClick={this.onClose.bind(this)} />
+          <IconComponent color="black-fg" style={styles.icon} font="" onClick={this.onClose.bind(this)} />
         </div>
         {this.state.messages.map((message, i) => (
           (this.state.filter.length && this.state.filter.indexOf(message.kind) < 0) || <MessageComponent {...message} key={i} />
         ))}
+        <div ref="bottom" />
       </div>
     );
   }
