@@ -66,7 +66,7 @@ const styles = {
     borderLeft: "solid 1px #646079",
   },
   submenu: {
-    zIndex: 10,
+    zIndex: 20,
     position: positionA,
     right: 0,
     boxShadow: "8px 8px 4px 0 rgba(0, 0, 0, 0.6)",
@@ -151,7 +151,7 @@ export class TablineComponent extends React.Component<Props, States> {
     const message = this.state.message;
 
     if (messages.length) {
-      message[type] = messages.pop();
+      message[type] = [ ...messages ].pop();
     } else {
       delete(message[type]);
     }
