@@ -14,23 +14,16 @@ interface Props {
 }
 
 interface States {
-  filter: string[],
   messages: IMessage[];
 }
 
-const positionF: "absolute" = "absolute";
-const positionS: "sticky" = "sticky";
+const position: "sticky" = "sticky";
 const styles = {
   scope: {
-    position: positionF,
-    zIndex: 10,
-    bottom: 0,
-    borderRadius: "4px 0 0 0",
-    boxShadow: "8px -8px 4px 0 rgba(0, 0, 0, 0.6)",
     overflow: "auto",
   },
   actions: {
-    position: positionS,
+    position,
     display: "flex",
     top: 0,
   },
@@ -45,20 +38,20 @@ export class HistoryComponent extends React.Component<Props, States> {
   constructor(props: Props) {
     super(props);
 
-    this.state = { filter: [], messages: [] };
+    this.state = { messages: [] };
     Emit.on("messages:history", this.onHistory.bind(this));
   }
 
   componentWillUnmount() {
+    clearInterval(this.timer);
     Emit.clear(["messages:history"]);
   }
 
   private onClose() {
     Emit.send("envim:command", "messages clear");
+    Emit.share("messages:history", []);
 
-    clearTimeout(this.timer);
-    this.setState({ messages: [] });
-    this.timer = 0;
+    clearInterval(this.timer);
   }
 
   private onHistory(messages: IMessage[]) {
@@ -79,14 +72,12 @@ export class HistoryComponent extends React.Component<Props, States> {
 
   render() {
     return this.state.messages.length > 0 && (
-      <div className="animate slide-up" style={{...styles.scope, ...this.props, ...Highlights.style(0)}}>
+      <div style={{...styles.scope, ...this.props, ...Highlights.style(0)}}>
         <div className="color-white" style={styles.actions}>
           <div className="space" />
           <IconComponent color="black-fg" style={styles.icon} font="" onClick={this.onClose.bind(this)} />
         </div>
-        {this.state.messages.map((message, i) => (
-          (this.state.filter.length && this.state.filter.indexOf(message.kind) < 0) || <MessageComponent {...message} key={i} />
-        ))}
+        {this.state.messages.map((message, i) => <MessageComponent {...message} key={i} />)}
         <div ref="bottom" />
       </div>
     );

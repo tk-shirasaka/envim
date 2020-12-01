@@ -1,6 +1,6 @@
 import React from "react";
 
-import { IHighlight } from "common/interface";
+import { IHighlight, IMessage } from "common/interface";
 
 import { Emit } from "../../utils/emit";
 import { Highlights } from "../../utils/highlight";
@@ -30,6 +30,7 @@ interface States {
     display?: "block" | "none";
     cursor: "default" | "not-allowed";
   }};
+  history: boolean;
 }
 
 const positionR: "relative" = "relative"
@@ -56,18 +57,19 @@ export class EnvimComponent extends React.Component<Props, States> {
   constructor(props: Props) {
     super(props);
 
-    this.setSize();
-    this.state = { grids: {} };
+    this.setSize(false);
+    this.state = { grids: {}, history: false };
     Emit.on("highlight:set", this.onHighlight.bind(this));
     Emit.on("grid:resize", this.onResize.bind(this));
     Emit.on("win:pos", this.onWin.bind(this));
     Emit.on("win:hide", this.hideWin.bind(this));
     Emit.on("win:close", this.closeWin.bind(this));
+    Emit.on("messages:history", this.onHistory.bind(this));
     Emit.send("envim:attach", x2Col(this.editor.width), y2Row(this.editor.height));
   }
 
   componentDidUpdate() {
-    this.setSize();
+    this.setSize(this.state.history);
     this.timer && clearTimeout(this.timer)
     this.timer = +setTimeout(() => {
       Emit.send("envim:resize", 1, x2Col(this.editor.width), y2Row(this.editor.height));
@@ -75,15 +77,16 @@ export class EnvimComponent extends React.Component<Props, States> {
   }
 
   componentWillUnmount() {
-    Emit.clear(["highlight:set", "grid:resize", "win:pos", "win:hide", "win:close"]);
+    Emit.clear(["highlight:set", "grid:resize", "win:pos", "win:hide", "win:close", "messages:history"]);
   }
 
-  private setSize() {
+  private setSize(footer: boolean) {
     const font  = Setting.font;
     this.main = { fontSize: font.size, lineHeight: `${font.height}px` };
     this.editor = { width: this.props.width, height: row2Y(y2Row(this.props.height - 8) - 1) };
     this.header = { width: this.props.width, height: this.props.height - this.editor.height };
-    this.footer = { width: this.props.width, height: Math.min(this.editor.height, font.height * 15) };
+    this.footer = { width: this.props.width, height: footer ? Math.min(this.editor.height, font.height * 15) : 0 };
+    this.editor.height -= this.footer.height;
   }
 
   private onHighlight(highlights: {id: number, ui: boolean, hl: IHighlight}[]) {
@@ -134,6 +137,14 @@ export class EnvimComponent extends React.Component<Props, States> {
     this.setState({ grids });
   }
 
+  private onHistory(messages: IMessage[]) {
+    const history = messages.length > 0;
+    if (this.state.history !== history) {
+      this.setSize(history);
+      this.setState({ history });
+    }
+  }
+
   render() {
     return (
       <div style={this.main}>
@@ -142,12 +153,12 @@ export class EnvimComponent extends React.Component<Props, States> {
           { Object.keys(this.state.grids).length === 0 ? <div className="color-black" style={this.editor}>Loading...</div> : Object.keys(this.state.grids).map(grid => (
             <EditorComponent key={grid} grid={+grid} style={this.state.grids[+grid]} />
           )) }
-          <HistoryComponent {...this.footer} />
           <CmdlineComponent />
           <PopupmenuComponent />
           <NotificateComponent />
           <InputComponent />
         </div>
+        <HistoryComponent {...this.footer} />
       </div>
     );
   }
