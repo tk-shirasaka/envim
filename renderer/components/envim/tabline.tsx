@@ -96,9 +96,9 @@ export class TablineComponent extends React.Component<Props, States> {
     Emit.clear(["tabline:update", "menu:update", "mode:change", "messages:notificate", "messages:mode", "messages:command", "messages:ruler", "setting:others"]);
   }
 
-  private runCommand(command: string, e: MouseEvent | null = null) {
-    e?.stopPropagation();
-    e?.preventDefault();
+  private runCommand(command: string, e: MouseEvent) {
+    e.stopPropagation();
+    e.preventDefault();
 
     Emit.send("envim:command", command);
     Emit.share("envim:focus");
@@ -127,11 +127,6 @@ export class TablineComponent extends React.Component<Props, States> {
     e.preventDefault();
 
     this.setState({ menus });
-  }
-
-  private runMenu(i: number, command: string, e: MouseEvent) {
-    this.toggleMenu(i, e);
-    this.runCommand(command);
   }
 
   private onTabline(tabs: ITab[]) {
@@ -200,14 +195,14 @@ export class TablineComponent extends React.Component<Props, States> {
     );
   }
 
-  private renderSubmenu(i: number, menu: IMenu) {
+  private renderSubmenu(menu: IMenu) {
     const style = { top: this.props.height, ...styles.submenu };
     const sname = this.state.mode?.short_name;
     return !sname || !menu.active ? null : (
       <div className="animate fade-in" style={style}>
-        { menu.submenus?.map((submenu, j) => {
+        { menu.submenus?.map((submenu, i) => {
           const command = `emenu ${menu.name.replace(/([\. ])/g, "\\$1")}.${submenu.name.replace(/([\. ])/g, "\\$1")}`;
-          return submenu.mappings[sname]?.enabled && <div key={j} className="color-black clickable" style={styles.space} onClick={e => this.runMenu(i, command, e)}>{ submenu.name }</div>
+          return submenu.mappings[sname]?.enabled && <div key={i} className="color-black clickable" style={styles.space} onClick={e => this.runCommand(command, e)}>{ submenu.name }</div>
         })}
       </div>
     );
@@ -233,7 +228,7 @@ export class TablineComponent extends React.Component<Props, States> {
         { this.state.menus.map((menu, i) => (
           <div key={i} className={`color-black ${menu.active ? "active" : "clickable"}`} style={styles.menu} onMouseEnter={e => this.toggleMenu(i, e)} onMouseLeave={e => this.toggleMenu(i, e)}>
             { menu.name }
-            { this.renderSubmenu(i, menu) }
+            { this.renderSubmenu(menu) }
           </div>
         ))}
       </div>
