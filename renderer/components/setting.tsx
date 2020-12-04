@@ -16,7 +16,6 @@ interface States {
   font: { width: number; height: number; size: number; };
   opacity: number;
   options: { [k: string]: boolean; };
-  others: { [k: string]: boolean; };
 }
 
 const flexDirection: "column" = "column";
@@ -85,14 +84,6 @@ export class SettingComponent extends React.Component<Props, States> {
     this.setState({ options });
   }
 
-  private onToggleOther(e: ChangeEvent) {
-    const input = e.target as HTMLInputElement;
-    const others = this.state.others;
-    others[input.name] = input.checked;
-    Setting.others = others;
-    this.setState({ others });
-  }
-
   private onSubmit(e: FormEvent) {
     e.stopPropagation();
     e.preventDefault();
@@ -149,11 +140,6 @@ export class SettingComponent extends React.Component<Props, States> {
           <h3>Options</h3>
           { Object.keys(this.state.options).map((key, i) => (
             <label key={i}><input type="checkbox" name={key} checked={this.state.options[key]} onChange={this.onToggleOption.bind(this)} />{ key }</label>
-          ))}
-
-          <h3>Others</h3>
-          { Object.keys(this.state.others).map((key, i) => (
-            <label key={i}><input type="checkbox" name={key} checked={this.state.others[key]} onChange={this.onToggleOther.bind(this)} />{ key }</label>
           ))}
         </div>
 

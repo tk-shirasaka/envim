@@ -42,6 +42,6 @@ export interface IMenu {
   name: string;
   active: boolean;
   hidden: boolean;
-  mappings: { [k: string]: { enabled: boolean; } };
+  mappings: { [k: string]: { enabled: boolean; rhs: string; } };
   submenus?: IMenu[];
 }

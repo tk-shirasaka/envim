@@ -7,7 +7,6 @@ interface ISetting {
   font: { size: number; width: number; height: number; };
   opacity: number;
   options: { [k: string]: boolean; };
-  others: { [k: string]: boolean; };
 }
 
 const defaultSetting: ISetting = {
@@ -22,9 +21,6 @@ const defaultSetting: ISetting = {
     ext_popupmenu: true,
     ext_messages: true,
     ext_hlstate: true,
-  },
-  others: {
-    notify: true,
   },
 };
 
@@ -81,13 +77,5 @@ export class Setting {
 
   static set options(options: ISetting["options"]) {
     Setting.set({ ...Setting.item, options });
-  }
-
-  static get others() {
-    return Setting.item.others;
-  }
-
-  static set others(others: ISetting["others"]) {
-    Setting.set({ ...Setting.item, others }, "others");
   }
 }
