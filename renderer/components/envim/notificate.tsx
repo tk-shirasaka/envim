@@ -27,7 +27,6 @@ const styles = {
     borderRadius: "0 0 0 4px",
     boxShadow: "8px 8px 4px 0 rgba(0, 0, 0, 0.6)",
     overflow: "auto",
-    cursor: "pointer",
   },
 };
 
@@ -86,21 +85,10 @@ export class NotificateComponent extends React.Component<Props, States> {
 
     return (
       <div className="animate slide-right" style={styles.messages}>
-        <div onClick={e => this.onClose(e, "mode")}>
-          {this.state.mode.map((message, i) => <MessageComponent {...message} key={i} />)}
-        </div>
-
-        <div onClick={e => this.onClose(e, "command")}>
-          {this.state.command.map((message, i) => <MessageComponent {...message} key={i} />)}
-        </div>
-
-        <div onClick={e => this.onClose(e, "ruler")}>
-          {this.state.ruler.map((message, i) => <MessageComponent {...message} key={i} />)}
-        </div>
-
-        <div onClick={e => this.onClose(e, "notificate")}>
-          {this.state.notificate.map((message, i) => <MessageComponent {...message} key={i} />)}
-        </div>
+        {this.state.mode.map((message, i) => <MessageComponent key={i} message={message} open={true} onClick={e => this.onClose(e, "mode")} />)}
+        {this.state.command.map((message, i) => <MessageComponent key={i} message={message} open={true} onClick={e => this.onClose(e, "command")} />)}
+        {this.state.ruler.map((message, i) => <MessageComponent key={i} message={message} open={true} onClick={e => this.onClose(e, "ruler")} />)}
+        {this.state.notificate.map((message, i) => <MessageComponent key={i} message={message} open={true} onClick={e => this.onClose(e, "notificate")} />)}
       </div>
     );
   }

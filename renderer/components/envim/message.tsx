@@ -7,26 +7,40 @@ import { notificates } from "../../utils/icons";
 
 import { IconComponent } from "../icon";
 
-type Props = IMessage;
-
-interface States {
+interface Props {
+  message: IMessage;
+  open: boolean;
+  onClick: (...args: any[]) => void;
 }
 
-const whiteSpace: "pre-wrap" = "pre-wrap";
+interface States {
+  open: boolean;
+}
+
+const whiteSpaceP: "pre-wrap" = "pre-wrap";
+const whiteSpaceN: "nowrap" = "nowrap";
 const wordBreak: "break-all" = "break-all";
 const styles = {
   content: {
     display: "flex",
     overflow: "hidden",
+    cursor: "pointer",
   },
   kind: {
     padding: "2px 4px",
   },
-  message: {
+  open: {
     width: "100%",
     padding: "2px 4px",
-    whiteSpace,
+    whiteSpace: whiteSpaceP,
     wordBreak,
+  },
+  close: {
+    width: "100%",
+    padding: "2px 4px",
+    textOverflow: "ellipsis",
+    overflow: "hidden",
+    whiteSpace: whiteSpaceN,
   },
 };
 
@@ -40,10 +54,10 @@ export class MessageComponent extends React.Component<Props, States> {
 
   render() {
     return (
-      <div style={{...styles.content, ...Highlights.style(0)}}>
-        {this.getKind(this.props.kind)}
-        <div style={styles.message}>
-          {this.props.contents.map(({hl, content}, i) => hl === 0 ? content : <span style={Highlights.style(hl)} key={i}>{ content }</span>)}
+      <div style={{...styles.content, ...Highlights.style(0)}} onClick={this.props.onClick}>
+        {this.getKind(this.props.message.kind)}
+        <div style={this.props.open ? styles.open : styles.close}>
+          {this.props.message.contents.map(({hl, content}, i) => hl === 0 ? content : <span style={Highlights.style(hl)} key={i}>{ content }</span>)}
         </div>
       </div>
     );

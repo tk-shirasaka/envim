@@ -7,6 +7,7 @@ export class Emit {
   static on(event: string, callback: (...args: any[]) => void) {
     Emit.emit.on(event, callback);
     ipcRenderer.on(event, (_: IpcRendererEvent, ...args: any[]) => Emit.share(event, ...args));
+    ipcRenderer.on(event, (_: IpcRendererEvent, ...args: any[]) => Emit.share("debug", event, ...args));
   }
 
   static share(event: string, ...args: any[]) {

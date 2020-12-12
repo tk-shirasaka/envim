@@ -136,7 +136,7 @@ export class App {
           this.msgShow("notificate", [["", [], true]]);
         break;
         case "msg_history_show":
-          this.msgShow("history", r[0][0]);
+          this.msgHistoryShow(r[0][0]);
         break;
 
         /** default **/
@@ -336,6 +336,16 @@ export class App {
     });
 
     Emit.send(`messages:${group}`, this.messages.get(group));
+  }
+
+  private msgHistoryShow(contents: any[]) {
+    this.messages.clear("history");
+    contents.forEach(([kind, messages, replace_last]) => (this.messages.set("history", kind, messages, replace_last)));
+
+    if (contents.length) {
+      this.nvim.command("messages clear");
+      Emit.send("messages:history", this.messages.get("history"));
+    }
   }
 
   private modeInfoSet(modes: IMode[]) {

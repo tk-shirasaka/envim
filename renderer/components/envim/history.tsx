@@ -1,4 +1,4 @@
-import React from "react";
+import React, { MouseEvent } from "react";
 
 import { IMessage } from "../../../common/interface";
 
@@ -15,6 +15,8 @@ interface Props {
 
 interface States {
   messages: IMessage[];
+  select: number;
+  debug: boolean;
 }
 
 const position: "sticky" = "sticky";
@@ -38,46 +40,59 @@ export class HistoryComponent extends React.Component<Props, States> {
   constructor(props: Props) {
     super(props);
 
-    this.state = { messages: [] };
+    this.state = { messages: [], select: -1, debug: false };
+    this.timer = +setInterval(() => Emit.send("envim:command", "messages"), 500);
     Emit.on("messages:history", this.onHistory.bind(this));
+    Emit.on("debug", this.onDebug.bind(this));
   }
 
   componentWillUnmount() {
     clearInterval(this.timer);
-    Emit.clear(["messages:history"]);
-  }
-
-  private onClose() {
-    Emit.send("envim:command", "messages clear");
-    Emit.share("messages:history", []);
-
-    clearInterval(this.timer);
+    Emit.clear(["messages:history", "debug"]);
   }
 
   private onHistory(messages: IMessage[]) {
-    if (this.state.messages.length === 0 && messages.length) {
-      const timer = +setInterval(() => {
-        this.state.messages.length
-          ? Emit.send("envim:command", "messages")
-          : clearInterval(timer);
-      }, 500);
-      this.timer = timer;
-    }
+    messages = [ ...this.state.messages, ...messages ];
+    this.setState({ messages: messages.slice(-1000) });
+    setTimeout(() => (this.refs.bottom as HTMLDivElement).scrollIntoView({ behavior: "smooth" }));
+  }
 
-    if (messages.length && this.state.messages.length !== messages.length) {
-      setTimeout(() => (this.refs.bottom as HTMLDivElement).scrollIntoView({ behavior: "smooth" }), 500);
-    }
-    this.setState({ messages });
+  private onDebug(event: string, ...args: any[]) {
+    if (!this.state.debug) return;
+
+    this.onHistory([{ contents: [{ hl: 0, content: `-- ${event} --\n${JSON.stringify(args, null, 2)}` }], kind: "debug" }]);
+  }
+
+  private onClose() {
+    Emit.share("envim:focus");
+    this.setState({ messages: [] });
+  }
+
+  private toggleDebug(e: MouseEvent) {
+    e.stopPropagation();
+    e.preventDefault();
+
+    Emit.share("envim:focus");
+    this.setState({ debug: !this.state.debug });
+  }
+
+  private toggleSelect(e: MouseEvent, select: number) {
+    e.stopPropagation();
+    e.preventDefault();
+
+    Emit.share("envim:focus");
+    this.setState({ select: this.state.select === select ? -1 : select });
   }
 
   render() {
-    return this.state.messages.length > 0 && (
+    return (
       <div style={{...styles.scope, ...this.props, ...Highlights.style(0)}}>
         <div className="color-white" style={styles.actions}>
           <div className="space" />
-          <IconComponent color="black-fg" style={styles.icon} font="" onClick={this.onClose.bind(this)} />
+          <IconComponent color={ this.state.debug ? "green-fg" : "gray-fg" } style={styles.icon} font="" onClick={this.toggleDebug.bind(this)} />
+          <IconComponent color="red-fg" style={styles.icon} font="" onClick={this.onClose.bind(this)} />
         </div>
-        {this.state.messages.map((message, i) => <MessageComponent {...message} key={i} />)}
+        {this.state.messages.map((message, i) => <MessageComponent key={i} message={message} open={this.state.select === i} onClick={e => this.toggleSelect(e, i)} />)}
         <div ref="bottom" />
       </div>
     );

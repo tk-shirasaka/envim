@@ -19,7 +19,6 @@ export class Envim {
     Emit.on("envim:mouse", this.onMouse.bind(this));
     Emit.on("envim:input", this.onInput.bind(this));
     Emit.on("envim:command", this.onCommand.bind(this));
-    Emit.on("envim:log", this.onLog.bind(this));
     process.on("uncaughtException", this.onError.bind(this));
     process.on("unhandledRejection", this.onError.bind(this));
   }
@@ -74,13 +73,6 @@ export class Envim {
 
   private async onCommand(command: string) {
     await this.nvim.command(command);
-  }
-
-  private async onLog(log: any) {
-    if (["number", "string"].indexOf(typeof log) < 0) {
-      log = JSON.stringify(log);
-    }
-    this.nvim.outWriteLine(log);
   }
 
   private onDisconnect() {

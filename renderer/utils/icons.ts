@@ -29,4 +29,5 @@ export const notificates = [
   { font: "", color: "pink", kinds: ["return_prompt"], filter: false},
   { font: "", color: "gray", kinds: ["mode", "command"], filter: false},
   { font: "", color: "gray", kinds: ["ruler"], filter: false},
+  { font: "", color: "green", kinds: ["debug"], filter: true},
 ];
