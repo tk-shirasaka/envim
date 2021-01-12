@@ -7,6 +7,8 @@ export class Browser {
   static win?: BrowserWindow;
 
   constructor() {
+    app.commandLine.appendSwitch('enable-transparent-visuals');
+    app.disableHardwareAcceleration();
     app.on("ready", this.onReady.bind(this));
     app.on("activate", this.onActivate.bind(this));
     app.on("window-all-closed", this.onQuit.bind(this));
