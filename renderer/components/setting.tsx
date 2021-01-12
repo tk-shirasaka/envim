@@ -107,7 +107,7 @@ export class SettingComponent extends React.Component<Props, States> {
 
     return (
       <div style={style}>
-        <span><IconComponent color="white-fg" style={styles.icon} font="" /> Normal</span>,
+        <span><IconComponent color="white-fg" style={styles.icon} font="" /> Regular</span>,
         <span className="bold"><IconComponent color="white-fg" style={styles.icon} font="" /> Bold</span>,
         <span className="italic"><IconComponent color="white-fg" style={styles.icon} font="" /> Italic</span>
       </div>

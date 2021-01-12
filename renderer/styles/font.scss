@@ -1,28 +1,28 @@
 @font-face {
-  font-family: "Normal";
+  font-family: "Regular";
   src: url(fonts/HackGenNerd-Regular.ttf);
 }
 
 @font-face {
-  font-family: "Nerd Font";
-  src: url(fonts/HackGenNerd-Regular.ttf);
-}
-
-@font-face {
-  font-family: "Normal Bold";
+  font-family: "Bold";
   src: url(fonts/HackGenNerd-Bold.ttf);
 }
 
 @font-face {
-  font-family: "Nerd Font Bold";
-  src: url(fonts/HackGenNerd-Bold.ttf);
+  font-family: "Editor Regular";
+  src: url(fonts/HackGenNerdConsole-Regular.ttf);
+}
+
+@font-face {
+  font-family: "Editor Bold";
+  src: url(fonts/HackGenNerdConsole-Bold.ttf);
 }
 
 h1, h2, h3, h4, h5, h6, .bold {
-  font-family: "Normal Bold", "Nerd Font Bold" !important;
+  font-family: "Bold" !important;
 
   * {
-    font-family: "Normal Bold", "Nerd Font Bold" !important;
+    font-family: "Bold" !important;
   }
 }
 
@@ -31,7 +31,7 @@ h1, h2, h3, h4, h5, h6, .bold {
 }
 
 :not(h1):not(h2):not(h3):not(h4):not(h5):not(h6):not(.bold) {
-  font-family: "Normal", "Nerd Font";
+  font-family: "Regular";
   font-style: normal;
   font-size: inherit;
   line-height: inherit;

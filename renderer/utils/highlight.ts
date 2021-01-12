@@ -37,9 +37,9 @@ class Highlight {
 
   font(size: number) {
     return {
-      normal: `${size}px Normal, Nerd Font`,
-      bold: `${size}px Normal Bold, Nerd Font Bold`,
-      italic:`italic ${size}px Normal, Nerd Font`,
+      normal: `${size}px Editor Regular`,
+      bold: `${size}px Editor Bold`,
+      italic:`italic ${size}px Editor Regular`,
     }[this.type];
   }
 
