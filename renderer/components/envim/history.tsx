@@ -1,4 +1,4 @@
-import React, { MouseEvent } from "react";
+import React, { createRef, RefObject, MouseEvent } from "react";
 
 import { IMessage } from "../../../common/interface";
 
@@ -35,6 +35,7 @@ const styles = {
 };
 
 export class HistoryComponent extends React.Component<Props, States> {
+  private bottom: RefObject<HTMLDivElement> = createRef<HTMLDivElement>();
   private timer: number = 0;
 
   constructor(props: Props) {
@@ -54,7 +55,7 @@ export class HistoryComponent extends React.Component<Props, States> {
   private onHistory(messages: IMessage[]) {
     messages = [ ...this.state.messages, ...messages ];
     this.setState({ messages: messages.slice(-1000) });
-    setTimeout(() => (this.refs.bottom as HTMLDivElement).scrollIntoView({ behavior: "smooth" }));
+    setTimeout(() => this.bottom.current?.scrollIntoView({ behavior: "smooth" }));
   }
 
   private onDebug(event: string, ...args: any[]) {
@@ -93,7 +94,7 @@ export class HistoryComponent extends React.Component<Props, States> {
           <IconComponent color="red-fg" style={styles.icon} font="" onClick={this.onClear.bind(this)} />
         </div>
         {this.state.messages.map((message, i) => <MessageComponent key={i} message={message} open={this.state.select === i} onClick={e => this.toggleSelect(e, i)} />)}
-        <div ref="bottom" />
+        <div ref={this.bottom} />
       </div>
     );
   }

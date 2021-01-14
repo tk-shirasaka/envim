@@ -1,5 +1,4 @@
 import { Localstorage } from "./localstorage";
-import { Emit } from "./emit";
 
 interface ISetting {
   type: "command" | "address";
@@ -33,10 +32,9 @@ export class Setting {
     return Setting.item;
   }
 
-  private static set(item: ISetting, key: string = "") {
+  private static set(item: ISetting) {
     Setting.item = item;
     ls.set(Setting.item);
-    key && Emit.share(`setting:${key}`);
   }
 
   static get type() {
@@ -60,7 +58,7 @@ export class Setting {
   }
 
   static set font(font: ISetting["font"]) {
-    Setting.set({ ...Setting.item, font }, "font");
+    Setting.set({ ...Setting.item, font });
   }
 
   static get opacity() {

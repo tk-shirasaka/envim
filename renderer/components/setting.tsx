@@ -3,8 +3,6 @@ import React, { FormEvent, ChangeEvent } from "react";
 import { Emit } from "../utils/emit";
 import { Setting } from "../utils/setting";
 
-import { IconComponent } from "./icon";
-
 interface Props {
   width: number;
   height: number;
@@ -98,26 +96,18 @@ export class SettingComponent extends React.Component<Props, States> {
     };
   }
 
-  private renderFontExample() {
-    const style = {
+  private getExampleStyle() {
+    return {
       padding: "4px 8px",
       fontSize: this.state.font.size,
       lineHeight: `${this.state.font.height}px`,
     };
-
-    return (
-      <div style={style}>
-        <span><IconComponent color="white-fg" style={styles.icon} font="" /> Regular</span>,
-        <span className="bold"><IconComponent color="white-fg" style={styles.icon} font="" /> Bold</span>,
-        <span className="italic"><IconComponent color="white-fg" style={styles.icon} font="" /> Italic</span>
-      </div>
-    );
   }
 
   render() {
     return (
       <form className="color-black" style={this.getStyle()} onSubmit={this.onSubmit.bind(this)}>
-        <h1>Welcome To Envim!</h1>
+        <h1 className="bold">Welcome To Envim!</h1>
         <div>
           <i className="color-green-fg" style={styles.logo}></i>
           <i className="color-white-fg" style={styles.icon}></i>
@@ -125,19 +115,19 @@ export class SettingComponent extends React.Component<Props, States> {
         </div>
 
         <div>
-          <h3>Neovim path</h3>
+          <h3 className="bold">Neovim path</h3>
           <div>
             <label><input type="radio" value="command" checked={this.state.type === "command"} onChange={this.onToggleType.bind(this)} />Command</label>
             <label><input type="radio" value="address" checked={this.state.type === "address"} onChange={this.onToggleType.bind(this)} />Port</label>
           </div>
           <label>Enter neovim path<input type="text" value={this.state.path} onChange={this.onChangePath.bind(this)} autoFocus={true} /></label>
 
-          <h3>Appearance</h3>
+          <h3 className="bold">Appearance</h3>
           <label>Font Size ({this.state.font.size}px)<input type="range" min="5" max="20" value={this.state.font.size} onChange={this.onChangeFont.bind(this)} /></label>
-          {this.renderFontExample()}
+          <div style={this.getExampleStyle()}>Example Text</div>
           <label>Transparent ({this.state.opacity}%)<input type="range" min="0" max="50" value={this.state.opacity} onChange={this.onChangeOpacity.bind(this)} /></label>
 
-          <h3>Options</h3>
+          <h3 className="bold">Options</h3>
           { Object.keys(this.state.options).map((key, i) => (
             <label key={i}><input type="checkbox" name={key} checked={this.state.options[key]} onChange={this.onToggleOption.bind(this)} />{ key }</label>
           ))}

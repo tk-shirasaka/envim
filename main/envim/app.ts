@@ -216,15 +216,7 @@ export class App {
   }
 
   private gridScroll(grid: number, top: number, bottom: number, left: number, right: number, rows: number, cols: number) {
-    const check = (row: number, col: number) => (top <= row && left <= col && row < bottom && col < right);
-
-    this.grids[grid].getLines(0, rows > 0, cell => {
-      const [srow, trow] = [cell.row, cell.row - rows];
-      const [scol, tcol] = [cell.col, cell.col - cols];
-      if (!check(srow, scol)) return;
-      if (!check(trow, tcol)) return;
-      this.grids[grid].moveCell(srow, scol, trow, tcol);
-    });
+    this.grids[grid].scroll(top, bottom, left, right, rows, cols)
   }
 
   private winPos(grid: number, anchor: string, pgrid: number, row: number, col: number, width: number, height: number, focusable: boolean, zIndex: number) {
@@ -237,7 +229,7 @@ export class App {
       const top = offset.row + (anchor[0] === "N" ? row : row - height);
       const left = offset.col + (anchor[1] === "W" ? col : col - width);
 
-      this.grids[grid].setOffsetPos(top, left);
+      this.grids[grid].setOffsetPos(top, left, zIndex);
       Emit.send("win:pos", grid, width, height, top, left, focusable, zIndex);
     }
   }
@@ -260,10 +252,8 @@ export class App {
         const active = current.data === tab.data;
         const filetype = await this.nvim.request("nvim_buf_get_option", [buffer.data, "filetype"]);
         const buftype = await this.nvim.request("nvim_buf_get_option", [buffer.data, "buftype"]);
-        const edit = await this.nvim.request("nvim_buf_get_option", [buffer.data, "modified"]);
-        const protect = !await this.nvim.request("nvim_buf_get_option", [buffer.data, "modifiable"]);
 
-        next.push({ name, active, filetype, buftype, edit, protect });
+        next.push({ name, active, filetype, buftype });
       }
     }
     Emit.send("tabline:update", next);

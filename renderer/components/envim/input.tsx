@@ -1,4 +1,4 @@
-import React, { KeyboardEvent, CompositionEvent } from "react";
+import React, { createRef, RefObject, KeyboardEvent, CompositionEvent } from "react";
 
 import { Emit } from "../../utils/emit";
 import { keycode } from "../../utils/keycode";
@@ -9,7 +9,7 @@ interface Props {
 }
 
 interface States {
-  style: { top: number; left: number; width: number; color: string; background: string; };
+  style: { top: number; left: number; width: number, zIndex: number; color: string; background: string; };
   composit: boolean;
   busy: boolean;
 }
@@ -17,7 +17,6 @@ interface States {
 const position: "absolute" = "absolute";
 const pointerEvents: "none" = "none";
 const style = {
-  zIndex: 10,
   position,
   display: "block",
   border: "none",
@@ -29,11 +28,12 @@ const style = {
 };
 
 export class InputComponent extends React.Component<Props, States> {
+  private input: RefObject<HTMLInputElement> = createRef<HTMLInputElement>();
 
   constructor(props: Props) {
     super(props);
 
-    this.state = { style: { top: 0, left: 0, width: col2X(1), color: "none", background: "none" }, composit: false, busy: false };
+    this.state = { style: { top: 0, left: 0, width: col2X(1), zIndex: 0, color: "none", background: "none" }, composit: false, busy: false };
     Emit.on("envim:focus", this.onFocus.bind(this));
     Emit.on("grid:cursor", this.onCursor.bind(this));
     Emit.on("grid:busy", this.onBusy.bind(this));
@@ -44,14 +44,15 @@ export class InputComponent extends React.Component<Props, States> {
   }
 
   private onFocus() {
-    (this.refs.input as HTMLInputElement).focus();
+    this.input.current?.focus();
   }
 
-  private onCursor(cursor: { row: number, col: number, width: number, hl: number }) {
+  private onCursor(cursor: { row: number, col: number, width: number, hl: number, zIndex: number }) {
     const style = this.state.style;
     style.width = this.state.busy ? 0 : col2X(cursor.width);
     style.top = row2Y(cursor.row);
     style.left = col2X(cursor.col);
+    style.zIndex = cursor.zIndex;
     style.color = Highlights.color(cursor.hl, "background");
     style.background = Highlights.color(cursor.hl, "foreground");
     this.setState({ style });
@@ -99,7 +100,7 @@ export class InputComponent extends React.Component<Props, States> {
 
   render() {
     return (
-      <input style={this.getStyle()} autoFocus={true} ref="input"
+      <input style={this.getStyle()} autoFocus={true} ref={this.input}
         onKeyDown={this.onKeyDown.bind(this)}
         onCompositionStart={this.onCompositionStart.bind(this)}
         onCompositionEnd={this.onCompositionEnd.bind(this)}

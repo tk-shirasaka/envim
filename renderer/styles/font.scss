@@ -18,19 +18,15 @@
   src: url(fonts/HackGenNerdConsole-Bold.ttf);
 }
 
-h1, h2, h3, h4, h5, h6, .bold {
+.bold {
   font-family: "Bold" !important;
-
-  * {
-    font-family: "Bold" !important;
-  }
 }
 
 .italic {
   font-style: italic !important;
 }
 
-:not(h1):not(h2):not(h3):not(h4):not(h5):not(h6):not(.bold) {
+* {
   font-family: "Regular";
   font-style: normal;
   font-size: inherit;

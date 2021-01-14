@@ -5,7 +5,7 @@ export class Grid {
   private flush: { [k: string]: ICell } = {};
   private width :number = 0;
   private height: number = 0;
-  private offset: { row: number, col: number } = { row: 0, col: 0 };
+  private offset: { row: number, col: number, zIndex: number } = { row: 0, col: 0, zIndex: 0 };
 
   constructor(width :number, height: number) {
     this.resize(width, height);
@@ -39,11 +39,11 @@ export class Grid {
     row += this.offset.row;
     col += this.offset.col;
 
-    return { col, row, width, hl };
+    return { col, row, width, hl, zIndex: this.offset.zIndex };
   }
 
-  setOffsetPos(row: number, col: number) {
-    this.offset = { row, col };
+  setOffsetPos(row: number, col: number, zIndex: number) {
+    this.offset = { row, col, zIndex };
   }
 
   getOffsetPos() {
@@ -58,23 +58,37 @@ export class Grid {
     return (this.lines[row] && this.lines[row][col]) ? this.lines[row][col] : this.getDefault(row, col);
   }
 
-  setCell(row: number, col: number, text: string, hl: number) {
+  setCell(row: number, col: number, text: string, hl: number, asc: boolean = true) {
     const prev = this.getCell(row, col - 1);
     const next = this.getCell(row, col + 1);
     const cell = this.getCell(row, col);
 
-    text || (prev.width = 2);
     hl < 0 && (hl = prev.hl);
+    asc && text === "" && (prev.width = 2);
     if (cell.text !== text || cell.hl !== hl) {
+      this.flush[`${prev.row},${prev.col}`] = prev;
       this.flush[`${cell.row},${cell.col}`] = cell;
       this.flush[`${next.row},${next.col}`] = next;
     };
     [ cell.row, cell.col, cell.text, cell.hl, cell.width ] = [ row, col, text, hl, text.length ];
   }
 
-  moveCell(srow: number, scol: number, trow: number, tcol: number) {
-    const { text, hl } = this.getCell(srow, scol);
-    this.setCell(trow, tcol, text, hl)
+  scroll(top: number, bottom: number, left: number, right: number, rows: number, cols: number) {
+    const ylimit = rows > 0 ? bottom - top - rows : bottom - top + rows;
+    const xlimit = cols > 0 ? right - left - cols  : right - left + cols;
+    const asc = cols > 0;
+
+    for (let i = 0; i <= ylimit; i++) {
+      const trow = rows > 0 ? top + i : bottom - i - 1;
+      const srow = trow + rows;
+      for (let j = 0; j <= xlimit; j++) {
+        const tcol = cols > 0 ? left + j : right - j - 1;
+        const scol = tcol + cols;
+        const { text, hl } = this.getCell(srow, scol);
+
+        this.setCell(trow, tcol, text, hl, asc);
+      }
+    }
   }
 
   getFlush() {
@@ -84,20 +98,10 @@ export class Grid {
     this.flush = {};
     Object.keys(flush).forEach(k => flush[k].width && result.push(flush[k]));
 
-    return result;
-  }
-
-  getLine(row: number, col: number, fn: (cell: ICell) => void) {
-    for (let i = col; i < this.width; i++) {
-      fn(this.getCell(row, col + i));
-    }
-  }
-
-  getLines(row: number, asc: boolean, fn: (cell: ICell) => void) {
-    const [offset, direction] = asc ? [0, 1] : [this.height - row - 1, -1];
-
-    for (let i = row; i < this.height; i++) {
-      this.getLine(offset + row + i * direction, 0, fn);
-    }
+    return result.sort((a, b) => {
+      if (a.row < b.row || (a.row === b.row && a.col < b.col)) return -1;
+      if (a.row > b.row || (a.row === b.row && a.col > b.col)) return 1;
+      return 0;
+    });
   }
 }

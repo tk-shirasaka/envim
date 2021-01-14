@@ -24,8 +24,6 @@ export interface ITab {
   active: boolean;
   filetype: string;
   buftype: string;
-  edit: boolean;
-  protect: boolean;
 }
 
 export interface IMessage {

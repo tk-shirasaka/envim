@@ -13,7 +13,6 @@ interface Props {
 
 interface States {
   init: boolean;
-  font: { width: number; height: number; size: number; };
   window: { width: number; height: number; };
 }
 
@@ -23,9 +22,10 @@ export class AppComponent extends React.Component<Props, States> {
     this.state = { ...Setting.get(), init: false, window: { width: window.innerWidth, height: window.innerHeight } };
 
     window.addEventListener("resize", this.onResize.bind(this));
+    (document as any).fonts.load("10px Editor Regular").then();
+    (document as any).fonts.load("10px Editor Bold").then();
     Emit.on("app:start", this.onStart.bind(this));
     Emit.on("app:stop", this.onStop.bind(this));
-    Emit.on("setting:font", this.onFont.bind(this));
   }
 
   private getSize() {
@@ -48,11 +48,6 @@ export class AppComponent extends React.Component<Props, States> {
 
   private onStop() {
     this.setState({ init: false });
-  }
-
-  private onFont() {
-    const font = Setting.font;
-    this.setState({ font });
   }
 
   render() {

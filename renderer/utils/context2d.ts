@@ -35,23 +35,25 @@ export class Context2D {
     }
   }
 
-  private rect(x: number, y: number, width: number, hl: number) {
+  private rect(x: number, y: number, width: number, hl: number, fill: boolean) {
     this.ctx.clearRect(x, y, width * this.font.width, this.font.height);
-    this.style(hl, "background");
-    this.ctx.fillRect(x, y, width * this.font.width, this.font.height);
+    if (fill) {
+      this.style(hl, "background");
+      this.ctx.fillRect(x, y, width * this.font.width, this.font.height);
+    }
   }
 
-  clear(width: number, height: number) {
+  clear(fill: boolean, width: number, height: number) {
     this.style(0, "background");
     this.ctx.clearRect(0, 0, width * 2, height * 2);
-    this.ctx.fillRect(0, 0, width * 2, height * 2);
+    fill && this.ctx.fillRect(0, 0, width * 2, height * 2);
   }
 
   flush(cells: ICell[]) {
     cells.forEach(cell => {
       const [y, x] = [cell.row * this.font.height, cell.col * this.font.width];
-      this.rect(x, y, cell.width, cell.hl);
-      this.underline(x, y, cell.width, cell.hl);
+        this.rect(x, y, cell.width, cell.hl, cell.text !== null);
+        this.underline(x, y, cell.width, cell.hl);
     });
     cells.forEach(cell => {
       if (cell.text === ' ') return;

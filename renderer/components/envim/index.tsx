@@ -91,7 +91,6 @@ export class EnvimComponent extends React.Component<Props, States> {
     highlights.forEach(({id, ui, hl}) => {
       Highlights.setHighlight(id, ui, hl);
     });
-    Object.keys(this.state.grids).length === 0 && this.onWin(1, x2Col(this.editor.width), y2Row(this.editor.height), 0, 0, true, 0)
   }
 
   private onResize(grid: number, width: number, height: number) {
@@ -136,19 +135,22 @@ export class EnvimComponent extends React.Component<Props, States> {
   }
 
   render() {
+    const main = { zIndex: 1, width: this.editor.width, height: this.editor.height, top: 0, left: 0 };
+
     return (
       <div style={this.main}>
         <TablineComponent {...this.header} />
         <div style={{...styles.editor, ...this.editor}}>
-          { Object.keys(this.state.grids).length === 0 ? <div className="color-black" style={this.editor}>Loading...</div> : Object.keys(this.state.grids).map(grid => (
-            <EditorComponent key={grid} grid={+grid} style={this.state.grids[+grid]} />
+          <EditorComponent grid={1} fill={Object.keys(this.state.grids).length === 0} style={main} />
+          { Object.keys(this.state.grids).reverse().map(grid => (
+            <EditorComponent key={grid} grid={+grid} fill={true} style={this.state.grids[+grid]} />
           )) }
           <CmdlineComponent />
           <PopupmenuComponent />
           <NotificateComponent />
           <InputComponent />
         </div>
-        { Setting.options.ext_messages && Object.keys(this.state.grids).length && <HistoryComponent {...this.footer} /> }
+        { Setting.options.ext_messages && <HistoryComponent {...this.footer} /> }
       </div>
     );
   }

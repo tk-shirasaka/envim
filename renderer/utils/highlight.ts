@@ -58,7 +58,9 @@ export class Highlights {
   }
 
   static color(id: number, type: "foreground" | "background" | "special") {
-    return Highlights.hls[id][type] || Highlights.hls[0][type];
+    if (Highlights.hls[id] && Highlights.hls[id][type]) return Highlights.hls[id][type];
+    if (Highlights.hls[0] && Highlights.hls[0][type]) return Highlights.hls[0][type];
+    return "rgba(0, 0, 0, 1)"
   }
 
   static style(id: number, reverse: boolean = false) {

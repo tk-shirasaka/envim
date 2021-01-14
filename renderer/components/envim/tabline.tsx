@@ -31,7 +31,7 @@ const styles = {
     margin: "4px 4px 0 0",
     minWidth: 0,
     cursor: "default",
-    borderBottom: 2,
+    borderBottom: "2px solid",
     borderRadius: "4px 4px 0 0",
     boxShadow: "0 0 4px 0 rgba(0, 0, 0, 0.6)",
   },
@@ -42,10 +42,6 @@ const styles = {
     overflow: "hidden",
     lineHeight: 0,
     whiteSpace,
-  },
-  active: {
-    zIndex: 10,
-    borderBottom: "solid 2px #2295c5",
   },
   notify: {
     maxWidth: 300,
@@ -119,18 +115,24 @@ export class TablineComponent extends React.Component<Props, States> {
     this.setState({ mode });
   }
 
-  private getTabStyle(active: boolean) {
-    return active ? {...styles.tab, ...styles.active} : styles.tab;
-  }
-
   private getStyle(style: { [k: string]: number | string }) {
     const lineHeight = `${this.props.height}px`;
     return {...style, lineHeight};
   }
 
-  private renderName(tab: ITab) {
+  private renderTab(i: number, tab: ITab) {
     const icon = icons.filter(icon => tab.filetype.search(icon.type) >= 0 || tab.buftype.search(icon.type) >= 0).shift();
-    return icon && <IconComponent color={icon.color} style={styles.name} font={icon.font} text={tab.name.replace(/([^\/])[^\/]*\//g, "$1/")} />;
+
+    if (!icon) return null;
+
+    const color = `color-${icon.color}-dark`;
+    const modified = tab.active ? "active" : "clickable";
+    return (
+      <div key={i} className={`animate fade-in ${color} ${modified}`} style={styles.tab} onClick={e => this.runCommand(`tabnext ${i + 1}`, e)}>
+        <IconComponent color={icon.color} style={styles.name} font={icon.font} text={tab.name.replace(/([^\/])[^\/]*\//g, "$1/")} />
+        <IconComponent color="red-fg" style={styles.space} font="" onClick={e => this.runCommand(this.state.tabs.length > 1 ? `tabclose! ${i + 1}` : "quit", e)} />
+      </div>
+    );
   }
 
   private renderSubmenu(menu: IMenu) {
@@ -151,14 +153,7 @@ export class TablineComponent extends React.Component<Props, States> {
   render() {
     return (
       <div className="color-black" style={{...this.props, ...styles.scope}}>
-        {this.state.tabs.map((tab, i) => (
-          <div key={i} className={`animate fade-in color-black ${tab.active ? "active" : "clickable"}`} style={this.getTabStyle(tab.active)} onClick={e => this.runCommand(`tabnext ${i + 1}`, e)}>
-            { this.renderName(tab) }
-            { tab.edit && <IconComponent color="gray-fg" style={styles.space} font="" /> }
-            { tab.protect && <IconComponent color="yellow-fg" style={styles.space} font="" /> }
-            <IconComponent color="red-fg" style={styles.space} font="" onClick={e => this.runCommand(this.state.tabs.length > 1 ? `tabclose! ${i + 1}` : "quit", e)} />
-          </div>
-        ))}
+        {this.state.tabs.map((tab, i) => this.renderTab(i, tab))}
         { this.state.tabs.length > 0 && <IconComponent color="green-fg" style={this.getStyle(styles.space)} font="" onClick={e => this.runCommand("$tabnew", e)} /> }
         <div className="space dragable" />
         { this.state.menus.map((menu, i) => (

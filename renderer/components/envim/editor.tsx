@@ -1,4 +1,4 @@
-import React, { MouseEvent, WheelEvent } from "react";
+import React, { createRef, RefObject, MouseEvent, WheelEvent } from "react";
 
 import { ICell } from "common/interface";
 
@@ -8,6 +8,7 @@ import { y2Row, x2Col } from "../../utils/size";
 
 interface Props {
   grid: number;
+  fill: boolean;
   style: {
     zIndex: number;
     width: number;
@@ -25,12 +26,13 @@ interface States {
 const position: "absolute" = "absolute";
 const style = {
   position,
-  boxShadow: "0 8px 8px 0 rgba(0, 0, 0, 0.6)",
+  boxShadow: "0 0 8px 0 rgba(0, 0, 0, 0.6)",
   width: "100%",
   height: "100%",
 };
 
 export class EditorComponent extends React.Component<Props, States> {
+  private canvas: RefObject<HTMLCanvasElement> = createRef<HTMLCanvasElement>();
   private timer: number = 0;
   private drag: boolean = false;
   private ctx?: CanvasRenderingContext2D;
@@ -45,18 +47,18 @@ export class EditorComponent extends React.Component<Props, States> {
   }
 
   componentDidMount() {
-    const canvas = this.refs.canvas as HTMLCanvasElement;
-    const ctx = canvas.getContext("2d");
+    const ctx = this.canvas.current?.getContext("2d");
+
     if (ctx) {
       this.ctx = ctx;
       this.renderer = new Context2D(ctx);
-      this.renderer.clear(this.props.style.width, this.props.style.height);
+      this.renderer.clear(this.props.fill, this.props.style.width, this.props.style.height);
     }
   }
 
   componentDidUpdate() {
     if (this.ctx && this.capture) {
-      this.renderer?.clear(this.props.style.width, this.props.style.height);
+      this.renderer?.clear(this.props.fill, this.props.style.width, this.props.style.height);
       this.ctx.putImageData(this.capture, 0, 0);
       delete(this.capture);
     }
@@ -118,7 +120,7 @@ export class EditorComponent extends React.Component<Props, States> {
   }
 
   private onClear() {
-    this.renderer?.clear(this.props.style.width, this.props.style.height);
+    this.renderer?.clear(this.props.fill, this.props.style.width, this.props.style.height);
   }
 
   private onFlush(cells: ICell[]) {
@@ -127,7 +129,7 @@ export class EditorComponent extends React.Component<Props, States> {
 
   render() {
     return (
-      <canvas className="animate fade-in" style={{...style, ...this.props.style}} width={this.props.style.width * 2} height={this.props.style.height * 2} ref="canvas"
+      <canvas className="animate fade-in" style={{...style, ...this.props.style}} width={this.props.style.width * 2} height={this.props.style.height * 2} ref={this.canvas}
         onMouseDown={this.onMouseDown.bind(this)}
         onMouseMove={this.onMouseMove.bind(this)}
         onMouseUp={this.onMouseUp.bind(this)}
