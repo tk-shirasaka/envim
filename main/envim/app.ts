@@ -221,6 +221,7 @@ export class App {
 
   private winPos(grid: number, anchor: string, pgrid: number, row: number, col: number, width: number, height: number, focusable: boolean, zIndex: number) {
     if (this.grids[grid] && this.grids[pgrid]) {
+      const winsize = this.grids[1].getSize();
       const current = this.grids[grid].getSize();
       const offset = this.grids[pgrid].getOffsetPos();
       width = width || current.width;
@@ -231,6 +232,12 @@ export class App {
 
       this.grids[grid].setOffsetPos(top, left, zIndex);
       Emit.send("win:pos", grid, width, height, top, left, focusable, zIndex);
+
+      if (winsize.width < left + width || winsize.height < top + height) {
+        width -= Math.max(0, left + width - winsize.width);
+        height -= Math.max(0, top + height - winsize.height);
+        Emit.share("envim:resize", grid, width, height);
+      }
     }
   }
 
