@@ -1,5 +1,7 @@
 import React, { createRef, RefObject, KeyboardEvent, CompositionEvent } from "react";
 
+import { IMode } from "../../../common/interface";
+
 import { Emit } from "../../utils/emit";
 import { keycode } from "../../utils/keycode";
 import { Highlights } from "../../utils/highlight";
@@ -12,6 +14,7 @@ interface States {
   style: { top: number; left: number; width: number, zIndex: number; color: string; background: string; };
   composit: boolean;
   busy: boolean;
+  shape: "block" | "vertical" | "horizontal";
 }
 
 const position: "absolute" = "absolute";
@@ -22,7 +25,6 @@ const style = {
   border: "none",
   padding: 0,
   margin: 0,
-  opacity: 0.6,
   caretColor: "transparent",
   pointerEvents,
 };
@@ -33,33 +35,50 @@ export class InputComponent extends React.Component<Props, States> {
   constructor(props: Props) {
     super(props);
 
-    this.state = { style: { top: 0, left: 0, width: col2X(1), zIndex: 0, color: "none", background: "none" }, composit: false, busy: false };
+    this.state = { style: { top: 0, left: 0, width: col2X(1), zIndex: 0, color: "none", background: "none" }, composit: false, busy: false, shape: "block" };
     Emit.on("envim:focus", this.onFocus.bind(this));
     Emit.on("grid:cursor", this.onCursor.bind(this));
     Emit.on("grid:busy", this.onBusy.bind(this));
+    Emit.on("mode:change", this.changeMode.bind(this));
   }
 
   componentWillUnmount() {
-    Emit.clear(["envim:focus", "grid:cursor", "grid:busy"]);
+    Emit.clear(["envim:focus", "grid:cursor", "grid:busy", "mode:change"]);
   }
 
   private onFocus() {
     this.input.current?.focus();
   }
 
-  private onCursor(cursor: { row: number, col: number, width: number, hl: number, zIndex: number }) {
+  private onCursor(cursor: { row: number, col: number, width: number, zIndex: number }) {
     const style = this.state.style;
-    style.width = this.state.busy ? 0 : col2X(cursor.width);
+
+    style.width = this.getWidth(cursor.width, this.state.shape);
     style.top = row2Y(cursor.row);
     style.left = col2X(cursor.col);
     style.zIndex = cursor.zIndex;
-    style.color = Highlights.color(cursor.hl, "background");
-    style.background = Highlights.color(cursor.hl, "foreground");
     this.setState({ style });
   }
 
   private onBusy(busy: boolean) {
     this.setState({ busy });
+  }
+
+  private changeMode(mode: IMode) {
+    const style = this.state.style;
+    const shape = mode.cursor_shape;
+
+    style.width = this.getWidth(1, shape);
+    style.color = Highlights.color(mode.attr_id, "background");
+    style.background = Highlights.color(mode.attr_id, "foreground");
+
+    this.setState({ style, shape });
+  }
+
+  private getWidth(width: number, shape: "block" | "vertical" | "horizontal") {
+    if (this.state.busy) return 0;
+    if (width > 1) return col2X(width);
+    return shape === "block" ? col2X(width) : 2;
   }
 
   private onKeyDown(e: KeyboardEvent) {
@@ -73,7 +92,7 @@ export class InputComponent extends React.Component<Props, States> {
 
     if (this.state.composit) {
       const style = this.state.style;
-      style.width = this.state.busy ? 0 : col2X(input.value.length * 2);
+      style.width = this.getWidth(input.value.length * 2, this.state.shape);
       this.setState({ style });
     } else {
       code && Emit.send("envim:input", code);
@@ -90,7 +109,7 @@ export class InputComponent extends React.Component<Props, States> {
 
     input.value && Emit.send("envim:input", input.value);
     input.value = "";
-    style.width = this.state.busy ? 0 : col2X(1);
+    style.width = this.getWidth(1, this.state.shape);
     this.setState({ composit: false, style });
   }
 
@@ -100,7 +119,7 @@ export class InputComponent extends React.Component<Props, States> {
 
   render() {
     return (
-      <input style={this.getStyle()} autoFocus={true} ref={this.input}
+      <input className="animate blink" style={this.getStyle()} autoFocus={true} ref={this.input}
         onKeyDown={this.onKeyDown.bind(this)}
         onCompositionStart={this.onCompositionStart.bind(this)}
         onCompositionEnd={this.onCompositionEnd.bind(this)}

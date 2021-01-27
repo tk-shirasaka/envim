@@ -1,6 +1,6 @@
 .animate {
   animation-duration: .5s;
-  animation-timing-function:  ease-out;
+  animation-timing-function: ease-out;
 
   &.slide-right {
     animation-name: slideRight, fadeIn;
@@ -15,6 +15,13 @@
   }
 
   &.fade-in {
+    animation-name: fadeIn;
+  }
+
+  &.blink {
+    animation-duration: 1s;
+    animation-timing-function: ease-in;
+    animation-iteration-count: infinite;
     animation-name: fadeIn;
   }
 }

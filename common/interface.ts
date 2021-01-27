@@ -32,6 +32,9 @@ export interface IMessage {
 }
 
 export interface IMode {
+  cursor_shape: "block" | "horizontal" | "vertical";
+  cell_percentage: number;
+  attr_id: number;
   name: string;
   short_name: string;
 }

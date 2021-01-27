@@ -45,11 +45,11 @@ export class Grid {
   }
 
   getCursorPos(row: number, col: number) {
-    const { width, hl } = this.getCell(row, col);
+    const { width } = this.getCell(row, col);
     row += this.info.offset.row;
     col += this.info.offset.col;
 
-    return { col, row, width, hl, zIndex: this.info.zIndex };
+    return { col, row, width, zIndex: this.info.zIndex };
   }
 
   getDefault(row: number, col: number) {
