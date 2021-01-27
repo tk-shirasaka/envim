@@ -163,10 +163,18 @@ export class App {
   }
 
   private gridResize(grid: number, width: number, height: number) {
+    let refresh = false;
+
     if (this.grids[grid]) {
-      this.grids[grid].resize(width, height) && Emit.send("grid:resize", grid, width, height);
+      refresh = this.grids[grid].resize(width, height);
     } else {
+      refresh = true;
       this.grids[grid] = new Grid(width, height);
+    }
+
+    if (refresh) {
+      const { pgrid, zIndex, offset, focusable } = this.grids[grid].getInfo();
+      this.winPos(grid, offset.anchor, pgrid, offset.row, offset.col, width, height, focusable, zIndex);
     }
   }
 
@@ -201,7 +209,7 @@ export class App {
   }
 
   private gridClear(grid: number) {
-    const { width, height } = this.grids[grid].getSize();
+    const { width, height } = this.grids[grid].getInfo();
     this.grids[grid] = new Grid(width, height);
     Emit.send(`clear:${grid}`);
   }
@@ -220,24 +228,25 @@ export class App {
   }
 
   private winPos(grid: number, anchor: string, pgrid: number, row: number, col: number, width: number, height: number, focusable: boolean, zIndex: number) {
-    if (this.grids[grid] && this.grids[pgrid]) {
-      const winsize = this.grids[1].getSize();
-      const current = this.grids[grid].getSize();
-      const offset = this.grids[pgrid].getOffsetPos();
-      width = width || current.width;
-      height = height || current.height;
+    if (!this.grids[grid]) this.grids[grid] = new Grid(width, height);
 
-      const top = offset.row + (anchor[0] === "N" ? row : row - height);
-      const left = offset.col + (anchor[1] === "W" ? col : col - width);
+    const winsize = this.grids[1].getInfo();
+    const current = this.grids[grid].getInfo();
+    const offset = this.grids[pgrid].getInfo().offset;
 
-      this.grids[grid].setOffsetPos(top, left, zIndex);
-      Emit.send("win:pos", grid, width, height, top, left, focusable, zIndex);
+    width = width || current.width;
+    height = height || current.height;
 
-      if (winsize.width < left + width || winsize.height < top + height) {
-        width -= Math.max(0, left + width - winsize.width);
-        height -= Math.max(0, top + height - winsize.height);
-        Emit.share("envim:resize", grid, width, height);
-      }
+    const top = Math.min(winsize.height - 1, Math.max(0, offset.row + (anchor[0] === "N" ? row : row - height)));
+    const left = Math.min(winsize.width - 1, Math.max(0, offset.col + (anchor[1] === "W" ? col : col - width)));
+
+    this.grids[grid].setInfo(pgrid, width, height, zIndex, { anchor, row: top, col: left }, focusable);
+    Emit.send("win:pos", grid, width, height, top, left, focusable, zIndex);
+
+    if (winsize.width < left + width || winsize.height < top + height) {
+      width -= Math.max(1, left + width - winsize.width);
+      height -= Math.max(1, top + height - winsize.height);
+      Emit.share("envim:resize", grid, width, height);
     }
   }
 
@@ -296,8 +305,8 @@ export class App {
 
   private popupmenuShow(items: string[][], selected: number, row: number, col: number, grid: number) {
     const height = Math.min(5, items.length);
-    const offset = this.grids[grid]?.getOffsetPos() || { row: 1, col: this.grids[1].getSize().width * 0.1 + 3 };
-    const parent = this.grids[1].getSize();
+    const offset = this.grids[grid]?.getInfo().offset || { row: 1, col: this.grids[1].getInfo().width * 0.1 + 3 };
+    const parent = this.grids[1].getInfo();
 
     row += offset.row;
     col += offset.col;

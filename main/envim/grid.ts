@@ -3,20 +3,34 @@ import { ICell } from "common/interface";
 export class Grid {
   private lines: ICell[][] = [];
   private flush: { [k: string]: ICell } = {};
-  private width :number = 0;
-  private height: number = 0;
-  private offset: { row: number, col: number, zIndex: number } = { row: 0, col: 0, zIndex: 0 };
+  private info: {
+    pgrid: number;
+    width: number;
+    height: number;
+    zIndex: number;
+    offset: { anchor: string, row: number, col: number };
+    focusable: boolean;
+  }
 
   constructor(width :number, height: number) {
+    this.info = { pgrid: 1, width: 0, height: 0, zIndex: 0, offset: { anchor: "NW", row: 0, col: 0 }, focusable: true };
     this.resize(width, height);
   }
 
+  setInfo(pgrid: number, width: number, height: number, zIndex: number, offset: { anchor: string, row: number, col: number }, focusable: boolean) {
+    this.info = { pgrid, width, height, zIndex, offset, focusable };
+  }
+
+  getInfo() {
+    return this.info;
+  }
+
   resize(width :number, height: number) {
-    if (this.width === width && this.height === height) return false;
+    if (this.info.width === width && this.info.height === height) return false;
     const old = this.lines;
 
-    this.width = width;
-    this.height = height;
+    this.info.width = width;
+    this.info.height = height;
     this.lines = [];
 
     for (let i = 0; i < height; i++) {
@@ -30,24 +44,12 @@ export class Grid {
     return true;
   }
 
-  getSize() {
-    return { width: this.width, height: this.height };
-  }
-
   getCursorPos(row: number, col: number) {
     const { width, hl } = this.getCell(row, col);
-    row += this.offset.row;
-    col += this.offset.col;
+    row += this.info.offset.row;
+    col += this.info.offset.col;
 
-    return { col, row, width, hl, zIndex: this.offset.zIndex };
-  }
-
-  setOffsetPos(row: number, col: number, zIndex: number) {
-    this.offset = { row, col, zIndex };
-  }
-
-  getOffsetPos() {
-    return this.offset;
+    return { col, row, width, hl, zIndex: this.info.zIndex };
   }
 
   getDefault(row: number, col: number) {

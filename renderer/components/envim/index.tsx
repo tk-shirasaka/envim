@@ -27,7 +27,7 @@ interface States {
     height: number;
     top: number;
     left: number;
-    display?: "block" | "none";
+    display: "block" | "none";
     cursor: "default" | "not-allowed";
   }};
 }
@@ -59,7 +59,6 @@ export class EnvimComponent extends React.Component<Props, States> {
     this.setSize();
     this.state = { grids: {} };
     Emit.on("highlight:set", this.onHighlight.bind(this));
-    Emit.on("grid:resize", this.onResize.bind(this));
     Emit.on("win:pos", this.onWin.bind(this));
     Emit.on("win:hide", this.hideWin.bind(this));
     Emit.on("win:close", this.closeWin.bind(this));
@@ -75,7 +74,7 @@ export class EnvimComponent extends React.Component<Props, States> {
   }
 
   componentWillUnmount() {
-    Emit.clear(["highlight:set", "grid:resize", "win:pos", "win:hide", "win:close"]);
+    Emit.clear(["highlight:set", "win:pos", "win:hide", "win:close"]);
   }
 
   private setSize() {
@@ -91,18 +90,6 @@ export class EnvimComponent extends React.Component<Props, States> {
     highlights.forEach(({id, ui, hl}) => {
       Highlights.setHighlight(id, ui, hl);
     });
-  }
-
-  private onResize(grid: number, width: number, height: number) {
-    if (this.state.grids[grid]) {
-      const grids = this.state.grids;
-      const { top, left, cursor, display, zIndex } = grids[grid];
-
-      [ height, width ] = [ row2Y(height), col2X(width) ];
-      grids[grid] = { width, height, top, left, cursor, display, zIndex };
-
-      this.setState({ grids });
-    }
   }
 
   private onWin(grid: number, width: number, height: number, top: number, left: number, focusable: boolean, zIndex: number) {
@@ -135,15 +122,14 @@ export class EnvimComponent extends React.Component<Props, States> {
   }
 
   render() {
-    const main = { zIndex: 1, width: this.editor.width, height: this.editor.height, top: 0, left: 0 };
+    const grids = Object.keys(this.state.grids).length;
 
     return (
       <div style={this.main}>
         <TablineComponent {...this.header} />
         <div style={{...styles.editor, ...this.editor}}>
-          <EditorComponent grid={1} fill={Object.keys(this.state.grids).length === 0} style={main} />
           { Object.keys(this.state.grids).reverse().map(grid => (
-            <EditorComponent key={grid} grid={+grid} fill={true} style={this.state.grids[+grid]} />
+            <EditorComponent key={grid} grid={+grid} fill={!(+grid === 1 && grids > 1)} style={this.state.grids[+grid]} />
           )) }
           <CmdlineComponent />
           <PopupmenuComponent />

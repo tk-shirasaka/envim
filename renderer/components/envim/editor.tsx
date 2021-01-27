@@ -15,8 +15,8 @@ interface Props {
     height: number;
     top: number;
     left: number;
-    display?: "block" | "none";
-    cursor?: "default" | "not-allowed";
+    display: "block" | "none";
+    cursor: "default" | "not-allowed";
   };
 }
 
