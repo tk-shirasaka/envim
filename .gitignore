@@ -1,5 +1,6 @@
 node_modules
 styles.css
-main/bundle.js
-renderer/bundle.js
+main.js
+preload.js
+renderer.js
 dist/*

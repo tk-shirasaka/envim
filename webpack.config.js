@@ -4,10 +4,13 @@ const path = require('path');
 var main = {
   mode: 'development',
   target: 'electron-main',
-  entry: path.join(__dirname, 'main', 'index'),
+  entry: {
+    main: path.join(__dirname, 'main', 'index'),
+    preload: path.join(__dirname, 'preload', 'index'),
+  },
   output: {
-    filename: 'bundle.js',
-    path: path.resolve(__dirname, 'main')
+    filename: '[name].js',
+    path: __dirname,
   },
   node: {
     __dirname: false,
@@ -16,12 +19,7 @@ var main = {
   module: {
     rules: [{
       test: /.ts$/,
-      include: [
-        path.resolve(__dirname, 'main'),
-      ],
-      exclude: [
-        path.resolve(__dirname, 'node_modules'),
-      ],
+      exclude: /node_modules/,
       loader: 'ts-loader',
     }]
   },
@@ -35,8 +33,8 @@ var renderer = {
   target: 'electron-renderer',
   entry: path.join(__dirname, 'renderer', 'components', 'index'),
   output: {
-    filename: 'bundle.js',
-    path: path.resolve(__dirname, 'renderer')
+    filename: 'renderer.js',
+    path: __dirname,
   },
   resolve: {
     extensions: ['.js', '.jsx', '.ts', '.tsx', 'scss']
@@ -50,7 +48,6 @@ var renderer = {
         ],
         include: [
           path.resolve(__dirname, 'renderer'),
-          path.resolve(__dirname, 'node_modules'),
         ],
       },
       {
@@ -64,7 +61,7 @@ var renderer = {
     ]
   },
   plugins: [
-    new MiniCssExtractPlugin({ filename: '../styles.css' }),
+    new MiniCssExtractPlugin({ filename: 'styles.css' }),
   ],
 };
 

@@ -1,4 +1,4 @@
-import { ipcMain, IpcMainEvent } from "electron";
+import { ipcMain, IpcMainInvokeEvent } from "electron";
 import { EventEmitter } from "events";
 
 import { Browser } from "./browser";
@@ -8,7 +8,7 @@ export class Emit {
 
   static on(event: string, callback: (...args: any[]) => void) {
     Emit.emit.on(event, callback);
-    ipcMain.on(event, (_: IpcMainEvent, ...args: any[]) => Emit.share(event, ...args));
+    ipcMain.handle(event, (_: IpcMainInvokeEvent, ...args: any[]) => Emit.share(event, ...args));
   }
 
   static share(event: string, ...args: any[]) {

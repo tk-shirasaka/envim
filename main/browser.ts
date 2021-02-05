@@ -1,4 +1,5 @@
 import { app, BrowserWindow } from "electron";
+import { join } from "path";
 
 import { setMenu } from "./menu";
 import { Emit } from "./emit";
@@ -36,12 +37,15 @@ export class Browser {
       resizable: true,
       frame: false,
       webPreferences: {
-        nodeIntegration: true,
+        nodeIntegration: false,
+        contextIsolation: true,
+        worldSafeExecuteJavaScript: true,
+        preload: join(__dirname, "preload.js"),
       },
     });
 
     Browser.win.maximize();
-    Browser.win.loadURL(`file://${__dirname}/../index.html`);
+    Browser.win.loadFile(join(__dirname, "index.html"));
     Browser.win.on("closed", () => delete(Browser.win));
   }
 }
