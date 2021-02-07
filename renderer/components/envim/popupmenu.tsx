@@ -101,13 +101,13 @@ export class PopupmenuComponent extends React.Component<Props, States> {
 
   private getKindStyle(kind: string) {
     if (kind === "") return "";
-    switch (kind[0].toUpperCase()) {
-      case "A": case "B": case "C": case "D": case "E": return "bold color-red-fg";
-      case "F": case "G": case "H": case "I": case "J": return "bold color-green-fg";
-      case "K": case "L": case "M": case "N": case "O": return "bold color-lightblue-fg";
-      case "P": case "Q": case "R": case "S": case "T": return "bold color-purple-fg";
-      case "U": case "V": case "W": case "X": case "Y": return "bold color-yellow-fg";
-      case "Z": default: return "bold color-orange-fg";
+    switch (kind[0].charCodeAt(0) % 6) {
+      case 0: return "bold color-red-fg";
+      case 1: return "bold color-green-fg";
+      case 2: return "bold color-lightblue-fg";
+      case 3: return "bold color-purple-fg";
+      case 4: return "bold color-yellow-fg";
+      case 5: return "bold color-orange-fg";
     }
   }
 
