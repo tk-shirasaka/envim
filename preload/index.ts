@@ -5,8 +5,10 @@ const emit = new EventEmitter;
 
 const on = (event: string, callback: (...args: any[]) => void) => {
   emit.on(event, callback);
-  ipcRenderer.on(event, (_: IpcRendererEvent, ...args: any[]) => share(event, ...args));
-  ipcRenderer.on(event, (_: IpcRendererEvent, ...args: any[]) => share("debug", event, ...args));
+  ipcRenderer.on(event, (_: IpcRendererEvent, ...args: any[]) => {
+    share(event, ...args);
+    share("debug", event, ...args);
+  });
 };
 
 const share = (event: string, ...args: any[]) => {
