@@ -9,6 +9,10 @@ class Highlight {
   private decorate: "none" | "strikethrough" | "underline" | "undercurl";
 
   constructor(highlight: IHighlight, alpha: number) {
+    if (highlight.blend !== undefined) {
+      alpha = Math.min(alpha, highlight.blend === 100 ? 0 : (100 - highlight.blend) / 100);
+    }
+
     this.background = this.intToColor(highlight.reverse ? highlight.foreground : highlight.background, alpha);
     this.foreground = this.intToColor(highlight.reverse ? highlight.background : highlight.foreground, 1);
     this.special = this.intToColor(highlight.special, 1);
