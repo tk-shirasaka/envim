@@ -18,6 +18,7 @@ export class Grid {
   }
 
   setInfo(pgrid: number, width: number, height: number, zIndex: number, offset: { anchor: string, row: number, col: number }, focusable: boolean) {
+    this.resize(width, height);
     this.info = { pgrid, width, height, zIndex, offset, focusable };
   }
 
@@ -76,15 +77,15 @@ export class Grid {
   }
 
   scroll(top: number, bottom: number, left: number, right: number, rows: number, cols: number) {
-    const ylimit = rows > 0 ? bottom - top - rows : bottom - top + rows;
-    const xlimit = cols > 0 ? right - left - cols  : right - left + cols;
+    const ylimit = bottom - top - Math.abs(rows);
+    const xlimit = right - left - Math.abs(cols);
     const asc = cols > 0;
 
     for (let i = 0; i <= ylimit; i++) {
-      const trow = rows > 0 ? top + i : bottom - i - 1;
+      const trow = rows > 0 ? top + i : bottom - i;
       const srow = trow + rows;
       for (let j = 0; j <= xlimit; j++) {
-        const tcol = cols > 0 ? left + j : right - j - 1;
+        const tcol = cols > 0 ? left + j : right - j;
         const scol = tcol + cols;
         const { text, hl } = this.getCell(srow, scol);
 
