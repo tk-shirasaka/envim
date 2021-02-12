@@ -44,7 +44,7 @@ class Highlight {
   }
 
   decoration() {
-    return ["underline", "undercurl"].indexOf(this.decorate) >= 0;
+    return this.decorate;
   }
 }
 

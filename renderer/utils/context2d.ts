@@ -23,13 +23,30 @@ export class Context2D {
   }
 
   private underline(x: number, y: number, width: number, hl: number) {
-    if (Highlights.decoration(hl)) {
+    const type = Highlights.decoration(hl);
+    const decoration = ["underline", "undercurl"].indexOf(type) >= 0;
+
+    if (decoration) {
       this.ctx.save();
       this.ctx.strokeStyle = Highlights.color(hl, "special");
       this.ctx.beginPath();
-      this.ctx.moveTo(x, y + this.font.height - 1);
-      this.ctx.lineTo(x + width * this.font.width, y + this.font.height - 1);
-      this.ctx.closePath();
+      this.ctx.lineWidth = 2;
+
+      switch(type) {
+        case "underline":
+          this.ctx.moveTo(x, y + this.font.height - 1);
+          this.ctx.lineTo(x + width * this.font.width, y + this.font.height - 1);
+          break;
+
+        case "undercurl":
+          const cycle = this.font.width / 8;
+          for (let i = 0; i < width * 2; i++) {
+            this.ctx.arc(x + (i * 4 + 0) * cycle, y + this.font.height - cycle * 1.2, cycle, 0.9 * Math.PI, 0.1 * Math.PI, true);
+            this.ctx.arc(x + (i * 4 + 2) * cycle, y + this.font.height - cycle * 0.9, cycle, 1.1 * Math.PI, 1.9 * Math.PI, false);
+          }
+          break;
+      }
+
       this.ctx.stroke()
       this.ctx.restore();
     }
