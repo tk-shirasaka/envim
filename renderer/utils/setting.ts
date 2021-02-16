@@ -20,6 +20,7 @@ const defaultSetting: ISetting = {
     ext_popupmenu: true,
     ext_messages: true,
     ext_hlstate: true,
+    ext_termcolors: true,
   },
 };
 
