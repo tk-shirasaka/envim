@@ -4,22 +4,21 @@ export class Grid {
   private lines: ICell[][] = [];
   private flush: { [k: string]: ICell } = {};
   private info: {
-    pgrid: number;
     width: number;
     height: number;
     zIndex: number;
-    offset: { anchor: string, row: number, col: number };
+    offset: { row: number, col: number };
     focusable: boolean;
   }
 
   constructor(width :number, height: number) {
-    this.info = { pgrid: 1, width: 0, height: 0, zIndex: 0, offset: { anchor: "NW", row: 0, col: 0 }, focusable: true };
+    this.info = { width: 0, height: 0, zIndex: 0, offset: { row: 0, col: 0 }, focusable: true };
     this.resize(width, height);
   }
 
-  setInfo(pgrid: number, width: number, height: number, zIndex: number, offset: { anchor: string, row: number, col: number }, focusable: boolean) {
+  setInfo(width: number, height: number, zIndex: number, offset: { row: number, col: number }, focusable: boolean) {
     this.resize(width, height);
-    this.info = { pgrid, width, height, zIndex, offset, focusable };
+    this.info = { width, height, zIndex, offset, focusable };
   }
 
   getInfo() {
@@ -82,10 +81,10 @@ export class Grid {
     const asc = cols > 0;
 
     for (let i = 0; i <= ylimit; i++) {
-      const trow = rows > 0 ? top + i : bottom - i;
+      const trow = rows > 0 ? top + i : bottom - i - 1;
       const srow = trow + rows;
       for (let j = 0; j <= xlimit; j++) {
-        const tcol = cols > 0 ? left + j : right - j;
+        const tcol = cols > 0 ? left + j : right - j - 1;
         const scol = tcol + cols;
         const { text, hl } = this.getCell(srow, scol);
 

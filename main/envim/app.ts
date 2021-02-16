@@ -68,10 +68,13 @@ export class App {
 
         /** ext_multigrid **/
         case "win_pos":
-          r.forEach(r => this.winPos(r[0], "NW", 1, r[2], r[3], r[4], r[5], true, 1));
+          r.forEach(r => this.winPos(r[0], r[2], r[3], r[4], r[5], true, 1));
         break;
         case "win_float_pos":
-          r.forEach(r => this.winPos(r[0], r[2], r[3], r[4], r[5], 0, 0, r[6], 2));
+          r.forEach(r => this.winFloatPos(r[0], r[2], r[3], r[4], r[5], r[6]));
+        break;
+        case "msg_set_pos":
+          r.forEach(r => this.msgSetPos(r[0], r[1]));
         break;
         case "win_hide":
           r.forEach(r => this.winHide(r[0]));
@@ -173,8 +176,8 @@ export class App {
     }
 
     if (refresh) {
-      const { pgrid, zIndex, offset, focusable } = this.grids[grid].getInfo();
-      this.winPos(grid, offset.anchor, pgrid, offset.row, offset.col, width, height, focusable, zIndex);
+      const { zIndex, offset, focusable } = this.grids[grid].getInfo();
+      this.winPos(grid, offset.row, offset.col, width, height, focusable, zIndex);
     }
   }
 
@@ -227,27 +230,37 @@ export class App {
     this.grids[grid].scroll(top, bottom, left, right, rows, cols)
   }
 
-  private winPos(grid: number, anchor: string, pgrid: number, row: number, col: number, width: number, height: number, focusable: boolean, zIndex: number) {
+  private winPos(grid: number, row: number, col: number, width: number, height: number, focusable: boolean, zIndex: number) {
     if (!this.grids[grid]) this.grids[grid] = new Grid(width, height);
 
+    this.grids[grid].setInfo(width, height, zIndex, { row, col }, focusable);
+    Emit.send("win:pos", grid, width, height, row, col, focusable, zIndex);
+  }
+
+  private winFloatPos(grid: number, anchor: string, pgrid: number, row: number, col: number, focusable: boolean) {
     const winsize = this.grids[1].getInfo();
-    const current = this.grids[grid].getInfo();
-    const offset = this.grids[pgrid].getInfo().offset;
+    const current = this.grids[grid] ? this.grids[grid].getInfo() : this.grids[1].getInfo();
+    const { offset, zIndex } = this.grids[pgrid].getInfo();
 
-    width = width || current.width;
-    height = height || current.height;
+    row = Math.min(winsize.height - 1, Math.max(0, offset.row + (anchor[0] === "N" ? row : row - current.height)));
+    col = Math.min(winsize.width - 1, Math.max(0, offset.col + (anchor[1] === "W" ? col : col - current.width)));
 
-    const top = Math.min(winsize.height - 1, Math.max(0, offset.row + (anchor[0] === "N" ? row : row - height)));
-    const left = Math.min(winsize.width - 1, Math.max(0, offset.col + (anchor[1] === "W" ? col : col - width)));
+    const width = current.width - Math.max(0, col + current.width - winsize.width);
+    const height = current.height - Math.max(0, row + current.height - winsize.height);
 
-    this.grids[grid].setInfo(pgrid, width, height, zIndex, { anchor, row: top, col: left }, focusable);
-    Emit.send("win:pos", grid, width, height, top, left, focusable, zIndex);
+    this.winPos(grid, row, col, width, height, focusable, zIndex + 5);
 
-    if (winsize.width < left + width || winsize.height < top + height) {
-      width -= Math.max(1, left + width - winsize.width);
-      height -= Math.max(1, top + height - winsize.height);
+    if (current.width < width || current.height < height) {
       Emit.share("envim:resize", grid, width, height);
     }
+  }
+
+  private msgSetPos(grid: number, row: number) {
+    const winsize = this.grids[1].getInfo();
+    const width = winsize.width;
+    const height = winsize.height - row;
+
+    this.winPos(grid, row, 0, width, height, false, winsize.zIndex + 3);
   }
 
   private winHide(grid: number) {
