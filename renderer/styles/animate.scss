@@ -1,6 +1,9 @@
 .animate {
+  transition-property: top, left, right, bottom, width, height;
+  transition-duration: .1s;
+  transition-timing-function: linear;
   animation-duration: .5s;
-  animation-timing-function: ease-out;
+  animation-timing-function: ease-in-out;
 
   &.slide-right {
     animation-name: slideRight, fadeIn;

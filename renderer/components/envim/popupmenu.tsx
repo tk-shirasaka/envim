@@ -57,12 +57,13 @@ export class PopupmenuComponent extends React.Component<Props, States> {
   private sendPum(state: States) {
     const { row, col } = state;
     const items = this.getItems(state);
-    const width = Math.max(...items.map(({ word, menu, kind }) => [word, menu, kind].join("").length)) + 5;
+    const width = Math.max(...items.map(({ word, menu, kind }) => ` ${word}  ${menu}  ${kind} `.length));
 
     Emit.send("envim:api", "nvim_ui_pum_set_bounds", [width, items.length, row, col]);
   }
 
   private onPopupmenu(state: States) {
+    state.col--;
     this.sendPum(state);
     this.setState(state);
   }
@@ -89,11 +90,11 @@ export class PopupmenuComponent extends React.Component<Props, States> {
   }
 
   private getScopeStyle() {
-    const { size, height, width } = Setting.font;
+    const { size, height } = Setting.font;
     return {
       ...styles.scope,
       top: row2Y(this.state.row),
-      left: col2X(this.state.col) - width,
+      left: col2X(this.state.col),
       fontSize: size,
       lineHeight: `${height}px`,
     };
@@ -120,8 +121,9 @@ export class PopupmenuComponent extends React.Component<Props, States> {
       <div className="animate fade-in" style={this.getScopeStyle()}>
         {items.map(({ word, kind, menu }, i) => (
           <div className={`color-black ${this.state.selected === i + start ? "active" : "clickable"}`} style={styles.line} onClick={() => this.onItem(i + start)} key={i}>
-            <div style={column}>{ word } { menu }</div>
+            <div style={column}>{ word }</div>
             <div className={this.getKindStyle(kind)} style={column}>{ kind }</div>
+            <div className={this.getKindStyle(menu)} style={column}>{ menu }</div>
           </div>
         ))}
       </div>

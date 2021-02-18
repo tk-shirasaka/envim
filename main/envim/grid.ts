@@ -53,7 +53,7 @@ export class Grid {
   }
 
   getDefault(row: number, col: number) {
-    return { row, col, text: " ", hl: 0, width: 1 };
+    return { row, col, text: " ", hl: 0, width: 0 };
   }
 
   getCell(row: number, col: number) {
