@@ -95,14 +95,17 @@ export class EnvimComponent extends React.Component<Props, States> {
   private onWin(grid: number, width: number, height: number, top: number, left: number, focusable: boolean, zIndex: number) {
     const grids = this.state.grids;
     const cursor: "default" | "not-allowed" = focusable ? "default" : "not-allowed";
-    const display = "block";
+    const display: "block" = "block";
 
     [ height, width ] = [ row2Y(height), col2X(width) ];
     [ top, left ] = [ row2Y(top), col2X(left) ];
 
-    grids[grid] = { width, height, top, left, cursor, display, zIndex };
+    const next = { width, height, top, left, cursor, display, zIndex };
 
-    this.setState({ grids });
+    if (JSON.stringify(grids[grid]) !== JSON.stringify(next)) {
+      grids[grid] = next;
+      this.setState({ grids });
+    }
   }
 
   private hideWin(grid: number) {
