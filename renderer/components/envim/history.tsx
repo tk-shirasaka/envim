@@ -61,7 +61,7 @@ export class HistoryComponent extends React.Component<Props, States> {
   private onDebug(event: string, ...args: any[]) {
     if (!this.state.debug) return;
 
-    this.onHistory([{ contents: [{ hl: 0, content: `-- ${event} --\n${JSON.stringify(args, null, 2)}` }], kind: "debug" }]);
+    this.onHistory([{ contents: [{ hl: 0, content: `-- ${event} --\n${JSON.stringify(args, null, 2)}` }], kind: "debug", timestamp: 0 }]);
   }
 
   private onClear() {

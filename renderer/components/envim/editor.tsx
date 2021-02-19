@@ -13,8 +13,7 @@ interface Props {
     zIndex: number;
     width: number;
     height: number;
-    top: number;
-    left: number;
+    transform: string;
     display: "block" | "none";
     cursor: "default" | "not-allowed";
   };

@@ -28,6 +28,7 @@ export interface ITab {
 
 export interface IMessage {
   kind: string;
+  timestamp: number;
   contents: { hl: number, content: string }[];
 }
 

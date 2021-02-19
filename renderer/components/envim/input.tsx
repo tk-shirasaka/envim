@@ -11,7 +11,7 @@ interface Props {
 }
 
 interface States {
-  style: { top: number; left: number; width: number, zIndex: number; color: string; background: string; };
+  style: { transform: string; width: number, zIndex: number; color: string; background: string; };
   composit: boolean;
   busy: boolean;
   shape: "block" | "vertical" | "horizontal";
@@ -35,7 +35,7 @@ export class InputComponent extends React.Component<Props, States> {
   constructor(props: Props) {
     super(props);
 
-    this.state = { style: { top: 0, left: 0, width: col2X(1), zIndex: 0, color: "none", background: "none" }, composit: false, busy: false, shape: "block" };
+    this.state = { style: { transform: "", width: col2X(1), zIndex: 0, color: "none", background: "none" }, composit: false, busy: false, shape: "block" };
     Emit.on("envim:focus", this.onFocus.bind(this));
     Emit.on("grid:cursor", this.onCursor.bind(this));
     Emit.on("grid:busy", this.onBusy.bind(this));
@@ -54,8 +54,7 @@ export class InputComponent extends React.Component<Props, States> {
     const style = this.state.style;
 
     style.width = this.getWidth(cursor.width, this.state.shape);
-    style.top = row2Y(cursor.row);
-    style.left = col2X(cursor.col);
+    style.transform = `translate(${col2X(cursor.col)}px, ${row2Y(cursor.row)}px)`;
     style.zIndex = cursor.zIndex;
     this.setState({ style });
   }

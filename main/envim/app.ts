@@ -345,7 +345,6 @@ export class App {
   }
 
   private msgShow(group: string, contents: any[]) {
-    group === "history" && this.messages.clear(group);
     contents.forEach(([kind, messages, replace_last]) => {
       if (messages.length) {
         this.messages.set(group, kind, messages, replace_last);
@@ -354,7 +353,14 @@ export class App {
       }
     });
 
-    Emit.send(`messages:${group}`, this.messages.get(group));
+    const notificates = [
+      ...this.messages.get("notificate"),
+      ...this.messages.get("mode"),
+      ...this.messages.get("command"),
+      ...this.messages.get("ruler"),
+    ].sort((a, b) => a.timestamp - b.timestamp);
+
+    Emit.send("messages:notificate", notificates);
   }
 
   private msgHistoryShow(contents: any[]) {

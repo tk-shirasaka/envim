@@ -10,23 +10,28 @@ interface Props {
 }
 
 interface States {
-  notificate: IMessage[];
-  mode: IMessage[];
-  command: IMessage[];
-  ruler: IMessage[];
+  messages: IMessage[];
 }
 
 const position: "absolute" = "absolute";
+const overflowX: "hidden" = "hidden";
+const overflowY: "auto" = "auto";
 const styles = {
-  messages: {
+  scope: {
     position,
+    overflowX,
+    overflowY,
     zIndex: 10,
     right: 0,
     width: 300,
     maxHeight: "100%",
-    borderRadius: "0 0 0 4px",
-    boxShadow: "8px 8px 4px 0 rgba(0, 0, 0, 0.6)",
-    overflow: "auto",
+  },
+  messages: {
+    margin: 8,
+    overflowX,
+    overflowY,
+    borderRadius: 4,
+    boxShadow: "0 0 8px 0 rgba(0, 0, 0, 0.6)",
   },
 };
 
@@ -34,61 +39,35 @@ export class NotificateComponent extends React.Component<Props, States> {
   constructor(props: Props) {
     super(props);
 
-    this.state = { notificate: [], mode: [], command: [], ruler: [] };
+    this.state = { messages: [] };
     Emit.on("messages:notificate", this.onNotificate.bind(this));
-    Emit.on("messages:mode", this.onMode.bind(this));
-    Emit.on("messages:command", this.onCommand.bind(this));
-    Emit.on("messages:ruler", this.onRuler.bind(this));
   }
 
   componentWillUnmount() {
-    Emit.clear(["messages:notificate", "messages:mode", "messages:command", "messages:ruler"]);
+    Emit.clear(["messages:notificate"]);
   }
 
-  private onNotificate(notificate: IMessage[]) {
-    this.setState({ notificate });
+  private onNotificate(messages: IMessage[]) {
+    this.setState({ messages });
   }
 
-  private onMode(mode: IMessage[]) {
-    this.setState({ mode });
-  }
-
-  private onCommand(command: IMessage[]) {
-    this.setState({ command });
-  }
-
-  private onRuler(ruler: IMessage[]) {
-    this.setState({ ruler });
-  }
-
-  private onClose(e: MouseEvent, type: string) {
+  private onClose(e: MouseEvent, i: number) {
     e.stopPropagation();
     e.preventDefault();
 
-    if (type === "notificate") this.onNotificate([]);
-    if (type === "mode") this.onMode([]);
-    if (type === "command") this.onCommand([]);
-    if (type === "ruler") this.onRuler([]);
+    const messages = this.state.messages;
 
+    messages.splice(i, 1);
+    this.setState({ messages });
     Emit.share("envim:focus");
   }
 
   render() {
-    if (
-      this.state.notificate.length === 0 &&
-      this.state.mode.length === 0 &&
-      this.state.command.length === 0 &&
-      this.state.ruler.length === 0
-    ) {
-      return null;
-    }
-
-    return (
-      <div className="animate slide-right" style={styles.messages}>
-        {this.state.mode.map((message, i) => <MessageComponent key={i} message={message} open={true} onClick={e => this.onClose(e, "mode")} />)}
-        {this.state.command.map((message, i) => <MessageComponent key={i} message={message} open={true} onClick={e => this.onClose(e, "command")} />)}
-        {this.state.ruler.map((message, i) => <MessageComponent key={i} message={message} open={true} onClick={e => this.onClose(e, "ruler")} />)}
-        {this.state.notificate.map((message, i) => <MessageComponent key={i} message={message} open={true} onClick={e => this.onClose(e, "notificate")} />)}
+    return this.state.messages.length === 0 ? null : (
+      <div style={styles.scope}>
+        {this.state.messages.map((message, i) =>
+          <div className="animate slide-right" style={styles.messages} key={i}><MessageComponent message={message} open={true} onClick={e => this.onClose(e, i)} /></div>
+        )}
       </div>
     );
   }

@@ -25,8 +25,7 @@ interface States {
     zIndex: number;
     width: number;
     height: number;
-    top: number;
-    left: number;
+    transform: string;
     display: "block" | "none";
     cursor: "default" | "not-allowed";
   }};
@@ -96,11 +95,11 @@ export class EnvimComponent extends React.Component<Props, States> {
     const grids = this.state.grids;
     const cursor: "default" | "not-allowed" = focusable ? "default" : "not-allowed";
     const display: "block" = "block";
+    const transform = `translate(${col2X(left)}px, ${row2Y(top)}px)`;
 
     [ height, width ] = [ row2Y(height), col2X(width) ];
-    [ top, left ] = [ row2Y(top), col2X(left) ];
 
-    const next = { width, height, top, left, cursor, display, zIndex };
+    const next = { width, height, transform, cursor, display, zIndex };
 
     if (JSON.stringify(grids[grid]) !== JSON.stringify(next)) {
       grids[grid] = next;

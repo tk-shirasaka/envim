@@ -1,5 +1,5 @@
 .animate {
-  transition-property: top, left, right, bottom, width, height;
+  transition-property: transform, width, height;
   transition-duration: .1s;
   transition-timing-function: linear;
   animation-duration: .5s;

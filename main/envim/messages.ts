@@ -6,6 +6,7 @@ class Message {
   set(group: string, kind: string, messages: string[][], replace: boolean) {
     const i = replace ? -1 : this.messages.length - 1;
     const contents = messages.map(([hl, content]) => ({ hl: +hl, content }))
+    const timestamp = (new Date).getTime();
 
     replace && this.messages.pop();
 
@@ -13,7 +14,7 @@ class Message {
     if (group !== "history" && i >= 0 && this.messages[i].kind === kind) {
       this.messages[i].contents = [...this.messages[i].contents, { hl: 0, content: "\n" }, ...contents];
     } else {
-      this.messages = [...this.messages, { kind, contents }];
+      this.messages = [...this.messages, { kind, contents, timestamp }];
     }
   }
 

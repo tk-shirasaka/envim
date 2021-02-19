@@ -21,13 +21,13 @@ const styles = {
   scope: {
     zIndex: 10,
     position,
+    display: "table",
     overflow: "hidden",
     boxShadow: "8px 8px 4px 0 rgba(0, 0, 0, 0.6)",
     whiteSpace,
   },
   line: {
-    display: "flex",
-    justifyContent: "space-between",
+    display: "table-row",
   },
 };
 
@@ -93,8 +93,7 @@ export class PopupmenuComponent extends React.Component<Props, States> {
     const { size, height } = Setting.font;
     return {
       ...styles.scope,
-      top: row2Y(this.state.row),
-      left: col2X(this.state.col),
+      transform: `translate(${col2X(this.state.col)}px, ${row2Y(this.state.row)}px)`,
       fontSize: size,
       lineHeight: `${height}px`,
     };
@@ -115,7 +114,7 @@ export class PopupmenuComponent extends React.Component<Props, States> {
   render() {
     const { start } = this.state;
     const items = this.getItems(this.state);
-    const column = { padding: `0 ${Setting.font.width}px` };
+    const column = { padding: `0 ${Setting.font.width}px`, display: "table-cell" };
 
     return items.length === 0 ? null : (
       <div className="animate fade-in" style={this.getScopeStyle()}>
