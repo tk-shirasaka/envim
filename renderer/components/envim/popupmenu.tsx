@@ -1,8 +1,8 @@
-import React from "react";
+import React, { createRef, RefObject } from "react";
 
 import { Emit } from "../../utils/emit";
 import { Setting } from "../../utils/setting";
-import { row2Y, col2X } from "../../utils/size";
+import { row2Y, col2X, x2Col } from "../../utils/size";
 
 interface Props {
 }
@@ -21,10 +21,12 @@ const styles = {
   scope: {
     zIndex: 10,
     position,
-    display: "table",
-    overflow: "hidden",
-    boxShadow: "8px 8px 4px 0 rgba(0, 0, 0, 0.6)",
     whiteSpace,
+    overflow: "hidden",
+  },
+  viewer: {
+    display: "table",
+    boxShadow: "8px 8px 4px 0 rgba(0, 0, 0, 0.6)",
   },
   line: {
     display: "table-row",
@@ -33,6 +35,8 @@ const styles = {
 
 export class PopupmenuComponent extends React.Component<Props, States> {
   private maxline: number = 5;
+  private width: number = 0;
+  private viewer: RefObject<HTMLDivElement> = createRef<HTMLDivElement>();
 
   constructor(props: Props) {
     super(props);
@@ -43,28 +47,24 @@ export class PopupmenuComponent extends React.Component<Props, States> {
     Emit.on("popupmenu:hide", this.offPopupmenu.bind(this));
   }
 
+  componentDidUpdate() {
+    if (this.viewer.current && this.width === 0 && this.state.items.length > 0) {
+      const { row, col, items } = this.state;
+      const width = x2Col(this.viewer.current.clientWidth) + 1;
+      const length = Math.min(items.length, this.maxline);
+
+      Emit.send("envim:api", "nvim_ui_pum_set_bounds", [width, length, row, col]);
+    }
+  }
+
   componentWillUnmount() {
     Emit.clear(["popupmenu:show", "popupmenu:select", "popupmenu:hide"]);
   }
 
-  private getItems(state: States) {
-    const { start } = state;
-    const end = Math.min(state.items.length, start + this.maxline);
-
-    return state.items.slice(start, end)
-  }
-
-  private sendPum(state: States) {
-    const { row, col } = state;
-    const items = this.getItems(state);
-    const width = Math.max(...items.map(({ word, menu, kind }) => ` ${word}  ${menu}  ${kind} `.length));
-
-    Emit.send("envim:api", "nvim_ui_pum_set_bounds", [width, items.length, row, col]);
-  }
-
   private onPopupmenu(state: States) {
+    this.width = 0;
     state.col--;
-    this.sendPum(state);
+
     this.setState(state);
   }
 
@@ -73,7 +73,6 @@ export class PopupmenuComponent extends React.Component<Props, States> {
       ? this.state.start
       : Math.max(0, Math.min(this.state.items.length - this.maxline, this.state.start - this.state.selected + selected));
 
-    this.sendPum({ ...this.state, selected, start });
     this.setState({ selected, start });
   }
 
@@ -96,6 +95,14 @@ export class PopupmenuComponent extends React.Component<Props, States> {
       transform: `translate(${col2X(this.state.col)}px, ${row2Y(this.state.row)}px)`,
       fontSize: size,
       lineHeight: `${height}px`,
+      maxHeight: row2Y(this.maxline),
+    };
+  }
+
+  private getViewerStyle() {
+    return {
+      ...styles.viewer,
+      transform: `translate(0, ${row2Y(-this.state.start)}px)`,
     };
   }
 
@@ -112,19 +119,19 @@ export class PopupmenuComponent extends React.Component<Props, States> {
   }
 
   render() {
-    const { start } = this.state;
-    const items = this.getItems(this.state);
     const column = { padding: `0 ${Setting.font.width}px`, display: "table-cell" };
 
-    return items.length === 0 ? null : (
-      <div className="animate fade-in" style={this.getScopeStyle()}>
-        {items.map(({ word, kind, menu }, i) => (
-          <div className={`color-black ${this.state.selected === i + start ? "active" : "clickable"}`} style={styles.line} onClick={() => this.onItem(i + start)} key={i}>
-            <div style={column}>{ word }</div>
-            <div className={this.getKindStyle(kind)} style={column}>{ kind }</div>
-            <div className={this.getKindStyle(menu)} style={column}>{ menu }</div>
-          </div>
-        ))}
+    return this.state.items.length === 0 ? null : (
+      <div style={this.getScopeStyle()}>
+        <div className="animate fade-in" style={this.getViewerStyle()} ref={this.viewer}>
+          {this.state.items.map(({ word, kind, menu }, i) => (
+            <div className={`color-black ${this.state.selected === i ? "active" : "clickable"}`} style={styles.line} onClick={() => this.onItem(i)} key={i}>
+              <div style={column}>{ word }</div>
+              <div className={this.getKindStyle(kind)} style={column}>{ kind }</div>
+              <div className={this.getKindStyle(menu)} style={column}>{ menu }</div>
+            </div>
+          ))}
+        </div>
       </div>
     )
   }
