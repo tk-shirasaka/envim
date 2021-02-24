@@ -36,6 +36,7 @@ export class Browser {
       transparent: true,
       resizable: true,
       frame: false,
+      hasShadow: false,
       webPreferences: {
         nodeIntegration: false,
         contextIsolation: true,
