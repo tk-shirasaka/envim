@@ -55,11 +55,11 @@ export class MessageComponent extends React.Component<Props, States> {
     return (
       <div style={{ lineHeight, ...styles.content }} onClick={this.props.onClick}>
         <IconComponent color={icon.color} style={styles.kind} font={icon.font} />
-        <div style={{ ...styles.before, ...Highlights.style(0) }}></div>
+        <div style={{ ...styles.before, ...Highlights.style(0) }} className="selectable"></div>
         <div style={ this.props.open ? styles.open : styles.close }>
-          {this.props.message.contents.map(({hl, content}, i) => <span style={Highlights.style(hl)} key={i}>{ content }</span>)}
+          {this.props.message.contents.map(({hl, content}, i) => <span style={Highlights.style(hl)} className="selectable" key={i}>{ content }</span>)}
         </div>
-        <div className="space" style={{ ...styles.after, ...Highlights.style(0) }}></div>
+        <div className="space selectable" style={{ ...styles.after, ...Highlights.style(0) }}></div>
       </div>
     );
   }
