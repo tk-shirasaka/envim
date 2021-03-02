@@ -136,7 +136,7 @@ export class CmdlineComponent extends React.Component<Props, States> {
   private renderCmdline(cmdline: States["cmdline"]) {
     return cmdline.map(({hl, reverse, c}, i) => {
       c = c.charCodeAt(0) < 0x20 ? `^${String.fromCharCode(c.charCodeAt(0) + 0x40)}` : c;
-      return (hl || reverse) ? <span style={Highlights.style(hl, reverse)} key={i}>{ c }</span> : c;
+      return (hl || reverse) ? <div className="inline-block" style={Highlights.style(hl, reverse)} key={i}>{ c }</div> : c;
     });
   }
 

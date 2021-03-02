@@ -23,26 +23,21 @@ const wordBreak: "break-all" = "break-all";
 const styles = {
   content: {
     display: "flex",
-    overflow: "hidden",
     cursor: "pointer",
   },
   kind: {
     padding: "0px 4px",
   },
   open: {
-    whiteSpace: whiteSpaceP,
     wordBreak,
+    whiteSpace: whiteSpaceP,
+    padding: "0px 4px",
   },
   close: {
+    whiteSpace: whiteSpaceN,
     textOverflow: "ellipsis",
     overflow: "hidden",
-    whiteSpace: whiteSpaceN,
-  },
-  before: {
-    width: 4,
-  },
-  after: {
-    minWidth: 4,
+    padding: "0px 4px",
   },
 };
 
@@ -53,13 +48,11 @@ export class MessageComponent extends React.Component<Props, States> {
     const lineHeight = `${Setting.font.height + 4}px`;
 
     return (
-      <div style={{ lineHeight, ...styles.content }} onClick={this.props.onClick}>
+      <div style={{ lineHeight, ...styles.content, ...Highlights.style(0) }} onClick={this.props.onClick}>
         <IconComponent color={icon.color} style={styles.kind} font={icon.font} />
-        <div style={{ ...styles.before, ...Highlights.style(0) }} className="selectable"></div>
         <div style={ this.props.open ? styles.open : styles.close }>
-          {this.props.message.contents.map(({hl, content}, i) => <span style={Highlights.style(hl)} className="selectable" key={i}>{ content }</span>)}
+          {this.props.message.contents.map(({hl, content}, i) => hl === 0 ? content : <span style={Highlights.style(hl)} className="selectable" key={i}>{ content }</span>)}
         </div>
-        <div className="space selectable" style={{ ...styles.after, ...Highlights.style(0) }}></div>
       </div>
     );
   }
