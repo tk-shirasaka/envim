@@ -202,6 +202,11 @@ export class App {
   }
 
   private gridLine(grid: number, row: number, col: number, cells: string[][]) {
+    if (!this.grids[grid]) {
+      const { width, height } = this.grids[1].getInfo();
+      this.winPos(grid, 0, 0, width, height, false, 0);
+    }
+
     let i = 0;
     cells.forEach(cell => {
       const repeat = cell[2] || 1;
