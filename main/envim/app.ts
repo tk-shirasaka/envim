@@ -238,26 +238,29 @@ export class App {
   private winPos(grid: number, row: number, col: number, width: number, height: number, focusable: boolean, zIndex: number) {
     if (!this.grids[grid]) this.grids[grid] = new Grid(width, height);
 
+    const winsize = this.grids[1].getInfo();
+    const overwidth = Math.max(0, col + width - winsize.width);
+    const overheight = Math.max(0, row + height - winsize.height);
+
+    col = Math.min(winsize.width - 1, Math.max(0, col - overwidth));
+    row = Math.min(winsize.height - 1, Math.max(0, row - overheight));
+
     this.grids[grid].setInfo(width, height, zIndex, { row, col }, focusable);
     Emit.send("win:pos", grid, width, height, row, col, focusable, zIndex);
+
+    if (winsize.width < width || winsize.height < height) {
+      Emit.share("envim:resize", grid, Math.min(winsize.width, width), Math.min(winsize.height, height));
+    }
   }
 
   private winFloatPos(grid: number, anchor: string, pgrid: number, row: number, col: number, focusable: boolean) {
-    const winsize = this.grids[1].getInfo();
     const current = this.grids[grid] ? this.grids[grid].getInfo() : this.grids[1].getInfo();
     const { offset, zIndex } = this.grids[pgrid].getInfo();
 
-    row = Math.min(winsize.height - 1, Math.max(0, offset.row + (anchor[0] === "N" ? row : row - current.height)));
-    col = Math.min(winsize.width - 1, Math.max(0, offset.col + (anchor[1] === "W" ? col : col - current.width)));
+    row = offset.row + (anchor[0] === "N" ? row : row - current.height);
+    col = offset.col + (anchor[1] === "W" ? col : col - current.width);
 
-    const width = current.width - Math.max(0, col + current.width - winsize.width);
-    const height = current.height - Math.max(0, row + current.height - winsize.height);
-
-    this.winPos(grid, row, col, width, height, focusable, zIndex + 5);
-
-    if (current.width < width || current.height < height) {
-      Emit.share("envim:resize", grid, width, height);
-    }
+    this.winPos(grid, row, col, current.width, current.height, focusable, zIndex + 5);
   }
 
   private msgSetPos(grid: number, row: number) {
@@ -284,8 +287,8 @@ export class App {
 
       if (buffer) {
         const active = current.data === tab.data;
-        const filetype = await this.nvim.request("nvim_buf_get_option", [buffer.data, "filetype"]);
-        const buftype = await this.nvim.request("nvim_buf_get_option", [buffer.data, "buftype"]);
+        const filetype = await this.nvim.request("nvim_buf_get_option", [buffer.data, "filetype"]).catch(() => "");
+        const buftype = await this.nvim.request("nvim_buf_get_option", [buffer.data, "buftype"]).catch(() => "");
 
         next.push({ name, active, filetype, buftype });
       }
