@@ -20,9 +20,12 @@ interface States {
 }
 
 const position: "sticky" = "sticky";
+const flexDirection: "column" = "column";
 const styles = {
   scope: {
     overflow: "auto",
+    display: "flex",
+    flexDirection,
   },
   actions: {
     position,
@@ -87,14 +90,14 @@ export class HistoryComponent extends React.Component<Props, States> {
 
   render() {
     return (
-      <div style={{...styles.scope, ...this.props, ...Highlights.style(0)}}>
+      <div style={{...styles.scope, ...this.props}}>
         <div className="color-white" style={styles.actions}>
           <div className="space" />
           <IconComponent color={ this.state.debug ? "green-fg" : "gray-fg" } style={styles.icon} font="" onClick={this.toggleDebug.bind(this)} />
           <IconComponent color="red-fg" style={styles.icon} font="" onClick={this.onClear.bind(this)} />
         </div>
         {this.state.messages.map((message, i) => <MessageComponent key={i} message={message} open={this.state.select === i} onClick={e => this.toggleSelect(e, i)} />)}
-        <div ref={this.bottom} />
+        <div className="space" style={Highlights.style(0)} ref={this.bottom} />
       </div>
     );
   }

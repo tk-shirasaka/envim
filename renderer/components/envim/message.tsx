@@ -43,15 +43,20 @@ const styles = {
 
 export class MessageComponent extends React.Component<Props, States> {
 
+  private contentStyle(defaultStyle: { [k: string]: string }, style: { [k: string]: string }) {
+    return defaultStyle.background === style.background ? { color: style.color, borderColor: style.borderColor } : style;
+  }
+
   render() {
     const icon = notificates.filter(icon => icon.kinds.indexOf(this.props.message.kind) >= 0)[0];
     const lineHeight = `${Setting.font.height + 4}px`;
+    const defaultStyle = Highlights.style(0);
 
     return (
-      <div style={{ lineHeight, ...styles.content, ...Highlights.style(0) }} onClick={this.props.onClick}>
+      <div style={{ lineHeight, ...styles.content, ...defaultStyle }} onClick={this.props.onClick}>
         <IconComponent color={icon.color} style={styles.kind} font={icon.font} />
         <div style={ this.props.open ? styles.open : styles.close }>
-          {this.props.message.contents.map(({hl, content}, i) => hl === 0 ? content : <span style={Highlights.style(hl)} className="selectable" key={i}>{ content }</span>)}
+          {this.props.message.contents.map(({hl, content}, i) => <span style={this.contentStyle(defaultStyle, hl === 0 ? defaultStyle : Highlights.style(hl))} className="selectable" key={i}>{ content }</span>)}
         </div>
       </div>
     );
