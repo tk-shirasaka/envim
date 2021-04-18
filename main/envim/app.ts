@@ -6,16 +6,16 @@ import { ITab, IMode } from "common/interface";
 
 import { Emit } from "../emit";
 import { Clipboard } from "./clipboard";
-import { Grid } from "./grid";
+import { Grids } from "./grid";
 import { Messages } from "./messages";
 
 export class App {
-  private grids: { [k: number]: Grid } = {};
   private messages: Messages = new Messages;
   private modes: IMode[] = [];
   private timer: number = 0;
 
   constructor(private nvim: NeovimClient) {
+    Grids.init();
     Clipboard.setup(this.nvim);
     nvim.on("request", this.onRequest.bind(this));
     nvim.on("notification", this.onNotification.bind(this));
@@ -168,17 +168,14 @@ export class App {
   private gridResize(grid: number, width: number, height: number) {
     let refresh = false;
 
-    if (this.grids[grid]) {
-      refresh = this.grids[grid].resize(width, height);
+    if (Grids.exist(grid)) {
+      refresh = Grids.get(grid).resize(width, height);
     } else {
       refresh = true;
-      this.grids[grid] = new Grid(width, height);
+      Grids.add(grid, width, height);
     }
 
-    if (refresh) {
-      const { zIndex, offset, focusable } = this.grids[grid].getInfo();
-      this.winPos(grid, offset.row, offset.col, width, height, focusable, zIndex);
-    }
+    refresh && Grids.show(grid);
   }
 
   private defaultColorsSet(foreground: number, background: number, special: number) {
@@ -202,51 +199,45 @@ export class App {
   }
 
   private gridLine(grid: number, row: number, col: number, cells: string[][]) {
-    if (!this.grids[grid]) {
-      const { width, height } = this.grids[1].getInfo();
-      this.winPos(grid, 0, 0, width, height, false, 0);
-    }
-
     let i = 0;
     cells.forEach(cell => {
       const repeat = cell[2] || 1;
       for (let j = 0; j < repeat; j++) {
-        this.grids[grid].setCell(row, col + i++, cell[0], cell.length > 1 ? +cell[1] : -1);
+        Grids.get(grid).setCell(row, col + i++, cell[0], cell.length > 1 ? +cell[1] : -1);
       }
     });
   }
 
   private gridClear(grid: number) {
-    const { width, height } = this.grids[grid].getInfo();
-    this.grids[grid] = new Grid(width, height);
+    const { width, height } = Grids.get(grid).getInfo();
+    Grids.add(grid, width, height);
     Emit.send(`clear:${grid}`);
   }
 
   private gridDestory(grid: number) {
-    delete(this.grids[grid]);
+    Grids.delete(grid);
     Emit.send("win:close", grid);
   }
 
   private gridCursorGoto(grid: number, row: number, col: number) {
-    if (this.grids[grid]) Emit.send("grid:cursor", this.grids[grid].getCursorPos(row, col));
+    Grids.cursor(grid, row, col);
   }
 
   private gridScroll(grid: number, top: number, bottom: number, left: number, right: number, rows: number, cols: number) {
-    this.grids[grid].scroll(top, bottom, left, right, rows, cols)
+    Grids.get(grid).scroll(top, bottom, left, right, rows, cols)
   }
 
   private winPos(grid: number, row: number, col: number, width: number, height: number, focusable: boolean, zIndex: number) {
-    if (!this.grids[grid]) this.grids[grid] = new Grid(width, height);
-
-    const winsize = this.grids[1].getInfo();
+    const winsize = Grids.get().getInfo();
+    const current = Grids.get(grid);
     const overwidth = Math.max(0, col + width - winsize.width);
     const overheight = Math.max(0, row + height - winsize.height);
 
     col = Math.min(winsize.width - 1, Math.max(0, col - overwidth));
     row = Math.min(winsize.height - 1, Math.max(0, row - overheight));
 
-    this.grids[grid].setInfo(width, height, zIndex, { row, col }, focusable);
-    Emit.send("win:pos", grid, width, height, row, col, focusable, zIndex);
+    current.setInfo(width, height, Math.max(zIndex, current.getInfo().zIndex), { row, col }, focusable);
+    Grids.show(grid);
 
     if (winsize.width < width || winsize.height < height) {
       Emit.share("envim:resize", grid, Math.min(winsize.width, width), Math.min(winsize.height, height));
@@ -254,8 +245,8 @@ export class App {
   }
 
   private winFloatPos(grid: number, anchor: string, pgrid: number, row: number, col: number, focusable: boolean) {
-    const current = this.grids[grid] ? this.grids[grid].getInfo() : this.grids[1].getInfo();
-    const { offset, zIndex } = this.grids[pgrid].getInfo();
+    const current = Grids.get(grid).getInfo();
+    const { offset, zIndex } = Grids.get(pgrid).getInfo();
 
     row = offset.row + (anchor[0] === "N" ? row : row - current.height);
     col = offset.col + (anchor[1] === "W" ? col : col - current.width);
@@ -264,7 +255,7 @@ export class App {
   }
 
   private msgSetPos(grid: number, row: number) {
-    const winsize = this.grids[1].getInfo();
+    const winsize = Grids.get().getInfo();
     const width = winsize.width;
     const height = winsize.height - row;
 
@@ -272,7 +263,7 @@ export class App {
   }
 
   private winHide(grid: number) {
-    Emit.send("win:hide", grid);
+    Grids.hide(grid);
   }
 
   private winClose(grid: number) {
@@ -326,8 +317,8 @@ export class App {
 
   private popupmenuShow(items: string[][], selected: number, row: number, col: number, grid: number) {
     const height = Math.min(5, items.length);
-    const offset = this.grids[grid]?.getInfo().offset || { row: 1, col: this.grids[1].getInfo().width * 0.1 + 3 };
-    const parent = this.grids[1].getInfo();
+    const offset = Grids.exist(grid) ? Grids.get(grid).getInfo().offset : { row: 1, col: Grids.get().getInfo().width * 0.1 + 3 };
+    const parent = Grids.get().getInfo();
 
     row += offset.row;
     col += offset.col;
@@ -403,9 +394,9 @@ export class App {
     this.timer = timer;
     setTimeout(() => {
       if (timer !== this.timer) return;
-      Object.keys(this.grids).forEach(grid => {
-        const flush = this.grids[+grid].getFlush();
-        flush.length && Emit.send(`flush:${grid}`, flush);
+      Grids.all((id, grid) => {
+        const flush = grid.getFlush();
+        flush.length && Emit.send(`flush:${id}`, flush);
       });
     });
   }
