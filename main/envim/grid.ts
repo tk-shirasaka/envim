@@ -122,18 +122,16 @@ export class Grids {
     Grids.hidden = {};
   }
 
-  static add(grid: number, width: number, height: number) {
-    Grids.grids[grid] = new Grid(width, height);
-  }
-
   static exist(grid: number) {
     return !!Grids.grids[grid];
   }
 
   static get(grid: number = Grids.default) {
     if (!Grids.exist(grid)) {
-      const { width, height } = Grids.get(Grids.default).getInfo();
-      Grids.add(grid, width, height);
+      const { width, height } = grid === Grids.default
+        ? { width: 1, height: 1 }
+        : Grids.get().getInfo();
+      Grids.grids[grid] = new Grid(width, height);
     }
 
     return Grids.grids[grid];

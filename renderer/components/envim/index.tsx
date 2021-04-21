@@ -47,6 +47,7 @@ const styles = {
 
 export class EnvimComponent extends React.Component<Props, States> {
   private timer: number = 0;
+  private refresh: boolean = true;
   private main: { fontSize: number; lineHeight: string; } = { fontSize: 0, lineHeight: "" };
   private editor: { width: number; height: number; } = { width: 0, height: 0 };
   private header: { width: number; height: number; } = { width: 0, height: 0 };
@@ -65,9 +66,12 @@ export class EnvimComponent extends React.Component<Props, States> {
   }
 
   componentDidUpdate() {
+    if (this.refresh === false) return;
+
     this.setSize();
     this.timer && clearTimeout(this.timer)
     this.timer = +setTimeout(() => {
+      this.refresh = false;
       Emit.send("envim:resize", 1, x2Col(this.editor.width), y2Row(this.editor.height));
     }, 200);
   }
@@ -102,6 +106,10 @@ export class EnvimComponent extends React.Component<Props, States> {
     const next = { width, height, transform, cursor, display, zIndex };
 
     if (JSON.stringify(grids[grid]) !== JSON.stringify(next)) {
+      this.refresh = !(
+        grids[grid] && grids[grid].transform === next.transform &&
+        grids[grid].width === next.width && grids[grid].height === next.height
+      )
       grids[grid] = next;
       this.setState({ grids });
     }

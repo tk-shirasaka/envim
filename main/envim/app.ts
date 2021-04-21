@@ -166,16 +166,7 @@ export class App {
   }
 
   private gridResize(grid: number, width: number, height: number) {
-    let refresh = false;
-
-    if (Grids.exist(grid)) {
-      refresh = Grids.get(grid).resize(width, height);
-    } else {
-      refresh = true;
-      Grids.add(grid, width, height);
-    }
-
-    refresh && Grids.show(grid);
+    Grids.get(grid).resize(width, height) && Grids.show(grid);
   }
 
   private defaultColorsSet(foreground: number, background: number, special: number) {
@@ -209,8 +200,10 @@ export class App {
   }
 
   private gridClear(grid: number) {
-    const { width, height } = Grids.get(grid).getInfo();
-    Grids.add(grid, width, height);
+    const { width, height, zIndex, offset, focusable } = Grids.get(grid).getInfo();
+
+    Grids.delete(grid);
+    Grids.get(grid).setInfo(width, height, zIndex, offset, focusable);
     Emit.send(`clear:${grid}`);
   }
 
