@@ -120,6 +120,7 @@ export class EnvimComponent extends React.Component<Props, States> {
 
     grids[grid].display = "none";
 
+    this.refresh = true;
     this.setState({ grids });
   }
 
@@ -128,6 +129,7 @@ export class EnvimComponent extends React.Component<Props, States> {
 
     delete(grids[grid]);
 
+    this.refresh = true;
     this.setState({ grids });
   }
 
