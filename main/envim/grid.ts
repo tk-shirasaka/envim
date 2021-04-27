@@ -62,35 +62,41 @@ class Grid {
     return (this.lines[row] && this.lines[row][col]) ? this.lines[row][col] : this.getDefault(row, col);
   }
 
-  setCell(row: number, col: number, text: string, hl: number, asc: boolean = true) {
+  setCell(row: number, col: number, text: string, hl: number) {
     const prev = this.getCell(row, col - 1);
-    const next = this.getCell(row, col + 1);
     const cell = this.getCell(row, col);
 
     hl < 0 && (hl = prev.hl);
-    asc && text === "" && (prev.width = 2);
+    text === "" && (prev.width = 2);
     if (cell.text !== text || cell.hl !== hl) {
       this.flush[`${prev.row},${prev.col}`] = prev;
       this.flush[`${cell.row},${cell.col}`] = cell;
-      this.flush[`${next.row},${next.col}`] = next;
     };
-    [ cell.row, cell.col, cell.text, cell.hl, cell.width ] = [ row, col, text, hl, text.length ];
+    [ cell.text, cell.hl, cell.width ] = [ text, hl, text.length ];
   }
 
   scroll(top: number, bottom: number, left: number, right: number, rows: number, cols: number) {
-    const ylimit = bottom - top - Math.abs(rows);
-    const xlimit = right - left - Math.abs(cols);
-    const asc = cols > 0;
+    const y = rows > 0
+      ? { limit: bottom - top - rows, start: top, direction: 1 }
+      : { limit: bottom - top + rows, start: bottom - 1, direction: -1 };
+    const x = cols > 0
+      ? { limit: right - left - cols, start: left, direction: 1 }
+      : { limit: right - left + cols, start: right - 1, direction: -1 };
 
-    for (let i = 0; i <= ylimit; i++) {
-      const trow = rows > 0 ? top + i : bottom - i - 1;
+    for (let i = 0; i < y.limit; i++) {
+      const trow = y.start + y.direction * i;
       const srow = trow + rows;
-      for (let j = 0; j <= xlimit; j++) {
-        const tcol = cols > 0 ? left + j : right - j - 1;
+      for (let j = 0; j < x.limit; j++) {
+        const tcol = x.start + x.direction * j;
         const scol = tcol + cols;
-        const { text, hl } = this.getCell(srow, scol);
 
-        this.setCell(trow, tcol, text, hl, asc);
+        const { text, hl, width } = this.getCell(srow, scol);
+        const cell = this.getCell(trow, tcol);
+
+        if (hl !== cell.hl || text !== cell.text || width !== cell.width) {
+          this.flush[`${trow}.${tcol}`] = cell;
+        }
+        [ cell.text, cell.hl, cell.width ] = [ text, hl, width ];
       }
     }
   }
@@ -161,7 +167,7 @@ export class Grids {
       });
     }
 
-    Emit.send("grid:cursor", Grids.grids[grid].getCursorPos(row, col));
+    Emit.send("grid:cursor", Grids.get(grid).getCursorPos(row, col));
   }
 
   static show(grid: number) {
