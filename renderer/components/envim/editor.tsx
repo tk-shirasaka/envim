@@ -14,7 +14,7 @@ interface Props {
     width: number;
     height: number;
     transform: string;
-    display: "block" | "none";
+    visibility: "visible" | "hidden";
     cursor: "default" | "not-allowed";
   };
 }

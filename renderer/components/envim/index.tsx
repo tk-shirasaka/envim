@@ -26,7 +26,7 @@ interface States {
     width: number;
     height: number;
     transform: string;
-    display: "block" | "none";
+    visibility: "visible" | "hidden";
     cursor: "default" | "not-allowed";
   }};
 }
@@ -98,12 +98,12 @@ export class EnvimComponent extends React.Component<Props, States> {
   private onWin(grid: number, width: number, height: number, top: number, left: number, focusable: boolean, zIndex: number) {
     const grids = this.state.grids;
     const cursor: "default" | "not-allowed" = focusable ? "default" : "not-allowed";
-    const display: "block" = "block";
+    const visibility: "visible" = "visible";
     const transform = `translate(${col2X(left)}px, ${row2Y(top)}px)`;
 
     [ height, width ] = [ row2Y(height), col2X(width) ];
 
-    const next = { width, height, transform, cursor, display, zIndex };
+    const next = { width, height, transform, cursor, visibility, zIndex };
 
     if (JSON.stringify(grids[grid]) !== JSON.stringify(next)) {
       this.refresh = !(
@@ -118,7 +118,7 @@ export class EnvimComponent extends React.Component<Props, States> {
   private hideWin(grid: number) {
     const grids = this.state.grids;
 
-    grids[grid].display = "none";
+    grids[grid].visibility = "hidden";
 
     this.refresh = true;
     this.setState({ grids });
