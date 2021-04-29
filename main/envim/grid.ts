@@ -14,7 +14,7 @@ class Grid {
   }
 
   constructor(width :number, height: number) {
-    this.info = { width: 0, height: 0, zIndex: 0, offset: { row: 0, col: 0 }, focusable: true };
+    this.info = { width: 0, height: 0, zIndex: 1, offset: { row: 0, col: 0 }, focusable: true };
     this.resize(width, height);
   }
 
@@ -119,12 +119,12 @@ class Grid {
 export class Grids {
   private static grids: { [k: number]: Grid } = {};
   private static default: 1 = 1;
-  private static active: number = Grids.default;
+  private static active: number = 0;
   private static hidden: { [k: number]: boolean } = {};
 
   static init() {
     Grids.grids = {};
-    Grids.active = Grids.default;
+    Grids.active = 0;
     Grids.hidden = {};
   }
 
