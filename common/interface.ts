@@ -6,6 +6,15 @@ export interface ICell {
   width: number;
 }
 
+export interface IScroll {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  rows: number;
+  cols: number;
+}
+
 export interface IHighlight {
   foreground?: number,
   background?: number,

@@ -12,7 +12,6 @@ import { Messages } from "./messages";
 export class App {
   private messages: Messages = new Messages;
   private modes: IMode[] = [];
-  private timer: number = 0;
 
   constructor(private nvim: NeovimClient) {
     Grids.init();
@@ -217,7 +216,8 @@ export class App {
   }
 
   private gridScroll(grid: number, top: number, bottom: number, left: number, right: number, rows: number, cols: number) {
-    Grids.get(grid).scroll(top, bottom, left, right, rows, cols)
+    const [ cells, scroll ] = Grids.get(grid).scroll(top, bottom, left, right, rows, cols)
+    Emit.send(`flush:${grid}`, cells, scroll);
   }
 
   private winPos(grid: number, row: number, col: number, width: number, height: number, focusable: boolean, zIndex: number) {
@@ -383,14 +383,9 @@ export class App {
   }
 
   private flush() {
-    const timer = (new Date).getTime();
-    this.timer = timer;
-    setTimeout(() => {
-      if (timer !== this.timer) return;
-      Grids.all((id, grid) => {
-        const flush = grid.getFlush();
-        flush.length && Emit.send(`flush:${id}`, flush);
-      });
+    Grids.all((id, grid) => {
+      const flush = grid.getFlush();
+      flush.length && Emit.send(`flush:${id}`, flush);
     });
   }
 }

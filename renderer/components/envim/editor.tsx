@@ -1,6 +1,6 @@
 import React, { createRef, RefObject, MouseEvent, WheelEvent } from "react";
 
-import { ICell } from "common/interface";
+import { ICell, IScroll } from "common/interface";
 
 import { Emit } from "../../utils/emit";
 import { Context2D } from "../../utils/context2d";
@@ -23,20 +23,23 @@ interface States {
 }
 
 const position: "absolute" = "absolute";
-const style = {
-  position,
-  boxShadow: "0 0 8px 0 rgba(0, 0, 0, 0.6)",
-  width: "100%",
-  height: "100%",
+const styles = {
+  bg: {
+    position,
+    boxShadow: "0 0 8px 0 rgba(0, 0, 0, 0.6)",
+  },
+  fg: {
+    position,
+  },
 };
 
 export class EditorComponent extends React.Component<Props, States> {
-  private canvas: RefObject<HTMLCanvasElement> = createRef<HTMLCanvasElement>();
+  private fg: RefObject<HTMLCanvasElement> = createRef<HTMLCanvasElement>();
+  private bg: RefObject<HTMLCanvasElement> = createRef<HTMLCanvasElement>();
   private timer: number = 0;
   private drag: boolean = false;
-  private ctx?: CanvasRenderingContext2D;
   private renderer?: Context2D;
-  private capture?: ImageData;
+  private capture?: { fg: ImageData; bg: ImageData };
 
   constructor(props: Props) {
     super(props);
@@ -46,32 +49,34 @@ export class EditorComponent extends React.Component<Props, States> {
   }
 
   componentDidMount() {
-    const ctx = this.canvas.current?.getContext("2d");
+    const fg = this.fg.current?.getContext("2d");
+    const bg = this.bg.current?.getContext("2d");
 
-    if (ctx) {
-      this.ctx = ctx;
-      this.renderer = new Context2D(ctx);
-      this.renderer.clear(this.props.fill, this.props.style.width, this.props.style.height);
+    if (fg && bg) {
+      this.renderer = new Context2D(fg, bg);
+      this.renderer.clear(this.props.fill, 0, 0, x2Col(this.props.style.width), y2Row(this.props.style.height));
     }
   }
 
   componentDidUpdate() {
-    if (this.ctx && this.capture) {
-      this.renderer?.clear(this.props.fill, this.props.style.width, this.props.style.height);
-      this.ctx.putImageData(this.capture, 0, 0);
+    if (this.renderer && this.capture) {
+      this.renderer.clear(this.props.fill, 0, 0, x2Col(this.props.style.width), y2Row(this.props.style.height));
+      this.renderer.putCapture(this.capture.fg, this.capture.bg, 0, 0);
       delete(this.capture);
     }
   }
 
   componentWillUnmount() {
+    delete(this.renderer);
     Emit.clear([`clear:${this.props.grid}`, `flush:${this.props.grid}`]);
   }
 
   shouldComponentUpdate(props: Props) {
     const prev = this.props.style;
     const next = props.style;
-    if (this.ctx && (prev.width !== next.width || prev.height !== next.height)) {
-      this.capture = this.ctx.getImageData(0, 0, Math.min(prev.width, next.width) * 2, Math.min(prev.height, next.height) * 2);
+    if (this.renderer && (prev.width !== next.width || prev.height !== next.height)) {
+      const [ fg, bg ] = this.renderer.getCapture(0, 0, x2Col(Math.min(prev.width, next.width)), y2Row(Math.min(prev.height, next.height)));
+      this.capture = { fg, bg };
     }
     return true;
   }
@@ -119,21 +124,25 @@ export class EditorComponent extends React.Component<Props, States> {
   }
 
   private onClear() {
-    this.renderer?.clear(this.props.fill, this.props.style.width, this.props.style.height);
+    this.renderer?.clear(this.props.fill, 0, 0, x2Col(this.props.style.width), y2Row(this.props.style.height));
   }
 
-  private onFlush(cells: ICell[]) {
-    this.renderer?.flush(cells);
+  private onFlush(cells: ICell[], scroll?: IScroll) {
+    scroll && this.renderer?.push({ scroll });
+    this.renderer?.push({ cells });
   }
 
   render() {
     return (
-      <canvas className="animate fade-in" style={{...style, ...this.props.style}} width={this.props.style.width * 2} height={this.props.style.height * 2} ref={this.canvas}
-        onMouseDown={this.onMouseDown.bind(this)}
-        onMouseMove={this.onMouseMove.bind(this)}
-        onMouseUp={this.onMouseUp.bind(this)}
-        onWheel={this.onMouseWheel.bind(this)}
-      />
+      <>
+        <canvas className="animate fade-in" style={{...styles.bg, ...this.props.style}} width={this.props.style.width * 2} height={this.props.style.height * 2} ref={this.bg} />
+        <canvas className="animate fade-in" style={{...styles.fg, ...this.props.style}} width={this.props.style.width * 2} height={this.props.style.height * 2} ref={this.fg}
+          onMouseDown={this.onMouseDown.bind(this)}
+          onMouseMove={this.onMouseMove.bind(this)}
+          onMouseUp={this.onMouseUp.bind(this)}
+          onWheel={this.onMouseWheel.bind(this)}
+        />
+      </>
     );
   }
 }

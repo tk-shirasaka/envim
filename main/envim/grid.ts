@@ -11,7 +11,7 @@ class Grid {
     zIndex: number;
     offset: { row: number, col: number };
     focusable: boolean;
-  }
+  };
 
   constructor(width :number, height: number) {
     this.info = { width: 0, height: 0, zIndex: 1, offset: { row: 0, col: 0 }, focusable: true };
@@ -71,17 +71,18 @@ class Grid {
     if (cell.text !== text || cell.hl !== hl) {
       this.flush[`${prev.row},${prev.col}`] = prev;
       this.flush[`${cell.row},${cell.col}`] = cell;
-    };
+    }
     [ cell.text, cell.hl, cell.width ] = [ text, hl, text.length ];
   }
 
   scroll(top: number, bottom: number, left: number, right: number, rows: number, cols: number) {
+    const flush: ICell[] = [];
     const y = rows > 0
-      ? { limit: bottom - top - rows, start: top, direction: 1 }
-      : { limit: bottom - top + rows, start: bottom - 1, direction: -1 };
+      ? { limit: bottom - top, start: top, direction: 1 }
+      : { limit: bottom - top, start: bottom - 1, direction: -1 };
     const x = cols > 0
-      ? { limit: right - left - cols, start: left, direction: 1 }
-      : { limit: right - left + cols, start: right - 1, direction: -1 };
+      ? { limit: right - left, start: left, direction: 1 }
+      : { limit: right - left, start: right - 1, direction: -1 };
 
     for (let i = 0; i < y.limit; i++) {
       const trow = y.start + y.direction * i;
@@ -93,12 +94,14 @@ class Grid {
         const { text, hl, width } = this.getCell(srow, scol);
         const cell = this.getCell(trow, tcol);
 
-        if (hl !== cell.hl || text !== cell.text || width !== cell.width) {
-          this.flush[`${trow}.${tcol}`] = cell;
+        if (this.flush[`${srow},${scol}`] || y.limit - i <= Math.abs(rows) || x.limit - j <= Math.abs(cols)) {
+          flush.push(cell);
         }
         [ cell.text, cell.hl, cell.width ] = [ text, hl, width ];
       }
     }
+
+    return [ flush, { x: left, y: top, width: right - left, height: bottom - top, rows, cols } ];
   }
 
   getFlush() {
@@ -109,8 +112,8 @@ class Grid {
     Object.keys(flush).forEach(k => flush[k].width && result.push(flush[k]));
 
     return result.sort((a, b) => {
-      if (a.row < b.row || (a.row === b.row && a.col < b.col)) return -1;
-      if (a.row > b.row || (a.row === b.row && a.col > b.col)) return 1;
+      if (a.hl < b.hl) return -1;
+      if (a.hl > b.hl) return 1;
       return 0;
     });
   }
