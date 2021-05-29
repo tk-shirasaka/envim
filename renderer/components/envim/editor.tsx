@@ -108,7 +108,7 @@ export class EditorComponent extends React.Component<Props, States> {
     this.drag && this.onMouseEvent(e, "drag");
   }
 
-  private onMouseUp(e: MouseEvent) {
+  private onMouseRelease(e: MouseEvent) {
     clearTimeout(this.timer);
 
     this.drag && this.onMouseEvent(e, "release");
@@ -139,7 +139,8 @@ export class EditorComponent extends React.Component<Props, States> {
         <canvas className="animate fade-in" style={{...styles.fg, ...this.props.style}} width={this.props.style.width * 2} height={this.props.style.height * 2} ref={this.fg}
           onMouseDown={this.onMouseDown.bind(this)}
           onMouseMove={this.onMouseMove.bind(this)}
-          onMouseUp={this.onMouseUp.bind(this)}
+          onMouseUp={this.onMouseRelease.bind(this)}
+          onMouseLeave={this.onMouseRelease.bind(this)}
           onWheel={this.onMouseWheel.bind(this)}
         />
       </>
