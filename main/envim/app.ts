@@ -384,8 +384,8 @@ export class App {
 
   private flush() {
     Grids.all((id, grid) => {
-      const flush = grid.getFlush();
-      flush.length && Emit.send(`flush:${id}`, flush);
+      const cells = grid.getFlush();
+      cells.length && Emit.send(`flush:${id}`, cells);
     });
   }
 }

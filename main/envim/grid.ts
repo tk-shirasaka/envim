@@ -106,12 +106,12 @@ class Grid {
 
   getFlush() {
     const flush = this.flush;
-    const result: ICell[] = [];
+    const cells: ICell[] = [];
 
     this.flush = {};
-    Object.keys(flush).forEach(k => flush[k].width && result.push(flush[k]));
+    Object.keys(flush).forEach(k => flush[k].width && cells.push(flush[k]));
 
-    return result.sort((a, b) => {
+    return cells.sort((a, b) => {
       if (a.hl < b.hl) return -1;
       if (a.hl > b.hl) return 1;
       return 0;

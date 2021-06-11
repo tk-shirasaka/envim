@@ -36,6 +36,7 @@ const styles = {
 export class EditorComponent extends React.Component<Props, States> {
   private fg: RefObject<HTMLCanvasElement> = createRef<HTMLCanvasElement>();
   private bg: RefObject<HTMLCanvasElement> = createRef<HTMLCanvasElement>();
+  private clear: boolean = true;
   private timer: number = 0;
   private drag: boolean = false;
   private renderer?: Context2D;
@@ -124,12 +125,14 @@ export class EditorComponent extends React.Component<Props, States> {
   }
 
   private onClear() {
-    this.renderer?.clear(this.props.fill, 0, 0, x2Col(this.props.style.width), y2Row(this.props.style.height));
+    this.clear = true;
   }
 
   private onFlush(cells: ICell[], scroll?: IScroll) {
+    this.clear && this.renderer?.clear(this.props.fill, 0, 0, x2Col(this.props.style.width), y2Row(this.props.style.height));
     scroll && this.renderer?.push({ scroll });
     this.renderer?.push({ cells });
+    this.clear = false;
   }
 
   render() {
