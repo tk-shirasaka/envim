@@ -170,7 +170,9 @@ export class Grids {
       });
     }
 
-    Emit.send("grid:cursor", Grids.get(grid).getCursorPos(row, col));
+    const limit = Grids.get().getInfo();
+    const cursor = Grids.get(grid).getCursorPos(row, col);
+    cursor.row < limit.height && cursor.col < limit.width && Emit.send("grid:cursor", cursor);
   }
 
   static show(grid: number) {
