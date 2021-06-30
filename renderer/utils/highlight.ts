@@ -28,7 +28,7 @@ class Highlight {
   }
 
   private intToColor(color: number | undefined, a: number) {
-    if (color === undefined) return "";
+    if (color === undefined || color < 0) return "";
 
     const rgb = `${("000000" + color.toString(16)).slice(-6)}`;
 
@@ -64,7 +64,10 @@ export class Highlights {
   static color(id: number, type: "foreground" | "background" | "special") {
     if (Highlights.hls[id] && Highlights.hls[id][type]) return Highlights.hls[id][type];
     if (Highlights.hls[0] && Highlights.hls[0][type]) return Highlights.hls[0][type];
-    return "rgba(0, 0, 0, 1)"
+
+    const alpha = (100 - Setting.opacity) / 100;
+
+    return type === "foreground" ? "rgba(255, 255, 255, 1)" : `rgba(0, 0, 0, ${alpha})`;
   }
 
   static style(id: number, reverse: boolean = false) {
