@@ -67,7 +67,11 @@ export class Highlights {
 
     const alpha = (100 - Setting.opacity) / 100;
 
-    return type === "foreground" ? "rgba(255, 255, 255, 1)" : `rgba(0, 0, 0, ${alpha})`;
+    return {
+      "foreground": "rgba(255, 255, 255, 1)",
+      "background": `rgba(0, 0, 0, ${alpha})`,
+      "special": "rgba(255, 0, 0, 1)"
+    }[type];
   }
 
   static style(id: number, reverse: boolean = false) {
