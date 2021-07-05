@@ -46,7 +46,7 @@ export class PopupmenuComponent extends React.Component<Props, States> {
   componentDidUpdate() {
     if (this.scope.current && this.width === 0 && this.state.items.length > 0) {
       const { row, col, items } = this.state;
-      const width = x2Col(this.scope.current.clientWidth) + 1;
+      const width = x2Col(this.scope.current.clientWidth) + 2;
       const length = Math.min(items.length, this.maxline);
 
       Emit.send("envim:api", "nvim_ui_pum_set_bounds", [width, length, row, col]);
@@ -97,12 +97,12 @@ export class PopupmenuComponent extends React.Component<Props, States> {
   private getKindStyle(kind: string) {
     if (kind === "") return "";
     switch (kind[0].charCodeAt(0) % 6) {
-      case 0: return "editor-bold color-red-fg";
-      case 1: return "editor-bold color-green-fg";
-      case 2: return "editor-bold color-lightblue-fg";
-      case 3: return "editor-bold color-purple-fg";
-      case 4: return "editor-bold color-yellow-fg";
-      case 5: return "editor-bold color-orange-fg";
+      case 0: return "bold color-red-fg";
+      case 1: return "bold color-green-fg";
+      case 2: return "bold color-lightblue-fg";
+      case 3: return "bold color-purple-fg";
+      case 4: return "bold color-yellow-fg";
+      case 5: return "bold color-orange-fg";
     }
   }
 
@@ -110,7 +110,7 @@ export class PopupmenuComponent extends React.Component<Props, States> {
     const column = { padding: `0 ${Setting.font.width}px`, display: "table-cell" };
 
     return this.state.items.length === 0 ? null : (
-      <div className="editor animate fade-in" style={this.getScopeStyle()} ref={this.scope}>
+      <div className="animate fade-in" style={this.getScopeStyle()} ref={this.scope}>
         {this.state.items.map(({ word, kind, menu }, i) => (
           <div className={`color-black ${this.state.selected === i ? "active" : "clickable"}`} style={styles.line} onClick={() => this.onItem(i)} key={i}>
             <div style={column}>{ word }</div>
