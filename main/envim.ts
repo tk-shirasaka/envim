@@ -2,13 +2,13 @@ import { dialog } from "electron";
 import { createConnection, Socket } from "net";
 import { spawn, ChildProcess } from "child_process";
 import { NeovimClient } from "neovim";
+import { UiAttachOptions } from "neovim/lib/api/Neovim"
 
 import { Emit } from "./emit";
 import { App } from "./envim/app";
 
 export class Envim {
   private nvim = new NeovimClient;
-  private options: { [k: string]: boolean }  = {};
   private connect: { process?: ChildProcess; socket?: Socket; } = {}
 
   constructor() {
@@ -23,7 +23,7 @@ export class Envim {
     process.on("unhandledRejection", this.onError.bind(this));
   }
 
-  private async onConnect(type: string, value: string, options: { [k: string]: boolean }) {
+  private async onConnect(type: string, value: string ) {
     let reader, writer;
 
     switch (type) {
@@ -39,7 +39,6 @@ export class Envim {
     }
 
     if (reader && writer) {
-      this.options = options;
       this.nvim = new NeovimClient;
       this.nvim.attach({ reader, writer });
       this.nvim.setClientInfo("Envim", { major: 0, minor: 0, patch: 1, prerelease: "dev" }, "ui", {}, {})
@@ -49,10 +48,8 @@ export class Envim {
     }
   }
 
-  private onAttach(width: number, height: number) {
-    const options: { [k: string]: boolean } = { ...{ ext_linegrid: true }, ...this.options };
-
-    this.onApi("nvim_ui_attach", [width, height, options])
+  private onAttach(width: number, height: number, options: UiAttachOptions) {
+    this.nvim.uiAttach(width, height, { ...{ ext_linegrid: true }, ...options });
   }
 
   private onResize(grid: number, width: number, height: number) {

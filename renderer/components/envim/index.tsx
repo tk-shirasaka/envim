@@ -61,7 +61,7 @@ export class EnvimComponent extends React.Component<Props, States> {
     Emit.on("win:pos", this.onWin.bind(this));
     Emit.on("win:hide", this.hideWin.bind(this));
     Emit.on("win:close", this.closeWin.bind(this));
-    Emit.send("envim:attach", x2Col(this.editor.width), y2Row(this.editor.height));
+    Emit.send("envim:attach", x2Col(this.editor.width), y2Row(this.editor.height), Setting.options);
   }
 
   componentDidUpdate() {
