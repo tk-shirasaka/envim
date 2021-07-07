@@ -2,6 +2,7 @@ import React, { createRef, RefObject } from "react";
 
 import { Emit } from "../../utils/emit";
 import { Setting } from "../../utils/setting";
+import { Highlights } from "../../utils/highlight";
 import { row2Y, col2X, x2Col } from "../../utils/size";
 
 interface Props {
@@ -87,6 +88,7 @@ export class PopupmenuComponent extends React.Component<Props, States> {
     const { size, height } = Setting.font;
     return {
       ...styles.scope,
+      ...Highlights.style(0),
       transform: `translate(${col2X(this.state.col)}px, ${row2Y(this.state.row)}px)`,
       fontSize: size,
       lineHeight: `${height}px`,
@@ -95,14 +97,14 @@ export class PopupmenuComponent extends React.Component<Props, States> {
   }
 
   private getKindStyle(kind: string) {
-    if (kind === "") return "";
     switch (kind[0].charCodeAt(0) % 6) {
-      case 0: return "bold color-red-fg";
-      case 1: return "bold color-green-fg";
-      case 2: return "bold color-lightblue-fg";
-      case 3: return "bold color-purple-fg";
-      case 4: return "bold color-yellow-fg";
-      case 5: return "bold color-orange-fg";
+      case 0: return "red";
+      case 1: return "green";
+      case 2: return "lightblue";
+      case 3: return "purple";
+      case 4: return "yellow";
+      case 5: return "orange";
+      default: return 0;
     }
   }
 
@@ -112,9 +114,9 @@ export class PopupmenuComponent extends React.Component<Props, States> {
     return this.state.items.length === 0 ? null : (
       <div className="animate fade-in" style={this.getScopeStyle()} ref={this.scope}>
         {this.state.items.map(({ word, kind, menu }, i) => (
-          <div className={`color-black ${this.state.selected === i ? "active" : "clickable"}`} style={styles.line} onClick={() => this.onItem(i)} key={i}>
+          <div className={this.state.selected === i ? "bold" : ""} style={styles.line} onClick={() => this.onItem(i)} key={i}>
             <div style={column}>{ word }</div>
-            <div className={this.getKindStyle(`${kind}${menu}`)} style={column}>{ kind }{ menu }</div>
+            <div style={{ ...Highlights.style(this.getKindStyle(`${kind} ${menu}`)), ...column }}>{ kind } { menu }</div>
           </div>
         ))}
       </div>

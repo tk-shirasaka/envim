@@ -18,6 +18,10 @@
   src: url(fonts/HackGenNerdConsole-Bold.ttf);
 }
 
+body {
+  font-family: "Regular";
+}
+
 .bold {
   font-family: "Bold" !important;
 }
@@ -35,7 +39,7 @@
 }
 
 * {
-  font-family: "Regular";
+  font-family: inherit;
   font-style: normal;
   font-size: inherit;
   line-height: inherit;

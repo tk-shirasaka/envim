@@ -53,28 +53,23 @@ class Highlight {
 }
 
 export class Highlights {
-  private static hls: { [k: number]: Highlight } = {};
+  private static hls: { [k: string]: Highlight } = {};
 
-  static setHighlight(id: number, ui: boolean, hl: IHighlight) {
+  static setHighlight(id: number | string, ui: boolean, hl: IHighlight) {
     const alpha = ui ? (100 - Setting.opacity) / 100 : 1;
 
     Highlights.hls[id] = new Highlight(hl, alpha);
   }
 
-  static color(id: number, type: "foreground" | "background" | "special") {
+  static color(id: number | string, type: "foreground" | "background" | "special") {
     if (Highlights.hls[id] && Highlights.hls[id][type]) return Highlights.hls[id][type];
     if (Highlights.hls[0] && Highlights.hls[0][type]) return Highlights.hls[0][type];
+    if (Highlights.hls[-1] && Highlights.hls[-1][type]) return Highlights.hls[-1][type];
 
-    const alpha = (100 - Setting.opacity) / 100;
-
-    return {
-      "foreground": "rgba(255, 255, 255, 1)",
-      "background": `rgba(0, 0, 0, ${alpha})`,
-      "special": "rgba(255, 0, 0, 1)"
-    }[type];
+    return "rgba(0, 0, 0, 1)";
   }
 
-  static style(id: number, reverse: boolean = false) {
+  static style(id: number | string, reverse: boolean = false) {
     const background = Highlights.color(id, reverse ? "foreground" : "background");
     const foreground = Highlights.color(id, reverse ? "background" : "foreground");
 
