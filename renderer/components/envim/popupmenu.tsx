@@ -22,7 +22,7 @@ const styles = {
     zIndex: 10,
     position,
     overflow: "auto",
-    boxShadow: "8px 8px 4px 0 rgba(0, 0, 0, 0.6)",
+    boxShadow: "0 0 8px 0 rgba(0, 0, 0, 0.6)",
     whiteSpace,
   },
   line: {
@@ -85,13 +85,9 @@ export class PopupmenuComponent extends React.Component<Props, States> {
   }
 
   private getScopeStyle() {
-    const { size, height } = Setting.font;
     return {
       ...styles.scope,
-      ...Highlights.style(0),
       transform: `translate(${col2X(this.state.col)}px, ${row2Y(this.state.row)}px)`,
-      fontSize: size,
-      lineHeight: `${height}px`,
       maxHeight: row2Y(this.maxline),
     };
   }
@@ -115,8 +111,8 @@ export class PopupmenuComponent extends React.Component<Props, States> {
       <div className="animate fade-in" style={this.getScopeStyle()} ref={this.scope}>
         {this.state.items.map(({ word, kind, menu }, i) => (
           <div className={this.state.selected === i ? "bold" : ""} style={styles.line} onClick={() => this.onItem(i)} key={i}>
-            <div style={column}>{ word }</div>
-            <div style={{ ...Highlights.style(this.getKindStyle(`${kind} ${menu}`)), ...column }}>{ kind } { menu }</div>
+            <div style={{ ...Highlights.style(0, this.state.selected === i), ...column }}>{ word }</div>
+            <div style={{ ...Highlights.style(this.getKindStyle(`${kind} ${menu}`), this.state.selected === i), ...column }}>{ kind } { menu }</div>
           </div>
         ))}
       </div>
