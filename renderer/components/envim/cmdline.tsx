@@ -28,15 +28,9 @@ const styles = {
     right: "10%",
     overflow: "hidden",
     borderRadius: "0 0 4px 4px",
-    boxShadow: "8px 8px 4px 0 rgba(0, 0, 0, 0.6)",
+    boxShadow: "0 0 8px 0 rgba(0, 0, 0, 0.6)",
     pointerEvents,
     whiteSpace,
-  },
-  prompt: {
-    paddingRight: 0,
-  },
-  cmdline: {
-    paddingLeft: 0,
     wordBreak,
   },
 };
@@ -125,12 +119,8 @@ export class CmdlineComponent extends React.Component<Props, States> {
   }
 
   private getScopeStyle() {
-    const { width, height } = Setting.font;
-    return { top: -width, padding: width, paddingTop: height, ...styles.scope };
-  }
-
-  private getCmdlineStyle(style: object) {
-    return { padding: Setting.font.width, ...Highlights.style(0), ...style };
+    const { height } = Setting.font;
+    return { padding: height, ...Highlights.style(0), ...styles.scope };
   }
 
   private renderCmdline(cmdline: States["cmdline"]) {
@@ -142,9 +132,9 @@ export class CmdlineComponent extends React.Component<Props, States> {
 
   render() {
     return this.state.cmdline.length > 0 && (
-      <div className="color-black animate slide-down" style={this.getScopeStyle()}>
-        <div className="bold" style={this.getCmdlineStyle(styles.prompt)}>{ this.state.prompt }</div>
-        <div className="space" style={this.getCmdlineStyle(styles.cmdline)}>
+      <div className="animate slide-down" style={this.getScopeStyle()}>
+        <div className="bold">{ this.state.prompt }</div>
+        <div>
           {this.state.contents.map((content, i) => <div key={i}>{ this.renderCmdline(content) }</div>)}
           <div>{ this.renderCmdline(this.state.cmdline) }</div>
         </div>
