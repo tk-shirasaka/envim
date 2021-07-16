@@ -7,10 +7,8 @@ import { ITab, IMode } from "common/interface";
 import { Emit } from "../emit";
 import { Clipboard } from "./clipboard";
 import { Grids } from "./grid";
-import { Messages } from "./messages";
 
 export class App {
-  private messages: Messages = new Messages;
   private modes: IMode[] = [];
 
   constructor(private nvim: NeovimClient) {
@@ -123,19 +121,19 @@ export class App {
 
         /** ext_messages **/
         case "msg_show":
-          this.msgShow("notificate", r);
+          r.forEach(r => this.msgShow(r[0], r[1], r[2]));
         break;
         case "msg_showmode":
-          r.forEach(r => this.msgShow("mode", [["mode", r[0], true]]));
+          r.forEach(r => this.msgShowmode(r[0]));
         break;
         case "msg_showcmd":
-          r.forEach(r => this.msgShow("command", [["command", r[0], true]]));
+          r.forEach(r => this.msgShowcmd(r[0]));
         break;
         case "msg_ruler":
-          r.forEach(r => this.msgShow("ruler", [["ruler", r[0], true]]));
+          r.forEach(r => this.msgRuler(r[0]));
         break;
         case "msg_clear":
-          this.msgShow("notificate", [["", [], true]]);
+          this.msgClear();
         break;
         case "msg_history_show":
           r.forEach(r => this.msgHistoryShow(r[0]));
@@ -348,33 +346,37 @@ export class App {
     Emit.send("popupmenu:hide");
   }
 
-  private msgShow(group: string, contents: any[]) {
-    contents.forEach(([kind, messages, replace_last]) => {
-      if (messages.length) {
-        this.messages.set(group, kind, messages, replace_last);
-      } else {
-        this.messages.clear(group);
-      }
-    });
-
-    const notificates = [
-      ...this.messages.get("notificate"),
-      ...this.messages.get("mode"),
-      ...this.messages.get("command"),
-      ...this.messages.get("ruler"),
-    ].sort((a, b) => a.timestamp - b.timestamp);
-
-    Emit.send("messages:notificate", notificates);
+  private msgShow(kind: string, contents: string[][], replace: boolean) {
+    Emit.send("messages:show", this.convertMessage(kind, contents), replace);
   }
 
-  private msgHistoryShow(contents: any[]) {
-    this.messages.clear("history");
-    contents.forEach(([kind, messages, replace_last]) => (this.messages.set("history", kind, messages, replace_last)));
+  private msgClear() {
+    Emit.send("messages:clear");
+  }
 
-    if (contents.length) {
+  private msgShowmode(contents: string[][]) {
+    Emit.send("messages:mode", this.convertMessage("mode", contents));
+  }
+
+  private msgShowcmd(contents: string[][]) {
+    Emit.send("messages:command", this.convertMessage("command", contents));
+  }
+
+  private msgRuler(contents: string[][]) {
+    Emit.send("messages:ruler", this.convertMessage("ruler", contents));
+  }
+
+  private msgHistoryShow(entries: any[]) {
+    if (entries.length) {
       this.nvim.command("messages clear");
-      Emit.send("messages:history", this.messages.get("history"));
+      Emit.send("messages:history", entries.map(
+        ([kind, contents]) => this.convertMessage(kind, contents)
+      ));
     }
+  }
+
+  private convertMessage(kind: string, contents: string[][]) {
+    return { kind, contents: contents.map(([hl, content]) => ({ hl: +hl, content })) };
   }
 
   private modeInfoSet(modes: IMode[]) {

@@ -78,11 +78,12 @@ export class EnvimComponent extends React.Component<Props, States> {
 
   private setSize() {
     const font  = Setting.font;
+    const padding = this.props.height % font.height;
+    const space = font.height * (Setting.options.ext_messages ? 2 : 1) + (padding < 16 ? font.height : 0);
     this.main = { fontSize: font.size, lineHeight: `${font.height}px` };
-    this.editor = { width: this.props.width, height: row2Y(y2Row(this.props.height - 8) - 1) };
-    this.header = { width: this.props.width, height: this.props.height - this.editor.height };
-    this.footer = { width: this.props.width, height: Setting.options.ext_messages ? Math.min(this.editor.height, font.height * 15) : 0 };
-    this.editor.height -= this.footer.height;
+    this.editor = { width: this.props.width, height: this.props.height - padding - space };
+    this.footer = { width: this.props.width, height: Setting.options.ext_messages ? font.height + 4 : 0 };
+    this.header = { width: this.props.width, height: this.props.height - this.editor.height - this.footer.height };
   }
 
   private onHighlight(highlights: {id: number, ui: boolean, hl: IHighlight}[]) {

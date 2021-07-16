@@ -23,13 +23,13 @@ export const icons = [
 ];
 
 export const notificates = [
-  { font: "", color: "lightblue", kinds: ["echo",  "echomsg", ""], filter: true},
-  { font: "", color: "green", kinds: ["quickfix",  "search_count"], filter: true},
-  { font: "", color: "yellow", kinds: ["wmsg"], filter: true},
-  { font: "", color: "red", kinds: ["emsg", "echoerr", "lua_error", "rpc_error"], filter: true},
-  { font: "", color: "purple", kinds: ["confirm", "confirm_sub"], filter: false},
-  { font: "", color: "pink", kinds: ["return_prompt"], filter: false},
-  { font: "", color: "gray", kinds: ["mode", "command"], filter: false},
-  { font: "", color: "gray", kinds: ["ruler"], filter: false},
-  { font: "", color: "green", kinds: ["debug"], filter: true},
+  { font: "", kinds: ["echo",  "echomsg", ""]},
+  { font: "", kinds: ["quickfix",  "search_count"]},
+  { font: "", kinds: ["wmsg"]},
+  { font: "", kinds: ["emsg", "echoerr", "lua_error", "rpc_error"]},
+  { font: "", kinds: ["confirm", "confirm_sub"]},
+  { font: "", kinds: ["return_prompt"]},
+  { font: "", kinds: ["mode", "command"]},
+  { font: "", kinds: ["ruler"]},
+  { font: "", kinds: ["debug"]},
 ];

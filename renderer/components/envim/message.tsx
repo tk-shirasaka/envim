@@ -9,7 +9,7 @@ import { notificates } from "../../utils/icons";
 interface Props {
   message: IMessage;
   open: boolean;
-  onClick: (...args: any[]) => void;
+  onClick?: (...args: any[]) => void;
 }
 
 interface States {
@@ -19,7 +19,7 @@ const whiteSpaceP: "pre-wrap" = "pre-wrap";
 const whiteSpaceN: "nowrap" = "nowrap";
 const wordBreak: "break-all" = "break-all";
 const styles = {
-  content: {
+  scope: {
     display: "flex",
     cursor: "pointer",
   },
@@ -53,7 +53,7 @@ export class MessageComponent extends React.Component<Props, States> {
     const defaultStyle = Highlights.style(defaultHl);
 
     return (
-      <div style={{ lineHeight, ...styles.content, ...defaultStyle }} onClick={this.props.onClick}>
+      <div style={{ lineHeight, ...styles.scope, ...defaultStyle }} onClick={this.props.onClick}>
         <i style={{ ...styles.kind, ...Highlights.style(defaultHl, true) }}>{ icon.font }</i>
         <div style={ this.props.open ? styles.open : styles.close }>
           {this.props.message.contents.map(({hl, content}, i) => <span style={this.contentStyle(defaultStyle, hl === defaultHl ? defaultStyle : Highlights.style(hl))} className="selectable" key={i}>{ content }</span>)}
