@@ -41,10 +41,10 @@ export class App {
       switch (name) {
         /** ext_linegrid **/
         case "grid_resize":
-          this.gridResize(r[0][0], r[0][1], r[0][2]);
+          r.forEach(r => this.gridResize(r[0], r[1], r[2]));
         break;
         case "default_colors_set":
-          this.defaultColorsSet(r[0][0], r[0][1], r[0][2]);
+          r.forEach(r => this.defaultColorsSet(r[0], r[1], r[2]));
         break;
         case "hl_attr_define":
           this.hlAttrDefine(r);
@@ -53,16 +53,16 @@ export class App {
           r.forEach(r => this.gridLine(r[0], r[1], r[2], r[3]));
         break;
         case "grid_clear":
-          this.gridClear(r[0][0]);
+          r.forEach(r => this.gridClear(r[0]));
         break;
         case "grid_destroy":
-          this.gridDestory(r[0][0]);
+          r.forEach(r => this.gridDestory(r[0]));
         break;
         case "grid_cursor_goto":
-          this.gridCursorGoto(r[0][0], r[0][1], r[0][2]);
+          r.forEach(r => this.gridCursorGoto(r[0], r[1], r[2]));
         break;
         case "grid_scroll":
-          this.gridScroll(r[0][0], r[0][1], r[0][2], r[0][3], r[0][4], r[0][5], r[0][6]);
+          r.forEach(r => this.gridScroll(r[0], r[1], r[2], r[3], r[4], r[5], r[6]));
         break;
 
         /** ext_multigrid **/
@@ -79,32 +79,32 @@ export class App {
           r.forEach(r => this.winHide(r[0]));
         break;
         case "win_close":
-          this.winClose(r[0][0]);
+          r.forEach(r => this.winClose(r[0]));
         break;
 
         /** ext_tabline **/
         case "tabline_update":
-          this.tablineUpdate(r[0][0], r[0][1]);
+          r.forEach(r => this.tablineUpdate(r[0], r[1]));
         break;
 
         /** ext_cmdline **/
         case "cmdline_show":
-          this.cmdlineShow(r[0][0], r[0][1], r[0][2] || r[0][3], r[0][4]);
+          r.forEach(r => this.cmdlineShow(r[0], r[1], r[2] || r[3], r[4]));
         break;
         case "cmdline_pos":
-          this.cmdlinePos(r[0][0]);
+          r.forEach(r => this.cmdlinePos(r[0]));
         break;
         case "cmdline_special_char":
-          this.cmdlineSpecialChar(r[0][0], r[0][1]);
+          r.forEach(r => this.cmdlineSpecialChar(r[0], r[1]));
         break;
         case "cmdline_hide":
           this.cmdlineHide();
         break;
         case "cmdline_block_show":
-          this.cmdlineBlockShow(r[0][0]);
+          r.forEach(r => this.cmdlineBlockShow(r[0]));
         break;
         case "cmdline_block_append":
-          this.cmdlineBlockAppend(r[0][0]);
+          r.forEach(r => this.cmdlineBlockAppend(r[0]));
         break;
         case "cmdline_block_hide":
           this.cmdlineBlockHide();
@@ -112,10 +112,10 @@ export class App {
 
         /** ext_popupmenu **/
         case "popupmenu_show":
-          this.popupmenuShow(r[0][0], r[0][1], r[0][2], r[0][3], r[0][4]);
+          r.forEach(r => this.popupmenuShow(r[0], r[1], r[2], r[3], r[4]));
         break;
         case "popupmenu_select":
-          this.popupmenuSelect(r[0][0]);
+          r.forEach(r => this.popupmenuSelect(r[0]));
         break;
         case "popupmenu_hide":
           this.popupmenuHide();
@@ -126,27 +126,27 @@ export class App {
           this.msgShow("notificate", r);
         break;
         case "msg_showmode":
-          this.msgShow("mode", [["mode", r[0][0], true]]);
+          r.forEach(r => this.msgShow("mode", [["mode", r[0], true]]));
         break;
         case "msg_showcmd":
-          this.msgShow("command", [["command", r[0][0], true]]);
+          r.forEach(r => this.msgShow("command", [["command", r[0], true]]));
         break;
         case "msg_ruler":
-          this.msgShow("ruler", [["ruler", r[0][0], true]]);
+          r.forEach(r => this.msgShow("ruler", [["ruler", r[0], true]]));
         break;
         case "msg_clear":
           this.msgShow("notificate", [["", [], true]]);
         break;
         case "msg_history_show":
-          this.msgHistoryShow(r[0][0]);
+          r.forEach(r => this.msgHistoryShow(r[0]));
         break;
 
         /** default **/
         case "mode_info_set":
-          this.modeInfoSet(r[0][1]);
+          r.forEach(r => this.modeInfoSet(r[1]));
         break;
         case "mode_change":
-          this.modeChange(r[0][1]);
+          r.forEach(r => this.modeChange(r[1]));
         break;
         case "busy_start":
           this.busy(true);
