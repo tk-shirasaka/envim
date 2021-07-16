@@ -6,8 +6,6 @@ import { Setting } from "../../utils/setting";
 import { Highlights } from "../../utils/highlight";
 import { notificates } from "../../utils/icons";
 
-import { IconComponent } from "../icon";
-
 interface Props {
   message: IMessage;
   open: boolean;
@@ -26,6 +24,7 @@ const styles = {
     cursor: "pointer",
   },
   kind: {
+    display: "inline-block",
     padding: "0px 4px",
   },
   open: {
@@ -50,13 +49,14 @@ export class MessageComponent extends React.Component<Props, States> {
   render() {
     const icon = notificates.filter(icon => icon.kinds.indexOf(this.props.message.kind) >= 0)[0];
     const lineHeight = `${Setting.font.height + 4}px`;
-    const defaultStyle = Highlights.style(0);
+    const defaultHl = this.props.message.contents[0].hl;
+    const defaultStyle = Highlights.style(defaultHl);
 
     return (
       <div style={{ lineHeight, ...styles.content, ...defaultStyle }} onClick={this.props.onClick}>
-        <IconComponent color={icon.color} style={styles.kind} font={icon.font} />
+        <i style={{ ...styles.kind, ...Highlights.style(defaultHl, true) }}>{ icon.font }</i>
         <div style={ this.props.open ? styles.open : styles.close }>
-          {this.props.message.contents.map(({hl, content}, i) => <span style={this.contentStyle(defaultStyle, hl === 0 ? defaultStyle : Highlights.style(hl))} className="selectable" key={i}>{ content }</span>)}
+          {this.props.message.contents.map(({hl, content}, i) => <span style={this.contentStyle(defaultStyle, hl === defaultHl ? defaultStyle : Highlights.style(hl))} className="selectable" key={i}>{ content }</span>)}
         </div>
       </div>
     );
