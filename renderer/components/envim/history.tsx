@@ -137,7 +137,9 @@ export class HistoryComponent extends React.Component<Props, States> {
     e.preventDefault();
 
     Emit.share("envim:focus");
+    if (this.state.messages[select].kind === "debug") {
     this.setState({ select: this.state.select === select ? -1 : select });
+    }
   }
 
   private getScopeStyle() {
@@ -157,7 +159,7 @@ export class HistoryComponent extends React.Component<Props, States> {
           <IconComponent color={ this.state.debug ? "green-fg" : "gray-fg" } style={styles.icon} font="" onClick={this.toggleDebug.bind(this)} />
           <IconComponent color="red-fg" style={styles.icon} font="" onClick={this.onClear.bind(this)} />
         </div>
-        {this.state.messages.map((message, i) => <MessageComponent key={i} message={message} open={this.state.select === i} onClick={e => this.toggleSelect(e, i)} />)}
+        {this.state.messages.map((message, i) => <MessageComponent key={i} message={message} open={message.kind !== "debug" || this.state.select === i} onClick={e => this.toggleSelect(e, i)} />)}
         <div className="space" style={Highlights.style(0)} ref={this.bottom} />
       </div>
     );
