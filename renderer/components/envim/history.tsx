@@ -113,8 +113,15 @@ export class HistoryComponent extends React.Component<Props, States> {
   }
 
   private onMouseLeave() {
-    clearInterval(this.timer);
-    this.setState({ enter: false})
+    const timer = this.timer;
+    this.timer = 0;
+
+    setTimeout(() => {
+      if (this.timer) return;
+
+      clearInterval(timer);
+      this.setState({ enter: false})
+    }, 500);
   }
 
   private toggleDebug(e: MouseEvent) {
