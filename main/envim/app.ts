@@ -136,7 +136,7 @@ export class App {
           this.msgClear();
         break;
         case "msg_history_show":
-          r.forEach(r => this.msgHistoryShow(r[0]));
+          this.msgHistoryShow(r[0][0]);
         break;
 
         /** default **/
