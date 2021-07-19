@@ -80,7 +80,6 @@ export class PopupmenuComponent extends React.Component<Props, States> {
     const num = i - this.state.selected;
     const cmd = num < 0 ? "<C-p>" : "<C-n>";
 
-    Emit.share("envim:focus");
     Emit.send("envim:input", cmd.repeat(Math.abs(num)));
   }
 

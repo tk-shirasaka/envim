@@ -1,4 +1,4 @@
-import React, { createRef, RefObject, MouseEvent } from "react";
+import React, { createRef, RefObject } from "react";
 
 import { IMessage } from "../../../common/interface";
 
@@ -102,7 +102,6 @@ export class HistoryComponent extends React.Component<Props, States> {
   }
 
   private onClear() {
-    Emit.share("envim:focus");
     this.setState({ messages: [], select: -1 });
   }
 
@@ -124,21 +123,13 @@ export class HistoryComponent extends React.Component<Props, States> {
     }, 500);
   }
 
-  private toggleDebug(e: MouseEvent) {
-    e.stopPropagation();
-    e.preventDefault();
-
-    Emit.share("envim:focus");
+  private toggleDebug() {
     this.setState({ debug: !this.state.debug });
   }
 
-  private toggleSelect(e: MouseEvent, select: number) {
-    e.stopPropagation();
-    e.preventDefault();
-
-    Emit.share("envim:focus");
+  private toggleSelect(select: number) {
     if (this.state.messages[select].kind === "debug") {
-    this.setState({ select: this.state.select === select ? -1 : select });
+      this.setState({ select: this.state.select === select ? -1 : select });
     }
   }
 
@@ -159,7 +150,7 @@ export class HistoryComponent extends React.Component<Props, States> {
           <IconComponent color={ this.state.debug ? "green-fg" : "gray-fg" } style={styles.icon} font="" onClick={this.toggleDebug.bind(this)} />
           <IconComponent color="red-fg" style={styles.icon} font="" onClick={this.onClear.bind(this)} />
         </div>
-        {this.state.messages.map((message, i) => <MessageComponent key={i} message={message} open={message.kind !== "debug" || this.state.select === i} onClick={e => this.toggleSelect(e, i)} />)}
+        {this.state.messages.map((message, i) => <MessageComponent key={i} message={message} open={message.kind !== "debug" || this.state.select === i} onClick={_ => this.toggleSelect(i)} />)}
         <div className="space" style={Highlights.style(0)} ref={this.bottom} />
       </div>
     );

@@ -122,11 +122,15 @@ export class EnvimComponent extends React.Component<Props, States> {
     this.setState({ grids });
   }
 
+  private onMouseUp() {
+    Emit.share("envim:focus");
+  }
+
   render() {
     const grids = Object.keys(this.state.grids).length;
 
     return (
-      <div style={this.main}>
+      <div style={this.main} onMouseUp={this.onMouseUp}>
         <TablineComponent {...this.header} />
         <div style={{...styles.editor, ...this.editor}}>
           { Object.keys(this.state.grids).reverse().map(grid => (

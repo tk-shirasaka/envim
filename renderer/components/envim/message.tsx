@@ -55,8 +55,8 @@ export class MessageComponent extends React.Component<Props, States> {
     return (
       <div style={{ lineHeight, ...styles.scope, ...defaultStyle }} onClick={this.props.onClick}>
         <i style={{ ...styles.kind, ...Highlights.style(defaultHl, true) }}>{ icon.font }</i>
-        <div style={ this.props.open ? styles.open : styles.close }>
-          {this.props.message.contents.map(({hl, content}, i) => <span style={this.contentStyle(defaultStyle, hl === defaultHl ? defaultStyle : Highlights.style(hl))} className="selectable" key={i}>{ content }</span>)}
+        <div className="selectable space" style={ this.props.open ? styles.open : styles.close }>
+          {this.props.message.contents.map(({hl, content}, i) => <span style={this.contentStyle(defaultStyle, hl === defaultHl ? defaultStyle : Highlights.style(hl))} key={i}>{ content }</span>)}
         </div>
       </div>
     );

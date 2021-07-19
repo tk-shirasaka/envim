@@ -1,4 +1,4 @@
-import React, { MouseEvent } from "react";
+import React from "react";
 
 import { IMessage } from "../../../common/interface";
 
@@ -60,22 +60,18 @@ export class NotificateComponent extends React.Component<Props, States> {
     this.setState({ messages: [] });
   }
 
-  private onClose(e: MouseEvent, i: number) {
-    e.stopPropagation();
-    e.preventDefault();
-
+  private onClose(i: number) {
     const messages = this.state.messages;
 
     messages.splice(i, 1);
     this.setState({ messages });
-    Emit.share("envim:focus");
   }
 
   render() {
     return this.state.messages.length === 0 ? null : (
       <div style={styles.scope}>
         {this.state.messages.map((message, i) =>
-          <div className="animate slide-right" style={styles.messages} key={i}><MessageComponent message={message} open={true} onClick={e => this.onClose(e, i)} /></div>
+          <div className="animate slide-right" style={styles.messages} key={i}><MessageComponent message={message} open={true} onClick={_ => this.onClose(i)} /></div>
         )}
       </div>
     );

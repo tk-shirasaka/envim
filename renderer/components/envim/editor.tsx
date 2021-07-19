@@ -87,9 +87,6 @@ export class EditorComponent extends React.Component<Props, States> {
     const button = wheel ? "wheel" : ["left", "middle", "right"][e.button] || "left";
     const modiffier = [];
 
-    wheel || e.stopPropagation();
-    wheel || e.preventDefault();
-
     e.shiftKey && modiffier.push("S");
     e.ctrlKey && modiffier.push("C");
     e.altKey && modiffier.push("A");
@@ -102,7 +99,6 @@ export class EditorComponent extends React.Component<Props, States> {
     this.timer = +setTimeout(() => this.drag = true, 200);
 
     this.onMouseEvent(e, "press");
-    Emit.share("envim:focus");
   }
 
   private onMouseMove(e: MouseEvent) {

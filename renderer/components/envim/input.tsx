@@ -47,7 +47,7 @@ export class InputComponent extends React.Component<Props, States> {
   }
 
   private onFocus() {
-    this.input.current?.focus();
+    setTimeout(_ => this.input.current?.focus(), 500);
   }
 
   private onCursor(cursor: { row: number, col: number, width: number, zIndex: number }) {
