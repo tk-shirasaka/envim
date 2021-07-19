@@ -71,7 +71,7 @@ export class NotificateComponent extends React.Component<Props, States> {
     return this.state.messages.length === 0 ? null : (
       <div style={styles.scope}>
         {this.state.messages.map((message, i) =>
-          <div className="animate slide-right" style={styles.messages} key={i}><MessageComponent message={message} open={true} onClick={_ => this.onClose(i)} /></div>
+          <div className="animate slide-right" style={styles.messages} key={i}><MessageComponent message={message} open={true} onClick={() => this.onClose(i)} /></div>
         )}
       </div>
     );

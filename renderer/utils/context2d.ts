@@ -109,7 +109,7 @@ export class Context2D {
         this.move.y -= rows;
         this.render();
       } else {
-        requestAnimationFrame(_ => animate(ox, oy));
+        requestAnimationFrame(() => animate(ox, oy));
       }
     };
     animate(0, 0);
@@ -142,7 +142,7 @@ export class Context2D {
     } else if (flush?.cells) {
       this.flush(flush.cells);
     } else {
-      requestAnimationFrame(_ => this.render());
+      requestAnimationFrame(() => this.render());
     }
   }
 

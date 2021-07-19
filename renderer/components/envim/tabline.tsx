@@ -121,9 +121,9 @@ export class TablineComponent extends React.Component<Props, States> {
     const color = `color-${icon.color}-dark`;
     const modified = tab.active ? "active" : "clickable";
     return (
-      <div key={i} className={`animate fade-in ${color} ${modified}`} style={styles.tab} onClick={_ => this.runCommand(`tabnext ${i + 1}`,)}>
+      <div key={i} className={`animate fade-in ${color} ${modified}`} style={styles.tab} onClick={() => this.runCommand(`tabnext ${i + 1}`,)}>
         <IconComponent color={icon.color} style={styles.name} font={icon.font} text={tab.name.replace(/([^\/])[^\/]*\//g, "$1/")} />
-        <IconComponent color="red-fg" style={styles.space} font="" onClick={_ => this.runCommand(this.state.tabs.length > 1 ? `tabclose! ${i + 1}` : "quitall")} />
+        <IconComponent color="red-fg" style={styles.space} font="" onClick={() => this.runCommand(this.state.tabs.length > 1 ? `tabclose! ${i + 1}` : "quitall")} />
       </div>
     );
   }
@@ -136,8 +136,8 @@ export class TablineComponent extends React.Component<Props, States> {
         { menu.submenus?.map((submenu, i) => {
           const command = `emenu ${menu.name.replace(/([\. ])/g, "\\$1")}.${submenu.name.replace(/([\. ])/g, "\\$1")}`;
           return submenu.mappings[sname]?.enabled && submenu.mappings[sname]?.rhs
-            ? <div key={i} className="color-black clickable" style={styles.space} onClick={_ => this.runCommand(command)}>{ submenu.name }</div>
-            : <div key={i} className="color-gray-fg-dark" style={styles.space} onClick={_ => this.runCommand("")}>{ submenu.name }</div>
+            ? <div key={i} className="color-black clickable" style={styles.space} onClick={() => this.runCommand(command)}>{ submenu.name }</div>
+            : <div key={i} className="color-gray-fg-dark" style={styles.space} onClick={() => this.runCommand("")}>{ submenu.name }</div>
         })}
       </div>
     );
@@ -147,10 +147,10 @@ export class TablineComponent extends React.Component<Props, States> {
     return (
       <div className="color-black" style={{...this.props, ...styles.scope}}>
         {this.state.tabs.map((tab, i) => this.renderTab(i, tab))}
-        { this.state.tabs.length > 0 && <IconComponent color="green-fg" style={this.getStyle(styles.space)} font="" onClick={_ => this.runCommand("$tabnew")} /> }
+        { this.state.tabs.length > 0 && <IconComponent color="green-fg" style={this.getStyle(styles.space)} font="" onClick={() => this.runCommand("$tabnew")} /> }
         <div className="space dragable" />
         { this.state.menus.map((menu, i) => (
-          <div key={i} className={`color-black ${menu.active ? "active" : "clickable"}`} style={styles.menu} onMouseEnter={_ => this.toggleMenu(i)} onMouseLeave={_ => this.toggleMenu(i)}>
+          <div key={i} className={`color-black ${menu.active ? "active" : "clickable"}`} style={styles.menu} onMouseEnter={() => this.toggleMenu(i)} onMouseLeave={() => this.toggleMenu(i)}>
             { menu.name }
             { this.renderSubmenu(menu) }
           </div>
