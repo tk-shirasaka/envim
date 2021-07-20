@@ -8,8 +8,8 @@ interface Props {
 }
 
 interface States {
-  cmdline: { hl: number, reverse: boolean, c: string }[];
-  contents: { hl: number, reverse: boolean, c: string }[][];
+  cmdline: { hl: string, reverse: boolean, c: string }[];
+  contents: { hl: string, reverse: boolean, c: string }[][];
   pos: number;
   prompt: string;
   indent: number;
@@ -65,12 +65,12 @@ export class CmdlineComponent extends React.Component<Props, States> {
     let i = 0;
 
     for (; i < indent; i++) {
-      result.push({ hl: 0, reverse: false, c: " " });
+      result.push({ hl: "0", reverse: false, c: " " });
     }
     content.forEach(([hl, text]) => {
-      result = result.concat(text.split("").map(c => ({ hl: +hl, reverse: false, c })))
+      result = result.concat(text.split("").map(c => ({ hl, reverse: false, c })))
     });
-    result.push({ hl: 0, reverse: false, c: " " });
+    result.push({ hl: "0", reverse: false, c: " " });
 
     return result;
   }
@@ -98,7 +98,7 @@ export class CmdlineComponent extends React.Component<Props, States> {
     const pos = shift ? this.state.pos + 1 : this.state.pos;
 
     shift || (cmdline[this.state.pos].reverse = false);
-    cmdline.splice(this.state.pos, 0, { hl: 0, c, reverse: true });
+    cmdline.splice(this.state.pos, 0, { hl: "0", c, reverse: true });
     this.setState({ cmdline, pos });
   }
 
@@ -120,7 +120,7 @@ export class CmdlineComponent extends React.Component<Props, States> {
 
   private getScopeStyle() {
     const { height } = Setting.font;
-    return { padding: height, ...Highlights.style(0), ...styles.scope };
+    return { padding: height, ...Highlights.style("0"), ...styles.scope };
   }
 
   private renderCmdline(cmdline: States["cmdline"]) {

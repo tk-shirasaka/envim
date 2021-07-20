@@ -56,18 +56,18 @@ class Grid {
   }
 
   getDefault(row: number, col: number) {
-    return { row, col, text: " ", hl: 0, width: 0 };
+    return { row, col, text: " ", hl: "0", width: 0 };
   }
 
   getCell(row: number, col: number) {
     return (this.lines[row] && this.lines[row][col]) ? this.lines[row][col] : this.getDefault(row, col);
   }
 
-  setCell(row: number, col: number, text: string, hl: number) {
+  setCell(row: number, col: number, text: string, hl: string) {
     const prev = this.getCell(row, col - 1);
     const cell = this.getCell(row, col);
 
-    hl < 0 && (hl = prev.hl);
+    +hl < 0 && (hl = prev.hl);
     text === "" && (prev.width = 2);
     if (cell.text !== text || cell.hl !== hl) {
       this.flush[`${prev.row},${prev.col}`] = prev;

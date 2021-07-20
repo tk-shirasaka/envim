@@ -18,7 +18,7 @@ export class Context2D {
     this.render();
   }
 
-  private style(hl: number, type: "foreground" | "background") {
+  private style(hl: string, type: "foreground" | "background") {
     const next = Highlights.color(hl, type);
     const ctx = type === "foreground" ? this.fg : this.bg;
     if (ctx.fillStyle !== next) {
@@ -26,7 +26,7 @@ export class Context2D {
     }
   }
 
-  private fontStyle(hl: number) {
+  private fontStyle(hl: string) {
     const next = Highlights.font(hl, this.font.size);
     if (this.fg.font !== next) {
       this.fg.font = next
@@ -34,7 +34,7 @@ export class Context2D {
     this.fg.textBaseline = "top";
   }
 
-  private underline(x: number, y: number, width: number, hl: number) {
+  private underline(x: number, y: number, width: number, hl: string) {
     const type = Highlights.decoration(hl);
     const decoration = ["underline", "undercurl"].indexOf(type) >= 0;
 
@@ -64,7 +64,7 @@ export class Context2D {
     }
   }
 
-  private rect(x: number, y: number, width: number, height: number, hl: number, fill: boolean) {
+  private rect(x: number, y: number, width: number, height: number, hl: string, fill: boolean) {
     this.fg.clearRect(x, y, width * this.font.width, height * this.font.height);
     this.bg.clearRect(x, y, width * this.font.width, height * this.font.height);
     if (fill) {
@@ -74,7 +74,7 @@ export class Context2D {
   }
 
   clear(fill: boolean, x: number, y: number, width: number, height: number) {
-    this.rect(x * this.font.width, y * this.font.height, width, height, 0, fill);
+    this.rect(x * this.font.width, y * this.font.height, width, height, "0", fill);
   }
 
   getCapture(x: number, y: number, width: number, height: number) {

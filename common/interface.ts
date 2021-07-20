@@ -2,7 +2,7 @@ export interface ICell {
   row: number;
   col: number;
   text: string;
-  hl: number;
+  hl: string;
   width: number;
 }
 
@@ -37,13 +37,13 @@ export interface ITab {
 
 export interface IMessage {
   kind: string;
-  contents: { hl: number, content: string }[];
+  contents: { hl: string, content: string }[];
 }
 
 export interface IMode {
   cursor_shape: "block" | "horizontal" | "vertical";
   cell_percentage: number;
-  attr_id: number;
+  attr_id: string;
   name: string;
   short_name: string;
 }

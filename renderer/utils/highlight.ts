@@ -55,13 +55,13 @@ class Highlight {
 export class Highlights {
   private static hls: { [k: string]: Highlight } = {};
 
-  static setHighlight(id: number | string, ui: boolean, hl: IHighlight) {
+  static setHighlight(id: string, ui: boolean, hl: IHighlight) {
     const alpha = ui ? (100 - Setting.opacity) / 100 : 1;
 
     Highlights.hls[id] = new Highlight(hl, alpha);
   }
 
-  static color(id: number | string, type: "foreground" | "background" | "special") {
+  static color(id: string, type: "foreground" | "background" | "special") {
     if (Highlights.hls[id] && Highlights.hls[id][type]) return Highlights.hls[id][type];
     if (Highlights.hls[0] && Highlights.hls[0][type]) return Highlights.hls[0][type];
     if (Highlights.hls[-1] && Highlights.hls[-1][type]) return Highlights.hls[-1][type];
@@ -69,18 +69,18 @@ export class Highlights {
     return "rgba(0, 0, 0, 1)";
   }
 
-  static style(id: number | string, reverse: boolean = false) {
+  static style(id: string, reverse: boolean = false) {
     const background = Highlights.color(id, reverse ? "foreground" : "background");
     const foreground = Highlights.color(id, reverse ? "background" : "foreground");
 
     return { background, color: foreground, borderColor: foreground };
   }
 
-  static font(id: number, size: number) {
-    return Highlights.hls[id].font(size);
+  static font(id: string, size: number) {
+    return Highlights.hls[id]?.font(size) || "";
   }
 
-  static decoration(id: number) {
-    return Highlights.hls[id].decoration();
+  static decoration(id: string) {
+    return Highlights.hls[id]?.decoration() || "none";
   }
 }

@@ -86,7 +86,7 @@ export class EnvimComponent extends React.Component<Props, States> {
     this.header = { width: this.props.width, height: this.props.height - this.editor.height - this.footer.height };
   }
 
-  private onHighlight(highlights: {id: number, ui: boolean, hl: IHighlight}[]) {
+  private onHighlight(highlights: {id: string, ui: boolean, hl: IHighlight}[]) {
     highlights.forEach(({id, ui, hl}) => {
       Highlights.setHighlight(id, ui, hl);
     });

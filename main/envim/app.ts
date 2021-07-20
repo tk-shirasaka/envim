@@ -167,7 +167,7 @@ export class App {
   }
 
   private async defaultColorsSet(foreground: number, background: number, special: number) {
-    Emit.send("highlight:set", [{id: 0, ui: true, hl: { foreground, background, special }}]);
+    Emit.send("highlight:set", [{id: "0", ui: true, hl: { foreground, background, special }}]);
 
     const black = await this.nvim.getColorByName("black");
     const white = await this.nvim.getColorByName("white");
@@ -181,7 +181,7 @@ export class App {
     const purple = await this.nvim.getColorByName("purple1");
 
     Emit.send("highlight:set", [
-      {id: -1, ui: true, hl: { foreground: white, background: black, special: red }},
+      {id: "-1", ui: true, hl: { foreground: white, background: black, special: red }},
       {id: "blue", ui: true, hl: { foreground: blue }},
       {id: "lightblue", ui: true, hl: { foreground: lightblue }},
       {id: "green", ui: true, hl: { foreground: green }},
@@ -203,7 +203,7 @@ export class App {
     cells.forEach(cell => {
       const repeat = cell[2] || 1;
       for (let j = 0; j < repeat; j++) {
-        Grids.get(grid).setCell(row, col + i++, cell[0], cell.length > 1 ? +cell[1] : -1);
+        Grids.get(grid).setCell(row, col + i++, cell[0], cell.length > 1 ? cell[1] : "-1");
       }
     });
   }
@@ -376,7 +376,7 @@ export class App {
   }
 
   private convertMessage(kind: string, contents: string[][]) {
-    return { kind, contents: contents.map(([hl, content]) => ({ hl: +hl, content })) };
+    return { kind, contents: contents.map(([hl, content]) => ({ hl, content })) };
   }
 
   private modeInfoSet(modes: IMode[]) {
