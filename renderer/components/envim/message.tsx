@@ -43,7 +43,7 @@ const styles = {
 export class MessageComponent extends React.Component<Props, States> {
 
   private contentStyle(defaultStyle: { [k: string]: string }, style: { [k: string]: string }) {
-    return defaultStyle.background === style.background ? { color: style.color, borderColor: style.borderColor } : style;
+    return { ...style, ...(defaultStyle.background === style.background ? { background: "" } : {}) };
   }
 
   render() {

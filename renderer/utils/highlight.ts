@@ -40,11 +40,15 @@ class Highlight {
   }
 
   font(size: number) {
-    return {
-      normal: `${size}px Editor Regular`,
-      bold: `${size}px Editor Bold`,
-      italic:`italic ${size}px Editor Regular`,
-    }[this.type];
+    return `${this.fontStyle()} ${size}px ${this.fontFamily(true)}`;
+  }
+
+  fontFamily(editor: boolean) {
+    return (editor ? "Editor " : "") + { normal: "Regular", bold: "Bold", italic:"Regular" }[this.type];
+  }
+
+  fontStyle() {
+    return this.type === "italic" ? "italic" : "";
   }
 
   decoration() {
@@ -72,12 +76,24 @@ export class Highlights {
   static style(id: string, reverse: boolean = false) {
     const background = Highlights.color(id, reverse ? "foreground" : "background");
     const foreground = Highlights.color(id, reverse ? "background" : "foreground");
+    const special = Highlights.color(id, "special");
+    const fontFamily = Highlights.fontFamily(id);
+    const fontStyle = Highlights.fontStyle(id);
+    const textDecoration = { none: "", strikethrough: `line-through ${special}`, underline: `underline ${special}`, undercurl: `underline wavy ${special}`}[Highlights.decoration(id)];
 
-    return { background, color: foreground, borderColor: foreground };
+    return { background, color: foreground, borderColor: foreground, fontFamily, fontStyle, textDecoration };
   }
 
   static font(id: string, size: number) {
     return Highlights.hls[id]?.font(size) || "";
+  }
+
+  static fontFamily(id: string) {
+    return Highlights.hls[id]?.fontFamily(false) || "";
+  }
+
+  static fontStyle(id: string) {
+    return Highlights.hls[id]?.fontStyle() || "";
   }
 
   static decoration(id: string) {

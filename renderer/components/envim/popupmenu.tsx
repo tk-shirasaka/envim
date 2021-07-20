@@ -109,7 +109,7 @@ export class PopupmenuComponent extends React.Component<Props, States> {
     return this.state.items.length === 0 ? null : (
       <div className="animate fade-in" style={this.getScopeStyle()} ref={this.scope}>
         {this.state.items.map(({ word, kind, menu }, i) => (
-          <div className={this.state.selected === i ? "bold" : ""} style={styles.line} onClick={() => this.onItem(i)} key={i}>
+          <div style={styles.line} onClick={() => this.onItem(i)} key={i}>
             <div style={{ ...Highlights.style("0", this.state.selected === i), ...column }}>{ word }</div>
             <div style={{ ...Highlights.style(this.getKindStyle(`${kind} ${menu}`), this.state.selected === i), ...column }}>{ kind } { menu }</div>
           </div>
