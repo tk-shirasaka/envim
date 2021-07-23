@@ -10,8 +10,9 @@ export class Context2D {
   private deleted: boolean = false;
 
   constructor(
-    private fg: CanvasRenderingContext2D,
     private bg: CanvasRenderingContext2D,
+    private fg: CanvasRenderingContext2D,
+    private sp: CanvasRenderingContext2D,
   ) {
     const { size, width, height } = Setting.font;
     this.font = { size: size * 2, width: width * 2, height: height * 2 };
@@ -34,39 +35,40 @@ export class Context2D {
     this.fg.textBaseline = "top";
   }
 
-  private underline(x: number, y: number, width: number, hl: string) {
+  private decoration(x: number, y: number, width: number, hl: string) {
     const type = Highlights.decoration(hl);
-    const decoration = ["underline", "undercurl"].indexOf(type) >= 0;
 
-    if (decoration) {
-      this.bg.save();
-      this.bg.strokeStyle = Highlights.color(hl, "special");
-      this.bg.beginPath();
-      this.bg.lineWidth = 2;
+    if (type !== "none") {
+      this.sp.strokeStyle = Highlights.color(hl, "special");
+      this.sp.beginPath();
+      this.sp.lineWidth = 2;
 
       switch(type) {
+        case "strikethrough":
         case "underline":
-          this.bg.moveTo(x, y + this.font.height - 1);
-          this.bg.lineTo(x + width * this.font.width, y + this.font.height - 1);
+          const line = type === "underline" ? this.font.height - 1 : Math.floor(this.font.height / 2);
+
+          this.sp.moveTo(x, y + line);
+          this.sp.lineTo(x + width * this.font.width, y + line);
           break;
 
         case "undercurl":
           const cycle = this.font.width / 8;
           for (let i = 0; i < width * 2; i++) {
-            this.bg.arc(x + (i * 4 + 0) * cycle, y + this.font.height - cycle * 2.0, cycle, 0.9 * Math.PI, 0.1 * Math.PI, true);
-            this.bg.arc(x + (i * 4 + 2) * cycle, y + this.font.height - cycle * 1.5, cycle, 1.1 * Math.PI, 1.9 * Math.PI, false);
+            this.sp.arc(x + (i * 4 + 0) * cycle, y + this.font.height - cycle * 2.0, cycle, 0.9 * Math.PI, 0.1 * Math.PI, true);
+            this.sp.arc(x + (i * 4 + 2) * cycle, y + this.font.height - cycle * 1.5, cycle, 1.1 * Math.PI, 1.9 * Math.PI, false);
           }
           break;
       }
 
-      this.bg.stroke()
-      this.bg.restore();
+      this.sp.stroke()
     }
   }
 
   private rect(x: number, y: number, width: number, height: number, hl: string, fill: boolean) {
-    this.fg.clearRect(x, y, width * this.font.width, height * this.font.height);
     this.bg.clearRect(x, y, width * this.font.width, height * this.font.height);
+    this.fg.clearRect(x, y, width * this.font.width, height * this.font.height);
+    this.sp.clearRect(x, y, width * this.font.width, height * this.font.height);
     if (fill) {
       this.style(hl, "background");
       this.bg.fillRect(x, y, width * this.font.width, height * this.font.height);
@@ -79,20 +81,22 @@ export class Context2D {
 
   getCapture(x: number, y: number, width: number, height: number) {
     return [
-      this.fg.getImageData(x * this.font.width, y * this.font.height, width * this.font.width, height * this.font.height),
       this.bg.getImageData(x * this.font.width, y * this.font.height, width * this.font.width, height * this.font.height),
+      this.fg.getImageData(x * this.font.width, y * this.font.height, width * this.font.width, height * this.font.height),
+      this.sp.getImageData(x * this.font.width, y * this.font.height, width * this.font.width, height * this.font.height),
     ];
   }
 
-  putCapture(fg: ImageData, bg: ImageData, x: number, y: number) {
-    this.fg.putImageData(fg, x * this.font.width, y * this.font.height);
+  putCapture(bg: ImageData, fg: ImageData, sp: ImageData, x: number, y: number) {
     this.bg.putImageData(bg, x * this.font.width, y * this.font.height);
+    this.fg.putImageData(fg, x * this.font.width, y * this.font.height);
+    this.sp.putImageData(sp, x * this.font.width, y * this.font.height);
   }
 
   private scroll(rate: number, scroll: IScroll) {
     const { x, y, width, height, rows, cols } = scroll;
     const [ dx, dy ] = [ Math.max(x, x + cols), Math.max(y, y + rows) ];
-    const [ fg, bg ] = this.getCapture(dx, dy, width - Math.abs(cols), height - Math.abs(rows));
+    const [ bg, fg, sp ] = this.getCapture(dx, dy, width - Math.abs(cols), height - Math.abs(rows));
     const limitx = cols < 0 ? [ Math.min, Math.max ] : [ Math.max, Math.min ];
     const limity = rows < 0 ? [ Math.min, Math.max ] : [ Math.max, Math.min ];
     const animate = (ox: number, oy: number) => {
@@ -103,7 +107,7 @@ export class Context2D {
       oy = limity[1](rows, oy + ty * rate);
 
       this.clear(true, x, y, width, height);
-      this.putCapture(fg, bg, dx - ox, dy - oy);
+      this.putCapture(bg, fg, sp, dx - ox, dy - oy);
       if (ox === cols && oy === rows) {
         this.move.x -= cols;
         this.move.y -= rows;
@@ -119,7 +123,7 @@ export class Context2D {
     cells.forEach(cell => {
       const [y, x] = [cell.row * this.font.height, cell.col * this.font.width];
       this.rect(x, y, cell.width, 1, cell.hl, true);
-      this.underline(x, y, cell.width, cell.hl);
+      this.decoration(x, y, cell.width, cell.hl);
     });
 
     cells.forEach(cell => {
