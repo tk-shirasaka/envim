@@ -376,7 +376,12 @@ export class App {
   }
 
   private convertMessage(kind: string, contents: string[][]) {
-    return { kind, contents: contents.map(([hl, content]) => ({ hl, content })) };
+    return {
+      kind,
+      contents: contents
+        .map(([hl, content], i) => ({ hl, content: i ? content : content.replace(/^\s*\n/, "") }))
+        .filter(({ content }) => content.length)
+    };
   }
 
   private modeInfoSet(modes: IMode[]) {
