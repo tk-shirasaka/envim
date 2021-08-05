@@ -22,16 +22,18 @@ interface Props {
 interface States {
 }
 
-const pointerEvents: "none" = "none";
 const position: "absolute" = "absolute";
 const styles = {
-  bg: {
+  scope: {
     position,
     boxShadow: "0 0 8px 0 rgba(0, 0, 0, 0.6)",
   },
-  fg: {
-    pointerEvents,
+  canvas: {
     position,
+    top: 0,
+    left: 0,
+    width: "100%",
+    height: "100%",
   },
 };
 
@@ -137,17 +139,17 @@ export class EditorComponent extends React.Component<Props, States> {
 
   render() {
     return (
-      <>
-        <canvas className="animate fade-in" style={{...styles.bg, ...this.props.style}} width={this.props.style.width * 2} height={this.props.style.height * 2} ref={this.bg}
-          onMouseDown={this.onMouseDown.bind(this)}
-          onMouseMove={this.onMouseMove.bind(this)}
-          onMouseUp={this.onMouseRelease.bind(this)}
-          onMouseLeave={this.onMouseRelease.bind(this)}
-          onWheel={this.onMouseWheel.bind(this)}
-        />
-        <canvas className="animate fade-in" style={{...styles.fg, ...this.props.style}} width={this.props.style.width * 2} height={this.props.style.height * 2} ref={this.fg} />
-        <canvas className="animate fade-in" style={{...styles.fg, ...this.props.style}} width={this.props.style.width * 2} height={this.props.style.height * 2} ref={this.sp} />
-      </>
+      <div className="animate fade-in" style={{...styles.scope, ...this.props.style}}
+        onMouseDown={this.onMouseDown.bind(this)}
+        onMouseMove={this.onMouseMove.bind(this)}
+        onMouseUp={this.onMouseRelease.bind(this)}
+        onMouseLeave={this.onMouseRelease.bind(this)}
+        onWheel={this.onMouseWheel.bind(this)}
+      >
+        <canvas style={styles.canvas} width={this.props.style.width * 2} height={this.props.style.height * 2} ref={this.bg} />
+        <canvas style={styles.canvas} width={this.props.style.width * 2} height={this.props.style.height * 2} ref={this.fg} />
+        <canvas style={styles.canvas} width={this.props.style.width * 2} height={this.props.style.height * 2} ref={this.sp} />
+      </div>
     );
   }
 }
