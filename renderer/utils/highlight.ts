@@ -2,9 +2,10 @@ import { IHighlight } from "common/interface";
 import { Setting } from "./setting";
 
 class Highlight {
-  public foreground: string = "";
-  public background: string = "";
-  public special: string = "";
+  public foreground: { normal: string; alpha: string; };
+  public background: { normal: string; alpha: string; };
+  public special: { normal: string; alpha: string; };
+  public reverse?: boolean;
   private type: "normal" | "bold" | "italic";
   private decorate: "none" | "strikethrough" | "underline" | "undercurl";
 
@@ -13,9 +14,10 @@ class Highlight {
       alpha = Math.min(alpha, highlight.blend === 100 ? 0 : (100 - highlight.blend) / 100);
     }
 
-    this.background = this.intToColor(highlight.reverse ? highlight.foreground : highlight.background, alpha);
-    this.foreground = this.intToColor(highlight.reverse ? highlight.background : highlight.foreground, 1);
-    this.special = this.intToColor(highlight.special, 1);
+    this.background = this.intToColor(highlight.background, alpha);
+    this.foreground = this.intToColor(highlight.foreground, alpha);
+    this.special = this.intToColor(highlight.special, alpha);
+    this.reverse = highlight.reverse;
 
     this.type = "normal";
     if (highlight.bold) this.type = "bold";
@@ -28,7 +30,7 @@ class Highlight {
   }
 
   private intToColor(color: number | undefined, a: number) {
-    if (color === undefined || color < 0) return "";
+    if (color === undefined || color < 0) return { normal: "", alpha: "" };
 
     const rgb = `${("000000" + color.toString(16)).slice(-6)}`;
 
@@ -36,7 +38,7 @@ class Highlight {
     const g = Number(`0x${rgb[2]}${rgb[3]}`)
     const b = Number(`0x${rgb[4]}${rgb[5]}`)
 
-    return a < 1 ? `rgba(${r}, ${g}, ${b}, ${a})` : `#${rgb}`;
+    return { normal: `#${rgb}` , alpha: `rgba(${r}, ${g}, ${b}, ${a})` };
   }
 
   font(size: number) {
@@ -65,17 +67,24 @@ export class Highlights {
     Highlights.hls[id] = new Highlight(hl, alpha);
   }
 
-  static color(id: string, type: "foreground" | "background" | "special") {
-    if (Highlights.hls[id] && Highlights.hls[id][type]) return Highlights.hls[id][type];
-    if (Highlights.hls[0] && Highlights.hls[0][type]) return Highlights.hls[0][type];
-    if (Highlights.hls[-1] && Highlights.hls[-1][type]) return Highlights.hls[-1][type];
+  static color(id: string, type: "foreground" | "background" | "special", reverse: boolean = false) {
+    const alpha = type === "background" ? "alpha" : "normal";
+    reverse = Highlights.hls[id]?.reverse ? !reverse : reverse;
+
+    if (reverse && type !== "special") {
+      type = type === "foreground" ? "background" : "foreground";
+    }
+
+    if (Highlights.hls[id] && Highlights.hls[id][type][alpha]) return Highlights.hls[id][type][alpha];
+    if (Highlights.hls[0] && Highlights.hls[0][type][alpha]) return Highlights.hls[0][type][alpha];
+    if (Highlights.hls[-1] && Highlights.hls[-1][type][alpha]) return Highlights.hls[-1][type][alpha];
 
     return "rgba(0, 0, 0, 1)";
   }
 
   static style(id: string, reverse: boolean = false) {
-    const background = Highlights.color(id, reverse ? "foreground" : "background");
-    const foreground = Highlights.color(id, reverse ? "background" : "foreground");
+    const background = Highlights.color(id, "background", reverse);
+    const foreground = Highlights.color(id, "foreground", reverse);
     const special = Highlights.color(id, "special");
     const fontFamily = Highlights.fontFamily(id);
     const fontStyle = Highlights.fontStyle(id);
