@@ -118,7 +118,7 @@ export class InputComponent extends React.Component<Props, States> {
 
   render() {
     return (
-      <input className="animate blink" style={this.getStyle()} autoFocus={true} ref={this.input}
+      <input className={this.state.composit ? "" : "animate blink"} style={this.getStyle()} autoFocus={true} ref={this.input}
         onKeyDown={this.onKeyDown.bind(this)}
         onCompositionStart={this.onCompositionStart.bind(this)}
         onCompositionEnd={this.onCompositionEnd.bind(this)}
