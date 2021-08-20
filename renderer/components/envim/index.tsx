@@ -46,7 +46,7 @@ const styles = {
 };
 
 export class EnvimComponent extends React.Component<Props, States> {
-  private timer: number = 0;
+  private refresh: boolean = false;
   private main: { fontSize: number; lineHeight: string; } = { fontSize: 0, lineHeight: "" };
   private editor: { width: number; height: number; } = { width: 0, height: 0 };
   private header: { width: number; height: number; } = { width: 0, height: 0 };
@@ -64,12 +64,11 @@ export class EnvimComponent extends React.Component<Props, States> {
     Emit.send("envim:attach", x2Col(this.editor.width), y2Row(this.editor.height), Setting.options);
   }
 
-  componentDidUpdate() {
+  componentDidUpdate({width, height}: Props) {
+    if (this.refresh === false && this.props.width === width && this.props.height === height) return;
+
     this.setSize();
-    this.timer && clearTimeout(this.timer)
-    this.timer = +setTimeout(() => {
-      Emit.send("envim:resize", 1, x2Col(this.editor.width), y2Row(this.editor.height));
-    }, 200);
+    Emit.send("envim:resize", 1, x2Col(this.editor.width), y2Row(this.editor.height));
   }
 
   componentWillUnmount() {
@@ -103,6 +102,7 @@ export class EnvimComponent extends React.Component<Props, States> {
     const next = { width, height, transform, cursor, visibility, zIndex };
 
     if (JSON.stringify(grids[grid]) !== JSON.stringify(next)) {
+      this.refresh = grids[grid]?.width !== width || grids[grid].height !== height;
       grids[grid] = next;
       this.setState({ grids });
     }

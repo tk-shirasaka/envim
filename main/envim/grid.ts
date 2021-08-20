@@ -138,10 +138,7 @@ export class Grids {
 
   static get(grid: number = Grids.default) {
     if (!Grids.exist(grid)) {
-      const { width, height } = grid === Grids.default
-        ? { width: 1, height: 1 }
-        : Grids.get().getInfo();
-      Grids.grids[grid] = new Grid(width, height);
+      Grids.grids[grid] = new Grid(0, 0);
     }
 
     return Grids.grids[grid];
@@ -160,13 +157,10 @@ export class Grids {
 
     if (active !== grid) {
       Grids.active = grid;
-      [{ id: active, offset: -1 }, { id: grid, offset: 1 }].forEach(({id, offset}) => {
-        if (Grids.exist(id) === false) return;
+      [{ id: active, add: -1 }, { id: grid, add: 1 }].forEach(({id, add}) => {
+        const { width, height, zIndex, offset, focusable } = Grids.get(id).getInfo();
 
-        const info = Grids.grids[id].getInfo();
-
-        info.zIndex += offset;
-        Grids.grids[id].setInfo(info.width, info.height, info.zIndex, info.offset, info.focusable);
+        Grids.grids[id].setInfo(width, height, zIndex + add, offset, focusable);
         Grids.hidden[id] || Grids.show(id);
       });
     }
