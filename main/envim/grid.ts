@@ -49,8 +49,8 @@ class Grid {
   getCursorPos(row: number, col: number) {
     const { width } = this.getCell(row, col);
 
-    row = this.info.height < row ? -1 : row + this.info.offset.row;
-    col = this.info.width < col ? -1 : col + this.info.offset.col;
+    row = this.info.height <= row ? -1 : row + this.info.offset.row;
+    col = this.info.width <= col ? -1 : col + this.info.offset.col;
 
     return { col, row, width, zIndex: this.info.zIndex };
   }

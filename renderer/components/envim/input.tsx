@@ -68,8 +68,8 @@ export class InputComponent extends React.Component<Props, States> {
     const shape = mode.cursor_shape;
 
     style.width = this.getWidth(1, shape);
-    style.color = Highlights.color(mode.attr_id, "background");
-    style.background = Highlights.color(mode.attr_id, "foreground");
+    style.color = Highlights.color(mode.attr_id, "foreground", true);
+    style.background = Highlights.color(mode.attr_id, "background", true);
 
     this.setState({ style, shape });
   }
