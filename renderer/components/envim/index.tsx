@@ -108,17 +108,19 @@ export class EnvimComponent extends React.Component<Props, States> {
     }
   }
 
-  private hideWin(grid: number) {
+  private hideWin(ids: number[]) {
     const grids = this.state.grids;
 
-    grids[grid].visibility = "hidden";
+    ids.forEach(grid => grids[grid].visibility = "hidden");
+    this.refresh = true;
     this.setState({ grids });
   }
 
-  private closeWin(grid: number) {
+  private closeWin(ids: number[]) {
     const grids = this.state.grids;
 
-    delete(grids[grid]);
+    ids.forEach(grid => delete(grids[grid]));
+    this.refresh = true;
     this.setState({ grids });
   }
 

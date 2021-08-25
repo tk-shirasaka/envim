@@ -54,7 +54,7 @@ export class App {
           r.forEach(r => this.gridClear(r[0]));
         break;
         case "grid_destroy":
-          r.forEach(r => this.gridDestory(r[0]));
+          this.gridDestory(r.reduce((prev: number[], curr: number[]) => [ ...curr, ...prev]));
         break;
         case "grid_cursor_goto":
           r.forEach(r => this.gridCursorGoto(r[0], r[1], r[2]));
@@ -74,10 +74,10 @@ export class App {
           r.forEach(r => this.msgSetPos(r[0], r[1]));
         break;
         case "win_hide":
-          r.forEach(r => this.winHide(r[0]));
+          this.winHide(r.reduce((prev: number[], curr: number[]) => [ ...curr, ...prev]));
         break;
         case "win_close":
-          r.forEach(r => this.winClose(r[0]));
+          this.winClose(r.reduce((prev: number[], curr: number[]) => [ ...curr, ...prev]));
         break;
 
         /** ext_tabline **/
@@ -216,9 +216,9 @@ export class App {
     Emit.send(`clear:${grid}`);
   }
 
-  private gridDestory(grid: number) {
-    Grids.delete(grid);
-    Emit.send("win:close", grid);
+  private gridDestory(grids: number[]) {
+    grids.forEach(grid => Grids.delete(grid));
+    Emit.send("win:close", grids);
   }
 
   private gridCursorGoto(grid: number, row: number, col: number) {
@@ -265,12 +265,12 @@ export class App {
     this.winPos(grid, row, 0, width, height, false, winsize.zIndex + 3);
   }
 
-  private winHide(grid: number) {
-    Grids.hide(grid);
+  private winHide(grids: number[]) {
+    Grids.hide(grids);
   }
 
-  private winClose(grid: number) {
-    Emit.send("win:close", grid);
+  private winClose(grids: number[]) {
+    Emit.send("win:close", grids);
   }
 
   private async tablineUpdate(current: Tabpage, tabs: { tab: Tabpage, name: string }[]) {

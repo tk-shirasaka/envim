@@ -176,8 +176,8 @@ export class Grids {
     Emit.send("win:pos", grid, width, height, offset.row, offset.col, focusable, zIndex);
   }
 
-  static hide(grid: number) {
-    Grids.hidden[grid] = true;
-    Emit.send("win:hide", grid);
+  static hide(grids: number[]) {
+    grids.forEach(grid => Grids.hidden[grid] = true);
+    Emit.send("win:hide", grids);
   }
 }
