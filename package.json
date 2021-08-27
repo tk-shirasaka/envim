@@ -7,9 +7,7 @@
     "build": "webpack",
     "watch": "webpack -w",
     "lint": "tslint -c tslint.json -p tsconfig.json",
-    "release:linux": "webpack && electron-builder --linux appImage",
-    "release:mac": "webpack && electron-builder --mac zip",
-    "release:win": "webpack && electron-builder --win zip",
+    "release": "electron-builder",
     "start": "npm run build && electron ."
   },
   "repository": "https://github.com/tk-shirasaka/envim",
