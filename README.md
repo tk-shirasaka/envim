@@ -10,9 +10,9 @@ Neovim frontend writen by electron.
 ## Build
 
 ```sh
-npm run release:linux   # for Linux
-npm run release:mac     # for Mac
-npm run release:windows # for Windows
+make linux   # for Linux
+make mac     # for Mac
+make windows # for Windows
 ```
 
 ## Concept
