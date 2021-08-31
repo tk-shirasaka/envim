@@ -102,7 +102,7 @@ export class EnvimComponent extends React.Component<Props, States> {
     const next = { width, height, transform, cursor, visibility, zIndex };
 
     if (JSON.stringify(grids[grid]) !== JSON.stringify(next)) {
-      this.refresh = grids[grid]?.width !== width || grids[grid].height !== height;
+      this.refresh = grids[grid]?.width !== width || grids[grid]?.height !== height;
       grids[grid] = next;
       this.setState({ grids });
     }
