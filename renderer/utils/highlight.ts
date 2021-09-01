@@ -10,9 +10,8 @@ class Highlight {
   private decorate: "none" | "strikethrough" | "underline" | "undercurl";
 
   constructor(highlight: IHighlight, alpha: number) {
-    if (highlight.blend !== undefined) {
-      alpha = Math.min(alpha, highlight.blend === 100 ? 0 : (100 - highlight.blend) / 100);
-    }
+    alpha = highlight.blend === undefined ? alpha : highlight.blend;
+    alpha = (100 - alpha) / 100;
 
     this.background = this.intToColor(highlight.background, alpha);
     this.foreground = this.intToColor(highlight.foreground, alpha);
@@ -62,7 +61,7 @@ export class Highlights {
   private static hls: { [k: string]: Highlight } = {};
 
   static setHighlight(id: string, ui: boolean, hl: IHighlight) {
-    const alpha = ui ? (100 - Setting.opacity) / 100 : 1;
+    const alpha = ui ? Setting.opacity : 0;
 
     Highlights.hls[id] = new Highlight(hl, alpha);
   }
