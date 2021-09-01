@@ -173,7 +173,11 @@ export class Grids {
     const { width, height, offset, focusable, zIndex } = Grids.get(grid).getInfo();
 
     Grids.hidden[grid] && delete(Grids.hidden[grid]);
-    Emit.send("win:pos", grid, width, height, offset.row, offset.col, focusable, zIndex);
+    if (width && height) {
+      Emit.send("win:pos", grid, width, height, offset.row, offset.col, focusable, zIndex);
+    } else {
+      Grids.delete(grid);
+    }
   }
 
   static hide(grids: number[]) {
