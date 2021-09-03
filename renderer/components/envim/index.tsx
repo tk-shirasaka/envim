@@ -112,6 +112,8 @@ export class EnvimComponent extends React.Component<Props, States> {
     const grids = this.state.grids;
 
     ids.forEach(grid => {
+      if (!grids[grid]) return;
+
       this.refresh = grids[grid].zIndex < 5;
       grids[grid].visibility = "hidden";
     });
@@ -121,9 +123,9 @@ export class EnvimComponent extends React.Component<Props, States> {
   private closeWin(ids: number[]) {
     const grids = this.state.grids;
 
-    ids.forEach(grid => delete(grids[grid]));
-    this.refresh = true;
     ids.forEach(grid => {
+      if (!grids[grid]) return;
+
       this.refresh = grids[grid].zIndex < 5;
       delete(grids[grid]);
     });
