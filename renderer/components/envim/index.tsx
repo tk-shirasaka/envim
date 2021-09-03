@@ -68,7 +68,7 @@ export class EnvimComponent extends React.Component<Props, States> {
     if (this.refresh === false && this.props.width === width && this.props.height === height) return;
 
     this.setSize();
-    Emit.send("envim:resize", 1, x2Col(this.editor.width), y2Row(this.editor.height));
+    Emit.send("envim:command", "mode");
   }
 
   componentWillUnmount() {
@@ -102,7 +102,7 @@ export class EnvimComponent extends React.Component<Props, States> {
     const next = { width, height, transform, cursor, visibility, zIndex };
 
     if (JSON.stringify(grids[grid]) !== JSON.stringify(next)) {
-      this.refresh = grids[grid]?.width !== width || grids[grid]?.height !== height;
+      this.refresh = zIndex < 5 && (grids[grid]?.width !== width || grids[grid]?.height !== height);
       grids[grid] = next;
       this.setState({ grids });
     }
@@ -111,8 +111,10 @@ export class EnvimComponent extends React.Component<Props, States> {
   private hideWin(ids: number[]) {
     const grids = this.state.grids;
 
-    ids.forEach(grid => grids[grid].visibility = "hidden");
-    this.refresh = true;
+    ids.forEach(grid => {
+      this.refresh = grids[grid].zIndex < 5;
+      grids[grid].visibility = "hidden";
+    });
     this.setState({ grids });
   }
 
@@ -121,6 +123,10 @@ export class EnvimComponent extends React.Component<Props, States> {
 
     ids.forEach(grid => delete(grids[grid]));
     this.refresh = true;
+    ids.forEach(grid => {
+      this.refresh = grids[grid].zIndex < 5;
+      delete(grids[grid]);
+    });
     this.setState({ grids });
   }
 
@@ -129,14 +135,12 @@ export class EnvimComponent extends React.Component<Props, States> {
   }
 
   render() {
-    const grids = Object.keys(this.state.grids).length;
-
     return (
       <div style={this.main} onMouseUp={this.onMouseUp}>
         <TablineComponent {...this.header} />
         <div style={{...styles.editor, ...this.editor}}>
           { Object.keys(this.state.grids).reverse().map(grid => (
-            <EditorComponent key={grid} grid={+grid} fill={!(+grid === 1 && grids > 1)} style={this.state.grids[+grid]} />
+            <EditorComponent key={grid} grid={+grid} style={this.state.grids[+grid]} />
           )) }
           <CmdlineComponent />
           <PopupmenuComponent />

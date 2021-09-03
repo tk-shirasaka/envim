@@ -65,18 +65,16 @@ export class Context2D {
     }
   }
 
-  private rect(x: number, y: number, width: number, height: number, hl: string, fill: boolean) {
+  private rect(x: number, y: number, width: number, height: number, hl: string) {
+    this.style(hl, "background");
     this.bg.clearRect(x, y, width * this.font.width, height * this.font.height);
+    this.bg.fillRect(x, y, width * this.font.width, height * this.font.height);
     this.fg.clearRect(x, y, width * this.font.width, height * this.font.height);
     this.sp.clearRect(x, y, width * this.font.width, height * this.font.height);
-    if (fill) {
-      this.style(hl, "background");
-      this.bg.fillRect(x, y, width * this.font.width, height * this.font.height);
-    }
   }
 
-  clear(fill: boolean, x: number, y: number, width: number, height: number) {
-    this.rect(x * this.font.width, y * this.font.height, width, height, "0", fill);
+  clear(x: number, y: number, width: number, height: number) {
+    this.rect(x * this.font.width, y * this.font.height, width, height, "0");
   }
 
   getCapture(x: number, y: number, width: number, height: number) {
@@ -106,7 +104,7 @@ export class Context2D {
       ox = limitx[1](cols, ox + tx * rate);
       oy = limity[1](rows, oy + ty * rate);
 
-      this.clear(true, x, y, width, height);
+      this.clear(x, y, width, height);
       this.putCapture(bg, fg, sp, dx - ox, dy - oy);
       if (ox === cols && oy === rows) {
         this.move.x -= cols;
@@ -122,7 +120,7 @@ export class Context2D {
   private flush(cells: ICell[]) {
     cells.forEach(cell => {
       const [y, x] = [cell.row * this.font.height, cell.col * this.font.width];
-      this.rect(x, y, cell.width, 1, cell.hl, true);
+      this.rect(x, y, cell.width, 1, cell.hl);
       this.decoration(x, y, cell.width, cell.hl);
     });
 

@@ -8,7 +8,6 @@ import { y2Row, x2Col } from "../../utils/size";
 
 interface Props {
   grid: number;
-  fill: boolean;
   style: {
     zIndex: number;
     width: number;
@@ -59,13 +58,13 @@ export class EditorComponent extends React.Component<Props, States> {
 
     if (bg && fg && sp) {
       this.renderer = new Context2D(bg, fg, sp);
-      this.renderer.clear(this.props.fill, 0, 0, x2Col(this.props.style.width), y2Row(this.props.style.height));
+      this.renderer.clear(0, 0, x2Col(this.props.style.width), y2Row(this.props.style.height));
     }
   }
 
   componentDidUpdate() {
     if (this.renderer && this.capture) {
-      this.renderer.clear(this.props.fill, 0, 0, x2Col(this.props.style.width), y2Row(this.props.style.height));
+      this.renderer.clear(0, 0, x2Col(this.props.style.width), y2Row(this.props.style.height));
       this.renderer.putCapture(this.capture.bg, this.capture.fg, this.capture.sp, 0, 0);
       delete(this.capture);
     }
@@ -129,7 +128,7 @@ export class EditorComponent extends React.Component<Props, States> {
   }
 
   private onFlush(cells: ICell[], scroll?: IScroll) {
-    this.clear && this.renderer?.clear(this.props.fill, 0, 0, x2Col(this.props.style.width), y2Row(this.props.style.height));
+    this.clear && this.renderer?.clear(0, 0, x2Col(this.props.style.width), y2Row(this.props.style.height));
     scroll && this.renderer?.push({ scroll });
     this.renderer?.push({ cells });
     this.clear = false;

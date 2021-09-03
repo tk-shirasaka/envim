@@ -65,7 +65,7 @@ export class App {
 
         /** ext_multigrid **/
         case "win_pos":
-          r.forEach(r => this.winPos(r[0], r[2], r[3], r[4], r[5], true, 1));
+          r.forEach(r => this.winPos(r[0], r[2], r[3], r[4], r[5], true, 3));
         break;
         case "win_float_pos":
           r.forEach(r => this.winFloatPos(r[0], r[2], r[3], r[4], r[5], r[6]));
@@ -239,7 +239,7 @@ export class App {
     col = Math.min(winsize.width - 1, Math.max(0, col - overwidth));
     row = Math.min(winsize.height - 1, Math.max(0, row - overheight));
 
-    current.setInfo(width, height, Math.max(zIndex, current.getInfo().zIndex), { row, col }, focusable);
+    current.setInfo(width, height, grid === 1 ? 1 : zIndex, { row, col }, focusable);
     Grids.show(grid);
 
     if (winsize.width < width || winsize.height < height) {
@@ -254,7 +254,7 @@ export class App {
     row = offset.row + (anchor[0] === "N" ? row : row - current.height);
     col = offset.col + (anchor[1] === "W" ? col : col - current.width);
 
-    this.winPos(grid, row, col, current.width, current.height, focusable, zIndex + 5);
+    this.winPos(grid, row, col, current.width, current.height, focusable, zIndex + 4);
   }
 
   private msgSetPos(grid: number, row: number) {
