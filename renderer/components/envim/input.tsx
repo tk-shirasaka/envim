@@ -50,12 +50,14 @@ export class InputComponent extends React.Component<Props, States> {
     setTimeout(() => this.input.current?.focus(), 500);
   }
 
-  private onCursor(cursor: { row: number, col: number, width: number, zIndex: number }) {
+  private onCursor(cursor: { row: number, col: number, width: number, hl: string, zIndex: number }) {
     const style = this.state.style;
 
     style.width = this.getWidth(cursor.width, this.state.shape);
     style.transform = `translate(${col2X(cursor.col)}px, ${row2Y(cursor.row)}px)`;
     style.zIndex = cursor.zIndex;
+    style.color = Highlights.color(cursor.hl, "foreground", true);
+    style.background = Highlights.color(cursor.hl, "background", true);
     this.setState({ style });
   }
 
@@ -68,8 +70,6 @@ export class InputComponent extends React.Component<Props, States> {
     const shape = mode.cursor_shape;
 
     style.width = this.getWidth(1, shape);
-    style.color = Highlights.color(mode.attr_id, "foreground", true);
-    style.background = Highlights.color(mode.attr_id, "background", true);
 
     this.setState({ style, shape });
   }

@@ -47,12 +47,12 @@ class Grid {
   }
 
   getCursorPos(row: number, col: number) {
-    const { width } = this.getCell(row, col);
+    const { width, hl } = this.getCell(row, col);
 
     row = this.info.height <= row ? -1 : row + this.info.offset.row;
     col = this.info.width <= col ? -1 : col + this.info.offset.col;
 
-    return { col, row, width, zIndex: this.info.zIndex };
+    return { col, row, width, hl, zIndex: this.info.zIndex + 1 };
   }
 
   getDefault(row: number, col: number) {
@@ -153,16 +153,13 @@ export class Grids {
   }
 
   static cursor(grid: number, row: number, col: number) {
-    const active = Grids.active;
+    const curr = Grids.active;
+    const next = grid;
 
-    if (active !== grid) {
-      Grids.active = grid;
-      [{ id: active, add: -1 }, { id: grid, add: 1 }].forEach(({id, add}) => {
-        const { width, height, zIndex, offset, focusable } = Grids.get(id).getInfo();
-
-        Grids.grids[id].setInfo(width, height, zIndex + add, offset, focusable);
-        Grids.hidden[id] || Grids.show(id);
-      });
+    if (curr !== next) {
+      Grids.active = next;
+      Grids.hidden[curr] || Grids.show(curr);
+      Grids.hidden[next] || Grids.show(next);
     }
 
     const cursor = Grids.get(grid).getCursorPos(row, col);
@@ -171,10 +168,12 @@ export class Grids {
 
   static show(grid: number) {
     const { width, height, offset, focusable, zIndex } = Grids.get(grid).getInfo();
+    const active = grid === Grids.active ? 1 : 0;
 
     Grids.hidden[grid] && delete(Grids.hidden[grid]);
+
     if (width && height) {
-      Emit.send("win:pos", grid, width, height, offset.row, offset.col, focusable, zIndex);
+      Emit.send("win:pos", grid, width, height, offset.row, offset.col, focusable, zIndex + active);
     } else {
       Grids.delete(grid);
     }
