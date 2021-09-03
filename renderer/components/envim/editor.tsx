@@ -8,6 +8,7 @@ import { y2Row, x2Col } from "../../utils/size";
 
 interface Props {
   grid: number;
+  editor: { width: number; height: number; };
   style: {
     zIndex: number;
     width: number;
@@ -25,12 +26,13 @@ const position: "absolute" = "absolute";
 const styles = {
   scope: {
     position,
+    overflow: "hidden",
     boxShadow: "0 0 8px 0 rgba(0, 0, 0, 0.6)",
   },
   canvas: {
     position,
-    width: "100%",
-    height: "100%",
+    transform: "scale(0.5)",
+    transformOrigin: "0 0",
   },
 };
 
@@ -58,13 +60,13 @@ export class EditorComponent extends React.Component<Props, States> {
 
     if (bg && fg && sp) {
       this.renderer = new Context2D(bg, fg, sp);
-      this.renderer.clear(0, 0, x2Col(this.props.style.width), y2Row(this.props.style.height));
+      this.renderer.clear(0, 0, x2Col(this.props.editor.width), y2Row(this.props.editor.height));
     }
   }
 
   componentDidUpdate() {
     if (this.renderer && this.capture) {
-      this.renderer.clear(0, 0, x2Col(this.props.style.width), y2Row(this.props.style.height));
+      this.renderer.clear(0, 0, x2Col(this.props.editor.width), y2Row(this.props.editor.height));
       this.renderer.putCapture(this.capture.bg, this.capture.fg, this.capture.sp, 0, 0);
       delete(this.capture);
     }
@@ -76,8 +78,8 @@ export class EditorComponent extends React.Component<Props, States> {
   }
 
   shouldComponentUpdate(props: Props) {
-    const prev = this.props.style;
-    const next = props.style;
+    const prev = this.props.editor;
+    const next = props.editor;
     if (this.renderer && (prev.width !== next.width || prev.height !== next.height)) {
       const [ bg, fg, sp ] = this.renderer.getCapture(0, 0, x2Col(Math.min(prev.width, next.width)), y2Row(Math.min(prev.height, next.height)));
       this.capture = { bg, fg, sp };
@@ -86,7 +88,7 @@ export class EditorComponent extends React.Component<Props, States> {
   }
 
   private onMouseEvent(e: MouseEvent, action: string, wheel: boolean = false) {
-    const [col, row] = [ x2Col(e.nativeEvent.offsetX), y2Row(e.nativeEvent.offsetY) ];
+    const [col, row] = [ x2Col(e.nativeEvent.offsetX / 2), y2Row(e.nativeEvent.offsetY / 2) ];
     const button = wheel ? "wheel" : ["left", "middle", "right"][e.button] || "left";
     const modiffier = [];
 
@@ -128,7 +130,7 @@ export class EditorComponent extends React.Component<Props, States> {
   }
 
   private onFlush(cells: ICell[], scroll?: IScroll) {
-    this.clear && this.renderer?.clear(0, 0, x2Col(this.props.style.width), y2Row(this.props.style.height));
+    this.clear && this.renderer?.clear(0, 0, x2Col(this.props.editor.width), y2Row(this.props.editor.height));
     scroll && this.renderer?.push({ scroll });
     this.renderer?.push({ cells });
     this.clear = false;
@@ -143,9 +145,9 @@ export class EditorComponent extends React.Component<Props, States> {
         onMouseLeave={this.onMouseRelease.bind(this)}
         onWheel={this.onMouseWheel.bind(this)}
       >
-        <canvas style={styles.canvas} width={this.props.style.width * 2} height={this.props.style.height * 2} ref={this.bg} />
-        <canvas style={styles.canvas} width={this.props.style.width * 2} height={this.props.style.height * 2} ref={this.fg} />
-        <canvas style={styles.canvas} width={this.props.style.width * 2} height={this.props.style.height * 2} ref={this.sp} />
+        <canvas style={styles.canvas} width={this.props.editor.width * 2} height={this.props.editor.height * 2} ref={this.bg} />
+        <canvas style={styles.canvas} width={this.props.editor.width * 2} height={this.props.editor.height * 2} ref={this.fg} />
+        <canvas style={styles.canvas} width={this.props.editor.width * 2} height={this.props.editor.height * 2} ref={this.sp} />
       </div>
     );
   }

@@ -47,6 +47,7 @@ const styles = {
 
 export class EnvimComponent extends React.Component<Props, States> {
   private refresh: boolean = false;
+  private timer: number = 0;
   private main: { fontSize: number; lineHeight: string; } = { fontSize: 0, lineHeight: "" };
   private editor: { width: number; height: number; } = { width: 0, height: 0 };
   private header: { width: number; height: number; } = { width: 0, height: 0 };
@@ -65,12 +66,10 @@ export class EnvimComponent extends React.Component<Props, States> {
   }
 
   componentDidUpdate({width, height}: Props) {
-    if (this.props.width !== width || this.props.height !== height) {
-      this.setSize();
-      Emit.send("envim:resize", 1, x2Col(this.editor.width), y2Row(this.editor.height));
-    } else if (this.refresh) {
-      Emit.send("envim:command", "mode");
-    }
+    if (this.props.width === width && this.props.height === height) return
+
+    this.setSize();
+    Emit.send("envim:resize", 1, x2Col(this.editor.width), y2Row(this.editor.height));
   }
 
   componentWillUnmount() {
@@ -93,6 +92,24 @@ export class EnvimComponent extends React.Component<Props, States> {
     });
   }
 
+  private updateGrid(grids: States["grids"], refresh: boolean, async: boolean) {
+    const update = () => {
+      this.setState({ grids });
+      this.refresh && Emit.send("envim:command", "mode");
+      this.refresh = false;
+      this.timer = 0;
+    };
+
+    this.refresh = this.refresh || refresh;
+    this.timer && clearTimeout(this.timer);
+
+    if (async) {
+      this.timer = +setTimeout(update);
+    } else {
+      update();
+    }
+  }
+
   private onWin(grid: number, width: number, height: number, top: number, left: number, focusable: boolean, zIndex: number) {
     const grids = this.state.grids;
     const cursor: "default" | "not-allowed" = focusable ? "default" : "not-allowed";
@@ -104,34 +121,35 @@ export class EnvimComponent extends React.Component<Props, States> {
     const next = { width, height, transform, cursor, visibility, zIndex };
 
     if (JSON.stringify(grids[grid]) !== JSON.stringify(next)) {
-      this.refresh = zIndex < 5 && (grids[grid]?.width !== width || grids[grid]?.height !== height);
+      const async = grid in grids;
+      const refresh = zIndex < 5 && (grids[grid]?.width !== width || grids[grid]?.height !== height);
       grids[grid] = next;
-      this.setState({ grids });
+      this.updateGrid(grids, refresh, async);
     }
   }
 
   private hideWin(ids: number[]) {
     const grids = this.state.grids;
-
-    ids.forEach(grid => {
+    const refresh = ids.filter(grid => {
       if (!grids[grid]) return;
 
-      this.refresh = grids[grid].zIndex < 5;
       grids[grid].visibility = "hidden";
-    });
-    this.setState({ grids });
+      return grids[grid].zIndex < 5;
+    }).length > 0;
+
+    this.updateGrid(grids, refresh, true);
   }
 
   private closeWin(ids: number[]) {
     const grids = this.state.grids;
+    const refresh = ids.filter(grid => {
+      const refresh = grids[grid] && grids[grid].zIndex < 5;
 
-    ids.forEach(grid => {
-      if (!grids[grid]) return;
-
-      this.refresh = grids[grid].zIndex < 5;
       delete(grids[grid]);
-    });
-    this.setState({ grids });
+      return refresh;
+    }).length > 0;
+
+    this.updateGrid(grids, refresh, true);
   }
 
   private onMouseUp() {
@@ -144,7 +162,7 @@ export class EnvimComponent extends React.Component<Props, States> {
         <TablineComponent {...this.header} />
         <div style={{...styles.editor, ...this.editor}}>
           { Object.keys(this.state.grids).reverse().map(grid => (
-            <EditorComponent key={grid} grid={+grid} style={this.state.grids[+grid]} />
+            <EditorComponent key={grid} grid={+grid} editor={this.editor} style={this.state.grids[+grid]} />
           )) }
           <CmdlineComponent />
           <PopupmenuComponent />
