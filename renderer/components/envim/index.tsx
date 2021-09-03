@@ -65,10 +65,12 @@ export class EnvimComponent extends React.Component<Props, States> {
   }
 
   componentDidUpdate({width, height}: Props) {
-    if (this.refresh === false && this.props.width === width && this.props.height === height) return;
-
-    this.setSize();
-    Emit.send("envim:command", "mode");
+    if (this.props.width !== width || this.props.height !== height) {
+      this.setSize();
+      Emit.send("envim:resize", 1, x2Col(this.editor.width), y2Row(this.editor.height));
+    } else if (this.refresh) {
+      Emit.send("envim:command", "mode");
+    }
   }
 
   componentWillUnmount() {
