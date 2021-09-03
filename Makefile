@@ -8,16 +8,18 @@ UNZIP_CMD		= unzip -o
 RELEASE_CMD		= npm run release --
 TARGET_FILE_NAME	=
 
-build: install $(FONT_FILE_NAME).zip
+build: install fonts/$(FONT_FILE_NAME).zip
 	npm run build
 
 install:
 	npm install
 
-$(FONT_FILE_NAME).zip:
+fonts/$(FONT_FILE_NAME).zip:
 	$(DOWNLOAD_CMD) $(FONT_DOWNLOAD_URL)
 	$(UNZIP_CMD) $(FONT_FILE_NAME)
-	mv -f $(FONT_FILE_NAME) fonts
+	rm -rf fonts
+	mv $(FONT_FILE_NAME) fonts
+	mv $(FONT_FILE_NAME).zip fonts/
 
 linux: build
 	$(RELEASE_CMD) --linux appImage
