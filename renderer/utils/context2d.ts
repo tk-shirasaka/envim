@@ -130,7 +130,7 @@ export class Context2D {
       const [y, x] = [cell.row * this.font.height, cell.col * this.font.width];
       this.fontStyle(cell.hl);
       this.style(cell.hl, "foreground");
-      this.fg.fillText(cell.text, x, y + 1);
+      this.fg.fillText(cell.text, x, y + (this.font.height - this.font.size) / 2);
     });
     this.render();
   }
