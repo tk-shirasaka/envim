@@ -47,7 +47,10 @@ export class InputComponent extends React.Component<Props, States> {
   }
 
   private onFocus() {
-    setTimeout(() => this.input.current?.focus(), 500);
+    const selected = window.getSelection()?.toString();
+
+    selected && navigator.clipboard.writeText(selected);
+    this.input.current?.focus();
   }
 
   private onCursor(cursor: { row: number, col: number, width: number, hl: string, zIndex: number }) {
