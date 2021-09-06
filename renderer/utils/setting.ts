@@ -34,8 +34,8 @@ export class Setting {
   }
 
   private static set(item: ISetting) {
-    Setting.item = item;
-    ls.set(Setting.item);
+    ls.set(item);
+    Setting.item = ls.get();
   }
 
   static get type() {

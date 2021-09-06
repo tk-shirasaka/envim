@@ -62,6 +62,7 @@ export class EnvimComponent extends React.Component<Props, States> {
     Emit.on("win:pos", this.onWin.bind(this));
     Emit.on("win:hide", this.hideWin.bind(this));
     Emit.on("win:close", this.closeWin.bind(this));
+    Emit.on("option:set", this.onOption.bind(this));
     Emit.send("envim:attach", x2Col(this.editor.width), y2Row(this.editor.height), Setting.options);
   }
 
@@ -73,7 +74,8 @@ export class EnvimComponent extends React.Component<Props, States> {
   }
 
   componentWillUnmount() {
-    Emit.clear(["highlight:set", "win:pos", "win:hide", "win:close"]);
+    clearTimeout(this.timer);
+    Emit.clear(["highlight:set", "win:pos", "win:hide", "win:close", "option:set"]);
   }
 
   private setSize() {
@@ -150,6 +152,10 @@ export class EnvimComponent extends React.Component<Props, States> {
     }).length > 0;
 
     this.updateGrid(grids, refresh, true);
+  }
+
+  private onOption(options: { [k: string]: boolean }) {
+    Setting.options = options;
   }
 
   private onMouseUp() {

@@ -10,6 +10,7 @@ import { Grids } from "./grid";
 
 export class App {
   private modes: IMode[] = [];
+  private options: { [k: string]: string | number | boolean} = {};
 
   constructor(private nvim: NeovimClient) {
     Grids.init();
@@ -145,6 +146,8 @@ export class App {
         break;
         case "mode_change":
           r.forEach(r => this.modeChange(r[1]));
+        case "option_set":
+          this.optionsSet(r);
         break;
         case "busy_start":
           this.busy(true);
@@ -390,6 +393,17 @@ export class App {
 
   private modeChange(index: number) {
     Emit.send("mode:change", this.modes[index]);
+  }
+
+  private optionsSet(options: string[][]) {
+    const diff = options.filter(([name, value]) => {
+      const result = this.options[name] !== value;
+      this.options[name] = value;
+
+      return result;
+    }).length > 0;
+
+    diff && Emit.send("option:set", this.options);
   }
 
   private busy(busy: boolean) {
