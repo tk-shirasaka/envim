@@ -1,6 +1,7 @@
 import { ICell } from "common/interface";
 
 import { Emit } from "../emit";
+import { Highlights } from "./highlight";
 
 class Grid {
   private lines: ICell[][] = [];
@@ -56,7 +57,7 @@ class Grid {
   }
 
   getDefault(row: number, col: number) {
-    return { row, col, text: " ", hl: "0", width: 0 };
+    return { row, col, text: " ", hl: "0", width: 0, dirty: 0 };
   }
 
   getCell(row: number, col: number) {
@@ -67,13 +68,21 @@ class Grid {
     const prev = this.getCell(row, col - 1);
     const cell = this.getCell(row, col);
 
-    +hl < 0 && (hl = prev.hl);
-    text === "" && (prev.width = 2);
-    if (cell.text !== text || cell.hl !== hl) {
+    hl = +hl < 0 ? prev.hl : hl;
+
+    const hl1 = Highlights.get(hl);
+    const hl2 = Highlights.get(cell.hl);
+    const dirty = (this.flush[`${cell.row},${cell.col}`]?.dirty || 0)
+      | (hl1.fg === hl2.fg && hl1.type === hl2.type && cell.text === text ? 0 : 0b001)
+      | (hl1.bg === hl2.bg ? 0 : 0b010)
+      | (hl1.sp === hl2.sp && hl1.decorate === hl2.decorate ? 0 : 0b100);
+
+    (text === "") && (prev.width = 2);
+    if (dirty) {
       this.flush[`${prev.row},${prev.col}`] = prev;
       this.flush[`${cell.row},${cell.col}`] = cell;
     }
-    [ cell.text, cell.hl, cell.width ] = [ text, hl, text.length ];
+    [ cell.text, cell.hl, cell.width, cell.dirty ] = [ text, hl, text.length, dirty ];
   }
 
   scroll(top: number, bottom: number, left: number, right: number, rows: number, cols: number) {
