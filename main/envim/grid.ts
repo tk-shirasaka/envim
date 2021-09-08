@@ -73,9 +73,9 @@ class Grid {
     const hl1 = Highlights.get(hl);
     const hl2 = Highlights.get(cell.hl);
     const dirty = (this.flush[`${cell.row},${cell.col}`]?.dirty || 0)
-      | (hl1.fg === hl2.fg && hl1.type === hl2.type && cell.text === text ? 0 : 0b001)
+      | (hl1.fg === hl2.fg && cell.text === text ? 0 : 0b001)
       | (hl1.bg === hl2.bg ? 0 : 0b010)
-      | (hl1.sp === hl2.sp && hl1.decorate === hl2.decorate ? 0 : 0b100);
+      | (hl1.sp === hl2.sp ? 0 : 0b100);
 
     (text === "") && (prev.width = 2);
     if (dirty) {

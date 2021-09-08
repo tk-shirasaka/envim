@@ -1,19 +1,20 @@
 import { IHighlight } from "common/interface";
 
 export class Highlights {
-  private static hls: { [k: string]: { fg: number; bg: number; sp: number; type: string; decorate: string; } } = {};
+  private static hls: { [k: string]: { fg: number; bg: number; sp: number; } } = {};
 
-  static set(id: string, hl: IHighlight) {
-    const highlight = Highlights.get("_");
+  static set(id: string, hl: IHighlight, ui: boolean) {
+    const highlight = Highlights.get(id);
 
-    highlight.fg = hl.foreground || Highlights.hls["0"].fg;
-    highlight.bg = hl.background || Highlights.hls["0"].bg;
-    highlight.sp = hl.special || Highlights.hls["0"].sp;
-    if (hl.bold) highlight.type = "bold";
-    if (hl.italic) highlight.type = "italic";
-    if (hl.strikethrough) highlight.decorate = "strikethrough";
-    if (hl.underline) highlight.decorate = "underline";
-    if (hl.undercurl) highlight.decorate = "undercurl";
+    if (hl.foreground) highlight.fg = hl.foreground;
+    if (hl.background) highlight.bg = hl.background;
+    if (hl.special) highlight.sp = hl.special;
+    if (hl.bold) highlight.fg = 0x2000000 | highlight.fg;
+    if (hl.italic) highlight.fg = 0x4000000 | highlight.fg;
+    if (ui) highlight.bg = 0x2000000 | highlight.bg;
+    if (hl.strikethrough) highlight.sp = 0x2000000 | highlight.sp;
+    if (hl.underline) highlight.sp = 0x4000000 | highlight.sp;
+    if (hl.undercurl) highlight.sp = 0x8000000 | highlight.sp;
 
     [ highlight.fg, highlight.bg ] = hl.reverse ? [ highlight.bg, highlight.fg ] : [ highlight.fg, highlight.bg ];
 
@@ -21,6 +22,6 @@ export class Highlights {
   }
 
   static get(id: string) {
-    return Highlights.hls[id] || { fg: 0, bg: 0, sp: 0, type: "normal", decorate: "none" };
+    return Highlights.hls[id] || { fg: 0x1000000, bg: 0x1000000, sp: 0x1000000 };
   }
 }

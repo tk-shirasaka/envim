@@ -171,7 +171,7 @@ export class App {
   }
 
   private async defaultColorsSet(foreground: number, background: number, special: number) {
-    Highlights.set("0", { foreground, background, special });
+    Highlights.set("0", {}, true);
     Emit.send("highlight:set", [{id: "0", ui: true, hl: { foreground, background, special }}]);
 
     const black = await this.nvim.getColorByName("black");
@@ -199,9 +199,11 @@ export class App {
   }
 
   private hlAttrDefine(highlights: any[]) {
-    highlights = highlights.map(([id, rgb, _, info]) => {
-      Highlights.set(id, rgb);
-      return {id, ui: info.pop()?.kind === "ui", hl: rgb }
+    highlights = highlights.map(([id, hl, _, info]) => {
+      const ui = info.pop()?.kind === "ui"
+
+      Highlights.set(id, hl, ui);
+      return {id, ui, hl }
     });
     Emit.send("highlight:set", highlights);
   }
