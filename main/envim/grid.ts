@@ -64,7 +64,7 @@ class Grid {
     return (this.lines[row] && this.lines[row][col]) ? this.lines[row][col] : this.getDefault(row, col);
   }
 
-  setCell(row: number, col: number, text: string, hl: string) {
+  setCell(row: number, col: number, text: string, hl: string, width: number) {
     const prev = this.getCell(row, col - 1);
     const cell = this.getCell(row, col);
 
@@ -77,16 +77,15 @@ class Grid {
       | (hl1.bg === hl2.bg ? 0 : 0b010)
       | (hl1.sp === hl2.sp ? 0 : 0b100);
 
-    (text === "") && (prev.width = 2);
+    (width < 0) && (text === "") && (prev.width = 2);
     if (dirty) {
       this.flush[`${prev.row},${prev.col}`] = prev;
       this.flush[`${cell.row},${cell.col}`] = cell;
     }
-    [ cell.text, cell.hl, cell.width, cell.dirty ] = [ text, hl, text.length, dirty ];
+    [ cell.text, cell.hl, cell.width, cell.dirty ] = [ text, hl, width < 0 ? text.length : width, dirty ];
   }
 
   scroll(top: number, bottom: number, left: number, right: number, rows: number, cols: number) {
-    const flush: ICell[] = [];
     const y = rows > 0
       ? { limit: bottom - top, start: top, direction: 1 }
       : { limit: bottom - top, start: bottom - 1, direction: -1 };
@@ -104,14 +103,18 @@ class Grid {
         const { text, hl, width } = this.getCell(srow, scol);
         const cell = this.getCell(trow, tcol);
 
-        if (this.flush[`${srow},${scol}`] || y.limit - i <= Math.abs(rows) || x.limit - j <= Math.abs(cols)) {
-          flush.push(cell);
+        if (y.limit - i <= Math.abs(rows) || x.limit - j <= Math.abs(cols)) {
+          this.setCell(trow, tcol, text, hl, width)
+        } else {
+          [ cell.text, cell.hl, cell.width ] = [ text, hl, width ];
         }
-        [ cell.text, cell.hl, cell.width ] = [ text, hl, width ];
       }
     }
 
-    return [ flush, { x: left, y: top, width: right - left, height: bottom - top, rows, cols } ];
+    return [
+      this.getFlush(),
+      { x: left, y: top, width: right - left, height: bottom - top, rows, cols }
+    ];
   }
 
   getFlush() {
@@ -121,11 +124,7 @@ class Grid {
     this.flush = {};
     Object.keys(flush).forEach(k => flush[k].width && cells.push(flush[k]));
 
-    return cells.sort((a, b) => {
-      if (a.hl < b.hl) return -1;
-      if (a.hl > b.hl) return 1;
-      return 0;
-    });
+    return cells.sort((a, b) => (+a.hl) - (+b.hl));
   }
 }
 
