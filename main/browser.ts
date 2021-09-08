@@ -40,7 +40,6 @@ export class Browser {
       webPreferences: {
         nodeIntegration: false,
         contextIsolation: true,
-        worldSafeExecuteJavaScript: true,
         preload: join(__dirname, "preload.js"),
       },
     });
