@@ -7,7 +7,6 @@ export class Context2D {
   private font: { size: number; width: number; height: number; } = { size: 0, width: 0, height: 0 };
   private queues: { cells?: ICell[], scroll?: IScroll }[] = [];
   private move: { x: number, y: number } = { x: 0, y: 0 };
-  private deleted: boolean = false;
 
   constructor(
     private bg: CanvasRenderingContext2D,
@@ -100,7 +99,7 @@ export class Context2D {
   private scroll(rate: number, scroll: IScroll) {
     const { x, y, width, height, rows, cols } = scroll;
     const [ dx, dy ] = [ Math.max(x, x + cols), Math.max(y, y + rows) ];
-    const [ bg, fg, sp ] = this.getCapture(dx, dy, width - Math.abs(cols), height - Math.abs(rows));
+    const [ bg, fg, sp ] = this.getCapture(dx, dy, width, height);
     const limitx = cols < 0 ? [ Math.min, Math.max ] : [ Math.max, Math.min ];
     const limity = rows < 0 ? [ Math.min, Math.max ] : [ Math.max, Math.min ];
     const animate = (ox: number, oy: number) => {
@@ -111,6 +110,7 @@ export class Context2D {
       oy = limity[1](rows, oy + ty * rate);
 
       this.clear(x, y, width, height);
+      this.putCapture(bg, fg, sp, dx, dy);
       this.putCapture(bg, fg, sp, dx - ox, dy - oy);
       if (ox === cols && oy === rows) {
         this.move.x -= cols;
@@ -142,7 +142,6 @@ export class Context2D {
   }
 
   private render() {
-    if (this.deleted) return;
     const flush = this.queues.shift();
 
     if (flush?.scroll) {

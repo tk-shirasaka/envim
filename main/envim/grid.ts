@@ -88,15 +88,15 @@ class Grid {
   scroll(top: number, bottom: number, left: number, right: number, rows: number, cols: number) {
     const y = rows > 0
       ? { limit: bottom - top, start: top, direction: 1 }
-      : { limit: bottom - top, start: bottom - 1, direction: -1 };
+      : { limit: bottom - top, start: bottom, direction: -1 };
     const x = cols > 0
       ? { limit: right - left, start: left, direction: 1 }
-      : { limit: right - left, start: right - 1, direction: -1 };
+      : { limit: right - left, start: right, direction: -1 };
 
-    for (let i = 0; i < y.limit; i++) {
+    for (let i = 0; i <= y.limit; i++) {
       const trow = y.start + y.direction * i;
       const srow = trow + rows;
-      for (let j = 0; j < x.limit; j++) {
+      for (let j = 0; j <= x.limit; j++) {
         const tcol = x.start + x.direction * j;
         const scol = tcol + cols;
 
@@ -111,10 +111,7 @@ class Grid {
       }
     }
 
-    return [
-      this.getFlush(),
-      { x: left, y: top, width: right - left, height: bottom - top, rows, cols }
-    ];
+    return { x: left, y: top, width: right - left - Math.abs(cols), height: bottom - top - Math.abs(rows), rows, cols };
   }
 
   getFlush() {

@@ -236,8 +236,8 @@ export class App {
   }
 
   private gridScroll(grid: number, top: number, bottom: number, left: number, right: number, rows: number, cols: number) {
-    const [ cells, scroll ] = Grids.get(grid).scroll(top, bottom, left, right, rows, cols)
-    Emit.send(`flush:${grid}`, cells, scroll);
+    const scroll = Grids.get(grid).scroll(top, bottom, left, right, rows, cols)
+    Emit.send(`scroll:${grid}`, scroll);
   }
 
   private winPos(grid: number, row: number, col: number, width: number, height: number, focusable: boolean, zIndex: number) {

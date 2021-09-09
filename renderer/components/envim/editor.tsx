@@ -50,6 +50,7 @@ export class EditorComponent extends React.Component<Props, States> {
     super(props);
 
     Emit.on(`clear:${this.props.grid}`, this.onClear.bind(this));
+    Emit.on(`scroll:${this.props.grid}`, this.onScroll.bind(this));
     Emit.on(`flush:${this.props.grid}`, this.onFlush.bind(this));
   }
 
@@ -73,8 +74,9 @@ export class EditorComponent extends React.Component<Props, States> {
   }
 
   componentWillUnmount() {
+    const grid = this.props.grid;
     delete(this.renderer);
-    Emit.clear([`clear:${this.props.grid}`, `flush:${this.props.grid}`]);
+    Emit.clear([`clear:${grid}`, `scroll:${grid}`, `flush:${grid}`]);
   }
 
   shouldComponentUpdate(props: Props) {
@@ -129,9 +131,12 @@ export class EditorComponent extends React.Component<Props, States> {
     this.clear = true;
   }
 
-  private onFlush(cells: ICell[], scroll?: IScroll) {
+  private onScroll(scroll: IScroll) {
+    this.renderer?.push({ scroll });
+  }
+
+  private onFlush(cells: ICell[]) {
     this.clear && this.renderer?.clear(0, 0, x2Col(this.props.editor.width), y2Row(this.props.editor.height));
-    scroll && this.renderer?.push({ scroll });
     this.renderer?.push({ cells });
     this.clear = false;
   }
