@@ -1,4 +1,4 @@
-import { IWindow, ICell } from "common/interface";
+import { IWindow, ICell, IScroll } from "common/interface";
 
 import { Emit } from "../emit";
 import { Highlights } from "./highlight";
@@ -6,9 +6,11 @@ import { Highlights } from "./highlight";
 class Grid {
   private info: IWindow;
   private lines: ICell[][] = [];
+  private scroll: IScroll;
   private flush: { [k: string]: ICell } = {};
 
   constructor(id: number, width :number, height: number) {
+    this.scroll = { x: 0, y: 0, width: 0, height: 0, rows: 0, cols: 0 };
     this.info = { id, x: 0, y: 0, width: 0, height: 0, zIndex: 1, focusable: true, status: "show" };
     this.resize(width, height);
   }
@@ -79,7 +81,7 @@ class Grid {
     [ cell.text, cell.hl, cell.width, cell.dirty ] = [ text, hl, width < 0 ? text.length : width, dirty ];
   }
 
-  scroll(top: number, bottom: number, left: number, right: number, rows: number, cols: number) {
+  setScroll(top: number, bottom: number, left: number, right: number, rows: number, cols: number) {
     const y = rows > 0
       ? { limit: bottom - top, start: top, direction: 1 }
       : { limit: bottom - top, start: bottom, direction: -1 };
@@ -105,7 +107,14 @@ class Grid {
       }
     }
 
-    return { x: left, y: top, width: right - left - Math.abs(cols), height: bottom - top - Math.abs(rows), rows, cols };
+    this.scroll = {
+      x: left,
+      y: top,
+      width: right - left - Math.abs(cols),
+      height: bottom - top - Math.abs(rows),
+      rows,
+      cols,
+    };
   }
 
   getFlush() {
@@ -115,7 +124,10 @@ class Grid {
     this.flush = {};
     Object.keys(flush).forEach(k => flush[k].width && cells.push(flush[k]));
 
-    return cells.sort((a, b) => (+a.hl) - (+b.hl));
+    const scroll = this.scroll;
+    this.scroll = { x: 0, y: 0, width: 0, height: 0, rows: 0, cols: 0 };
+
+    return { scroll, cells: cells.sort((a, b) => (+a.hl) - (+b.hl)) };
   }
 }
 
@@ -184,8 +196,8 @@ export class Grids {
 
     Object.values(Grids.grids).map(grid => {
       const { id } = grid.getInfo();
-      const cells = grid.getFlush();
-      cells.length && Emit.send(`flush:${id}`, cells);
+      const { scroll, cells } = grid.getFlush();
+      (cells.length || scroll.rows || scroll.cols) && Emit.send(`flush:${id}`, scroll, cells);
     });
   }
 }
