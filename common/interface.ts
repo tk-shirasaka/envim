@@ -1,3 +1,14 @@
+export interface IWindow {
+  id: number;
+  x: number;
+  y: number
+  width: number;
+  height: number;
+  zIndex: number;
+  focusable: boolean
+  status: "show" | "hide" | "delete";
+}
+
 export interface ICell {
   row: number;
   col: number;

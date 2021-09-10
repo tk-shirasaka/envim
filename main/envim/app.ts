@@ -56,7 +56,7 @@ export class App {
           r.forEach(r => this.gridClear(r[0]));
         break;
         case "grid_destroy":
-          this.gridDestory(r.reduce((prev: number[], curr: number[]) => [ ...curr, ...prev]));
+          r.forEach(r => this.gridDestory(r[0]));
         break;
         case "grid_cursor_goto":
           r.forEach(r => this.gridCursorGoto(r[0], r[1], r[2]));
@@ -76,10 +76,10 @@ export class App {
           r.forEach(r => this.msgSetPos(r[0], r[1]));
         break;
         case "win_hide":
-          this.winHide(r.reduce((prev: number[], curr: number[]) => [ ...curr, ...prev]));
+          r.forEach(r => this.winHide(r[0]));
         break;
         case "win_close":
-          this.winClose(r.reduce((prev: number[], curr: number[]) => [ ...curr, ...prev]));
+          r.forEach(r => this.winClose(r[0]));
         break;
 
         /** ext_tabline **/
@@ -167,7 +167,8 @@ export class App {
   }
 
   private gridResize(grid: number, width: number, height: number) {
-    Grids.get(grid).resize(width, height) && Grids.show(grid);
+    Grids.get(grid).resize(width, height);
+    Grids.setStatus(grid, "show");
   }
 
   private async defaultColorsSet(foreground: number, background: number, special: number) {
@@ -219,16 +220,15 @@ export class App {
   }
 
   private gridClear(grid: number) {
-    const { width, height, zIndex, offset, focusable } = Grids.get(grid).getInfo();
+    const { x, y, width, height, zIndex, focusable } = Grids.get(grid).getInfo();
 
     Grids.delete(grid);
-    Grids.get(grid).setInfo(width, height, zIndex, offset, focusable);
+    Grids.get(grid).setInfo({ x, y, width, height, zIndex, focusable });
     Emit.send(`clear:${grid}`);
   }
 
-  private gridDestory(grids: number[]) {
-    grids.forEach(grid => Grids.delete(grid));
-    Emit.send("win:close", grids);
+  private gridDestory(grid: number) {
+    Grids.setStatus(grid, "delete");
   }
 
   private gridCursorGoto(grid: number, row: number, col: number) {
@@ -249,8 +249,8 @@ export class App {
     col = Math.min(winsize.width - 1, Math.max(0, col - overwidth));
     row = Math.min(winsize.height - 1, Math.max(0, row - overheight));
 
-    current.setInfo(width, height, grid === 1 ? 1 : zIndex, { row, col }, focusable);
-    Grids.show(grid);
+    current.setInfo({ x: col, y: row, width, height, zIndex: grid === 1 ? 1 : zIndex, focusable });
+    Grids.setStatus(grid, "show")
 
     if (winsize.width < width || winsize.height < height) {
       Emit.share("envim:resize", grid, Math.min(winsize.width, width), Math.min(winsize.height, height));
@@ -259,10 +259,10 @@ export class App {
 
   private winFloatPos(grid: number, anchor: string, pgrid: number, row: number, col: number, focusable: boolean) {
     const current = Grids.get(grid).getInfo();
-    const { offset, zIndex } = Grids.get(pgrid).getInfo();
+    const { x, y, zIndex } = Grids.get(pgrid).getInfo();
 
-    row = offset.row + (anchor[0] === "N" ? row : row - current.height);
-    col = offset.col + (anchor[1] === "W" ? col : col - current.width);
+    row = y + (anchor[0] === "N" ? row : row - current.height);
+    col = x + (anchor[1] === "W" ? col : col - current.width);
 
     this.winPos(grid, row, col, current.width, current.height, focusable, zIndex + 4);
   }
@@ -275,12 +275,12 @@ export class App {
     this.winPos(grid, row, 0, width, height, false, winsize.zIndex + 3);
   }
 
-  private winHide(grids: number[]) {
-    Grids.hide(grids);
+  private winHide(grid: number) {
+    Grids.setStatus(grid, "hide");
   }
 
-  private winClose(grids: number[]) {
-    Emit.send("win:close", grids);
+  private winClose(grid: number) {
+    Grids.setStatus(grid, "delete");
   }
 
   private async tablineUpdate(current: Tabpage, tabs: { tab: Tabpage, name: string }[]) {
@@ -330,11 +330,11 @@ export class App {
 
   private popupmenuShow(items: string[][], selected: number, row: number, col: number, grid: number) {
     const height = Math.min(5, items.length);
-    const offset = Grids.exist(grid) ? Grids.get(grid).getInfo().offset : { row: 1, col: Grids.get().getInfo().width * 0.1 + 3 };
+    const { x, y } = Grids.exist(grid) ? Grids.get(grid).getInfo() : { y: 1, x: Grids.get().getInfo().width * 0.1 + 3 };
     const parent = Grids.get().getInfo();
 
-    row += offset.row;
-    col += offset.col;
+    row += y;
+    col += x;
 
     row = row + height >= parent.height ? row - height : row + 1;
     col = Math.min(col, parent.width - 10);
@@ -423,9 +423,6 @@ export class App {
   }
 
   private flush() {
-    Grids.all((id, grid) => {
-      const cells = grid.getFlush();
-      cells.length && Emit.send(`flush:${id}`, cells);
-    });
+    Grids.flush();
   }
 }

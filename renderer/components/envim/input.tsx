@@ -53,11 +53,11 @@ export class InputComponent extends React.Component<Props, States> {
     this.input.current?.focus();
   }
 
-  private onCursor(cursor: { row: number, col: number, width: number, hl: string, zIndex: number }) {
+  private onCursor(cursor: { x: number, y: number, width: number, hl: string, zIndex: number }) {
     const style = this.state.style;
 
     style.width = this.getWidth(cursor.width, this.state.shape);
-    style.transform = `translate(${col2X(cursor.col)}px, ${row2Y(cursor.row)}px)`;
+    style.transform = `translate(${col2X(cursor.x)}px, ${row2Y(cursor.y)}px)`;
     style.zIndex = cursor.zIndex;
     style.color = Highlights.color(cursor.hl, "foreground", true);
     style.background = Highlights.color(cursor.hl, "background", true);

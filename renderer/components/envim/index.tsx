@@ -1,6 +1,6 @@
 import React from "react";
 
-import { IHighlight } from "common/interface";
+import { IWindow, IHighlight } from "common/interface";
 
 import { Emit } from "../../utils/emit";
 import { Highlights } from "../../utils/highlight";
@@ -47,7 +47,6 @@ const styles = {
 
 export class EnvimComponent extends React.Component<Props, States> {
   private refresh: boolean = false;
-  private timer: number = 0;
   private main: { fontSize: number; lineHeight: string; } = { fontSize: 0, lineHeight: "" };
   private editor: { width: number; height: number; } = { width: 0, height: 0 };
   private header: { width: number; height: number; } = { width: 0, height: 0 };
@@ -60,8 +59,6 @@ export class EnvimComponent extends React.Component<Props, States> {
     this.state = { grids: {} };
     Emit.on("highlight:set", this.onHighlight.bind(this));
     Emit.on("win:pos", this.onWin.bind(this));
-    Emit.on("win:hide", this.hideWin.bind(this));
-    Emit.on("win:close", this.closeWin.bind(this));
     Emit.on("option:set", this.onOption.bind(this));
     Emit.send("envim:attach", x2Col(this.editor.width), y2Row(this.editor.height), Setting.options);
   }
@@ -74,8 +71,7 @@ export class EnvimComponent extends React.Component<Props, States> {
   }
 
   componentWillUnmount() {
-    clearTimeout(this.timer);
-    Emit.clear(["highlight:set", "win:pos", "win:hide", "win:close", "option:set"]);
+    Emit.clear(["highlight:set", "win:pos", "option:set"]);
   }
 
   private setSize() {
@@ -94,64 +90,30 @@ export class EnvimComponent extends React.Component<Props, States> {
     });
   }
 
-  private updateGrid(grids: States["grids"], refresh: boolean, async: boolean) {
-    const update = () => {
-      this.setState({ grids });
-      this.refresh && Emit.send("envim:command", "mode");
-      this.refresh = false;
-      this.timer = 0;
-    };
-
-    this.refresh = this.refresh || refresh;
-    this.timer && clearTimeout(this.timer);
-
-    if (async) {
-      this.timer = +setTimeout(update);
-    } else {
-      update();
-    }
-  }
-
-  private onWin(grid: number, width: number, height: number, top: number, left: number, focusable: boolean, zIndex: number) {
+  private onWin(wins: IWindow[]) {
     const grids = this.state.grids;
-    const cursor: "default" | "not-allowed" = focusable ? "default" : "not-allowed";
-    const visibility: "visible" = "visible";
-    const transform = `translate(${col2X(left)}px, ${row2Y(top)}px)`;
 
-    [ height, width ] = [ row2Y(height), col2X(width) ];
+    wins.forEach(({ id, x, y, width, height, zIndex, focusable, status }) => {
+      const cursor: "default" | "not-allowed" = focusable ? "default" : "not-allowed";
+      const visibility: "visible" | "hidden" = status === "show" ? "visible" : "hidden";
+      const transform = `translate(${col2X(x)}px, ${row2Y(y)}px)`;
 
-    const next = { width, height, transform, cursor, visibility, zIndex };
+      [ height, width ] = [ row2Y(height), col2X(width) ];
 
-    if (JSON.stringify(grids[grid]) !== JSON.stringify(next)) {
-      const async = grid in grids;
-      const refresh = zIndex < 5 && (grids[grid]?.width !== width || grids[grid]?.height !== height);
-      grids[grid] = next;
-      this.updateGrid(grids, refresh, async);
-    }
-  }
+      const next = { width, height, transform, cursor, visibility, zIndex };
 
-  private hideWin(ids: number[]) {
-    const grids = this.state.grids;
-    const refresh = ids.filter(grid => {
-      if (!grids[grid]) return;
+      if (status === "delete") {
+        delete(grids[id]);
+        this.refresh = true;
+      } else if (JSON.stringify(grids[id]) !== JSON.stringify(next)) {
+        grids[id] = next;
+        this.refresh = this.refresh || (zIndex < 5 && (grids[id]?.width !== width || grids[id]?.height !== height));
+      }
+    });
 
-      grids[grid].visibility = "hidden";
-      return grids[grid].zIndex < 5;
-    }).length > 0;
-
-    this.updateGrid(grids, refresh, true);
-  }
-
-  private closeWin(ids: number[]) {
-    const grids = this.state.grids;
-    const refresh = ids.filter(grid => {
-      const refresh = grids[grid] && grids[grid].zIndex < 5;
-
-      delete(grids[grid]);
-      return refresh;
-    }).length > 0;
-
-    this.updateGrid(grids, refresh, true);
+    this.setState({ grids });
+    this.refresh && Emit.send("envim:command", "mode");
+    this.refresh = false;
   }
 
   private onOption(options: { [k: string]: boolean }) {

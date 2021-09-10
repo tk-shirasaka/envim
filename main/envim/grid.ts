@@ -1,27 +1,23 @@
-import { ICell } from "common/interface";
+import { IWindow, ICell } from "common/interface";
 
 import { Emit } from "../emit";
 import { Highlights } from "./highlight";
 
 class Grid {
+  private info: IWindow;
   private lines: ICell[][] = [];
   private flush: { [k: string]: ICell } = {};
-  private info: {
-    width: number;
-    height: number;
-    zIndex: number;
-    offset: { row: number, col: number };
-    focusable: boolean;
-  };
 
-  constructor(width :number, height: number) {
-    this.info = { width: 0, height: 0, zIndex: 1, offset: { row: 0, col: 0 }, focusable: true };
+  constructor(id: number, width :number, height: number) {
+    this.info = { id, x: 0, y: 0, width: 0, height: 0, zIndex: 1, focusable: true, status: "show" };
     this.resize(width, height);
   }
 
-  setInfo(width: number, height: number, zIndex: number, offset: { row: number, col: number }, focusable: boolean) {
-    this.resize(width, height);
-    this.info = { width, height, zIndex, offset, focusable };
+  setInfo(info: Object) {
+    const { id, ...curr } = this.info;
+    const next = { ...curr, ...info, id };
+    this.resize(next.width, next.height);
+    this.info = next;
   }
 
   getInfo() {
@@ -29,7 +25,7 @@ class Grid {
   }
 
   resize(width :number, height: number) {
-    if (this.info.width === width && this.info.height === height) return false;
+    if (this.info.width === width && this.info.height === height) return;
     const old = this.lines;
 
     this.info.width = width;
@@ -43,17 +39,15 @@ class Grid {
         this.lines[i].push(cell);
       }
     }
-
-    return true;
   }
 
-  getCursorPos(row: number, col: number) {
-    const { width, hl } = this.getCell(row, col);
+  getCursorPos(y: number, x: number) {
+    const { width, hl } = this.getCell(y, x);
 
-    row = this.info.height <= row ? -1 : row + this.info.offset.row;
-    col = this.info.width <= col ? -1 : col + this.info.offset.col;
+    y = this.info.height <= y ? -1 : y + this.info.y;
+    x = this.info.width <= x ? -1 : x + this.info.x;
 
-    return { col, row, width, hl, zIndex: this.info.zIndex + 1 };
+    return { x, y, width, hl, zIndex: this.info.zIndex + 1 };
   }
 
   getDefault(row: number, col: number) {
@@ -129,12 +123,12 @@ export class Grids {
   private static grids: { [k: number]: Grid } = {};
   private static default: 1 = 1;
   private static active: number = 0;
-  private static hidden: { [k: number]: boolean } = {};
+  private static changes: { [k: number]: number } = {};
 
   static init() {
     Grids.grids = {};
     Grids.active = 0;
-    Grids.hidden = {};
+    Grids.changes = {};
   }
 
   static exist(grid: number) {
@@ -143,14 +137,10 @@ export class Grids {
 
   static get(grid: number = Grids.default) {
     if (!Grids.exist(grid)) {
-      Grids.grids[grid] = new Grid(0, 0);
+      Grids.grids[grid] = new Grid(grid, 0, 0);
     }
 
     return Grids.grids[grid];
-  }
-
-  static all(callback: (id: number, grid: Grid) => void) {
-    Object.keys(Grids.grids).forEach(grid => callback(+grid, Grids.grids[+grid]));
   }
 
   static delete(grid: number) {
@@ -163,29 +153,39 @@ export class Grids {
 
     if (curr !== next) {
       Grids.active = next;
-      Grids.hidden[curr] || Grids.show(curr);
-      Grids.hidden[next] || Grids.show(next);
+      Grids.setStatus(grid, "show");
     }
 
     const cursor = Grids.get(grid).getCursorPos(row, col);
-    cursor.row < 0 || cursor.col < 0 || Emit.send("grid:cursor", cursor);
+    cursor.x < 0 || cursor.y < 0 || Emit.send("grid:cursor", cursor);
   }
 
-  static show(grid: number) {
-    const { width, height, offset, focusable, zIndex } = Grids.get(grid).getInfo();
-    const active = grid === Grids.active ? 1 : 0;
-
-    Grids.hidden[grid] && delete(Grids.hidden[grid]);
-
-    if (width && height) {
-      Emit.send("win:pos", grid, width, height, offset.row, offset.col, focusable, zIndex + active);
-    } else {
-      Grids.delete(grid);
-    }
+  static setStatus(grid: number, status: "show" | "hide" | "delete") {
+    Grids.changes[grid] = grid;
+    Grids.get(grid).setInfo({ status });
   }
 
-  static hide(grids: number[]) {
-    grids.forEach(grid => Grids.hidden[grid] = true);
-    Emit.send("win:hide", grids);
+  static flush() {
+    const wins: IWindow[] = Object.values(Grids.changes).map(grid => {
+      const info = { ...Grids.get(grid).getInfo() };
+
+      info.zIndex = info.id === Grids.active ? info.zIndex + 1 : info.zIndex;
+      info.status = info.width && info.height ? info.status : "delete";
+
+      if (info.status === "delete") {
+        delete(Grids.grids[info.id]);
+      }
+
+      return info;
+    });
+
+    Grids.changes = {};
+    wins.length && Emit.send("win:pos", wins);
+
+    Object.values(Grids.grids).map(grid => {
+      const { id } = grid.getInfo();
+      const cells = grid.getFlush();
+      cells.length && Emit.send(`flush:${id}`, cells);
+    });
   }
 }
