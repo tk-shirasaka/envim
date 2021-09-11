@@ -198,7 +198,8 @@ export class Grids {
 
     Object.values(Grids.grids).map(grid => {
       const { id } = grid.getInfo();
-      Emit.send(`flush:${id}`, grid.getFlush());
+      const flush = grid.getFlush();
+      flush.length && Emit.send(`flush:${id}`, flush);
     });
   }
 }
