@@ -124,10 +124,11 @@ class Grid {
 
   getFlush() {
     const flush = this.flush;
-
     this.flush = [];
 
-    flush.push({ cells: this.getDirty() });
+    const cells = this.getDirty();
+    cells.length && flush.push({ cells });
+
     return flush;
   }
 }
@@ -197,8 +198,7 @@ export class Grids {
 
     Object.values(Grids.grids).map(grid => {
       const { id } = grid.getInfo();
-      const { scroll, cells } = grid.getFlush();
-      (cells.length || scroll.rows || scroll.cols) && Emit.send(`flush:${id}`, scroll, cells);
+      Emit.send(`flush:${id}`, grid.getFlush());
     });
   }
 }

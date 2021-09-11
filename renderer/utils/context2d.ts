@@ -151,8 +151,8 @@ export class Context2D {
     }
   }
 
-  push(scroll: IScroll, cells: ICell[]) {
-    if (scroll.rows || scroll.cols) {
+  push(cells: ICell[], scroll?: IScroll) {
+    if (scroll) {
       this.move.x += scroll.cols;
       this.move.y += scroll.rows;
       this.queues.push({ scroll });

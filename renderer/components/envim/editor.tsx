@@ -130,9 +130,9 @@ export class EditorComponent extends React.Component<Props, States> {
     this.clear = true;
   }
 
-  private onFlush(scroll: IScroll, cells: ICell[]) {
+  private onFlush(flush: { cells: ICell[], scroll?: IScroll }[]) {
     this.clear && this.renderer?.clear(0, 0, x2Col(this.props.editor.width), y2Row(this.props.editor.height));
-    this.renderer?.push(scroll, cells);
+    flush.forEach(({ cells, scroll }) => this.renderer?.push(cells, scroll))
     this.clear = false;
   }
 
