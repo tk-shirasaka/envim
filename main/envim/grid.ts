@@ -6,11 +6,10 @@ import { Highlights } from "./highlight";
 class Grid {
   private info: IWindow;
   private lines: ICell[][] = [];
-  private scroll: IScroll;
-  private flush: { [k: string]: ICell } = {};
+  private flush: { cells: ICell[], scroll?: IScroll }[] = [];
+  private dirty: { [k: string]: ICell } = {};
 
   constructor(id: number, width :number, height: number) {
-    this.scroll = { x: 0, y: 0, width: 0, height: 0, rows: 0, cols: 0 };
     this.info = { id, x: 0, y: 0, width: 0, height: 0, zIndex: 1, focusable: true, status: "show" };
     this.resize(width, height);
   }
@@ -68,15 +67,15 @@ class Grid {
 
     const hl1 = Highlights.get(hl);
     const hl2 = Highlights.get(cell.hl);
-    const dirty = (this.flush[`${cell.row},${cell.col}`]?.dirty || 0)
+    const dirty = (this.dirty[`${cell.row},${cell.col}`]?.dirty || 0)
       | (hl1.fg === hl2.fg && cell.text === text ? 0 : 0b001)
       | (hl1.bg === hl2.bg ? 0 : 0b010)
       | (hl1.sp === hl2.sp ? 0 : 0b100);
 
     (width < 0) && (text === "") && (prev.width = 2);
     if (dirty) {
-      this.flush[`${prev.row},${prev.col}`] = prev;
-      this.flush[`${cell.row},${cell.col}`] = cell;
+      this.dirty[`${prev.row},${prev.col}`] = prev;
+      this.dirty[`${cell.row},${cell.col}`] = cell;
     }
     [ cell.text, cell.hl, cell.width, cell.dirty ] = [ text, hl, width < 0 ? text.length : width, dirty ];
   }
@@ -107,27 +106,29 @@ class Grid {
       }
     }
 
-    this.scroll = {
-      x: left,
-      y: top,
-      width: right - left - Math.abs(cols),
-      height: bottom - top - Math.abs(rows),
-      rows,
-      cols,
-    };
+    this.flush.push({
+      cells: this.getDirty(),
+      scroll: { x: left, y: top, width: right - left - Math.abs(cols), height: bottom - top - Math.abs(rows), rows, cols }
+    });
+  }
+
+  private getDirty() {
+    const dirty = this.dirty;
+    const cells: ICell[] = [];
+
+    this.dirty = {};
+    Object.keys(dirty).forEach(k => dirty[k].width && cells.push(dirty[k]));
+
+    return cells.sort((a, b) => (+a.hl) - (+b.hl));
   }
 
   getFlush() {
     const flush = this.flush;
-    const cells: ICell[] = [];
 
-    this.flush = {};
-    Object.keys(flush).forEach(k => flush[k].width && cells.push(flush[k]));
+    this.flush = [];
 
-    const scroll = this.scroll;
-    this.scroll = { x: 0, y: 0, width: 0, height: 0, rows: 0, cols: 0 };
-
-    return { scroll, cells: cells.sort((a, b) => (+a.hl) - (+b.hl)) };
+    flush.push({ cells: this.getDirty() });
+    return flush;
   }
 }
 

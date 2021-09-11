@@ -90,29 +90,27 @@ export class Context2D {
     ];
   }
 
-  putCapture(bg: ImageData, fg: ImageData, sp: ImageData, x: number, y: number) {
-    this.bg.putImageData(bg, x * this.font.width, y * this.font.height);
-    this.fg.putImageData(fg, x * this.font.width, y * this.font.height);
-    this.sp.putImageData(sp, x * this.font.width, y * this.font.height);
+  putCapture(bg: ImageData, fg: ImageData, sp: ImageData, x: number, y: number, dx: number = 0, dy: number = 0, dwidth: number = 0, dheight: number = 0) {
+    this.bg.putImageData(bg, x * this.font.width, y * this.font.height, dx * this.font.width, dy * this.font.height, dwidth * this.font.width || bg.width, dheight * this.font.height || bg.height);
+    this.fg.putImageData(fg, x * this.font.width, y * this.font.height, dx * this.font.width, dy * this.font.height, dwidth * this.font.width || fg.width, dheight * this.font.height || fg.height);
+    this.sp.putImageData(sp, x * this.font.width, y * this.font.height, dx * this.font.width, dy * this.font.height, dwidth * this.font.width || sp.width, dheight * this.font.height || sp.height);
   }
 
   private scroll(rate: number, scroll: IScroll) {
-    const { x, y, width, height, rows, cols } = scroll;
-    const [ dx, dy ] = [ Math.max(x, x + cols), Math.max(y, y + rows) ];
-    const [ bg, fg, sp ] = this.getCapture(dx, dy, width, height);
-    const limitx = cols < 0 ? [ Math.min, Math.max ] : [ Math.max, Math.min ];
-    const limity = rows < 0 ? [ Math.min, Math.max ] : [ Math.max, Math.min ];
+    const { x, y, rows, cols } = scroll;
+    const width = scroll.width + Math.abs(cols);
+    const height = scroll.height + Math.abs(rows);
+    const [ bg, fg, sp ] = this.getCapture(x, y, width, height);
+    const offsetx = (cols < 0 ? Math.min(cols, cols + this.move.x) : Math.max(cols, cols + this.move.x)) * rate ;
+    const offsety = (rows < 0 ? Math.min(rows, rows + this.move.y) : Math.max(rows, rows + this.move.y)) * rate ;
     const animate = (ox: number, oy: number) => {
-      const tx = cols + limitx[0](0, this.move.x);
-      const ty = rows + limity[0](0, this.move.y);
-
-      ox = limitx[1](cols, ox + tx * rate);
-      oy = limity[1](rows, oy + ty * rate);
+      ox = Math.abs(ox + offsetx) <= Math.abs(cols) ? ox + offsetx : cols;
+      oy = Math.abs(oy + offsety) <= Math.abs(rows) ? oy + offsety : rows;
 
       this.clear(x, y, width, height);
-      this.putCapture(bg, fg, sp, dx, dy);
-      this.putCapture(bg, fg, sp, dx - ox, dy - oy);
+      this.putCapture(bg, fg, sp, x - ox, y - oy, Math.max(0, ox), Math.max(0, oy), Math.min(width, width + ox), Math.min(height, height + oy));
       if (ox === cols && oy === rows) {
+        this.putCapture(bg, fg, sp, x, y, cols < 0 ? 0 : scroll.width, rows < 0 ? 0 : scroll.height, Math.abs(cols), Math.abs(rows));
         this.move.x -= cols;
         this.move.y -= rows;
         this.render();
