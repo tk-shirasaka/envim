@@ -97,9 +97,7 @@ export class Context2D {
   }
 
   private scroll(rate: number, scroll: IScroll) {
-    const { x, y, rows, cols } = scroll;
-    const width = scroll.width + Math.abs(cols);
-    const height = scroll.height + Math.abs(rows);
+    const { x, y, width, height, rows, cols } = scroll;
     const [ bg, fg, sp ] = this.getCapture(x, y, width, height);
     const offsetx = (cols < 0 ? Math.min(cols, cols + this.move.x) : Math.max(cols, cols + this.move.x)) * rate ;
     const offsety = (rows < 0 ? Math.min(rows, rows + this.move.y) : Math.max(rows, rows + this.move.y)) * rate ;
@@ -110,7 +108,8 @@ export class Context2D {
       this.clear(x, y, width, height);
       this.putCapture(bg, fg, sp, x - ox, y - oy, Math.max(0, ox), Math.max(0, oy), Math.min(width, width + ox), Math.min(height, height + oy));
       if (ox === cols && oy === rows) {
-        this.putCapture(bg, fg, sp, x, y, cols < 0 ? 0 : scroll.width, rows < 0 ? 0 : scroll.height, Math.abs(cols), Math.abs(rows));
+        rows && this.putCapture(bg, fg, sp, x, y, 0, rows < 0 ? 0 : height - Math.abs(rows), width, Math.abs(rows));
+        cols && this.putCapture(bg, fg, sp, x, y, cols < 0 ? 0 : width - Math.abs(cols), 0, Math.abs(cols), height);
         this.move.x -= cols;
         this.move.y -= rows;
         this.render();

@@ -82,11 +82,11 @@ class Grid {
 
   setScroll(top: number, bottom: number, left: number, right: number, rows: number, cols: number) {
     const y = rows > 0
-      ? { limit: bottom - top, start: top, direction: 1 }
-      : { limit: bottom - top, start: bottom, direction: -1 };
+      ? { limit: bottom - top - rows, start: top, direction: 1 }
+      : { limit: bottom - top + rows, start: bottom, direction: -1 };
     const x = cols > 0
-      ? { limit: right - left, start: left, direction: 1 }
-      : { limit: right - left, start: right, direction: -1 };
+      ? { limit: right - left - cols, start: left, direction: 1 }
+      : { limit: right - left + cols, start: right, direction: -1 };
 
     for (let i = 0; i <= y.limit; i++) {
       const trow = y.start + y.direction * i;
@@ -108,7 +108,7 @@ class Grid {
 
     this.flush.push({
       cells: this.getDirty(),
-      scroll: { x: left, y: top, width: right - left - Math.abs(cols), height: bottom - top - Math.abs(rows), rows, cols }
+      scroll: { x: left, y: top, width: right - left, height: bottom - top, rows, cols }
     });
   }
 
