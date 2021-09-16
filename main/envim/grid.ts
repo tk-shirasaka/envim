@@ -45,8 +45,8 @@ class Grid {
   getCursorPos(y: number, x: number) {
     const { width, hl } = this.getCell(y, x);
 
-    y = this.info.height <= y ? -1 : y + this.info.y;
-    x = this.info.width <= x ? -1 : x + this.info.x;
+    y = this.info.status === "show" && this.info.height > y ? y + this.info.y : -1;
+    x = this.info.status === "show" && this.info.width > x ? x + this.info.x : -1;
 
     return { x, y, width, hl, zIndex: this.info.zIndex + 1 };
   }
@@ -59,7 +59,7 @@ class Grid {
     return (this.lines[row] && this.lines[row][col]) ? this.lines[row][col] : this.getDefault(row, col);
   }
 
-  setCell(row: number, col: number, text: string, hl: string, width: number) {
+  setCell(row: number, col: number, text: string, hl: string) {
     const prev = this.getCell(row, col - 1);
     const cell = this.getCell(row, col);
 
@@ -72,44 +72,39 @@ class Grid {
       | (hl1.bg === hl2.bg ? 0 : 0b010)
       | (hl1.sp === hl2.sp ? 0 : 0b100);
 
-    (width < 0) && (text === "") && (prev.width = 2);
+    (text === "") && (prev.width = 2);
     if (dirty) {
       this.dirty[`${prev.row},${prev.col}`] = prev;
       this.dirty[`${cell.row},${cell.col}`] = cell;
     }
-    [ cell.text, cell.hl, cell.width, cell.dirty ] = [ text, hl, width < 0 ? text.length : width, dirty ];
+    [ cell.text, cell.hl, cell.width, cell.dirty ] = [ text, hl, text.length, dirty ];
   }
 
   setScroll(top: number, bottom: number, left: number, right: number, rows: number, cols: number) {
+    const cells = this.getDirty();
+    const scroll = { x: left, y: top, width: right - left, height: bottom - top, rows, cols };
     const y = rows > 0
       ? { limit: bottom - top - rows, start: top, direction: 1 }
-      : { limit: bottom - top + rows, start: bottom, direction: -1 };
+      : { limit: bottom - top + rows, start: bottom - 1, direction: -1 };
     const x = cols > 0
       ? { limit: right - left - cols, start: left, direction: 1 }
-      : { limit: right - left + cols, start: right, direction: -1 };
+      : { limit: right - left + cols, start: right - 1, direction: -1 };
 
-    for (let i = 0; i <= y.limit; i++) {
+    for (let i = 0; i < y.limit; i++) {
       const trow = y.start + y.direction * i;
       const srow = trow + rows;
-      for (let j = 0; j <= x.limit; j++) {
+      for (let j = 0; j < x.limit; j++) {
         const tcol = x.start + x.direction * j;
         const scol = tcol + cols;
 
         const { text, hl, width } = this.getCell(srow, scol);
         const cell = this.getCell(trow, tcol);
 
-        if (y.limit - i <= Math.abs(rows) || x.limit - j <= Math.abs(cols)) {
-          this.setCell(trow, tcol, text, hl, width)
-        } else {
-          [ cell.text, cell.hl, cell.width ] = [ text, hl, width ];
-        }
+        [ cell.text, cell.hl, cell.width ] = [ text, hl, width ];
       }
     }
 
-    this.flush.push({
-      cells: this.getDirty(),
-      scroll: { x: left, y: top, width: right - left, height: bottom - top, rows, cols }
-    });
+    this.flush.push({ cells, scroll });
   }
 
   private getDirty() {
@@ -119,7 +114,7 @@ class Grid {
     this.dirty = {};
     Object.keys(dirty).forEach(k => dirty[k].width && cells.push(dirty[k]));
 
-    return cells.sort((a, b) => (+a.hl) - (+b.hl));
+    return JSON.parse(JSON.stringify(cells.sort((a, b) => (+a.hl) - (+b.hl))));
   }
 
   getFlush() {
@@ -162,16 +157,13 @@ export class Grids {
   }
 
   static cursor(grid: number, row: number, col: number) {
-    const curr = Grids.active;
-    const next = grid;
-
-    if (curr !== next) {
-      Grids.active = next;
-      Grids.setStatus(grid, "show");
-    }
-
     const cursor = Grids.get(grid).getCursorPos(row, col);
-    cursor.x < 0 || cursor.y < 0 || Emit.send("grid:cursor", cursor);
+
+    if (cursor.x >= 0 && cursor.y >= 0) {
+      Grids.active = grid;
+      Grids.setStatus(grid, "show");
+      Emit.send("grid:cursor", cursor);
+    }
   }
 
   static setStatus(grid: number, status: "show" | "hide" | "delete") {

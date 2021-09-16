@@ -151,13 +151,13 @@ export class Context2D {
   }
 
   push(cells: ICell[], scroll?: IScroll) {
+    if (cells.length) {
+      this.queues.push({ cells });
+    }
     if (scroll) {
       this.move.x += scroll.cols;
       this.move.y += scroll.rows;
       this.queues.push({ scroll });
-    }
-    if (cells.length) {
-      this.queues.push({ cells });
     }
   }
 }

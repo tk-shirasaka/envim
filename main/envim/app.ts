@@ -214,7 +214,7 @@ export class App {
     cells.forEach(cell => {
       const repeat = cell[2] || 1;
       for (let j = 0; j < repeat; j++) {
-        Grids.get(grid).setCell(row, col + i++, cell[0], cell.length > 1 ? cell[1] : "-1", -1);
+        Grids.get(grid).setCell(row, col + i++, cell[0], cell.length > 1 ? cell[1] : "-1");
       }
     });
   }
