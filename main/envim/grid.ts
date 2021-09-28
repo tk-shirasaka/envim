@@ -73,11 +73,11 @@ class Grid {
       | (hl1.sp === hl2.sp ? 0 : 0b100);
 
     (text === "") && (prev.width = 2);
-    if (dirty) {
-      this.dirty[`${prev.row},${prev.col}`] = prev;
-      this.dirty[`${cell.row},${cell.col}`] = cell;
-    }
+
     [ cell.text, cell.hl, cell.width, cell.dirty ] = [ text, hl, text.length, dirty ];
+
+    (cell.dirty) && (this.dirty[`${cell.row},${cell.col}`] = cell);
+    (prev.dirty) && (this.dirty[`${prev.row},${prev.col}`] = prev);
   }
 
   setScroll(top: number, bottom: number, left: number, right: number, rows: number, cols: number) {
