@@ -105,12 +105,12 @@ export class EnvimComponent extends React.Component<Props, States> {
 
       const next = { width, height, transform, cursor, visibility, pointerEvents, zIndex };
 
+      this.refresh = this.refresh || status !== "show";
       if (status === "delete") {
         delete(grids[id]);
-        this.refresh = true;
       } else if (JSON.stringify(grids[id]) !== JSON.stringify(next)) {
-        grids[id] = next;
         this.refresh = this.refresh || (zIndex < 5 && (grids[id]?.width !== width || grids[id]?.height !== height));
+        grids[id] = next;
       }
     });
 
