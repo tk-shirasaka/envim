@@ -16,6 +16,7 @@ interface Props {
     transform: string;
     visibility: "visible" | "hidden";
     cursor: "default" | "not-allowed";
+    pointerEvents: "none" | "auto";
   };
 }
 
@@ -102,7 +103,10 @@ export class EditorComponent extends React.Component<Props, States> {
 
   private onMouseDown(e: MouseEvent) {
     clearTimeout(this.timer);
-    this.timer = +setTimeout(() => this.drag = true, 200);
+    this.timer = +setTimeout(() => {
+      this.drag = true;
+      Emit.share("envim:drag", this.props.grid)
+    });
 
     this.onMouseEvent(e, "press");
   }
@@ -111,11 +115,14 @@ export class EditorComponent extends React.Component<Props, States> {
     this.drag && this.onMouseEvent(e, "drag");
   }
 
-  private onMouseRelease(e: MouseEvent) {
+  private onMouseUp(e: MouseEvent) {
     clearTimeout(this.timer);
 
-    this.drag && this.onMouseEvent(e, "release");
-    this.drag = false;
+    if (this.drag) {
+      this.drag = false;
+      this.onMouseEvent(e, "release");
+      Emit.share("envim:drag", -1);
+    }
   }
 
   private onMouseWheel(e: WheelEvent) {
@@ -141,8 +148,7 @@ export class EditorComponent extends React.Component<Props, States> {
       <div className="animate fade-in" style={{...styles.scope, ...this.props.style}}
         onMouseDown={this.onMouseDown.bind(this)}
         onMouseMove={this.onMouseMove.bind(this)}
-        onMouseUp={this.onMouseRelease.bind(this)}
-        onMouseLeave={this.onMouseRelease.bind(this)}
+        onMouseUp={this.onMouseUp.bind(this)}
         onWheel={this.onMouseWheel.bind(this)}
       >
         <canvas style={styles.canvas} width={this.props.editor.width * 2} height={this.props.editor.height * 2} ref={this.bg} />

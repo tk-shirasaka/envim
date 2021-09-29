@@ -28,6 +28,7 @@ interface States {
     transform: string;
     visibility: "visible" | "hidden";
     cursor: "default" | "not-allowed";
+    pointerEvents: "none" | "auto";
   }};
 }
 
@@ -60,6 +61,7 @@ export class EnvimComponent extends React.Component<Props, States> {
     Emit.on("highlight:set", this.onHighlight.bind(this));
     Emit.on("win:pos", this.onWin.bind(this));
     Emit.on("option:set", this.onOption.bind(this));
+    Emit.on("envim:drag", this.onDrag.bind(this));
     Emit.send("envim:attach", x2Col(this.editor.width), y2Row(this.editor.height), Setting.options);
   }
 
@@ -71,7 +73,7 @@ export class EnvimComponent extends React.Component<Props, States> {
   }
 
   componentWillUnmount() {
-    Emit.clear(["highlight:set", "win:pos", "option:set"]);
+    Emit.clear(["highlight:set", "win:pos", "option:set", "envim:drag"]);
   }
 
   private setSize() {
@@ -97,10 +99,11 @@ export class EnvimComponent extends React.Component<Props, States> {
       const cursor: "default" | "not-allowed" = focusable ? "default" : "not-allowed";
       const visibility: "visible" | "hidden" = status === "show" ? "visible" : "hidden";
       const transform = `translate(${col2X(x)}px, ${row2Y(y)}px)`;
+      const pointerEvents: "none" | "auto" = grids[id]?.pointerEvents || "auto";
 
       [ height, width ] = [ row2Y(height), col2X(width) ];
 
-      const next = { width, height, transform, cursor, visibility, zIndex };
+      const next = { width, height, transform, cursor, visibility, pointerEvents, zIndex };
 
       if (status === "delete") {
         delete(grids[id]);
@@ -120,13 +123,24 @@ export class EnvimComponent extends React.Component<Props, States> {
     Setting.options = options;
   }
 
+  private onDrag(drag: number) {
+    const grids = this.state.grids;
+
+    Object.keys(grids).forEach(grid => {
+      grids[grid].pointerEvents = drag < 0 || drag === +grid ? "auto" : "none";
+    })
+
+    this.setState({ grids });
+  }
+
   private onMouseUp() {
+    this.onDrag(-1);
     Emit.share("envim:focus");
   }
 
   render() {
     return (
-      <div style={this.main} onMouseUp={this.onMouseUp}>
+      <div style={this.main} onMouseUp={this.onMouseUp.bind(this)}>
         <TablineComponent {...this.header} />
         <div style={{...styles.editor, ...this.editor}}>
           { Object.keys(this.state.grids).reverse().map(grid => (
