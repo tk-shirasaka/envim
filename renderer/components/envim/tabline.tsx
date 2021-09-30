@@ -27,20 +27,19 @@ const styles = {
   },
   tab: {
     display: "flex",
-    alignItems: "center",
     margin: "4px 4px 0 0",
     minWidth: 0,
     cursor: "default",
+    overflow: "hidden",
     borderBottom: "2px solid",
     borderRadius: "4px 4px 0 0",
     boxShadow: "0 0 4px 0 rgba(0, 0, 0, 0.6)",
   },
   name: {
     maxWidth: 300,
-    padding: "0 4px",
+    padding: "0 8px",
     textOverflow: "ellipsis",
     overflow: "hidden",
-    lineHeight: 0,
     whiteSpace,
   },
   notify: {
@@ -66,7 +65,7 @@ const styles = {
     whiteSpace,
   },
   space: {
-    padding: "0 4px",
+    paddingLeft: 4,
   },
 };
 
@@ -118,12 +117,12 @@ export class TablineComponent extends React.Component<Props, States> {
 
     if (!icon) return null;
 
-    const color = `color-${icon.color}-dark`;
-    const modified = tab.active ? "active" : "clickable";
+    const color = `${icon.color}-fg-dark`;
+    const lineHeight = `${this.props.height - 4}px`;
     return (
-      <div key={i} className={`animate fade-in ${color} ${modified}`} style={styles.tab} onClick={() => this.runCommand(`tabnext ${i + 1}`,)}>
-        <IconComponent color={icon.color} style={styles.name} font={icon.font} text={tab.name.replace(/([^\/])[^\/]*\//g, "$1/")} />
-        <IconComponent color="red-fg" style={styles.space} font="" onClick={() => this.runCommand(this.state.tabs.length > 1 ? `tabclose! ${i + 1}` : "quitall")} />
+      <div key={i} className={`animate fade-in color-${color}`} style={styles.tab}>
+        <IconComponent color={color} style={{ ...styles.name, lineHeight }} active={tab.active} font={icon.font} text={tab.name.replace(/([^\/])[^\/]*\//g, "$1/")} onClick={() => this.runCommand(`tabnext ${i + 1}`,)} />
+        <IconComponent color={icon.color} style={{ ...styles.space, lineHeight }} active={tab.active} font="" onClick={() => this.runCommand(this.state.tabs.length > 1 ? `tabclose! ${i + 1}` : "quitall")} />
       </div>
     );
   }
