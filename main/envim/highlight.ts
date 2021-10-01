@@ -4,7 +4,7 @@ export class Highlights {
   private static hls: { [k: string]: { fg: number; bg: number; sp: number; } } = {};
 
   static set(id: string, hl: IHighlight, ui: boolean) {
-    const highlight = Highlights.get(id);
+    const highlight = { fg: 0x01000000, bg: 0x02000000, sp: 0x03000000 };
 
     if (hl.foreground) highlight.fg = hl.foreground;
     if (hl.background) highlight.bg = hl.background;
@@ -19,10 +19,10 @@ export class Highlights {
     if (hl.underline) highlight.sp = 0x08000000 | highlight.sp;
     if (hl.undercurl) highlight.sp = 0x10000000 | highlight.sp;
 
-    Highlights.hls[id] = highlight
+    Highlights.hls[id] = highlight;
   }
 
   static get(id: string) {
-    return Highlights.hls[id] || { fg: 0x01000000, bg: 0x02000000, sp: 0x03000000 };
+    return Highlights.hls[id];
   }
 }
