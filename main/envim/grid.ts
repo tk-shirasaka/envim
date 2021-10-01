@@ -75,9 +75,7 @@ class Grid {
     (text === "") && (prev.width = 2);
 
     [ cell.text, cell.hl, cell.width, cell.dirty ] = [ text, hl, text.length, dirty ];
-
     (cell.dirty) && (this.dirty[`${cell.row},${cell.col}`] = cell);
-    (cell.dirty) && (prev.dirty) && (this.dirty[`${prev.row},${prev.col}`] = prev);
   }
 
   setScroll(top: number, bottom: number, left: number, right: number, rows: number, cols: number) {
