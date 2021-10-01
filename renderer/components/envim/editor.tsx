@@ -80,9 +80,9 @@ export class EditorComponent extends React.Component<Props, States> {
   }
 
   shouldComponentUpdate(props: Props) {
-    const prev = this.props.editor;
-    const next = props.editor;
-    if (this.renderer && (prev.width !== next.width || prev.height !== next.height)) {
+    const prev = this.props.style;
+    const next = props.style;
+    if (this.renderer && (prev.width < next.width || prev.height < next.height)) {
       const [ bg, fg, sp ] = this.renderer.getCapture(0, 0, x2Col(Math.min(prev.width, next.width)), y2Row(Math.min(prev.height, next.height)));
       this.capture = { bg, fg, sp };
     }
