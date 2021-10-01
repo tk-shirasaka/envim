@@ -112,7 +112,12 @@ export class EditorComponent extends React.Component<Props, States> {
   }
 
   private onMouseMove(e: MouseEvent) {
-    this.drag && this.onMouseEvent(e, "drag");
+    if (this.drag === false) return;
+
+    clearTimeout(this.timer);
+    this.timer = +setTimeout(() => {
+      this.onMouseEvent(e, "drag");
+    });
   }
 
   private onMouseUp(e: MouseEvent) {
