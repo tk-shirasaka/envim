@@ -201,7 +201,7 @@ export class App {
 
   private hlAttrDefine(highlights: any[]) {
     highlights = highlights.map(([id, hl, _, info]) => {
-      const ui = info.pop()?.kind === "ui"
+      const ui = info.some((info: { kind: string }) => info.kind === "ui");
 
       Highlights.set(id, hl, ui);
       return {id, ui, hl }
