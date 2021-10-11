@@ -54,8 +54,8 @@ export class Context2D {
         case "undercurl":
           const cycle = this.font.width / 8;
           for (let i = 0; i < width * 2; i++) {
-            this.sp.arc(x + (i * 4 + 0) * cycle, y + this.font.height - cycle * 2.0, cycle, 0.9 * Math.PI, 0.1 * Math.PI, true);
-            this.sp.arc(x + (i * 4 + 2) * cycle, y + this.font.height - cycle * 1.5, cycle, 1.1 * Math.PI, 1.9 * Math.PI, false);
+            this.sp.arc(x + (i * 4 + 1) * cycle, y + this.font.height - cycle * 2.0, cycle, 0.9 * Math.PI, 0.1 * Math.PI, true);
+            this.sp.arc(x + (i * 4 + 3) * cycle, y + this.font.height - cycle * 1.5, cycle, 1.1 * Math.PI, 1.9 * Math.PI, false);
           }
           break;
       }
