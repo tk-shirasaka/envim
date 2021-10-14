@@ -96,14 +96,14 @@ export class Context2D {
     this.sp.putImageData(sp, x * this.font.width, y * this.font.height, dx * this.font.width, dy * this.font.height, dwidth * this.font.width || sp.width, dheight * this.font.height || sp.height);
   }
 
-  private scroll(rate: number, scroll: IScroll) {
+  private scroll(limit: number, scroll: IScroll) {
     const { x, y, width, height, rows, cols } = scroll;
     const [ bg, fg, sp ] = this.getCapture(x, y, width, height);
-    const offsetx = (cols < 0 ? Math.min(cols, cols + this.move.x) : Math.max(cols, cols + this.move.x)) * rate ;
-    const offsety = (rows < 0 ? Math.min(rows, rows + this.move.y) : Math.max(rows, rows + this.move.y)) * rate ;
-    const animate = (ox: number, oy: number) => {
-      ox = Math.abs(ox + offsetx) <= Math.abs(cols) ? ox + offsetx : cols;
-      oy = Math.abs(oy + offsety) <= Math.abs(rows) ? oy + offsety : rows;
+    const animate = (i: number) => {
+      i = Math.min(limit, i + Math.max(Math.abs(this.move.x), Math.abs(this.move.y)));
+
+      const ox = cols * (i / limit);
+      const oy = rows * (i / limit);
 
       this.clear(x, y, width, height);
       this.putCapture(bg, fg, sp, x - ox, y - oy, Math.max(0, ox), Math.max(0, oy), Math.min(width, width + ox), Math.min(height, height + oy));
@@ -114,10 +114,10 @@ export class Context2D {
         this.move.y -= rows;
         this.render();
       } else {
-        requestAnimationFrame(() => animate(ox, oy));
+        requestAnimationFrame(() => animate(i));
       }
     };
-    animate(0, 0);
+    requestAnimationFrame(() => animate(0));
   }
 
   private flush(cells: ICell[]) {
@@ -142,7 +142,7 @@ export class Context2D {
     const flush = this.queues.shift();
 
     if (flush?.scroll) {
-      this.scroll(0.1, flush.scroll);
+      this.scroll(5, flush.scroll);
     } else if (flush?.cells) {
       this.flush(flush.cells);
     } else {
