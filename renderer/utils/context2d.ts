@@ -7,6 +7,7 @@ export class Context2D {
   private font: { size: number; width: number; height: number; } = { size: 0, width: 0, height: 0 };
   private queues: { cells?: ICell[], scroll?: IScroll }[] = [];
   private move: { x: number, y: number } = { x: 0, y: 0 };
+  private updating: boolean = false;
 
   constructor(
     private bg: CanvasRenderingContext2D,
@@ -15,7 +16,6 @@ export class Context2D {
   ) {
     const { size, width, height } = Setting.font;
     this.font = { size: size * 2, width: width * 2, height: height * 2 };
-    this.render();
   }
 
   private style(hl: string, type: "foreground" | "background") {
@@ -112,7 +112,7 @@ export class Context2D {
         cols && this.putCapture(bg, fg, sp, x, y, cols < 0 ? 0 : width - Math.abs(cols), 0, Math.abs(cols), height);
         this.move.x -= cols;
         this.move.y -= rows;
-        this.render();
+        this.render(true);
       } else {
         requestAnimationFrame(() => animate(i));
       }
@@ -135,18 +135,21 @@ export class Context2D {
       this.style(cell.hl, "foreground");
       this.fg.fillText(cell.text, x, y + (this.font.height - this.font.size) / 2);
     });
-    this.render();
   }
 
-  private render() {
+  render(force = false) {
+    if (force === false && this.updating) return;
+
     const flush = this.queues.shift();
 
+    this.updating = true;
     if (flush?.scroll) {
       this.scroll(5, flush.scroll);
     } else if (flush?.cells) {
       this.flush(flush.cells);
+      this.render(true);
     } else {
-      requestAnimationFrame(() => this.render());
+      this.updating = false;
     }
   }
 

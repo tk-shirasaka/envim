@@ -3,7 +3,7 @@ import React, { createRef, RefObject, MouseEvent, WheelEvent } from "react";
 import { ICell, IScroll } from "common/interface";
 
 import { Emit } from "../../utils/emit";
-import { Context2D } from "../../utils/context2d";
+import { Canvas } from "../../utils/canvas";
 import { y2Row, x2Col } from "../../utils/size";
 
 interface Props {
@@ -44,7 +44,6 @@ export class EditorComponent extends React.Component<Props, States> {
   private clear: boolean = true;
   private timer: number = 0;
   private drag: boolean = false;
-  private renderer?: Context2D;
   private capture?: { bg: ImageData; fg: ImageData; sp: ImageData };
 
   constructor(props: Props) {
@@ -60,30 +59,30 @@ export class EditorComponent extends React.Component<Props, States> {
     const sp = this.sp.current?.getContext("2d");
 
     if (bg && fg && sp) {
-      this.renderer = new Context2D(bg, fg, sp);
-      this.renderer.clear(0, 0, x2Col(this.props.editor.width), y2Row(this.props.editor.height));
+      Canvas.set(this.props.grid, bg, fg, sp);
+      Canvas.clear(this.props.grid, x2Col(this.props.editor.width), y2Row(this.props.editor.height));
     }
   }
 
   componentDidUpdate() {
-    if (this.renderer && this.capture) {
-      this.renderer.clear(0, 0, x2Col(this.props.editor.width), y2Row(this.props.editor.height));
-      this.renderer.putCapture(this.capture.bg, this.capture.fg, this.capture.sp, 0, 0);
+    if (this.capture) {
+      Canvas.clear(this.props.grid, x2Col(this.props.editor.width), y2Row(this.props.editor.height));
+      Canvas.putCapture(this.props.grid, this.capture.bg, this.capture.fg, this.capture.sp);
       delete(this.capture);
     }
   }
 
   componentWillUnmount() {
     const grid = this.props.grid;
-    delete(this.renderer);
+    Canvas.delete(grid);
     Emit.clear([`clear:${grid}`, `flush:${grid}`]);
   }
 
   shouldComponentUpdate(props: Props) {
     const prev = this.props;
     const next = props;
-    if (this.renderer && (prev.style.width < next.style.width || prev.style.height < next.style.height || prev.editor.width !== next.editor.width || prev.editor.height !== next.editor.height)) {
-      const [ bg, fg, sp ] = this.renderer.getCapture(0, 0, x2Col(Math.min(prev.style.width, next.style.width)), y2Row(Math.min(prev.style.height, next.style.height)));
+    if (prev.style.width < next.style.width || prev.style.height < next.style.height || prev.editor.width !== next.editor.width || prev.editor.height !== next.editor.height) {
+      const [ bg, fg, sp ] = Canvas.getCapture(this.props.grid, x2Col(Math.min(prev.style.width, next.style.width)), y2Row(Math.min(prev.style.height, next.style.height)));
       this.capture = { bg, fg, sp };
     }
     return true;
@@ -143,8 +142,8 @@ export class EditorComponent extends React.Component<Props, States> {
   }
 
   private onFlush(flush: { cells: ICell[], scroll?: IScroll }[]) {
-    this.clear && this.renderer?.clear(0, 0, x2Col(this.props.editor.width), y2Row(this.props.editor.height));
-    flush.forEach(({ cells, scroll }) => this.renderer?.push(cells, scroll))
+    this.clear && Canvas.clear(this.props.grid, x2Col(this.props.editor.width), y2Row(this.props.editor.height));
+    flush.forEach(({ cells, scroll }) => Canvas.update(this.props.grid, cells, scroll))
     this.clear = false;
   }
 
