@@ -38,7 +38,7 @@ export class Canvas {
   }
 
   private static render() {
-    Object.values(Canvas.renderer).forEach(renderer => renderer.render(false));
+    Object.values(Canvas.renderer).forEach(renderer => renderer.render());
     requestAnimationFrame(Canvas.render);
   }
 }

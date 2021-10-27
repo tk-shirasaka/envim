@@ -7,7 +7,7 @@ export class Context2D {
   private font: { size: number; width: number; height: number; } = { size: 0, width: 0, height: 0 };
   private queues: { cells?: ICell[], scroll?: IScroll }[] = [];
   private move: { x: number, y: number } = { x: 0, y: 0 };
-  private updating: boolean = false;
+  private scrolltmp?: { i: number; bg: ImageData; fg: ImageData; sp: ImageData; };
 
   constructor(
     private bg: CanvasRenderingContext2D,
@@ -97,27 +97,30 @@ export class Context2D {
   }
 
   private scroll(limit: number, scroll: IScroll) {
+    if (!this.scrolltmp) {
+      const [ bg, fg, sp ] = this.getCapture(scroll.x, scroll.y, scroll.width, scroll.height);
+      this.scrolltmp = { i: 0, bg, fg, sp };
+    }
+
     const { x, y, width, height, rows, cols } = scroll;
-    const [ bg, fg, sp ] = this.getCapture(x, y, width, height);
-    const animate = (i: number) => {
-      i = Math.min(limit, i + Math.max(Math.abs(this.move.x), Math.abs(this.move.y)));
+    const { bg, fg, sp } = this.scrolltmp;
+    const i = Math.min(limit, this.scrolltmp.i + Math.max(Math.abs(this.move.x), Math.abs(this.move.y)));
+    const ox = cols * (i / limit);
+    const oy = rows * (i / limit);
 
-      const ox = cols * (i / limit);
-      const oy = rows * (i / limit);
+    this.clear(x, y, width, height);
+    this.putCapture(bg, fg, sp, x - ox, y - oy, Math.max(0, ox), Math.max(0, oy), Math.min(width, width + ox), Math.min(height, height + oy));
 
-      this.clear(x, y, width, height);
-      this.putCapture(bg, fg, sp, x - ox, y - oy, Math.max(0, ox), Math.max(0, oy), Math.min(width, width + ox), Math.min(height, height + oy));
-      if (ox === cols && oy === rows) {
-        rows && this.putCapture(bg, fg, sp, x, y, 0, rows < 0 ? 0 : height - Math.abs(rows), width, Math.abs(rows));
-        cols && this.putCapture(bg, fg, sp, x, y, cols < 0 ? 0 : width - Math.abs(cols), 0, Math.abs(cols), height);
-        this.move.x -= cols;
-        this.move.y -= rows;
-        this.render(true);
-      } else {
-        requestAnimationFrame(() => animate(i));
-      }
-    };
-    requestAnimationFrame(() => animate(0));
+    if (ox === cols && oy === rows) {
+      rows && this.putCapture(bg, fg, sp, x, y, 0, rows < 0 ? 0 : height - Math.abs(rows), width, Math.abs(rows));
+      cols && this.putCapture(bg, fg, sp, x, y, cols < 0 ? 0 : width - Math.abs(cols), 0, Math.abs(cols), height);
+      this.move.x -= cols;
+      this.move.y -= rows;
+      delete(this.scrolltmp);
+    } else {
+      this.scrolltmp.i = i;
+      this.queues.unshift({ scroll });
+    }
   }
 
   private flush(cells: ICell[]) {
@@ -137,19 +140,13 @@ export class Context2D {
     });
   }
 
-  render(force = false) {
-    if (force === false && this.updating) return;
-
+  render() {
     const flush = this.queues.shift();
 
-    this.updating = true;
     if (flush?.scroll) {
       this.scroll(5, flush.scroll);
     } else if (flush?.cells) {
       this.flush(flush.cells);
-      this.render(true);
-    } else {
-      this.updating = false;
     }
   }
 
