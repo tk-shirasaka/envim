@@ -79,7 +79,7 @@ export class Context2D {
   }
 
   clear(x: number, y: number, width: number, height: number) {
-    this.rect(x * this.font.width, y * this.font.height, width, height, "0", 0b111);
+    this.rect(x * this.font.width, y * this.font.height - 1, width, height, "0", 0b111);
   }
 
   getCapture(x: number, y: number, width: number, height: number) {
@@ -109,11 +109,11 @@ export class Context2D {
     const oy = rows * (i / limit);
 
     this.clear(x, y, width, height);
-    this.putCapture(bg, fg, sp, x - ox, y - oy, Math.max(0, ox), Math.max(0, oy), Math.min(width, width + ox), Math.min(height, height + oy));
+    this.putCapture(bg, fg, sp, x - ox, y - oy, Math.max(0, ox), Math.max(0, oy), width - Math.abs(ox), height - Math.abs(oy));
 
     if (ox === cols && oy === rows) {
-      rows && this.putCapture(bg, fg, sp, x, y, 0, rows < 0 ? 0 : height - Math.abs(rows), width, Math.abs(rows));
-      cols && this.putCapture(bg, fg, sp, x, y, cols < 0 ? 0 : width - Math.abs(cols), 0, Math.abs(cols), height);
+      rows && this.putCapture(bg, fg, sp, x, y, 0, rows < 0 ? 0 : height - rows, width, Math.abs(rows));
+      cols && this.putCapture(bg, fg, sp, x, y, cols < 0 ? 0 : width - cols, 0, Math.abs(cols), height);
       this.move.x -= cols;
       this.move.y -= rows;
       delete(this.scrolltmp);
