@@ -2,7 +2,7 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const path = require('path');
 
 var main = {
-  mode: 'development',
+  mode: process.env.DEVELOPMENT ? 'development' : 'production',
   target: 'electron-main',
   entry: {
     main: path.join(__dirname, 'main', 'index'),
@@ -29,7 +29,7 @@ var main = {
 };
 
 var renderer = {
-  mode: 'development',
+  mode: process.env.DEVELOPMENT ? 'development' : 'production',
   target: 'electron-renderer',
   entry: path.join(__dirname, 'renderer', 'components', 'index'),
   output: {
