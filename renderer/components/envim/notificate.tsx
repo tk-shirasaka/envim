@@ -49,9 +49,7 @@ export class NotificateComponent extends React.Component<Props, States> {
   }
 
   private onShow(message: IMessage, replace: boolean) {
-    const messages = this.state.messages;
-
-    replace && messages.pop();
+    const messages = replace ? [] : this.state.messages.slice(-1);
 
     this.setState({ messages: [ ...messages, message ] });
   }
