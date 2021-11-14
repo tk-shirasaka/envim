@@ -60,13 +60,13 @@ export class EditorComponent extends React.Component<Props, States> {
 
     if (bg && fg && sp) {
       Canvas.set(this.props.grid, bg, fg, sp);
-      Canvas.clear(this.props.grid, x2Col(this.props.editor.width), y2Row(this.props.editor.height));
+      Canvas.clear(this.props.grid, x2Col(this.props.style.width), y2Row(this.props.style.height));
     }
   }
 
   componentDidUpdate() {
     if (this.capture) {
-      Canvas.clear(this.props.grid, x2Col(this.props.editor.width), y2Row(this.props.editor.height));
+      Canvas.clear(this.props.grid, x2Col(this.props.style.width), y2Row(this.props.style.height));
       Canvas.putCapture(this.props.grid, this.capture.bg, this.capture.fg, this.capture.sp);
       delete(this.capture);
     }
@@ -142,7 +142,7 @@ export class EditorComponent extends React.Component<Props, States> {
   }
 
   private onFlush(flush: { cells: ICell[], scroll?: IScroll }[]) {
-    this.clear && Canvas.clear(this.props.grid, x2Col(this.props.editor.width), y2Row(this.props.editor.height));
+    this.clear && Canvas.clear(this.props.grid, x2Col(this.props.style.width), y2Row(this.props.style.height));
     flush.forEach(({ cells, scroll }) => Canvas.update(this.props.grid, cells, scroll))
     this.clear = false;
   }
