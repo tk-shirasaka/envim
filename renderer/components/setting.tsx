@@ -18,6 +18,7 @@ interface States {
 
 const flexDirection: "column" = "column";
 const boxSizing: "border-box" = "border-box";
+const position: "absolute" = "absolute";
 const styles = {
   scope: {
     padding: 8,
@@ -26,6 +27,14 @@ const styles = {
     overflow: "auto",
     flexDirection,
     boxSizing,
+  },
+  backdrop: {
+    width: "100%",
+    height: "100%",
+    top: 0,
+    left: 0,
+    position,
+    zIndex: -1,
   },
   logo: {
     fontSize: "2em",
@@ -91,8 +100,7 @@ export class SettingComponent extends React.Component<Props, States> {
   private getStyle() {
     return {
       opacity: (100 - this.state.opacity) / 100,
-      ...this.props,
-      ...styles.scope
+      ...styles.backdrop,
     };
   }
 
@@ -106,7 +114,8 @@ export class SettingComponent extends React.Component<Props, States> {
 
   render() {
     return (
-      <form className="color-black" style={this.getStyle()} onSubmit={this.onSubmit.bind(this)}>
+      <form className="color-white-fg" style={{ ...this.props, ...styles.scope }} onSubmit={this.onSubmit.bind(this)}>
+        <div className="color-black" style={this.getStyle()}></div>
         <h1 className="bold">Welcome To Envim!</h1>
         <div>
           <i className="color-green-fg" style={styles.logo}></i>

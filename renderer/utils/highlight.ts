@@ -61,8 +61,8 @@ export class Highlights {
   private static hls: { [k: string]: Highlight } = {};
 
   static setHighlight(id: string, ui: boolean, hl: IHighlight) {
-    const multiple = Setting.options.ext_multigrid ? 2 : 1;
-    const alpha = ui ? Setting.opacity * multiple : 0;
+    const multiple = Setting.options.ext_multigrid ? 1 : 2;
+    const alpha = ui ? Math.sqrt((Setting.opacity / 100) ** multiple) * 100 : 0;
 
     Highlights.hls[id] = new Highlight(hl, alpha);
   }
