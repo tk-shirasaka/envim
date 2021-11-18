@@ -21,6 +21,7 @@ interface Props {
 }
 
 interface States {
+  pause: boolean;
   grids: { [k: string]: {
     zIndex: number;
     width: number;
@@ -44,6 +45,16 @@ const styles = {
     margin: 0,
     padding: 0,
   },
+  backdrop: {
+    position: positionA,
+    zIndex: 100,
+    top: 0,
+    left: 0,
+    width: "100%",
+    height: "100%",
+    opacity: 0.4,
+    cusor: "wait",
+  }
 };
 
 export class EnvimComponent extends React.Component<Props, States> {
@@ -57,11 +68,12 @@ export class EnvimComponent extends React.Component<Props, States> {
     super(props);
 
     this.setSize();
-    this.state = { grids: {} };
+    this.state = { pause: false, grids: {} };
     Emit.on("highlight:set", this.onHighlight.bind(this));
     Emit.on("win:pos", this.onWin.bind(this));
     Emit.on("option:set", this.onOption.bind(this));
     Emit.on("envim:drag", this.onDrag.bind(this));
+    Emit.on("app:pause", this.onPause.bind(this));
     Emit.send("envim:attach", x2Col(this.editor.width), y2Row(this.editor.height), Setting.options);
   }
 
@@ -133,6 +145,10 @@ export class EnvimComponent extends React.Component<Props, States> {
     this.setState({ grids });
   }
 
+  private onPause(pause: boolean) {
+    this.setState({ pause });
+  }
+
   private onMouseUp() {
     this.onDrag(-1);
     Emit.share("envim:focus");
@@ -152,6 +168,7 @@ export class EnvimComponent extends React.Component<Props, States> {
           <InputComponent />
         </div>
         { Setting.options.ext_messages && <HistoryComponent {...this.footer} /> }
+        { this.state.pause && <div className="color-black" style={styles.backdrop}></div> }
       </div>
     );
   }

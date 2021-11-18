@@ -1,7 +1,6 @@
 import React from "react";
 
 import { Emit } from "../utils/emit";
-import { Setting } from "../utils/setting";
 import { x2Col, col2X } from "../utils/size";
 
 import { SidebarComponent } from "./sidebar";
@@ -19,7 +18,7 @@ interface States {
 export class AppComponent extends React.Component<Props, States> {
   constructor(props: Props) {
     super(props);
-    this.state = { ...Setting.get(), init: false, window: { width: window.innerWidth, height: window.innerHeight } };
+    this.state = { init: false, window: { width: window.innerWidth, height: window.innerHeight } };
 
     window.addEventListener("resize", this.onResize.bind(this));
     (document as any).fonts.load("10px Editor Regular").then();

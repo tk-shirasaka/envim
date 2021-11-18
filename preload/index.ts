@@ -15,8 +15,15 @@ const share = (event: string, ...args: any[]) => {
   emit.emit(event, ...args);
 };
 
-const send = (event: string, ...args: any[]) => {
-  ipcRenderer.invoke(event, ...args);
+const send = async (event: string, ...args: any[]) => {
+  const counter: boolean[] = [];
+  const timer = setTimeout(() => {
+    counter.push(true);
+    share("envim:pause", true)
+  });
+
+  await ipcRenderer.invoke(event, ...args);
+  counter.length ? share("envim:pause", false) : clearTimeout(timer);
 };
 
 const clear = (events: string[]) => {
