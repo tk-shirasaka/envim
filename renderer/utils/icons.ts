@@ -16,7 +16,7 @@ export const icons = [
   { font: "", color: "blue", name: "Docker", type: /docker/i },
   { font: "ﬥ", color: "gray", name: "JSON", type: /^json$/ },
   { font: "", color: "gray", name: "Config", type: /^(yaml)|(toml)$/ },
-  { font: "", color: "yellow", name: "SQL", type: /^sql$/ },
+  { font: "", color: "yellow", name: "SQL", type: /^(mysql)|(sql)$/ },
   { font: "", color: "red", name: "Quickfix", type: /^qf$/ },
   { font: "", color: "pink", name: "Help", type: /^help$/ },
   { font: "", color: "gray", name: "File", type: /.*/ },
