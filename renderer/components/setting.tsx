@@ -53,7 +53,6 @@ const styles = {
     borderStyle: "solid",
     borderRadius: 4,
     overflow: "hidden",
-    cursor: "pointer",
   },
   button: {
     marginTop: "1em",
@@ -180,14 +179,14 @@ export class SettingComponent extends React.Component<Props, States> {
           ))}
 
           <h3 className="bold">Bookmarks</h3>
-          <label className={this.state.bookmarks.find(({ selected }) => selected) ? "color-gray-fg" : "color-gray" } style={styles.bookmark} onClick={() => this.onSelectBookmark(-1)}>
+          <label className={`color-gray${this.state.bookmarks.find(({ selected }) => selected) ? "-fg" : ""} clickable`} style={styles.bookmark} onClick={() => this.onSelectBookmark(-1)}>
             Not select
           </label>
           { this.state.bookmarks.map((bookmark, i) => (
-            <label className={bookmark.selected ? "color-lightblue" : "color-lightblue-fg" } key={i} style={styles.bookmark} onClick={() => this.onSelectBookmark(i)}>
+            <label className={`color-blue${bookmark.selected ? "" : "-fg"} clickable`} key={i} style={styles.bookmark} onClick={() => this.onSelectBookmark(i)}>
               { bookmark.selected
                 ? <input type="text" name={`${i}`} value={bookmark.name} placeholder={bookmark.path} onChange={this.onChangeBookmark.bind(this)} />
-                  : <>{ bookmark.name }<i className="color-red-fg" style={styles.icon} onClick={(e) => this.onDeleteBookmark(e, i)}></i></>
+                  : <>{ bookmark.name }<i className="color-red-fg clickable" style={styles.icon} onClick={(e) => this.onDeleteBookmark(e, i)}></i></>
               }
             </label>
           ))}

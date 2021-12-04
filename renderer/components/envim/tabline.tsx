@@ -169,7 +169,7 @@ export class TablineComponent extends React.Component<Props, States> {
         {this.state.tabs.map((tab, i) => this.renderTab(i, tab))}
         { this.state.tabs.length > 0 && <IconComponent color="green-fg" style={this.getStyle(styles.space)} font="" onClick={() => this.runCommand("$tabnew")} /> }
         { Setting.bookmarks.find(({ path }) => path === this.state.cwd)
-            ? <IconComponent color="lightblue-fg" style={this.getStyle(styles.space)} font="" onClick={() => this.toggleBookmark()} />
+            ? <IconComponent color="blue-fg" style={this.getStyle(styles.space)} font="" onClick={() => this.toggleBookmark()} />
             : <IconComponent color="gray-fg" style={this.getStyle(styles.space)} font="" onClick={() => this.toggleBookmark()} />
         }
         <div className="space dragable" />

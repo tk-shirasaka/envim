@@ -16,15 +16,17 @@ $color-purple: #9e7ec1;
     background-color: $bg;
     border-color: $bg;
 
-    &.clickable:hover, &.active:hover {
-      @if $bg == null {
-        color: darken($fg, 30%);
-      } @else {
-        color: lighten($fg, 10%);
-        background-color: lighten($bg, 10%);
-        border-color: lighten($bg, 10%);
-      }
+    &.clickable, &.active {
       cursor: pointer;
+      &:hover {
+        @if $bg == null {
+          color: darken($fg, 30%);
+        } @else {
+          color: lighten($fg, 10%);
+          background-color: lighten($bg, 10%);
+          border-color: lighten($bg, 10%);
+        }
+      }
     }
     &.active {
       @if $bg == null {
