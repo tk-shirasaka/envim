@@ -1,4 +1,4 @@
-import React, { FormEvent, ChangeEvent } from "react";
+import React, { FormEvent, ChangeEvent, MouseEvent } from "react";
 
 import { Emit } from "../utils/emit";
 import { Setting } from "../utils/setting";
@@ -44,6 +44,16 @@ const styles = {
   },
   icon: {
     margin: "0 6px",
+  },
+  bookmark: {
+    width: "calc(100% - 2rem)",
+    margin: "0.1rem 0",
+    padding: "1rem",
+    borderWidth: 2,
+    borderStyle: "solid",
+    borderRadius: 4,
+    overflow: "hidden",
+    cursor: "pointer",
   },
   button: {
     marginTop: "1em",
@@ -93,9 +103,8 @@ export class SettingComponent extends React.Component<Props, States> {
   }
 
   private onSelectBookmark(index: number) {
-    const bookmarks = this.state.bookmarks.map(bookmark => ({ ...bookmark, selected: false }));
+    const bookmarks = this.state.bookmarks.map((bookmark, i) => ({ ...bookmark, selected: i === index }));
 
-    bookmarks[index].selected = true;
     Setting.bookmarks = bookmarks;
     this.setState({ bookmarks });
   }
@@ -109,8 +118,11 @@ export class SettingComponent extends React.Component<Props, States> {
     this.setState({ bookmarks });
   }
 
-  private onDeleteBookmark(index: number) {
+  private onDeleteBookmark(e: MouseEvent, index: number) {
     const bookmarks = this.state.bookmarks;
+
+    e.stopPropagation();
+    e.preventDefault();
 
     bookmarks.splice(index, 1);
     Setting.bookmarks = bookmarks;
@@ -168,11 +180,15 @@ export class SettingComponent extends React.Component<Props, States> {
           ))}
 
           <h3 className="bold">Bookmarks</h3>
+          <label className={this.state.bookmarks.find(({ selected }) => selected) ? "color-gray-fg" : "color-gray" } style={styles.bookmark} onClick={() => this.onSelectBookmark(-1)}>
+            Not select
+          </label>
           { this.state.bookmarks.map((bookmark, i) => (
-            <label key={i}>
-              <input type="radio" checked={bookmark.selected} onChange={() => this.onSelectBookmark(i)} />
-              <input type="text" name={`${i}`} value={bookmark.name} placeholder={bookmark.path} onChange={this.onChangeBookmark.bind(this)} />
-              <i className="color-red-fg" style={styles.icon} onClick={() => this.onDeleteBookmark(i)}></i>
+            <label className={bookmark.selected ? "color-lightblue" : "color-lightblue-fg" } key={i} style={styles.bookmark} onClick={() => this.onSelectBookmark(i)}>
+              { bookmark.selected
+                ? <input type="text" name={`${i}`} value={bookmark.name} placeholder={bookmark.path} onChange={this.onChangeBookmark.bind(this)} />
+                  : <>{ bookmark.name }<i className="color-red-fg" style={styles.icon} onClick={(e) => this.onDeleteBookmark(e, i)}></i></>
+              }
             </label>
           ))}
         </div>
