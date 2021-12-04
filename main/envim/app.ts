@@ -5,6 +5,7 @@ import { Tabpage } from "neovim/lib/api/Tabpage";
 import { ITab, IMode } from "common/interface";
 
 import { Emit } from "../emit";
+import { Autocmd } from "./autocmd";
 import { Clipboard } from "./clipboard";
 import { Grids } from "./grid";
 import { Highlights } from "./highlight";
@@ -15,6 +16,7 @@ export class App {
 
   constructor(private nvim: NeovimClient) {
     Grids.init();
+    Autocmd.setup(this.nvim);
     Clipboard.setup(this.nvim);
     nvim.on("request", this.onRequest.bind(this));
     nvim.on("notification", this.onNotification.bind(this));
@@ -32,6 +34,7 @@ export class App {
     switch (method) {
       case "redraw" :return this.redraw(args);
       case "envim_clipboard": return Clipboard.copy(args[0], args[1]);
+      case "envim_dirchanged": return Autocmd.dirchanged(args[0]);
     }
   }
 

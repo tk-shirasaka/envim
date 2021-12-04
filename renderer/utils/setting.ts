@@ -6,6 +6,7 @@ interface ISetting {
   font: { size: number; width: number; height: number; };
   opacity: number;
   options: { [k: string]: boolean; };
+  bookmarks: { name: string; path: string; selected: boolean }[];
 }
 
 const defaultSetting: ISetting = {
@@ -22,6 +23,7 @@ const defaultSetting: ISetting = {
     ext_hlstate: true,
     ext_termcolors: true,
   },
+  bookmarks: [],
 };
 
 const ls: Localstorage<ISetting> = new Localstorage<ISetting>("setting", defaultSetting);
@@ -76,5 +78,13 @@ export class Setting {
 
   static set options(options: ISetting["options"]) {
     Setting.set({ ...Setting.item, options });
+  }
+
+  static get bookmarks() {
+    return Setting.item.bookmarks;
+  }
+
+  static set bookmarks(bookmarks: ISetting["bookmarks"]) {
+    Setting.set({ ...Setting.item, bookmarks });
   }
 }

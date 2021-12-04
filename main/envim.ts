@@ -23,7 +23,7 @@ export class Envim {
     process.on("unhandledRejection", this.onError.bind(this));
   }
 
-  private async onConnect(type: string, value: string ) {
+  private async onConnect(type: string, value: string, path: string ) {
     let reader, writer;
 
     switch (type) {
@@ -45,6 +45,8 @@ export class Envim {
       this.nvim.on("disconnect", this.onDisconnect.bind(this));
       new App(this.nvim);
       Emit.send("app:start");
+
+      path && setTimeout(() => this.nvim.command(`cd ${path}`), 200);
     }
   }
 

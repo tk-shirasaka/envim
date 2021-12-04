@@ -3,6 +3,7 @@ import React from "react";
 import { ITab, IMode, IMenu } from "../../../common/interface";
 
 import { Emit } from "../../utils/emit";
+import { Setting } from "../../utils/setting";
 import { icons } from "../../utils/icons";
 
 import { IconComponent } from "../icon";
@@ -13,6 +14,7 @@ interface Props {
 }
 
 interface States {
+  cwd: string;
   tabs: ITab[];
   menus: IMenu[];
   mode?: IMode;
@@ -72,15 +74,34 @@ const styles = {
 export class TablineComponent extends React.Component<Props, States> {
   constructor(props: Props) {
     super(props);
-    this.state = { tabs: [], menus: [] };
+    this.state = { cwd: "", tabs: [], menus: [] };
 
+    Emit.on("envim:cwd", this.onCwd.bind(this));
     Emit.on("tabline:update", this.onTabline.bind(this));
     Emit.on("menu:update", this.onMenu.bind(this));
     Emit.on("mode:change", this.changeMode.bind(this));
   }
 
   componentWillUnmount() {
-    Emit.clear(["tabline:update", "menu:update", "mode:change", "messages:mode", "messages:command", "messages:ruler"]);
+    Emit.clear(["envim:cwd", "tabline:update", "menu:update", "mode:change", "messages:mode", "messages:command", "messages:ruler"]);
+  }
+
+  private onCwd(cwd: string) {
+    this.setState({ cwd });
+  }
+
+  private toggleBookmark() {
+    const bookmarks = Setting.bookmarks;
+    const cwd = this.state.cwd;
+    const index = Setting.bookmarks.findIndex(({ path }) => path === cwd);
+
+    if (index >= 0) {
+      bookmarks.splice(index, 1);
+    } else {
+      bookmarks.push({ path: cwd, name: cwd, selected: false });
+    }
+
+    Setting.bookmarks = bookmarks;
   }
 
   private runCommand(command: string) {
@@ -147,6 +168,10 @@ export class TablineComponent extends React.Component<Props, States> {
       <div className="color-black" style={{...this.props, ...styles.scope}}>
         {this.state.tabs.map((tab, i) => this.renderTab(i, tab))}
         { this.state.tabs.length > 0 && <IconComponent color="green-fg" style={this.getStyle(styles.space)} font="" onClick={() => this.runCommand("$tabnew")} /> }
+        { Setting.bookmarks.find(({ path }) => path === this.state.cwd)
+            ? <IconComponent color="lightblue-fg" style={this.getStyle(styles.space)} font="" onClick={() => this.toggleBookmark()} />
+            : <IconComponent color="gray-fg" style={this.getStyle(styles.space)} font="" onClick={() => this.toggleBookmark()} />
+        }
         <div className="space dragable" />
         { this.state.menus.map((menu, i) => (
           <div key={i} className={`color-black ${menu.active ? "active" : "clickable"}`} style={styles.menu} onMouseEnter={() => this.toggleMenu(i)} onMouseLeave={() => this.toggleMenu(i)}>

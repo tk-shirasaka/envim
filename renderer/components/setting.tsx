@@ -14,6 +14,7 @@ interface States {
   font: { width: number; height: number; size: number; };
   opacity: number;
   options: { [k: string]: boolean; };
+  bookmarks: { path: string; name: string; selected: boolean; }[];
 }
 
 const flexDirection: "column" = "column";
@@ -91,10 +92,35 @@ export class SettingComponent extends React.Component<Props, States> {
     this.setState({ options });
   }
 
+  private onSelectBookmark(index: number) {
+    const bookmarks = this.state.bookmarks.map(bookmark => ({ ...bookmark, selected: false }));
+
+    bookmarks[index].selected = true;
+    Setting.bookmarks = bookmarks;
+    this.setState({ bookmarks });
+  }
+
+  private onChangeBookmark(e: ChangeEvent) {
+    const input = e.target as HTMLInputElement;
+    const bookmarks = this.state.bookmarks;
+
+    bookmarks[+input.name].name = input.value;
+    Setting.bookmarks = bookmarks;
+    this.setState({ bookmarks });
+  }
+
+  private onDeleteBookmark(index: number) {
+    const bookmarks = this.state.bookmarks;
+
+    bookmarks.splice(index, 1);
+    Setting.bookmarks = bookmarks;
+    this.setState({ bookmarks });
+  }
+
   private onSubmit(e: FormEvent) {
     e.stopPropagation();
     e.preventDefault();
-    Emit.send("envim:connect", this.state.type, this.state.path);
+    Emit.send("envim:connect", this.state.type, this.state.path, this.state.bookmarks.find(({ selected }) => selected)?.path);
   }
 
   private getStyle() {
@@ -139,6 +165,15 @@ export class SettingComponent extends React.Component<Props, States> {
           <h3 className="bold">Options</h3>
           { Object.keys(this.state.options).map((key, i) => (
             <label key={i}><input type="checkbox" name={key} checked={this.state.options[key]} onChange={this.onToggleOption.bind(this)} />{ key }</label>
+          ))}
+
+          <h3 className="bold">Bookmarks</h3>
+          { this.state.bookmarks.map((bookmark, i) => (
+            <label key={i}>
+              <input type="radio" checked={bookmark.selected} onChange={() => this.onSelectBookmark(i)} />
+              <input type="text" name={`${i}`} value={bookmark.name} placeholder={bookmark.path} onChange={this.onChangeBookmark.bind(this)} />
+              <i className="color-red-fg" style={styles.icon} onClick={() => this.onDeleteBookmark(i)}></i>
+            </label>
           ))}
         </div>
 

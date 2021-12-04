@@ -11,9 +11,9 @@ export class Localstorage<T> {
 
   private deepcopy(s: any, t: any) {
     if (s instanceof Array) {
-      s.map((_, i) => {
-        return t instanceof Array && i in t ? this.deepcopy(s[i], t[i]) : s[i];
-      });
+      s = t instanceof Array ? (s.length < t.length ? t : s).map((_, i) => {
+        return this.deepcopy(s[i], t[i]) || t[i];
+      }) : s;
     } else if (s instanceof Object) {
       Object.keys(s).forEach(k => {
         s[k] = t instanceof Object && k in t ? this.deepcopy(s[k], t[k]) : s[k];
