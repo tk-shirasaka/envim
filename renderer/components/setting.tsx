@@ -20,6 +20,8 @@ interface States {
 const flexDirection: "column" = "column";
 const boxSizing: "border-box" = "border-box";
 const position: "absolute" = "absolute";
+const overflowX: "hidden" = "hidden";
+const overflowY: "auto" = "auto";
 const styles = {
   scope: {
     padding: 8,
@@ -45,14 +47,18 @@ const styles = {
   icon: {
     margin: "0 6px",
   },
+  block: {
+    maxHeight: "12rem",
+    overflowX,
+    overflowY,
+  },
   bookmark: {
-    width: "calc(100% - 2rem)",
-    margin: "0.1rem 0",
+    width: "calc(100% - 3rem)",
+    margin: "0.1rem auto",
     padding: "1rem",
     borderWidth: 2,
     borderStyle: "solid",
     borderRadius: 4,
-    overflow: "hidden",
   },
   button: {
     marginTop: "1em",
@@ -179,17 +185,19 @@ export class SettingComponent extends React.Component<Props, States> {
           ))}
 
           <h3 className="bold">Bookmarks</h3>
-          <label className={`color-gray${this.state.bookmarks.find(({ selected }) => selected) ? "-fg" : ""} clickable`} style={styles.bookmark} onClick={() => this.onSelectBookmark(-1)}>
-            Not select
-          </label>
-          { this.state.bookmarks.map((bookmark, i) => (
-            <label className={`color-blue${bookmark.selected ? "" : "-fg"} clickable`} key={i} style={styles.bookmark} onClick={() => this.onSelectBookmark(i)}>
-              { bookmark.selected
+          <div style={styles.block}>
+            <div className={`color-gray${this.state.bookmarks.find(({ selected }) => selected) ? "-fg" : ""} clickable`} style={styles.bookmark} onClick={() => this.onSelectBookmark(-1)}>
+              Not select
+            </div>
+            { this.state.bookmarks.map((bookmark, i) => (
+              <div className={`color-blue${bookmark.selected ? "" : "-fg"} clickable`} key={i} style={styles.bookmark} onClick={() => this.onSelectBookmark(i)}>
+                { bookmark.selected
                 ? <input type="text" name={`${i}`} value={bookmark.name} placeholder={bookmark.path} onChange={this.onChangeBookmark.bind(this)} />
-                  : <>{ bookmark.name }<i className="color-red-fg clickable" style={styles.icon} onClick={(e) => this.onDeleteBookmark(e, i)}></i></>
-              }
-            </label>
-          ))}
+                : <>{ bookmark.name }<i className="color-red-fg clickable" style={styles.icon} onClick={(e) => this.onDeleteBookmark(e, i)}></i></>
+                }
+              </div>
+            ))}
+          </div>
         </div>
 
         <button className="color-blue clickable" style={styles.button}>Start</button>
