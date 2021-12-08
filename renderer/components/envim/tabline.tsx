@@ -7,6 +7,7 @@ import { Setting } from "../../utils/setting";
 import { icons } from "../../utils/icons";
 
 import { IconComponent } from "../icon";
+import { MenuComponent } from "../menu";
 
 interface Props {
   width: number;
@@ -21,8 +22,6 @@ interface States {
 }
 
 const whiteSpace: "nowrap" = "nowrap";
-const positionR: "relative" = "relative";
-const positionA: "absolute" = "absolute";
 const styles = {
   scope: {
     display: "flex",
@@ -53,18 +52,11 @@ const styles = {
   },
   menu: {
     display: "flex",
-    position: positionR,
     alignItems: "center",
-    padding: 4,
+    height: "100%",
+    padding: "0 4px",
     minWidth: 0,
     borderLeft: "solid 1px #646079",
-  },
-  submenu: {
-    zIndex: 20,
-    position: positionA,
-    right: 0,
-    boxShadow: "8px 8px 4px 0 rgba(0, 0, 0, 0.6)",
-    whiteSpace,
   },
   space: {
     paddingLeft: 4,
@@ -108,13 +100,6 @@ export class TablineComponent extends React.Component<Props, States> {
     Emit.send("envim:command", command);
   }
 
-  private toggleMenu(i: number) {
-    const menus = this.state.menus
-    menus[i].active = menus[i].active ? false : true;
-
-    this.setState({ menus });
-  }
-
   private onTabline(tabs: ITab[]) {
     this.setState({ tabs });
   }
@@ -149,15 +134,14 @@ export class TablineComponent extends React.Component<Props, States> {
   }
 
   private renderSubmenu(menu: IMenu) {
-    const style = { top: this.props.height, ...styles.submenu };
     const sname = this.state.mode?.short_name;
-    return !sname || !menu.active ? null : (
-      <div className="animate fade-in" style={style}>
+    return !sname ? null : (
+      <div>
         { menu.submenus?.map((submenu, i) => {
           const command = `emenu ${menu.name.replace(/([\. ])/g, "\\$1")}.${submenu.name.replace(/([\. ])/g, "\\$1")}`;
           return submenu.mappings[sname]?.enabled && submenu.mappings[sname]?.rhs
-            ? <div key={i} className="color-black clickable" style={styles.space} onClick={() => this.runCommand(command)}>{ submenu.name }</div>
-            : <div key={i} className="color-gray-fg-dark" style={styles.space} onClick={() => this.runCommand("")}>{ submenu.name }</div>
+            ? <div key={i} className="color-black clickable" onClick={() => this.runCommand(command)}>{ submenu.name }</div>
+            : <div key={i} className="color-gray-fg-dark" onClick={() => this.runCommand("")}>{ submenu.name }</div>
         })}
       </div>
     );
@@ -167,17 +151,22 @@ export class TablineComponent extends React.Component<Props, States> {
     return (
       <div className="color-black" style={{...this.props, ...styles.scope}}>
         {this.state.tabs.map((tab, i) => this.renderTab(i, tab))}
-        { this.state.tabs.length > 0 && <IconComponent color="green-fg" style={this.getStyle(styles.space)} font="" onClick={() => this.runCommand("$tabnew")} /> }
+        { this.state.tabs.length > 0 && (
+          <MenuComponent color="green-fg" style={this.getStyle(styles.space)} label="">
+            <div className="color-black clickable" onClick={() => this.runCommand("$tabnew")}>No select</div>
+            {Setting.bookmarks.map(({ name, path }, i) => <div className="color-black clickable" key={i} onClick={() => this.runCommand(`$tabnew | cd ${path}`)}>{ name }</div>)}
+          </MenuComponent>
+        )
+        }
         { Setting.bookmarks.find(({ path }) => path === this.state.cwd)
             ? <IconComponent color="blue-fg" style={this.getStyle(styles.space)} font="" onClick={() => this.toggleBookmark()} />
             : <IconComponent color="gray-fg" style={this.getStyle(styles.space)} font="" onClick={() => this.toggleBookmark()} />
         }
         <div className="space dragable" />
         { this.state.menus.map((menu, i) => (
-          <div key={i} className={`color-black ${menu.active ? "active" : "clickable"}`} style={styles.menu} onMouseEnter={() => this.toggleMenu(i)} onMouseLeave={() => this.toggleMenu(i)}>
-            { menu.name }
+          <MenuComponent key={i} color="black" style={styles.menu} label={menu.name}>
             { this.renderSubmenu(menu) }
-          </div>
+          </MenuComponent>
         ))}
       </div>
     );
