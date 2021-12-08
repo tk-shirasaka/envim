@@ -22,8 +22,10 @@ const send = async (event: string, ...args: any[]) => {
     share("envim:pause", true)
   }, 100);
 
-  await ipcRenderer.invoke(event, ...args);
+  const result = await ipcRenderer.invoke(event, ...args);
   counter.length ? share("envim:pause", false) : clearTimeout(timer);
+
+  return result;
 };
 
 const clear = (events: string[]) => {

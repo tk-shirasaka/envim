@@ -3,7 +3,7 @@ declare global {
     envimIPC: {
       on: (event: string, callback: (...args: any[]) => void) => void,
       share: (event: string, ...args: any[]) => void,
-      send: (event: string, ...args: any[]) => void,
+      send: <T>(event: string, ...args: any[]) => Promise<T>,
       clear: (events: string[]) => void,
     }
   }
@@ -18,8 +18,8 @@ export class Emit {
     window.envimIPC.share(event, ...args);
   }
 
-  static send(event: string, ...args: any[]) {
-    window.envimIPC.send(event, ...args);
+  static send<T>(event: string, ...args: any[]): Promise<T> {
+    return window.envimIPC.send<T>(event, ...args);
   }
 
   static clear(events: string[]) {

@@ -12,7 +12,10 @@ export class Emit {
   }
 
   static share(event: string, ...args: any[]) {
-    Emit.emit.emit(event, ...args);
+    return Emit.emit
+      .listeners(event)
+      .map(callback => callback(...args))
+      .find(result => result);
   }
 
   static send(event: string, ...args: any[]) {

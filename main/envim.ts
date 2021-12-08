@@ -59,19 +59,19 @@ export class Envim {
   }
 
   private async onApi(fname: string, args: any[]) {
-    await this.nvim.request(fname, args);
+    return await this.nvim.request(fname, args);
   }
 
   private async onMouse(grid: number, button: string, action: string, modifier: string, row: number, col: number) {
-    await this.nvim.inputMouse(button, action, modifier, grid, row, col);
+    return await this.nvim.inputMouse(button, action, modifier, grid, row, col);
   }
 
   private async onInput(input: string) {
-    await this.nvim.input(input);
+    return await this.nvim.input(input);
   }
 
   private async onCommand(command: string) {
-    await this.nvim.command(command);
+    return await this.nvim.command(command);
   }
 
   private onDisconnect() {
