@@ -4,6 +4,7 @@ interface Props {
   label: string;
   color: string;
   style: Object;
+  onClick?: (...args: any[]) => void;
 }
 
 interface States {
@@ -78,7 +79,7 @@ export class MenuComponent extends React.Component<Props, States> {
   render() {
     return (
       <div className={`color-${this.props.color} clickable`} onMouseEnter={this.onMouseEnter.bind(this)} onMouseLeave={this.onMouseLeave.bind(this)} ref={this.div}>
-        <div style={this.props.style}>{ this.props.label }</div>
+        <div style={this.props.style} onClick={this.props?.onClick}>{ this.props.label }</div>
         { this.renderMenu() }
       </div>
     );
