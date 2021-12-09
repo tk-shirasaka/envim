@@ -18,6 +18,7 @@ interface States {
   cwd: string;
   tabs: ITab[];
   menus: IMenu[];
+  bookmarks: { path: string; name: string; selected: boolean; }[];
   mode?: IMode;
 }
 
@@ -66,7 +67,7 @@ const styles = {
 export class TablineComponent extends React.Component<Props, States> {
   constructor(props: Props) {
     super(props);
-    this.state = { cwd: "", tabs: [], menus: [] };
+    this.state = { cwd: "", tabs: [], menus: [], bookmarks: Setting.bookmarks };
 
     Emit.on("envim:cwd", this.onCwd.bind(this));
     Emit.on("tabline:update", this.onTabline.bind(this));
@@ -82,18 +83,24 @@ export class TablineComponent extends React.Component<Props, States> {
     this.setState({ cwd });
   }
 
-  private toggleBookmark() {
-    const bookmarks = Setting.bookmarks;
-    const cwd = this.state.cwd;
-    const index = Setting.bookmarks.findIndex(({ path }) => path === cwd);
+  private async saveBookmark(index: number, bookmark: { path: string, name: string, selected: boolean }) {
+    const bookmarks = this.state.bookmarks;
+    const args = ["input", ["Bookmark: ", bookmark.name]]
 
-    if (index >= 0) {
-      bookmarks.splice(index, 1);
-    } else {
-      bookmarks.push({ path: cwd, name: cwd, selected: false });
-    }
+    bookmark.name = await Emit.send<string>("envim:api", "nvim_call_function", args) || bookmark.name;
+    index < 0 ? bookmarks.push(bookmark) : bookmarks.splice(index, 1, bookmark);
+    Setting.bookmarks = bookmarks.sort((a, b) => a.name > b.name ? 1 : -1);
 
+    this.setState({ bookmarks });
+  }
+
+  private deleteBookmark(index: number) {
+    const bookmarks = this.state.bookmarks;
+
+    bookmarks.splice(index, 1);
     Setting.bookmarks = bookmarks;
+
+    this.setState({ bookmarks });
   }
 
   private runCommand(command: string) {
@@ -147,6 +154,28 @@ export class TablineComponent extends React.Component<Props, States> {
     );
   }
 
+  private renderBookmark() {
+    const cwd = this.state.cwd
+    const index = this.state.bookmarks.findIndex(({ path }) => path === cwd);
+    const { color, label, bookmark } = index >= 0
+      ? { color: "blue-fg", label: "", bookmark: this.state.bookmarks[index] }
+      : { color: "gray-fg", label: "", bookmark: { path: cwd, name: cwd, selected: false } };
+
+    return (
+        <MenuComponent color={color} style={this.getStyle(styles.space)} label={label}>
+          <div className="color-gray-fg small">Path</div>
+          <div className="color-white-fg">{ bookmark.path }</div>
+          <div className="color-gray-fg small">Name</div>
+          <div className="color-white-fg">{ index < 0 ? "-" : bookmark.name }</div>
+          <div style={styles.scope}>
+            <div className="space"></div>
+            { index >= 0 && <IconComponent color="red-fg" style={styles.space} font="" onClick={() => this.deleteBookmark(index)} /> }
+            <IconComponent color="blue-fg" font="" style={styles.space} onClick={() => this.saveBookmark(index, bookmark)} />
+          </div>
+        </MenuComponent>
+    )
+  }
+
   render() {
     return (
       <div className="color-black" style={{...this.props, ...styles.scope}}>
@@ -154,10 +183,7 @@ export class TablineComponent extends React.Component<Props, States> {
         <MenuComponent color="green-fg" style={this.getStyle(styles.space)} onClick={() => this.runCommand("$tabnew")} label="">
           {Setting.bookmarks.map(({ name, path }, i) => <div className="color-black clickable" key={i} onClick={() => this.runCommand(`$tabnew | cd ${path}`)}>{ name }</div>)}
         </MenuComponent>
-        { Setting.bookmarks.find(({ path }) => path === this.state.cwd)
-            ? <IconComponent color="blue-fg" style={this.getStyle(styles.space)} font="" onClick={() => this.toggleBookmark()} />
-            : <IconComponent color="gray-fg" style={this.getStyle(styles.space)} font="" onClick={() => this.toggleBookmark()} />
-        }
+        { this.renderBookmark() }
         <div className="space dragable" />
         { this.state.menus.map((menu, i) => (
           <MenuComponent key={i} color="black" style={styles.menu} label={menu.name}>
