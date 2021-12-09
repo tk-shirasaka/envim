@@ -13,28 +13,26 @@ $color-purple: #9e7ec1;
 @mixin make-color($name, $fg, $bg) {
   .color-#{$name} {
     color: $fg;
-    background-color: $bg;
-    border-color: $bg;
+    @if $bg != null {
+      background-color: $bg;
+      border-color: lighten($bg, 10%);
+    }
 
     &.clickable, &.active {
       cursor: pointer;
       &:hover {
-        @if $bg == null {
-          color: darken($fg, 30%);
-        } @else {
-          color: lighten($fg, 10%);
+        color: lighten($fg, 10%);
+        @if $bg != null {
+          border-color: lighten($bg, 20%);
           background-color: lighten($bg, 10%);
-          border-color: lighten($bg, 10%);
         }
       }
     }
     &.active {
-      @if $bg == null {
-        color: darken($fg, 20%);
-      } @else {
-        color: lighten($fg, 5%);
+      color: lighten($fg, 5%);
+      @if $bg != null {
+        border-color: lighten($bg, 15%);
         background-color: lighten($bg, 5%);
-        border-color: lighten($bg, 5%);
       }
     }
   }

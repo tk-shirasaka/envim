@@ -22,7 +22,10 @@ const styles = {
     padding: 4,
     whiteSpace,
     position: positionA,
-    boxShadow: "8px 8px 4px 0 rgba(0, 0, 0, 0.6)",
+    borderRadius: 4,
+    borderWidth: 1,
+    borderStyle: "solid",
+    boxShadow: "4px 4px 4px 0 rgba(0, 0, 0, 0.6)",
   },
   left: {
     left: 0,
@@ -50,7 +53,7 @@ export class MenuComponent extends React.Component<Props, States> {
 
   private calcAlign() {
     if (this.div.current) {
-      this.align = window.innerWidth / 2 < this.div.current?.clientLeft ? "left" : "right";
+      this.align = window.innerWidth / 2 < this.div.current?.offsetLeft ? "right" : "left";
     }
   }
 
