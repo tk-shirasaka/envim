@@ -87,7 +87,7 @@ export class TablineComponent extends React.Component<Props, States> {
     const bookmarks = this.state.bookmarks;
     const args = ["input", ["Bookmark: ", bookmark.name]]
 
-    bookmark.name = await Emit.send<string>("envim:api", "nvim_call_function", args) || bookmark.name;
+    bookmark.name = await Emit.sync<string>("envim:api", "nvim_call_function", args) || bookmark.name;
     index < 0 ? bookmarks.push(bookmark) : bookmarks.splice(index, 1, bookmark);
     Setting.bookmarks = bookmarks.sort((a, b) => a.name > b.name ? 1 : -1);
 

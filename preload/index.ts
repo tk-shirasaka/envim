@@ -15,6 +15,10 @@ const share = (event: string, ...args: any[]) => {
   emit.emit(event, ...args);
 };
 
+const sync = async (event: string, ...args: any[]) => {
+  return await ipcRenderer.invoke(event, ...args);
+};
+
 const send = async (event: string, ...args: any[]) => {
   const counter: boolean[] = [];
   const timer = setTimeout(() => {
@@ -35,4 +39,4 @@ const clear = (events: string[]) => {
   });
 };
 
-contextBridge.exposeInMainWorld("envimIPC", { on, share, send, clear });
+contextBridge.exposeInMainWorld("envimIPC", { on, share, sync, send, clear });
