@@ -1,6 +1,6 @@
 import React from "react";
 
-import { ITab, IMode, IMenu } from "../../../common/interface";
+import { ITab, IBuffer, IMode, IMenu } from "../../../common/interface";
 
 import { Emit } from "../../utils/emit";
 import { Setting } from "../../utils/setting";
@@ -17,6 +17,7 @@ interface Props {
 interface States {
   cwd: string;
   tabs: ITab[];
+  bufs: IBuffer[];
   menus: IMenu[];
   bookmarks: { path: string; name: string; selected: boolean; }[];
   mode?: IMode;
@@ -67,7 +68,7 @@ const styles = {
 export class TablineComponent extends React.Component<Props, States> {
   constructor(props: Props) {
     super(props);
-    this.state = { cwd: "", tabs: [], menus: [], bookmarks: Setting.bookmarks };
+    this.state = { cwd: "", tabs: [], bufs: [], menus: [], bookmarks: Setting.bookmarks };
 
     Emit.on("envim:cwd", this.onCwd.bind(this));
     Emit.on("tabline:update", this.onTabline.bind(this));
@@ -107,8 +108,8 @@ export class TablineComponent extends React.Component<Props, States> {
     Emit.send("envim:command", command);
   }
 
-  private onTabline(tabs: ITab[]) {
-    this.setState({ tabs });
+  private onTabline(tabs: ITab[], bufs: IBuffer[]) {
+    this.setState({ tabs, bufs });
   }
 
   private onMenu(menus: IMenu[]) {
@@ -182,6 +183,13 @@ export class TablineComponent extends React.Component<Props, States> {
     return (
       <div className="color-black" style={{...this.props, ...styles.scope}}>
         {this.state.tabs.map((tab, i) => this.renderTab(i, tab))}
+        <MenuComponent color="white-fg" style={this.getStyle(styles.space)} label="">
+          { this.state.bufs.map(({ name, buffer, active }, i) => (
+            <div className={`color-black ${active ? "active" : "clickable"}` }key={i} onClick={() => this.runCommand(`buffer ${buffer}`)}>
+              { name } <IconComponent style={styles.space} color="red-fg" font="" onClick={() => this.runCommand(`bdelete! ${buffer}`)} />
+            </div>
+          )) }
+        </MenuComponent>
         <MenuComponent color="green-fg" style={this.getStyle(styles.space)} onClick={() => this.runCommand("$tabnew")} label="">
           { this.state.bookmarks.map(({ name, path }, i) => <div className="color-black clickable" key={i} onClick={() => this.runCommand(`$tabnew | cd ${path}`)}>{ name }</div>) }
         </MenuComponent>

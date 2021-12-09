@@ -47,6 +47,12 @@ export interface ITab {
   buftype: string;
 }
 
+export interface IBuffer {
+  name: string;
+  buffer: number;
+  active: boolean;
+}
+
 export interface IMessage {
   kind: string;
   contents: { hl: string, content: string }[];

@@ -1,8 +1,9 @@
 import { NeovimClient } from "neovim";
 import { Response } from "neovim/lib/host";
 import { Tabpage } from "neovim/lib/api/Tabpage";
+import { Buffer } from "neovim/lib/api/Buffer";
 
-import { ITab, IMode } from "common/interface";
+import { ITab, IBuffer, IMode } from "common/interface";
 
 import { Emit } from "../emit";
 import { Autocmd } from "./autocmd";
@@ -87,7 +88,7 @@ export class App {
 
         /** ext_tabline **/
         case "tabline_update":
-          r.forEach(r => this.tablineUpdate(r[0], r[1]));
+          r.forEach(r => this.tablineUpdate(r[0], r[1], r[2], r[3]));
         break;
 
         /** ext_cmdline **/
@@ -285,21 +286,30 @@ export class App {
     Grids.setStatus(grid, "delete");
   }
 
-  private async tablineUpdate(current: Tabpage, tabs: { tab: Tabpage, name: string }[]) {
-    const next: ITab[] = [];
+  private async tablineUpdate(ctab: Tabpage, tabs: { tab: Tabpage, name: string }[], cbuf: Buffer, bufs: { buffer: Buffer, name: string }[]) {
+    const next: { tabs: ITab[]; bufs: IBuffer[] } = { tabs: [], bufs: [] };
+
     for (let i = 0; i < tabs.length; i++) {
       const { tab, name } = tabs[i];
       const buffer = await tab.window.buffer.catch(() => null);
 
       if (buffer) {
-        const active = current.data === tab.data;
+        const active = ctab.data === tab.data;
         const filetype = await this.nvim.request("nvim_buf_get_option", [buffer.data, "filetype"]).catch(() => "");
         const buftype = await this.nvim.request("nvim_buf_get_option", [buffer.data, "buftype"]).catch(() => "");
 
-        next.push({ name, active, filetype, buftype });
+        next.tabs.push({ name, active, filetype, buftype });
       }
     }
-    Emit.send("tabline:update", next);
+
+    for (let i = 0; i < bufs.length; i++) {
+      const { buffer, name } = bufs[i];
+      const active = cbuf.data === buffer.data;
+
+      next.bufs.push({ name, buffer: +buffer.data, active });
+    }
+
+    Emit.send("tabline:update", next.tabs, next.bufs);
   }
 
   private cmdlineShow(content: string[][], pos: number, prompt: string, indent: number) {
