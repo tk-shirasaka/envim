@@ -183,7 +183,7 @@ export class TablineComponent extends React.Component<Props, States> {
       <div className="color-black" style={{...this.props, ...styles.scope}}>
         {this.state.tabs.map((tab, i) => this.renderTab(i, tab))}
         <MenuComponent color="green-fg" style={this.getStyle(styles.space)} onClick={() => this.runCommand("$tabnew")} label="">
-          {Setting.bookmarks.map(({ name, path }, i) => <div className="color-black clickable" key={i} onClick={() => this.runCommand(`$tabnew | cd ${path}`)}>{ name }</div>)}
+          { this.state.bookmarks.map(({ name, path }, i) => <div className="color-black clickable" key={i} onClick={() => this.runCommand(`$tabnew | cd ${path}`)}>{ name }</div>) }
         </MenuComponent>
         { this.renderBookmark() }
         <div className="space dragable" />

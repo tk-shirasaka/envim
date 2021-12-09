@@ -59,7 +59,9 @@ export class MenuComponent extends React.Component<Props, States> {
   }
 
   onMouseEnter() {
-    this.setState({ active: true });
+    if (this.props.children && !(Array.isArray(this.props.children) && this.props.children.length === 0)) {
+      this.setState({ active: true });
+    }
   }
 
   onMouseLeave() {
