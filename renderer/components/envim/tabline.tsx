@@ -165,8 +165,10 @@ export class TablineComponent extends React.Component<Props, States> {
         <MenuComponent color={color} style={this.getStyle(styles.space)} label={label}>
           <div className="color-gray-fg small">Path</div>
           <div className="color-white-fg">{ bookmark.path }</div>
+          <div className="color-black divider" />
           <div className="color-gray-fg small">Name</div>
           <div className="color-white-fg">{ index < 0 ? "-" : bookmark.name }</div>
+          <div className="color-black divider" />
           <div style={styles.scope}>
             <div className="space"></div>
             { index >= 0 && <IconComponent color="red-fg" style={styles.space} font="" onClick={() => this.deleteBookmark(index)} /> }

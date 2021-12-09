@@ -26,3 +26,10 @@ i, .inline-block {
 .selectable {
   -webkit-user-select: text;
 }
+
+.divider {
+  margin: 4px 0 8px;
+  height: 0;
+  border-width: 1px 0 0;
+  border-style: solid;
+}

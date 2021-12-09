@@ -1,4 +1,4 @@
-import React, { FormEvent, ChangeEvent, MouseEvent } from "react";
+import React, { FormEvent, ChangeEvent } from "react";
 
 import { Emit } from "../utils/emit";
 import { Setting } from "../utils/setting";
@@ -20,8 +20,6 @@ interface States {
 const flexDirection: "column" = "column";
 const boxSizing: "border-box" = "border-box";
 const position: "absolute" = "absolute";
-const overflowX: "hidden" = "hidden";
-const overflowY: "auto" = "auto";
 const styles = {
   scope: {
     padding: 8,
@@ -46,19 +44,6 @@ const styles = {
   },
   icon: {
     margin: "0 6px",
-  },
-  block: {
-    maxHeight: "12rem",
-    overflowX,
-    overflowY,
-  },
-  bookmark: {
-    width: "calc(100% - 3rem)",
-    margin: "0.1rem auto",
-    padding: "1rem",
-    borderWidth: 2,
-    borderStyle: "solid",
-    borderRadius: 4,
   },
   button: {
     marginTop: "1em",
@@ -114,26 +99,6 @@ export class SettingComponent extends React.Component<Props, States> {
     this.setState({ bookmarks });
   }
 
-  private onChangeBookmark(e: ChangeEvent) {
-    const input = e.target as HTMLInputElement;
-    const bookmarks = this.state.bookmarks;
-
-    bookmarks[+input.name].name = input.value;
-    Setting.bookmarks = bookmarks;
-    this.setState({ bookmarks });
-  }
-
-  private onDeleteBookmark(e: MouseEvent, index: number) {
-    const bookmarks = this.state.bookmarks;
-
-    e.stopPropagation();
-    e.preventDefault();
-
-    bookmarks.splice(index, 1);
-    Setting.bookmarks = bookmarks;
-    this.setState({ bookmarks });
-  }
-
   private onSubmit(e: FormEvent) {
     e.stopPropagation();
     e.preventDefault();
@@ -173,32 +138,30 @@ export class SettingComponent extends React.Component<Props, States> {
             <label><input type="radio" value="address" checked={this.state.type === "address"} onChange={this.onToggleType.bind(this)} />Port</label>
           </div>
           <label>Enter neovim path<input type="text" value={this.state.path} onChange={this.onChangePath.bind(this)} autoFocus={true} /></label>
+          <div className="color-black divider" />
 
           <h3 className="bold">Appearance</h3>
           <label>Font Size ({this.state.font.size}px)<input type="range" min="5" max="20" value={this.state.font.size} onChange={this.onChangeFont.bind(this)} /></label>
           <div style={this.getExampleStyle()}>Example Text</div>
           <label>Transparent ({this.state.opacity}%)<input type="range" min="0" max="50" value={this.state.opacity} onChange={this.onChangeOpacity.bind(this)} /></label>
+          <div className="color-black divider" />
 
           <h3 className="bold">Options</h3>
           { Object.keys(this.state.options).map((key, i) => (
             <label key={i}><input type="checkbox" name={key} checked={this.state.options[key]} onChange={this.onToggleOption.bind(this)} />{ key }</label>
           ))}
+          <div className="color-black divider" />
 
           <h3 className="bold">Bookmarks</h3>
-          <div style={styles.block}>
-            <div className={`color-gray${this.state.bookmarks.find(({ selected }) => selected) ? "-fg" : ""} clickable`} style={styles.bookmark} onClick={() => this.onSelectBookmark(-1)}>
-              Not select
-            </div>
-            { this.state.bookmarks.map((bookmark, i) => (
-              <div className={`color-blue${bookmark.selected ? "" : "-fg"} clickable`} key={i} style={styles.bookmark} onClick={() => this.onSelectBookmark(i)}>
-                { bookmark.selected
-                ? <input type="text" name={`${i}`} value={bookmark.name} placeholder={bookmark.path} onChange={this.onChangeBookmark.bind(this)} />
-                : <>{ bookmark.name }<i className="color-red-fg clickable" style={styles.icon} onClick={(e) => this.onDeleteBookmark(e, i)}></i></>
-                }
-              </div>
-            ))}
+          <div>
+            <label><input type="radio" checked={!this.state.bookmarks.find(({ selected }) => selected)} onChange={() => this.onSelectBookmark(-1)} />Not select</label>
           </div>
-        </div>
+          { this.state.bookmarks.map((bookmark, i) => (
+            <div key={i}>
+              <label><input type="radio" checked={bookmark.selected} onChange={() => this.onSelectBookmark(i)} />{ bookmark.name }</label>
+            </div>
+          ))}
+          </div>
 
         <button className="color-blue clickable" style={styles.button}>Start</button>
       </form>
