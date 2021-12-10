@@ -1,4 +1,4 @@
-import React from "react";
+import React, { MouseEvent } from "react";
 
 import { ITab, IBuffer, IMode, IMenu } from "../../../common/interface";
 
@@ -104,7 +104,10 @@ export class TablineComponent extends React.Component<Props, States> {
     this.setState({ bookmarks });
   }
 
-  private runCommand(command: string) {
+  private runCommand(e: MouseEvent, command: string) {
+    e.stopPropagation();
+    e.preventDefault();
+
     Emit.send("envim:command", command);
   }
 
@@ -135,8 +138,8 @@ export class TablineComponent extends React.Component<Props, States> {
     const lineHeight = `${this.props.height - 4}px`;
     return (
       <div key={i} className={`animate fade-in color-${color}`} style={styles.tab}>
-        <IconComponent color={color} style={{ ...styles.name, lineHeight }} active={tab.active} font={icon.font} text={tab.name.replace(/([^\/])[^\/]*\//g, "$1/")} onClick={() => this.runCommand(`tabnext ${i + 1}`,)} />
-        <IconComponent color={icon.color} style={{ ...styles.space, lineHeight }} active={tab.active} font="" onClick={() => this.runCommand(this.state.tabs.length > 1 ? `tabclose! ${i + 1}` : "quitall")} />
+        <IconComponent color={color} style={{ ...styles.name, lineHeight }} active={tab.active} font={icon.font} text={tab.name.replace(/([^\/])[^\/]*\//g, "$1/")} onClick={e => this.runCommand(e, `tabnext ${i + 1}`,)} />
+        <IconComponent color={icon.color} style={{ ...styles.space, lineHeight }} active={tab.active} font="" onClick={e => this.runCommand(e, this.state.tabs.length > 1 ? `tabclose! ${i + 1}` : "quitall")} />
       </div>
     );
   }
@@ -148,8 +151,8 @@ export class TablineComponent extends React.Component<Props, States> {
         { menu.submenus?.map((submenu, i) => {
           const command = `emenu ${menu.name.replace(/([\. ])/g, "\\$1")}.${submenu.name.replace(/([\. ])/g, "\\$1")}`;
           return submenu.mappings[sname]?.enabled && submenu.mappings[sname]?.rhs
-            ? <div key={i} className="color-black clickable" onClick={() => this.runCommand(command)}>{ submenu.name }</div>
-            : <div key={i} className="color-gray-fg-dark" onClick={() => this.runCommand("")}>{ submenu.name }</div>
+            ? <div key={i} className="color-black clickable" onClick={e => this.runCommand(e, command)}>{ submenu.name }</div>
+            : <div key={i} className="color-gray-fg-dark" onClick={e => this.runCommand(e, "")}>{ submenu.name }</div>
         })}
       </div>
     );
@@ -185,13 +188,13 @@ export class TablineComponent extends React.Component<Props, States> {
         {this.state.tabs.map((tab, i) => this.renderTab(i, tab))}
         <MenuComponent color="white-fg" style={this.getStyle(styles.space)} label="">
           { this.state.bufs.map(({ name, buffer, active }, i) => (
-            <div className={`color-black ${active ? "active" : "clickable"}` }key={i} onClick={() => this.runCommand(`buffer ${buffer}`)}>
-              { name } <IconComponent style={styles.space} color="red-fg" font="" onClick={() => this.runCommand(`bdelete! ${buffer}`)} />
+            <div className={`color-black ${active ? "active" : "clickable"}` }key={i} onClick={e => this.runCommand(e, `buffer ${buffer}`)}>
+              { name } <IconComponent style={styles.space} color="red-fg" font="" onClick={e => this.runCommand(e, `bdelete! ${buffer}`)} />
             </div>
           )) }
         </MenuComponent>
-        <MenuComponent color="green-fg" style={this.getStyle(styles.space)} onClick={() => this.runCommand("$tabnew")} label="">
-          { this.state.bookmarks.map(({ name, path }, i) => <div className="color-black clickable" key={i} onClick={() => this.runCommand(`$tabnew | cd ${path}`)}>{ name }</div>) }
+        <MenuComponent color="green-fg" style={this.getStyle(styles.space)} onClick={e => this.runCommand(e, "$tabnew")} label="">
+          { this.state.bookmarks.map(({ name, path }, i) => <div className="color-black clickable" key={i} onClick={e => this.runCommand(e, `$tabnew | cd ${path}`)}>{ name }</div>) }
         </MenuComponent>
         { this.renderBookmark() }
         <div className="space dragable" />
