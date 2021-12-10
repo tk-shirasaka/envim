@@ -139,7 +139,7 @@ export class TablineComponent extends React.Component<Props, States> {
     return (
       <div key={i} className={`animate fade-in color-${color}`} style={styles.tab}>
         <IconComponent color={color} style={{ ...styles.name, lineHeight }} active={tab.active} font={icon.font} text={tab.name.replace(/([^\/])[^\/]*\//g, "$1/")} onClick={e => this.runCommand(e, `tabnext ${i + 1}`,)} />
-        <IconComponent color={icon.color} style={{ ...styles.space, lineHeight }} active={tab.active} font="" onClick={e => this.runCommand(e, this.state.tabs.length > 1 ? `tabclose! ${i + 1}` : "quitall")} />
+        <IconComponent color={icon.color} style={{ ...styles.space, lineHeight }} active={tab.active} font="" onClick={e => this.runCommand(e, this.state.tabs.length > 1 ? `tabclose! ${i + 1}` : "quitall!")} />
       </div>
     );
   }

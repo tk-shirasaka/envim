@@ -39,29 +39,30 @@ const styles = {
 export class MenuComponent extends React.Component<Props, States> {
   private div: RefObject<HTMLDivElement> = createRef<HTMLDivElement>();
   private align: "left" | "right" = "left";
+  private haschild: boolean = false;
 
   constructor(props: Props) {
     super(props);
     this.state = { active: false };
   }
   componentDidMount() {
-    this.calcAlign();
+    this.updateProperty();
   }
 
   componentDidUpdate() {
-    this.calcAlign();
+    this.updateProperty();
   }
 
-  private calcAlign() {
+  private updateProperty() {
     if (this.div.current) {
       this.align = window.innerWidth / 2 < this.div.current?.offsetLeft ? "right" : "left";
     }
+    this.haschild = this.haschild && !!this.props.children && !(Array.isArray(this.props.children) && this.props.children.length === 0);
   }
 
   onMouseEnter() {
-    if (this.props.children && !(Array.isArray(this.props.children) && this.props.children.length === 0)) {
-      this.setState({ active: true });
-    }
+    this.haschild = !!this.props.children && !(Array.isArray(this.props.children) && this.props.children.length === 0);
+    this.setState({ active: true });
   }
 
   onMouseLeave() {
@@ -69,7 +70,7 @@ export class MenuComponent extends React.Component<Props, States> {
   }
 
   private renderMenu() {
-    return this.state.active === false ? null : (
+    return this.state.active === false || this.haschild === false ? null : (
       <div style={styles.scope}>
         <div className="color-black" style={{ ...styles.menu, ...(this.align === "left" ? styles.left : styles.right) }}>
           { this.props.children }
@@ -80,8 +81,8 @@ export class MenuComponent extends React.Component<Props, States> {
 
   render() {
     return (
-      <div className={`color-${this.props.color} clickable`} onMouseEnter={this.onMouseEnter.bind(this)} onMouseLeave={this.onMouseLeave.bind(this)} ref={this.div}>
-        <div style={this.props.style} onClick={this.props?.onClick}>{ this.props.label }</div>
+      <div onMouseEnter={this.onMouseEnter.bind(this)} onMouseLeave={this.onMouseLeave.bind(this)} ref={this.div}>
+        <div className={`color-${this.props.color} clickable`} style={this.props.style} onClick={this.props?.onClick}>{ this.props.label }</div>
         { this.renderMenu() }
       </div>
     );
