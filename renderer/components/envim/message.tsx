@@ -5,6 +5,9 @@ import { IMessage } from "../../../common/interface";
 import { Highlights } from "../../utils/highlight";
 import { notificates } from "../../utils/icons";
 
+import { FlexComponent } from "../flex";
+import { IconComponent } from "../icon";
+
 interface Props {
   message: IMessage;
   open: boolean;
@@ -19,24 +22,16 @@ const whiteSpaceN: "nowrap" = "nowrap";
 const wordBreak: "break-all" = "break-all";
 const styles = {
   scope: {
-    display: "flex",
     cursor: "pointer",
-  },
-  kind: {
-    display: "inline-block",
-    padding: "2px 4px",
-    textDecoration: "",
   },
   open: {
     wordBreak,
     whiteSpace: whiteSpaceP,
-    padding: "2px 4px",
   },
   close: {
     whiteSpace: whiteSpaceN,
     textOverflow: "ellipsis",
-    overflow: "hidden",
-    padding: "2px 4px",
+    overflow: "hidden"
   },
 };
 
@@ -54,12 +49,14 @@ export class MessageComponent extends React.Component<Props, States> {
     const defaultStyle = Highlights.style(defaultHl);
 
     return (
-      <div style={styles.scope} onClick={this.props.onClick}>
-        <i style={{ ...Highlights.style(defaultHl, true), ...styles.kind }}>{ icon.font }</i>
-        <div className="selectable space" style={{ ...defaultStyle, ...(this.props.open ? styles.open : styles.close) }}>
-          {this.props.message.contents.map(({hl, content}, i) => <span style={this.contentStyle(defaultStyle, hl === defaultHl ? defaultStyle : Highlights.style(hl))} key={i}>{ content }</span>)}
-        </div>
-      </div>
+      <FlexComponent style={styles.scope} onClick={this.props.onClick}>
+        <IconComponent font={icon.font} style={Highlights.style(defaultHl, true)} />
+        <FlexComponent className="selectable space" grow={1} shrink={1} padding={[2, 4]} style={defaultStyle}>
+          <div style={this.props.open ? styles.open : styles.close}>
+            {this.props.message.contents.map(({hl, content}, i) => <span style={this.contentStyle(defaultStyle, hl === defaultHl ? defaultStyle : Highlights.style(hl))} key={i}>{ content }</span>)}
+          </div>
+        </FlexComponent>
+      </FlexComponent>
     );
   }
 }

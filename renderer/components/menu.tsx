@@ -1,5 +1,7 @@
 import React, { createRef, RefObject } from "react";
 
+import { FlexComponent } from "./flex";
+
 interface Props {
   label: string;
   color: string;
@@ -11,22 +13,15 @@ interface States {
   active: boolean;
 }
 
-const positionR: "relative" = "relative";
-const positionA: "absolute" = "absolute";
 const whiteSpace: "nowrap" = "nowrap";
 const styles = {
   scope: {
-    position: positionR,
+    overflow: "visible",
   },
   menu: {
     zIndex: 20,
-    padding: 4,
+    overflow: "visible",
     whiteSpace,
-    position: positionA,
-    borderRadius: 4,
-    borderWidth: 1,
-    borderStyle: "solid",
-    boxShadow: "4px 4px 4px 0 rgba(0, 0, 0, 0.6)",
   },
   left: {
     left: 0,
@@ -45,6 +40,7 @@ export class MenuComponent extends React.Component<Props, States> {
     super(props);
     this.state = { active: false };
   }
+
   componentDidMount() {
     this.updateProperty();
   }
@@ -55,7 +51,8 @@ export class MenuComponent extends React.Component<Props, States> {
 
   private updateProperty() {
     if (this.div.current) {
-      this.align = window.innerWidth / 2 < this.div.current?.offsetLeft ? "right" : "left";
+      const { left } = this.div.current.getBoundingClientRect();
+      this.align = window.innerWidth / 2 < left ? "right" : "left";
     }
     this.haschild = this.haschild && !!this.props.children && !(Array.isArray(this.props.children) && this.props.children.length === 0);
   }
@@ -70,21 +67,25 @@ export class MenuComponent extends React.Component<Props, States> {
   }
 
   private renderMenu() {
+    const style = { ...styles.menu, ...(this.align === "left" ? styles.left : styles.right) };
+
     return this.state.active === false || this.haschild === false ? null : (
-      <div style={styles.scope}>
-        <div className="color-black" style={{ ...styles.menu, ...(this.align === "left" ? styles.left : styles.right) }}>
+      <FlexComponent style={styles.scope}>
+        <FlexComponent className="color-black" direction="column" position="absolute" padding={[4]} border={[1]} rounded={[4]} shadow={true} style={style}>
           { this.props.children }
-        </div>
-      </div>
+        </FlexComponent>
+      </FlexComponent>
     );
   }
 
   render() {
     return (
-      <div onMouseEnter={this.onMouseEnter.bind(this)} onMouseLeave={this.onMouseLeave.bind(this)} ref={this.div}>
-        <div className={`color-${this.props.color} clickable`} style={this.props.style} onClick={this.props?.onClick}>{ this.props.label }</div>
-        { this.renderMenu() }
-      </div>
+      <FlexComponent vertical="center" style={styles.scope} onMouseEnter={this.onMouseEnter.bind(this)} onMouseLeave={this.onMouseLeave.bind(this)}>
+        <div ref={this.div}>
+          <div className={`color-${this.props.color} clickable`} style={this.props.style} onClick={this.props?.onClick}>{ this.props.label }</div>
+          { this.renderMenu() }
+        </div>
+      </FlexComponent>
     );
   }
 }

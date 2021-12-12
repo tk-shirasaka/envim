@@ -6,6 +6,7 @@ import { Emit } from "../../utils/emit";
 import { Setting } from "../../utils/setting";
 import { icons } from "../../utils/icons";
 
+import { FlexComponent } from "../flex";
 import { IconComponent } from "../icon";
 import { MenuComponent } from "../menu";
 
@@ -23,34 +24,17 @@ interface States {
   mode?: IMode;
 }
 
-const whiteSpace: "nowrap" = "nowrap";
 const styles = {
   scope: {
     display: "flex",
   },
   tab: {
-    display: "flex",
-    margin: "4px 4px 0 0",
     minWidth: 0,
     cursor: "default",
-    overflow: "hidden",
-    borderBottom: "2px solid",
-    borderRadius: "4px 4px 0 0",
-    boxShadow: "0 0 4px 0 rgba(0, 0, 0, 0.6)",
   },
   name: {
     maxWidth: 300,
     padding: "0 8px",
-    textOverflow: "ellipsis",
-    overflow: "hidden",
-    whiteSpace,
-  },
-  notify: {
-    maxWidth: 300,
-    padding: "0 4px",
-    textOverflow: "ellipsis",
-    overflow: "hidden",
-    whiteSpace,
   },
   menu: {
     display: "flex",
@@ -124,23 +108,16 @@ export class TablineComponent extends React.Component<Props, States> {
     this.setState({ mode });
   }
 
-  private getStyle(style: { [k: string]: number | string }) {
-    const lineHeight = `${this.props.height}px`;
-    return {...style, lineHeight};
-  }
-
   private renderTab(i: number, tab: ITab) {
     const icon = icons.filter(icon => tab.filetype.search(icon.type) >= 0 || tab.buftype.search(icon.type) >= 0).shift();
 
     if (!icon) return null;
 
-    const color = `${icon.color}-fg-dark`;
-    const lineHeight = `${this.props.height - 4}px`;
     return (
-      <div key={i} className={`animate fade-in color-${color}`} style={styles.tab}>
-        <IconComponent color={color} style={{ ...styles.name, lineHeight }} active={tab.active} font={icon.font} text={tab.name.replace(/([^\/])[^\/]*\//g, "$1/")} onClick={e => this.runCommand(e, `tabnext ${i + 1}`,)} />
-        <IconComponent color={icon.color} style={{ ...styles.space, lineHeight }} active={tab.active} font="" onClick={e => this.runCommand(e, this.state.tabs.length > 1 ? `tabclose! ${i + 1}` : "quitall!")} />
-      </div>
+      <FlexComponent key={i} className={`animate fade-in color-${icon.color}`} shrink={1} margin={[4, 4, 0, 0]} border={tab.active ? [0, 0, 2] : [0]} rounded={[4, 4, 0, 0]} shadow={true} style={styles.tab}>
+        <IconComponent color={`${icon.color}-fg-dark`} style={styles.name} active={tab.active} font={icon.font} text={tab.name.replace(/([^\/])[^\/]*\//g, "$1/")} onClick={e => this.runCommand(e, `tabnext ${i + 1}`,)} />
+        <IconComponent color={icon.color} style={styles.space} active={tab.active} font="" onClick={e => this.runCommand(e, this.state.tabs.length > 1 ? `tabclose! ${i + 1}` : "quitall!")} />
+      </FlexComponent>
     );
   }
 
@@ -166,18 +143,18 @@ export class TablineComponent extends React.Component<Props, States> {
       : { color: "gray-fg", label: "", bookmark: { path: cwd, name: cwd, selected: false } };
 
     return (
-        <MenuComponent color={color} style={this.getStyle(styles.space)} label={label}>
+        <MenuComponent color={color} style={styles.space} label={label}>
           <div className="color-gray-fg small">Path</div>
           <div className="color-white-fg">{ bookmark.path }</div>
           <div className="color-black divider" />
           <div className="color-gray-fg small">Name</div>
           <div className="color-white-fg">{ index < 0 ? "-" : bookmark.name }</div>
           <div className="color-black divider" />
-          <div style={styles.scope}>
+          <FlexComponent>
             <div className="space"></div>
             { index >= 0 && <IconComponent color="red-fg" style={styles.space} font="" onClick={() => this.deleteBookmark(index)} /> }
             <IconComponent color="blue-fg" font="" style={styles.space} onClick={() => this.saveBookmark(index, bookmark)} />
-          </div>
+          </FlexComponent>
         </MenuComponent>
     )
   }
@@ -186,14 +163,19 @@ export class TablineComponent extends React.Component<Props, States> {
     return (
       <div className="color-black" style={{...this.props, ...styles.scope}}>
         {this.state.tabs.map((tab, i) => this.renderTab(i, tab))}
-        <MenuComponent color="white-fg" style={this.getStyle(styles.space)} label="">
+        <MenuComponent color="white-fg" style={styles.space} label="">
           { this.state.bufs.map(({ name, buffer, active }, i) => (
-            <div className={`color-black ${active ? "active" : "clickable"}` }key={i} onClick={e => this.runCommand(e, `buffer ${buffer}`)}>
-              { name } <IconComponent style={styles.space} color="red-fg" font="" onClick={e => this.runCommand(e, `bdelete! ${buffer}`)} />
-            </div>
+            <FlexComponent className={`color-black ${active ? "active" : "clickable"}` } key={i}>
+              <FlexComponent vertical="center" grow={1} padding={[0, 4]}>{ name }</FlexComponent>
+              <IconComponent color="blue-fg" font="" onClick={e => this.runCommand(e, `buffer ${buffer}`)} />
+              <IconComponent color="blue-fg" font="" onClick={e => this.runCommand(e, `vsplit #${buffer}`)} />
+              <IconComponent color="blue-fg" font="" onClick={e => this.runCommand(e, `split #${buffer}`)} />
+              <IconComponent color="blue-fg" font="ﱚ" onClick={e => this.runCommand(e, `tab sbuffer ${buffer}`)} />
+              <IconComponent color="red-fg" font="" onClick={e => this.runCommand(e, `bdelete! ${buffer}`)} />
+            </FlexComponent>
           )) }
         </MenuComponent>
-        <MenuComponent color="green-fg" style={this.getStyle(styles.space)} onClick={e => this.runCommand(e, "$tabnew")} label="">
+        <MenuComponent color="green-fg" style={styles.space} onClick={e => this.runCommand(e, "$tabnew")} label="">
           { this.state.bookmarks.map(({ name, path }, i) => <div className="color-black clickable" key={i} onClick={e => this.runCommand(e, `$tabnew | cd ${path}`)}>{ name }</div>) }
         </MenuComponent>
         { this.renderBookmark() }
