@@ -15,12 +15,8 @@ interface States {
 
 const whiteSpace: "nowrap" = "nowrap";
 const styles = {
-  scope: {
-    overflow: "visible",
-  },
   menu: {
     zIndex: 20,
-    overflow: "visible",
     whiteSpace,
   },
   left: {
@@ -70,8 +66,8 @@ export class MenuComponent extends React.Component<Props, States> {
     const style = { ...styles.menu, ...(this.align === "left" ? styles.left : styles.right) };
 
     return this.state.active === false || this.haschild === false ? null : (
-      <FlexComponent style={styles.scope}>
-        <FlexComponent className="color-black" direction="column" position="absolute" padding={[4]} border={[1]} rounded={[4]} shadow={true} style={style}>
+      <FlexComponent overflow="visible">
+        <FlexComponent className="color-black" direction="column" position="absolute" overflow="visible" padding={[4]} border={[1]} rounded={[4]} shadow={true} style={style}>
           { this.props.children }
         </FlexComponent>
       </FlexComponent>
@@ -80,7 +76,7 @@ export class MenuComponent extends React.Component<Props, States> {
 
   render() {
     return (
-      <FlexComponent vertical="center" style={styles.scope} onMouseEnter={this.onMouseEnter.bind(this)} onMouseLeave={this.onMouseLeave.bind(this)}>
+      <FlexComponent vertical="center" overflow="visible" onMouseEnter={this.onMouseEnter.bind(this)} onMouseLeave={this.onMouseLeave.bind(this)}>
         <div ref={this.div}>
           <div className={`color-${this.props.color} clickable`} style={this.props.style} onClick={this.props?.onClick}>{ this.props.label }</div>
           { this.renderMenu() }

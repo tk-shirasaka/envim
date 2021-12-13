@@ -14,6 +14,7 @@ interface Props {
   border?: number[];
   rounded?: number[];
   position?: "relative" | "absolute" | "sticky";
+  overflow?: "hidden" | "auto" | "visible";
   style?: Object;
 }
 
@@ -25,7 +26,6 @@ export class GridComponent extends React.Component<Props, States> {
     const props = this.props;
     return {
         display: "grid",
-        overflow: "hidden",
         borderStyle: "solid",
         gridAutoFlow: props.direction || "row",
         gap: props.space || 0,
@@ -34,6 +34,7 @@ export class GridComponent extends React.Component<Props, States> {
         borderWidth: props.border && props.border.map(px => `${px}px`).join(" ") || 0,
         borderRadius: props.rounded && props.rounded.map(px => `${px}px`).join(" ") || 0,
         position: props.position || "relative",
+        overflow: props.overflow || "hidden",
         ...( props.style || {} )
     };
   }

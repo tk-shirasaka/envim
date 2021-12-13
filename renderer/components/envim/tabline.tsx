@@ -25,9 +25,6 @@ interface States {
 }
 
 const styles = {
-  scope: {
-    display: "flex",
-  },
   tab: {
     minWidth: 0,
     cursor: "default",
@@ -161,7 +158,7 @@ export class TablineComponent extends React.Component<Props, States> {
 
   render() {
     return (
-      <div className="color-black" style={{...this.props, ...styles.scope}}>
+      <FlexComponent className="color-black" overflow="visible" style={this.props}>
         {this.state.tabs.map((tab, i) => this.renderTab(i, tab))}
         <MenuComponent color="white-fg" style={styles.space} label="">
           { this.state.bufs.map(({ name, buffer, active }, i) => (
@@ -185,7 +182,7 @@ export class TablineComponent extends React.Component<Props, States> {
             { this.renderSubmenu(menu) }
           </MenuComponent>
         ))}
-      </div>
+      </FlexComponent>
     );
   }
 }

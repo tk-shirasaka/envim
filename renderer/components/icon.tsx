@@ -32,7 +32,7 @@ export class IconComponent extends React.Component<Props, States> {
     this.props.onClick && classes.push("clickable");
 
     return (
-      <FlexComponent className={classes.join(" ")} vertical="center" padding={[2, 4]} style={this.props.style} onClick={this.props.onClick}>
+      <FlexComponent className={classes.join(" ")} vertical="center" shrink={1} padding={[2, 4]} style={this.props.style} onClick={this.props.onClick}>
         <i>{ this.props.font }</i>
         { this.props.text && <div style={styles.text}>{ this.props.text }</div> }
       </FlexComponent>
