@@ -20,7 +20,7 @@ export const icons = [
   { font: "", color: "red", name: "Git", type: /git/ },
   { font: "", color: "blue", name: "Docker", type: /docker/i },
   { font: "ﬥ", color: "gray", name: "JSON", type: /^json$/ },
-  { font: "", color: "gray", name: "Config", type: /^(yaml)|(toml)|(make)$/ },
+  { font: "", color: "gray", name: "Config", type: /^(yaml)|(toml)|(make)|(conf)$/ },
   { font: "謹", color: "orange", name: "Xml", type: /^xml$/ },
   { font: "", color: "yellow", name: "SQL", type: /^(mysql)|(sql)$/ },
   { font: "", color: "lightblue", name: "Markdown", type: /^markdown$/ },
