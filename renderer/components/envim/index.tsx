@@ -40,11 +40,6 @@ const styles = {
     position: positionR,
     overflow: "hidden",
   },
-  grid: {
-    position: positionA,
-    margin: 0,
-    padding: 0,
-  },
   backdrop: {
     position: positionA,
     zIndex: 100,
