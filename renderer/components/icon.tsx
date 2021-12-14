@@ -14,12 +14,14 @@ interface Props {
 interface States {
 }
 
+const whiteSpace: "nowrap" = "nowrap";
 const styles = {
   text: {
     display: "inline",
     paddingLeft: 4,
     overflow: "hidden",
     textOverflow: "ellipsis",
+    whiteSpace,
   },
 };
 
