@@ -256,7 +256,7 @@ export class App {
     Grids.setStatus(grid, "show")
 
     if (winsize.width < width || winsize.height < height) {
-      Emit.share("envim:resize", grid, Math.min(winsize.width, width), Math.min(winsize.height, height));
+      Emit.share("envim:resize", grid, Math.min(winsize.width - 2, width), Math.min(winsize.height - 2, height));
     }
   }
 
