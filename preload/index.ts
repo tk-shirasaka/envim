@@ -15,8 +15,24 @@ const share = (event: string, ...args: any[]) => {
   emit.emit(event, ...args);
 };
 
+const invoke = async (event: string, ...args: any[]) => {
+  try {
+    return await ipcRenderer.invoke(event, ...args);
+  } catch (e: Error | any) {
+    const reg = /^Error invoking remote method '[^']+': /;
+    const contents: { hl: string, content: string }[] = [];
+    if (e instanceof Error) {
+      contents.push({ hl: "red", content: e.message.replace(reg, "")});
+    } else if (e instanceof String) {
+      contents.push({ hl: "red", content: e.toString().replace(reg, "")});
+    }
+
+    contents.length && share("messages:show", { kind: "debug", contents }, true);
+  }
+};
+
 const sync = async (event: string, ...args: any[]) => {
-  return await ipcRenderer.invoke(event, ...args);
+  return await invoke(event, ...args);
 };
 
 const send = async (event: string, ...args: any[]) => {
@@ -26,7 +42,7 @@ const send = async (event: string, ...args: any[]) => {
     share("envim:pause", true)
   }, 100);
 
-  const result = await ipcRenderer.invoke(event, ...args);
+  const result = await invoke(event, ...args);
   counter.length ? share("envim:pause", false) : clearTimeout(timer);
 
   return result;
