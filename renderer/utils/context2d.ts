@@ -14,8 +14,8 @@ export class Context2D {
     private fg: CanvasRenderingContext2D,
     private sp: CanvasRenderingContext2D,
   ) {
-    const { size, width, height } = Setting.font;
-    this.font = { size: size * 2, width: width * 2, height: height * 2 };
+    const { size, width, height, scale } = Setting.font;
+    this.font = { size: size * scale, width: width * scale, height: height * scale };
   }
 
   private style(hl: string, type: "foreground" | "background") {

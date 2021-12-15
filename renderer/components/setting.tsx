@@ -73,7 +73,7 @@ export class SettingComponent extends React.Component<Props, States> {
 
   private onChangeFont(e: ChangeEvent) {
     const size = +(e.target as HTMLInputElement).value;
-    const font = { size: size, width: size / 2, height: Math.floor(size * 1.25) };
+    const font = { size: size, width: size / 2, height: Math.floor(size * 1.25), scale: window.devicePixelRatio };
     Setting.font = font;
     this.setState({ font });
   }

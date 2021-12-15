@@ -3,6 +3,7 @@ import React, { createRef, RefObject, MouseEvent, WheelEvent } from "react";
 import { ICell, IScroll } from "common/interface";
 
 import { Emit } from "../../utils/emit";
+import { Setting } from "../../utils/setting";
 import { Canvas } from "../../utils/canvas";
 import { y2Row, x2Col } from "../../utils/size";
 
@@ -32,7 +33,6 @@ const styles = {
   },
   canvas: {
     position,
-    transform: "scale(0.5)",
     transformOrigin: "0 0",
   },
 };
@@ -89,7 +89,8 @@ export class EditorComponent extends React.Component<Props, States> {
   }
 
   private onMouseEvent(e: MouseEvent, action: string, wheel: boolean = false) {
-    const [col, row] = [ x2Col(e.nativeEvent.offsetX / 2), y2Row(e.nativeEvent.offsetY / 2) ];
+    const { scale } = Setting.font;
+    const [col, row] = [ x2Col(e.nativeEvent.offsetX / scale), y2Row(e.nativeEvent.offsetY / scale) ];
     const button = wheel ? "wheel" : ["left", "middle", "right"][e.button] || "left";
     const modiffier = [];
 
@@ -148,6 +149,8 @@ export class EditorComponent extends React.Component<Props, States> {
   }
 
   render() {
+    const { scale } = Setting.font;
+
     return (
       <div className="animate fade-in" style={{...styles.scope, ...this.props.style}}
         onMouseDown={this.onMouseDown.bind(this)}
@@ -155,9 +158,9 @@ export class EditorComponent extends React.Component<Props, States> {
         onMouseUp={this.onMouseUp.bind(this)}
         onWheel={this.onMouseWheel.bind(this)}
       >
-        <canvas style={styles.canvas} width={this.props.editor.width * 2} height={this.props.editor.height * 2} ref={this.bg} />
-        <canvas style={styles.canvas} width={this.props.editor.width * 2} height={this.props.editor.height * 2} ref={this.fg} />
-        <canvas style={styles.canvas} width={this.props.editor.width * 2} height={this.props.editor.height * 2} ref={this.sp} />
+        <canvas style={{ ...styles.canvas, transform: `scale(${1 / scale})` }} width={this.props.editor.width * scale} height={this.props.editor.height * scale} ref={this.bg} />
+        <canvas style={{ ...styles.canvas, transform: `scale(${1 / scale})` }} width={this.props.editor.width * scale} height={this.props.editor.height * scale} ref={this.fg} />
+        <canvas style={{ ...styles.canvas, transform: `scale(${1 / scale})` }} width={this.props.editor.width * scale} height={this.props.editor.height * scale} ref={this.sp} />
       </div>
     );
   }
