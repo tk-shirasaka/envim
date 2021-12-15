@@ -4,6 +4,8 @@ import { Emit } from "../../utils/emit";
 import { Highlights } from "../../utils/highlight";
 import { Setting } from "../../utils/setting";
 
+import { FlexComponent } from "../flex";
+
 interface Props {
 }
 
@@ -15,23 +17,13 @@ interface States {
   indent: number;
 }
 
-const position: "absolute" = "absolute";
 const pointerEvents: "none" = "none";
-const whiteSpace: "break-spaces" = "break-spaces";
-const wordBreak: "break-all" = "break-all";
 const styles = {
   scope: {
-    position,
     zIndex: 20,
-    display: "flex",
     left: "10%",
     right: "10%",
-    overflow: "hidden",
-    borderRadius: "0 0 4px 4px",
-    boxShadow: "0 0 8px 0 rgba(0, 0, 0, 0.6)",
     pointerEvents,
-    whiteSpace,
-    wordBreak,
   },
 };
 
@@ -126,19 +118,19 @@ export class CmdlineComponent extends React.Component<Props, States> {
   private renderCmdline(cmdline: States["cmdline"]) {
     return cmdline.map(({hl, reverse, c}, i) => {
       c = c.charCodeAt(0) < 0x20 ? `^${String.fromCharCode(c.charCodeAt(0) + 0x40)}` : c;
-      return (hl || reverse) ? <div className="inline-block" style={Highlights.style(hl, reverse)} key={i}>{ c }</div> : c;
+      return (hl || reverse) ? <div className="inline-block" style={Highlights.style(hl, { reverse })} key={i}>{ c }</div> : c;
     });
   }
 
   render() {
     return this.state.cmdline.length > 0 && (
-      <div className="animate slide-down" style={this.getScopeStyle()}>
+      <FlexComponent className="animate slide-down" position="absolute" whiteSpace="pre-wrap" rounded={[0, 0, 4, 4]} shadow={true} style={this.getScopeStyle()}>
         <div className="bold">{ this.state.prompt }</div>
         <div>
           {this.state.contents.map((content, i) => <div key={i}>{ this.renderCmdline(content) }</div>)}
           <div>{ this.renderCmdline(this.state.cmdline) }</div>
         </div>
-      </div>
+      </FlexComponent>
     );
   }
 }

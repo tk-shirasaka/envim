@@ -17,19 +17,11 @@ interface Props {
 interface States {
 }
 
-const whiteSpaceP: "pre-wrap" = "pre-wrap";
-const whiteSpaceN: "nowrap" = "nowrap";
-const wordBreak: "break-all" = "break-all";
 const styles = {
   scope: {
     cursor: "pointer",
   },
-  open: {
-    wordBreak,
-    whiteSpace: whiteSpaceP,
-  },
-  close: {
-    whiteSpace: whiteSpaceN,
+  message: {
     textOverflow: "ellipsis",
     overflow: "hidden"
   },
@@ -50,9 +42,9 @@ export class MessageComponent extends React.Component<Props, States> {
 
     return (
       <FlexComponent style={styles.scope} onClick={this.props.onClick}>
-        <IconComponent font={icon.font} style={Highlights.style(defaultHl, true)} />
-        <FlexComponent className="selectable space" grow={1} shrink={1} padding={[2, 4]} style={defaultStyle}>
-          <div style={this.props.open ? styles.open : styles.close}>
+        <IconComponent font={icon.font} style={Highlights.style(defaultHl, { reverse: true })} />
+        <FlexComponent className="selectable space" whiteSpace={this.props.open ? "pre-line" : "nowrap"} grow={1} shrink={1} padding={[2, 4]} style={defaultStyle}>
+          <div style={styles.message}>
             {this.props.message.contents.map(({hl, content}, i) => <span style={this.contentStyle(defaultStyle, hl === defaultHl ? defaultStyle : Highlights.style(hl))} key={i}>{ content }</span>)}
           </div>
         </FlexComponent>

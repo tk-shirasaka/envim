@@ -59,8 +59,8 @@ export class InputComponent extends React.Component<Props, States> {
     style.width = this.getWidth(cursor.width, this.state.shape);
     style.transform = `translate(${col2X(cursor.x)}px, ${row2Y(cursor.y)}px)`;
     style.zIndex = cursor.zIndex;
-    style.color = Highlights.color(cursor.hl, "foreground", true);
-    style.background = Highlights.color(cursor.hl, "background", true);
+    style.color = Highlights.color(cursor.hl, "foreground", { reverse: true, normal: true });
+    style.background = Highlights.color(cursor.hl, "background", { reverse: true, normal: true });
     this.setState({ style });
   }
 

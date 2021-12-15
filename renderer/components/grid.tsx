@@ -15,6 +15,8 @@ interface Props {
   rounded?: number[];
   position?: "relative" | "absolute" | "sticky";
   overflow?: "hidden" | "auto" | "visible";
+  wordBreak?: "break-all";
+  whiteSpace?: "nowrap" | "pre-wrap" | "pre-line";
   style?: Object;
 }
 
@@ -35,6 +37,8 @@ export class GridComponent extends React.Component<Props, States> {
         borderRadius: props.rounded && props.rounded.map(px => `${px}px`).join(" ") || 0,
         position: props.position || "relative",
         overflow: props.overflow || "hidden",
+        wordBreak: this.props.wordBreak || "break-all",
+        whiteSpace: this.props.whiteSpace || "nowrap",
         ...( props.style || {} )
     };
   }

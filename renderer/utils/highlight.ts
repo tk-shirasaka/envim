@@ -1,6 +1,11 @@
 import { IHighlight } from "common/interface";
 import { Setting } from "./setting";
 
+interface IOptions {
+  reverse?: boolean;
+  normal?: boolean;
+};
+
 class Highlight {
   public foreground: { normal: string; alpha: string; };
   public background: { normal: string; alpha: string; };
@@ -67,9 +72,9 @@ export class Highlights {
     Highlights.hls[id] = new Highlight(hl, alpha);
   }
 
-  static color(id: string, type: "foreground" | "background" | "special", reverse: boolean = false) {
-    const alpha = type === "background" ? "alpha" : "normal";
-    reverse = Highlights.hls[id]?.reverse ? !reverse : reverse;
+  static color(id: string, type: "foreground" | "background" | "special", options: IOptions = {}) {
+    const alpha = type === "background" && !options.normal ? "alpha" : "normal";
+    const reverse = Highlights.hls[id]?.reverse ? !options.reverse : options.reverse;
 
     if (reverse && type !== "special") {
       type = type === "foreground" ? "background" : "foreground";
@@ -82,9 +87,9 @@ export class Highlights {
     return "rgba(0, 0, 0, 1)";
   }
 
-  static style(id: string, reverse: boolean = false) {
-    const background = Highlights.color(id, "background", reverse);
-    const foreground = Highlights.color(id, "foreground", reverse);
+  static style(id: string, options: IOptions = {}) {
+    const background = Highlights.color(id, "background", options);
+    const foreground = Highlights.color(id, "foreground", options);
     const special = Highlights.color(id, "special");
     const fontFamily = Highlights.fontFamily(id);
     const fontStyle = Highlights.fontStyle(id);
