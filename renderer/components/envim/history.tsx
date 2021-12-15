@@ -28,10 +28,10 @@ const styles = {
   scope: {
     zIndex: 10,
     bottom: 0,
-    overflow: "auto",
   },
   open: {
     height: "30%",
+    overflow: "auto",
   },
   actions: {
     zIndex: 1,
