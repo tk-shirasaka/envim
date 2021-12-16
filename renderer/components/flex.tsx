@@ -1,11 +1,11 @@
-import React from "react";
+import React, { MouseEvent } from "react";
 
 interface Props {
   className?: string;
 
-  onClick?: () => void;
-  onMouseEnter?: () => void;
-  onMouseLeave?: () => void;
+  onClick?: (e: MouseEvent) => void;
+  onMouseEnter?: (e: MouseEvent) => void;
+  onMouseLeave?: (e: MouseEvent) => void;
 
   direction?: "row" | "column";
   shadow?: boolean;

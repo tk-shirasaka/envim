@@ -147,8 +147,7 @@ export class TablineComponent extends React.Component<Props, States> {
           <div className="color-gray-fg small">Name</div>
           <div className="color-white-fg">{ index < 0 ? "-" : bookmark.name }</div>
           <div className="color-black divider" />
-          <FlexComponent>
-            <div className="space"></div>
+          <FlexComponent horizontal="end">
             { index >= 0 && <IconComponent color="red-fg" style={styles.space} font="" onClick={() => this.deleteBookmark(index)} /> }
             <IconComponent color="blue-fg" font="" style={styles.space} onClick={() => this.saveBookmark(index, bookmark)} />
           </FlexComponent>
@@ -162,9 +161,8 @@ export class TablineComponent extends React.Component<Props, States> {
         {this.state.tabs.map((tab, i) => this.renderTab(i, tab))}
         <MenuComponent color="white-fg" style={styles.space} label="">
           { this.state.bufs.map(({ name, buffer, active }, i) => (
-            <FlexComponent className={`color-black ${active ? "active" : "clickable"}` } key={i}>
+            <FlexComponent className={`color-black ${active ? "active" : "clickable"}` } onClick={e => this.runCommand(e, `buffer ${buffer}`)} key={i}>
               <FlexComponent vertical="center" grow={1} padding={[0, 4]}>{ name }</FlexComponent>
-              <IconComponent color="blue-fg" font="" onClick={e => this.runCommand(e, `buffer ${buffer}`)} />
               <IconComponent color="blue-fg" font="" onClick={e => this.runCommand(e, `vsplit #${buffer}`)} />
               <IconComponent color="blue-fg" font="" onClick={e => this.runCommand(e, `split #${buffer}`)} />
               <IconComponent color="blue-fg" font="ﱚ" onClick={e => this.runCommand(e, `tab sbuffer ${buffer}`)} />
