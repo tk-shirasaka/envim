@@ -111,8 +111,8 @@ export class TablineComponent extends React.Component<Props, States> {
     if (!icon) return null;
 
     return (
-      <FlexComponent key={i} className={`animate fade-in color-${icon.color}`} shrink={1} margin={[4, 4, 0, 0]} border={tab.active ? [0, 0, 2] : [0]} rounded={[4, 4, 0, 0]} shadow={true} style={styles.tab}>
-        <IconComponent color={`${icon.color}-fg-dark`} style={styles.name} active={tab.active} font={icon.font} text={tab.name.replace(/([^\/])[^\/]*\//g, "$1/")} onClick={e => this.runCommand(e, `tabnext ${i + 1}`,)} />
+      <FlexComponent key={i} className={`animate fade-in color-${icon.color}`} title={tab.name} shrink={1} margin={[4, 4, 0, 0]} border={tab.active ? [0, 0, 2] : [0]} rounded={[4, 4, 0, 0]} shadow={true} style={styles.tab}>
+        <IconComponent color={`${icon.color}-fg-dark`} style={styles.name} active={tab.active} font={icon.font} text={tab.name.replace(/.*\//, "…/")} onClick={e => this.runCommand(e, `tabnext ${i + 1}`,)} />
         <IconComponent color={icon.color} style={styles.space} active={tab.active} font="" onClick={e => this.runCommand(e, this.state.tabs.length > 1 ? `tabclose! ${i + 1}` : "quitall!")} />
       </FlexComponent>
     );
@@ -161,8 +161,8 @@ export class TablineComponent extends React.Component<Props, States> {
         {this.state.tabs.map((tab, i) => this.renderTab(i, tab))}
         <MenuComponent color="white-fg" style={styles.space} label="">
           { this.state.bufs.map(({ name, buffer, active }, i) => (
-            <FlexComponent className={`color-black ${active ? "active" : "clickable"}` } onClick={e => this.runCommand(e, `buffer ${buffer}`)} key={i}>
-              <FlexComponent vertical="center" grow={1} padding={[0, 4]}>{ name }</FlexComponent>
+            <FlexComponent className={`color-black ${active ? "active" : "clickable"}` } title={name} onClick={e => this.runCommand(e, `buffer ${buffer}`)} key={i}>
+              <FlexComponent vertical="center" grow={1} padding={[0, 4]}>{ name.replace(/.*\//, "…/") }</FlexComponent>
               <IconComponent color="blue-fg" font="" onClick={e => this.runCommand(e, `vsplit #${buffer}`)} />
               <IconComponent color="blue-fg" font="" onClick={e => this.runCommand(e, `split #${buffer}`)} />
               <IconComponent color="blue-fg" font="ﱚ" onClick={e => this.runCommand(e, `tab sbuffer ${buffer}`)} />

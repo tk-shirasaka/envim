@@ -2,6 +2,7 @@ import React, { MouseEvent } from "react";
 
 interface Props {
   className?: string;
+  title?: string;
 
   onClick?: (e: MouseEvent) => void;
   onMouseEnter?: (e: MouseEvent) => void;
@@ -55,6 +56,7 @@ export class FlexComponent extends React.Component<Props, States> {
     return (
       <div
         className={this.props.className}
+        title={this.props.title}
         onClick={this.props.onClick}
         onMouseEnter={this.props.onMouseEnter}
         onMouseLeave={this.props.onMouseLeave}
