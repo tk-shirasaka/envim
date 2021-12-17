@@ -4,7 +4,7 @@ import { IMessage } from "../../../common/interface";
 
 import { Emit } from "../../utils/emit";
 
-import { GridComponent } from "../grid";
+import { FlexComponent } from "../flex";
 import { MessageComponent } from "./message";
 
 interface Props {
@@ -22,6 +22,7 @@ const styles = {
     overflowY,
     zIndex: 10,
     right: 0,
+    bottom: 0,
     width: 300,
     maxHeight: "100%",
   },
@@ -63,11 +64,11 @@ export class NotificateComponent extends React.Component<Props, States> {
 
   render() {
     return this.state.messages.length === 0 ? null : (
-      <GridComponent space={8} padding={[4]} position="absolute" style={styles.scope}>
+      <FlexComponent direction="column-reverse" padding={[0, 4]} position="absolute" style={styles.scope}>
         {this.state.messages.map((message, i) =>
-          <GridComponent className="animate slide-right" rounded={[4]} shadow={true} style={styles.messages} key={i}><MessageComponent message={message} open={true} onClick={() => this.onClose(i)} /></GridComponent>
+          <FlexComponent className="animate slide-right" margin={[4, 0]} rounded={[4]} shadow={true} style={styles.messages} key={i}><MessageComponent message={message} open={true} onClick={() => this.onClose(i)} /></FlexComponent>
         )}
-      </GridComponent>
+      </FlexComponent>
     );
   }
 }

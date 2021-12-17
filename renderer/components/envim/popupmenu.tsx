@@ -5,6 +5,8 @@ import { Setting } from "../../utils/setting";
 import { Highlights } from "../../utils/highlight";
 import { row2Y, col2X, x2Col } from "../../utils/size";
 
+import { FlexComponent } from "../flex";
+
 interface Props {
 }
 
@@ -15,18 +17,9 @@ interface States {
   col: number;
 }
 
-const position: "absolute" = "absolute";
-const whiteSpace: "break-spaces" = "break-spaces";
 const styles = {
   scope: {
     zIndex: 10,
-    position,
-    overflow: "auto",
-    boxShadow: "0 0 8px 0 rgba(0, 0, 0, 0.6)",
-    whiteSpace,
-  },
-  line: {
-    display: "table-row",
   },
 };
 
@@ -69,7 +62,7 @@ export class PopupmenuComponent extends React.Component<Props, States> {
     const top = row2Y(Math.max(0, Math.min(selected, this.state.items.length - this.maxline)));
 
     this.setState({ selected });
-    setTimeout(() => this.scope.current?.scrollTo({ top, behavior: "smooth" }));
+    setTimeout(() => this.scope.current?.parentElement?.scrollTo({ top, behavior: "smooth" }));
   }
 
   private offPopupmenu() {
@@ -104,17 +97,16 @@ export class PopupmenuComponent extends React.Component<Props, States> {
   }
 
   render() {
-    const column = { padding: `0 ${Setting.font.width}px`, display: "table-cell" };
-
     return this.state.items.length === 0 ? null : (
-      <div className="animate fade-in" style={this.getScopeStyle()} ref={this.scope}>
+      <FlexComponent className="animate fade-in" direction="column" position="absolute" overflow="auto" whiteSpace="pre-wrap" shadow={true} style={this.getScopeStyle()}>
+        <div ref={this.scope}></div>
         {this.state.items.map(({ word, kind, menu }, i) => (
-          <div style={styles.line} onClick={() => this.onItem(i)} key={i}>
-            <div style={{ ...Highlights.style("0", { reverse: this.state.selected === i }), ...column }}>{ word }</div>
-            <div style={{ ...Highlights.style(this.getKindStyle(`${kind} ${menu}`), { reverse: this.state.selected === i }), ...column }}>{ kind } { menu }</div>
-          </div>
+          <FlexComponent onClick={() => this.onItem(i)} key={i}>
+            <FlexComponent padding={[0, Setting.font.width]} grow={1} style={Highlights.style("0", { reverse: this.state.selected === i })}>{ word }</FlexComponent>
+            <FlexComponent padding={[0, Setting.font.width]} style={Highlights.style(this.getKindStyle(`${kind} ${menu}`), { reverse: this.state.selected !== i })}>{ kind } { menu }</FlexComponent>
+          </FlexComponent>
         ))}
-      </div>
+      </FlexComponent>
     )
   }
 }

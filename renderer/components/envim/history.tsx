@@ -130,7 +130,7 @@ export class HistoryComponent extends React.Component<Props, States> {
           <IconComponent color={ this.state.debug ? "green-fg" : "gray-fg" } font="" onClick={this.toggleDebug.bind(this)} />
           <IconComponent color="red-fg" font="" onClick={this.onClear.bind(this)} />
         </FlexComponent>
-        {this.state.messages.map((message, i) => <MessageComponent key={i} message={message} open={message.kind !== "debug" || this.state.select === i} onClick={() => this.toggleSelect(i)} />)}
+        {this.state.messages.map((message, i) => <div key={i}><MessageComponent message={message} open={message.kind !== "debug" || this.state.select === i} onClick={() => this.toggleSelect(i)} /></div>)}
         <div className="space" style={Highlights.style("0")} ref={this.bottom} />
       </FlexComponent>
     );

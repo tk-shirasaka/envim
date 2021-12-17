@@ -8,10 +8,11 @@ interface Props {
   onMouseEnter?: (e: MouseEvent) => void;
   onMouseLeave?: (e: MouseEvent) => void;
 
-  direction?: "row" | "column";
+  direction?: "row" | "column" | "row-reverse" | "column-reverse";
   shadow?: boolean;
   grow?: number;
   shrink?: number;
+  basis?: "auto" | "0";
   vertical?: "stretch" | "start" | "center" | "end";
   horizontal?: "stretch" | "start" | "center" | "end";
   margin?: number[];
@@ -21,7 +22,7 @@ interface Props {
   position?: "relative" | "absolute" | "sticky";
   overflow?: "hidden" | "auto" | "visible";
   wordBreak?: "break-all";
-  whiteSpace?: "nowrap" | "pre-wrap" | "pre-line";
+  whiteSpace?: "nowrap" | "pre-wrap";
   style?: Object;
 }
 
@@ -37,6 +38,7 @@ export class FlexComponent extends React.Component<Props, States> {
         flexDirection: props.direction || "row",
         flexGrow: props.grow || 0,
         flexShrink: props.shrink || 0,
+        flexBasis: props.basis || "auto",
         alignItems: props.vertical || "stretch",
         justifyContent: props.horizontal || "stretch",
         boxShadow: props.shadow ? "rgba(0, 0, 0, 0.5) 0 0 4px 2px" : "none",
