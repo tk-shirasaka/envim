@@ -7,6 +7,8 @@ import { Setting } from "../../utils/setting";
 import { Canvas } from "../../utils/canvas";
 import { y2Row, x2Col } from "../../utils/size";
 
+import { FlexComponent } from "../flex";
+
 interface Props {
   grid: number;
   editor: { width: number; height: number; };
@@ -26,11 +28,6 @@ interface States {
 
 const position: "absolute" = "absolute";
 const styles = {
-  scope: {
-    position,
-    overflow: "hidden",
-    boxShadow: "0 0 8px 0 rgba(0, 0, 0, 0.6)",
-  },
   canvas: {
     position,
     transformOrigin: "0 0",
@@ -152,7 +149,7 @@ export class EditorComponent extends React.Component<Props, States> {
     const { scale } = Setting.font;
 
     return (
-      <div className="animate fade-in" style={{...styles.scope, ...this.props.style}}
+      <FlexComponent className="animate fade-in" position="absolute" shadow={true} style={this.props.style}
         onMouseDown={this.onMouseDown.bind(this)}
         onMouseMove={this.onMouseMove.bind(this)}
         onMouseUp={this.onMouseUp.bind(this)}
@@ -161,7 +158,7 @@ export class EditorComponent extends React.Component<Props, States> {
         <canvas style={{ ...styles.canvas, transform: `scale(${1 / scale})` }} width={this.props.editor.width * scale} height={this.props.editor.height * scale} ref={this.bg} />
         <canvas style={{ ...styles.canvas, transform: `scale(${1 / scale})` }} width={this.props.editor.width * scale} height={this.props.editor.height * scale} ref={this.fg} />
         <canvas style={{ ...styles.canvas, transform: `scale(${1 / scale})` }} width={this.props.editor.width * scale} height={this.props.editor.height * scale} ref={this.sp} />
-      </div>
+      </FlexComponent>
     );
   }
 }

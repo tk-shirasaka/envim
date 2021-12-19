@@ -1,12 +1,16 @@
-import React, { MouseEvent } from "react";
+import React, { MouseEvent, WheelEvent } from "react";
 
 interface Props {
   className?: string;
   title?: string;
 
   onClick?: (e: MouseEvent) => void;
+  onMouseDown?: (e: MouseEvent) => void;
+  onMouseUp?: (e: MouseEvent) => void;
   onMouseEnter?: (e: MouseEvent) => void;
   onMouseLeave?: (e: MouseEvent) => void;
+  onMouseMove?: (e: MouseEvent) => void;
+  onWheel?: (e: WheelEvent) => void;
 
   direction?: "row" | "column" | "row-reverse" | "column-reverse";
   shadow?: boolean;
@@ -60,8 +64,11 @@ export class FlexComponent extends React.Component<Props, States> {
         className={this.props.className}
         title={this.props.title}
         onClick={this.props.onClick}
+        onMouseDown={this.props.onMouseDown}
+        onMouseUp={this.props.onMouseUp}
         onMouseEnter={this.props.onMouseEnter}
         onMouseLeave={this.props.onMouseLeave}
+        onWheel={this.props.onWheel}
         style={this.getStyle()}
       >
         { this.props.children }
