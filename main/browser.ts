@@ -17,11 +17,11 @@ export class Browser {
   }
 
   private onReady() {
-    setTimeout(this.create, 300);
+    this.create();
   }
 
   private onActivate() {
-    setTimeout(this.create, 300);
+    this.create();
   }
 
   private onQuit() {
