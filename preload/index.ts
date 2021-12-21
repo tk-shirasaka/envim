@@ -2,10 +2,12 @@ import { contextBridge, ipcRenderer, IpcRendererEvent } from "electron";
 import { EventEmitter } from "events";
 
 const emit = new EventEmitter;
+const counter: number[] = [];
 
 const on = (event: string, callback: (...args: any[]) => void) => {
   emit.on(event, callback);
   ipcRenderer.on(event, (_: IpcRendererEvent, ...args: any[]) => {
+    counter.length && share("envim:pause", false);
     share(event, ...args);
     share("debug", event, ...args);
   });
@@ -31,19 +33,16 @@ const invoke = async (event: string, ...args: any[]) => {
   }
 };
 
-const sync = async (event: string, ...args: any[]) => {
-  return await invoke(event, ...args);
-};
-
 const send = async (event: string, ...args: any[]) => {
-  const counter: boolean[] = [];
-  const timer = setTimeout(() => {
-    counter.push(true);
+  const timer = +setTimeout(() => {
+    counter.push(timer);
     share("envim:pause", true)
   }, 100);
 
   const result = await invoke(event, ...args);
-  counter.length ? share("envim:pause", false) : clearTimeout(timer);
+  const index = counter.indexOf(timer)
+  clearTimeout(timer);
+  index >= 0 && counter.splice(index, 1) && counter.length === 0 && share("envim:pause", false);
 
   return result;
 };
@@ -55,4 +54,4 @@ const clear = (events: string[]) => {
   });
 };
 
-contextBridge.exposeInMainWorld("envimIPC", { on, share, sync, send, clear });
+contextBridge.exposeInMainWorld("envimIPC", { on, share, send, clear });
