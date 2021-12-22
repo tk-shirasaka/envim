@@ -1,8 +1,5 @@
-import { app, BrowserWindow } from "electron";
+import { app, BrowserWindow, Menu } from "electron";
 import { join } from "path";
-
-import { setMenu } from "./menu";
-import { Emit } from "./emit";
 
 export class Browser {
   static win?: BrowserWindow;
@@ -13,7 +10,6 @@ export class Browser {
     app.on("ready", this.onReady.bind(this));
     app.on("activate", this.onActivate.bind(this));
     app.on("window-all-closed", this.onQuit.bind(this));
-    Emit.on("app:quit", this.onQuit.bind(this));
   }
 
   private onReady() {
@@ -31,12 +27,13 @@ export class Browser {
   private create() {
     if (Browser.win) return;
 
-    setMenu();
+    Menu.setApplicationMenu(Menu.buildFromTemplate([]));
     Browser.win = new BrowserWindow({
       transparent: true,
       resizable: true,
-      frame: false,
       hasShadow: false,
+      titleBarStyle: "hidden",
+      titleBarOverlay: true,
       webPreferences: {
         nodeIntegration: false,
         contextIsolation: true,
