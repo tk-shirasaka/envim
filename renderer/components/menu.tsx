@@ -18,6 +18,7 @@ const styles = {
   menu: {
     zIndex: 20,
     whiteSpace,
+    minWidth: "100%",
   },
   left: {
     left: 0,
