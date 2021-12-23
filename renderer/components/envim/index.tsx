@@ -56,7 +56,7 @@ export class EnvimComponent extends React.Component<Props, States> {
   private refresh: boolean = false;
   private main: { fontSize: number; lineHeight: string; } = { fontSize: 0, lineHeight: "" };
   private editor: { width: number; height: number; } = { width: 0, height: 0 };
-  private header: { width: number; height: number; padding: string } = { width: 0, height: 0, padding: "" };
+  private header: { height: number; padding: string } = { height: 0, padding: "" };
   private footer: { width: number; height: number; } = { width: 0, height: 0 };
 
   constructor(props: Props) {
@@ -85,27 +85,20 @@ export class EnvimComponent extends React.Component<Props, States> {
 
   private setSize() {
     const font  = Setting.font;
-    const titlebar = navigator.windowControlsOverlay.getTitleBarAreaRect
-      ? navigator.windowControlsOverlay.getTitleBarAreaRect()
-      : { x: 0, y: 0, width: 0, height: 0 };
+    const titlebar = navigator.windowControlsOverlay.getBoundingClientRect
+      ? navigator.windowControlsOverlay.getBoundingClientRect()
+      : { x: 0, y: 0, width: 0, height: 0, left: 0, right: 0 };
 
-    this.main = {
-      fontSize: font.size,
-      lineHeight: `${font.height}px`
-    };
+    this.main = { fontSize: font.size, lineHeight: `${font.height}px` };
     this.header = {
-      width: this.props.width,
-      height: Math.min(row2Y(2), titlebar.y + titlebar.height || row2Y(2)),
-      padding: titlebar.x ? `0 ${titlebar.width}px 0 0` : `0 0 0 ${titlebar.width}px`,
+      height: Math.min(row2Y(2), (titlebar.y * 2) + titlebar.height || row2Y(2)),
+      padding: titlebar.left ? `0 0 0 ${titlebar.left}px` : `0 ${titlebar.width}px 0 0`,
     };
     this.editor = {
       width: this.props.width,
       height: row2Y(y2Row(this.props.height - this.header.height - (Setting.options.ext_messages ? font.height + 4 : 0))),
     };
-    this.footer = {
-      width: this.props.width,
-      height: this.props.height - this.header.height - this.editor.height,
-    };
+    this.footer = { width: this.props.width, height: this.props.height - this.header.height - this.editor.height };
   }
 
   private onHighlight(highlights: {id: string, ui: boolean, hl: IHighlight}[]) {
