@@ -27,19 +27,16 @@ interface States {
 const styles = {
   tab: {
     minWidth: 0,
-    cursor: "default",
+    cursor: "pointer",
   },
   name: {
     maxWidth: 300,
     padding: "0 8px",
   },
   menu: {
-    display: "flex",
-    alignItems: "center",
-    height: "100%",
-    padding: "0 4px",
+    padding: "2px 8px",
     minWidth: 0,
-    borderLeft: "solid 1px #646079",
+    cursor: "pointer",
   },
   space: {
     paddingLeft: 4,
@@ -111,9 +108,9 @@ export class TablineComponent extends React.Component<Props, States> {
     if (!icon) return null;
 
     return (
-      <FlexComponent key={i} className={`animate fade-in color-${icon.color}`} title={tab.name} shrink={1} margin={[4, 4, 0, 0]} border={tab.active ? [0, 0, 2] : [0]} rounded={[4, 4, 0, 0]} shadow={true} style={styles.tab}>
-        <IconComponent color={`${icon.color}-fg-dark`} style={styles.name} active={tab.active} font={icon.font} text={tab.name.replace(/.*\//, "…/")} onClick={e => this.runCommand(e, `tabnext ${i + 1}`,)} />
-        <IconComponent color={icon.color} style={styles.space} active={tab.active} font="" onClick={e => this.runCommand(e, this.state.tabs.length > 1 ? `tabclose! ${i + 1}` : "quitall!")} />
+      <FlexComponent key={i} className={`animate fade-in color-${icon.color}-fg-dark clickable`} title={tab.name} shrink={1} margin={[4, 4, 0, 0]} rounded={[4, 4, 0, 0]} shadow={tab.active} style={styles.tab}>
+        <IconComponent style={styles.name} font={icon.font} text={tab.name.replace(/.*\//, "…/")} onClick={e => this.runCommand(e, `tabnext ${i + 1}`,)} />
+        <IconComponent color="gray-fg" style={styles.space} font="" onClick={e => this.runCommand(e, this.state.tabs.length > 1 ? `tabclose! ${i + 1}` : "quitall!")} />
       </FlexComponent>
     );
   }

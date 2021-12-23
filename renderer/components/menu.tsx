@@ -14,11 +14,13 @@ interface States {
 }
 
 const whiteSpace: "nowrap" = "nowrap";
+const boxSizing: "border-box" = "border-box";
 const styles = {
   menu: {
     zIndex: 20,
-    whiteSpace,
     minWidth: "100%",
+    whiteSpace,
+    boxSizing,
   },
   left: {
     left: 0,
@@ -79,7 +81,7 @@ export class MenuComponent extends React.Component<Props, States> {
     return (
       <FlexComponent vertical="center" overflow="visible" onMouseEnter={this.onMouseEnter.bind(this)} onMouseLeave={this.onMouseLeave.bind(this)}>
         <div ref={this.div}>
-          <div className={`color-${this.props.color} clickable`} style={this.props.style} onClick={this.props?.onClick}>{ this.props.label }</div>
+          <div className={`color-${this.props.color} clickable ${this.state.active && "active"}`} style={this.props.style} onClick={this.props?.onClick}>{ this.props.label }</div>
           { this.renderMenu() }
         </div>
       </FlexComponent>
