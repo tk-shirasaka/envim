@@ -1,25 +1,32 @@
-FONT_VERSION		=
-FONT_NAME		= HackGenNerd
-FONT_FILE_NAME		= $(FONT_NAME)_$(FONT_VERSION)
-FONT_DOWNLOAD_URL	= https://github.com/yuru7/HackGen/releases/download/$(FONT_VERSION)/$(FONT_FILE_NAME).zip
+NORMAL_FONT_DOWNLOAD_URL	=
+NORMAL_FONT_DOWNLOAD_FILE	=
+NORMAL_REGULAR_FONT_FILE_NAME	=
+NORMAL_BOLD_FONT_FILE_NAME	=
+EDITOR_FONT_DOWNLOAD_URL	=
+EDITOR_FONT_DOWNLOAD_FILE	=
+EDITOR_REGULAR_FONT_FILE_NAME	=
+EDITOR_BOLD_FONT_FILE_NAME	=
 
-DOWNLOAD_CMD		= curl -O -L
-UNZIP_CMD		= unzip -o
-RELEASE_CMD		= npm run release --
-TARGET_FILE_NAME	=
+DOWNLOAD_CMD			= curl -O -L
+UNZIP_CMD			= unzip -o
+RELEASE_CMD			= npm run release --
+TARGET_FILE_NAME		=
 
-build: install fonts/$(FONT_FILE_NAME).zip
+build: install fonts/NORMAL/$(NORMAL_FONT_DOWNLOAD_FILE).zip fonts/EDITOR/$(EDITOR_FONT_DOWNLOAD_FILE).zip
 	npm run build
 
 install:
 	npm install
 
-fonts/$(FONT_FILE_NAME).zip:
-	$(DOWNLOAD_CMD) $(FONT_DOWNLOAD_URL)
-	$(UNZIP_CMD) $(FONT_FILE_NAME)
-	rm -rf fonts
-	mv $(FONT_FILE_NAME) fonts
-	mv $(FONT_FILE_NAME).zip fonts/
+fonts/%.zip:
+	$(DOWNLOAD_CMD) $($(*D)_FONT_DOWNLOAD_URL)
+	$(UNZIP_CMD) -d $(*F) $(*F)
+	mv $(*F)/$($(*D)_REGULAR_FONT_FILE_NAME) fonts/$(*D)-Regular
+	mv $(*F)/$($(*D)_BOLD_FONT_FILE_NAME) fonts/$(*D)-Bold
+	rm -rf $(@D)
+	mkdir -p $(@D)
+	touch $@
+	rm -rf $(*F) $(@F)
 
 linux: build
 	$(RELEASE_CMD) --linux appImage

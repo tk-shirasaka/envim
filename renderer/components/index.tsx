@@ -1,6 +1,8 @@
 import React from "react";
 import ReactDom from "react-dom";
 
+import "../styles/index.scss";
+
 import { AppComponent } from "./app";
 
 declare global {
