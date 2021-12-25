@@ -16,31 +16,32 @@ export class Context2D {
   ) {
     const { size, width, height, scale } = Setting.font;
     this.font = { size: size * scale, width: width * scale, height: height * scale };
+    [bg, fg, sp].forEach(ctx => {
+      ctx.lineWidth = 1;
+      ctx.textBaseline = "top";
+    });
   }
 
-  private style(hl: string, type: "foreground" | "background") {
-    const next = Highlights.color(hl, type);
-    const ctx = type === "foreground" ? this.fg : this.bg;
-    if (ctx.fillStyle !== next) {
-      ctx.fillStyle = next;
-    }
-  }
+  private style(hl: string, type: "foreground" | "background" | "special") {
+    const color = Highlights.color(hl, type);
+    const ctx = { foreground: this.fg, background: this.bg, special: this.sp }[type];
+    const field = type === "special" ? "strokeStyle" : "fillStyle";
 
-  private fontStyle(hl: string) {
-    const next = Highlights.font(hl, this.font.size);
-    if (this.fg.font !== next) {
-      this.fg.font = next
+    ctx[field] === color || (ctx[field] = color);
+
+    if (type === "foreground") {
+      const font = Highlights.font(hl, this.font.size);
+
+      ctx.font === font || (this.fg.font = font);
     }
-    this.fg.textBaseline = "top";
   }
 
   private decoration(x: number, y: number, width: number, hl: string) {
     const type = Highlights.decoration(hl);
 
     if (type !== "none") {
-      this.sp.strokeStyle = Highlights.color(hl, "special");
+      this.style(hl, "special");
       this.sp.beginPath();
-      this.sp.lineWidth = 2;
 
       switch(type) {
         case "strikethrough":
@@ -134,7 +135,6 @@ export class Context2D {
       if ([" ", ""].indexOf(cell.text) >= 0 || (cell.dirty & 0b001) === 0) return;
 
       const [y, x] = [cell.row * this.font.height, cell.col * this.font.width];
-      this.fontStyle(cell.hl);
       this.style(cell.hl, "foreground");
       this.fg.fillText(cell.text, x, y + (this.font.height - this.font.size) / 2);
     });
