@@ -17,7 +17,7 @@ export class Context2D {
     const { size, width, height, scale } = Setting.font;
     this.font = { size: size * scale, width: width * scale, height: height * scale };
     [bg, fg, sp].forEach(ctx => {
-      ctx.lineWidth = 1;
+      ctx.lineWidth = scale;
       ctx.textBaseline = "top";
     });
   }
