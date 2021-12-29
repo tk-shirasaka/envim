@@ -6,10 +6,10 @@ interface Props {
 
   onClick?: (e: MouseEvent) => void;
   onMouseDown?: (e: MouseEvent) => void;
+  onMouseMove?: (e: MouseEvent) => void;
   onMouseUp?: (e: MouseEvent) => void;
   onMouseEnter?: (e: MouseEvent) => void;
   onMouseLeave?: (e: MouseEvent) => void;
-  onMouseMove?: (e: MouseEvent) => void;
   onWheel?: (e: WheelEvent) => void;
 
   direction?: "row" | "column" | "row-reverse" | "column-reverse";
@@ -65,6 +65,7 @@ export class FlexComponent extends React.Component<Props, States> {
         title={this.props.title}
         onClick={this.props.onClick}
         onMouseDown={this.props.onMouseDown}
+        onMouseMove={this.props.onMouseMove}
         onMouseUp={this.props.onMouseUp}
         onMouseEnter={this.props.onMouseEnter}
         onMouseLeave={this.props.onMouseLeave}
