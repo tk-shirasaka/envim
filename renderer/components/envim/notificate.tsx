@@ -14,12 +14,9 @@ interface States {
   messages: IMessage[];
 }
 
-const overflowX: "hidden" = "hidden";
-const overflowY: "auto" = "auto";
 const styles = {
   scope: {
-    overflowX,
-    overflowY,
+    overflow: "hidden auto",
     zIndex: 10,
     right: 0,
     bottom: 0,
@@ -27,8 +24,7 @@ const styles = {
     maxHeight: "100%",
   },
   messages: {
-    overflowX,
-    overflowY,
+    overflow: "hidden auto",
   },
 };
 

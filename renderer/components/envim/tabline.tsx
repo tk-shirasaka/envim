@@ -154,7 +154,7 @@ export class TablineComponent extends React.Component<Props, States> {
 
   render() {
     return (
-      <FlexComponent className="color-black" overflow="visible" style={this.props}>
+      <FlexComponent className="color-black" overflow="visible" shadow={true} style={this.props}>
         {this.state.tabs.map((tab, i) => this.renderTab(i, tab))}
         <MenuComponent color="white-fg" style={styles.space} label="">
           { this.state.bufs.map(({ name, buffer, active }, i) => (

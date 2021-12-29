@@ -31,7 +31,7 @@ const styles = {
   },
   open: {
     height: "30%",
-    overflow: "auto",
+    overflow: "hidden auto",
   },
   actions: {
     zIndex: 1,
@@ -122,10 +122,10 @@ export class HistoryComponent extends React.Component<Props, States> {
   render() {
     return (
       <FlexComponent className="animate" direction="column" position="absolute" style={this.getScopeStyle()} onMouseEnter={this.onMouseEnter.bind(this)} onMouseLeave={this.onMouseLeave.bind(this)}>
-        <FlexComponent className="color-white" position="sticky" style={styles.actions}>
-          { this.state.mode && <FlexComponent className="animate fade-in" margin={[0, 8, 0, 0]} rounded={[4, 4, 0, 0]} shadow={true}><MessageComponent message={this.state.mode} open={true} /></FlexComponent> }
-          { this.state.command && <FlexComponent className="animate fade-in" margin={[0, 8, 0, 0]} rounded={[4, 4, 0, 0]} shadow={true}><MessageComponent message={this.state.command} open={true} /></FlexComponent> }
-          { this.state.ruler && <FlexComponent className="animate fade-in" margin={[0, 8, 0, 0]} rounded={[4, 4, 0, 0]} shadow={true}><MessageComponent message={this.state.ruler} open={true} /></FlexComponent> }
+        <FlexComponent className="color-black" position="sticky" shadow={true} style={{ ...styles.actions, ...this.props }}>
+          { this.state.mode && <FlexComponent className="animate fade-in" margin={["auto", 4]} rounded={[4]} shadow={true}><MessageComponent message={this.state.mode} open={true} /></FlexComponent> }
+          { this.state.command && <FlexComponent className="animate fade-in" margin={["auto", 4]} rounded={[4]} shadow={true}><MessageComponent message={this.state.command} open={true} /></FlexComponent> }
+          { this.state.ruler && <FlexComponent className="animate fade-in" margin={["auto", 4]} rounded={[4]} shadow={true}><MessageComponent message={this.state.ruler} open={true} /></FlexComponent> }
           <div className="space" />
           <IconComponent color={ this.state.debug ? "green-fg" : "gray-fg" } font="" onClick={this.toggleDebug.bind(this)} />
           <IconComponent color="red-fg" font="" onClick={this.onClear.bind(this)} />
