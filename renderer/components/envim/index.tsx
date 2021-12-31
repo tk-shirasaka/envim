@@ -7,6 +7,8 @@ import { Highlights } from "../../utils/highlight";
 import { Setting } from "../../utils/setting";
 import { y2Row, x2Col, row2Y, col2X } from "../../utils/size";
 
+import { FlexComponent } from "../flex";
+
 import { TablineComponent } from "./tabline";
 import { EditorComponent } from "./editor";
 import { HistoryComponent } from "./history";
@@ -33,15 +35,8 @@ interface States {
   }};
 }
 
-const positionR: "relative" = "relative"
-const positionA: "absolute" = "absolute"
 const styles = {
-  editor: {
-    position: positionR,
-    overflow: "hidden",
-  },
   backdrop: {
-    position: positionA,
     zIndex: 100,
     top: 0,
     left: 0,
@@ -95,7 +90,7 @@ export class EnvimComponent extends React.Component<Props, States> {
       padding: titlebar.left ? `0 0 0 ${titlebar.left}px` : `0 ${titlebar.width}px 0 0`,
     };
     this.editor = {
-      width: this.props.width,
+      width: col2X(x2Col(this.props.width)),
       height: row2Y(y2Row(this.props.height - this.header.height - (Setting.options.ext_messages ? font.height + 4 : 0))),
     };
     this.footer = { width: this.props.width, height: this.props.height - this.header.height - this.editor.height };
@@ -161,17 +156,20 @@ export class EnvimComponent extends React.Component<Props, States> {
     return (
       <div style={this.main} onMouseUp={this.onMouseUp.bind(this)}>
         <TablineComponent {...this.header} />
-        <div style={{...styles.editor, ...this.editor}}>
-          { Object.keys(this.state.grids).reverse().map(grid => (
-            <EditorComponent key={grid} grid={+grid} editor={this.editor} style={this.state.grids[+grid]} />
-          )) }
-          <CmdlineComponent />
-          <PopupmenuComponent />
-          <NotificateComponent />
-          <InputComponent />
-        </div>
+        <FlexComponent>
+          <FlexComponent style={this.editor}>
+            { Object.keys(this.state.grids).reverse().map(grid => (
+              <EditorComponent key={grid} grid={+grid} editor={this.editor} style={this.state.grids[+grid]} />
+            )) }
+            <CmdlineComponent />
+            <PopupmenuComponent />
+            <NotificateComponent />
+            <InputComponent />
+          </FlexComponent>
+          <FlexComponent className="color-black" grow={1} shrink={1} shadow={true} />
+        </FlexComponent>
         { Setting.options.ext_messages && <HistoryComponent {...this.footer} /> }
-        { this.state.pause && <div className="color-black" style={styles.backdrop}></div> }
+        { this.state.pause && <FlexComponent className="color-black" position="absolute" style={styles.backdrop} /> }
       </div>
     );
   }

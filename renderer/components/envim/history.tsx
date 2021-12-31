@@ -31,11 +31,6 @@ const styles = {
   },
   open: {
     height: "30%",
-    overflow: "hidden auto",
-  },
-  actions: {
-    zIndex: 1,
-    top: 0,
   },
 };
 
@@ -121,8 +116,8 @@ export class HistoryComponent extends React.Component<Props, States> {
 
   render() {
     return (
-      <FlexComponent className="animate" direction="column" position="absolute" style={this.getScopeStyle()} onMouseEnter={this.onMouseEnter.bind(this)} onMouseLeave={this.onMouseLeave.bind(this)}>
-        <FlexComponent className="color-black" position="sticky" shadow={true} style={{ ...styles.actions, ...this.props }}>
+      <FlexComponent className="animate" direction="column-reverse" position="absolute" shadow={true} style={this.getScopeStyle()} onMouseEnter={this.onMouseEnter.bind(this)} onMouseLeave={this.onMouseLeave.bind(this)}>
+        <FlexComponent className="color-black" style={this.props}>
           { this.state.mode && <FlexComponent className="animate fade-in" margin={["auto", 4]} rounded={[4]} shadow={true}><MessageComponent message={this.state.mode} open={true} /></FlexComponent> }
           { this.state.command && <FlexComponent className="animate fade-in" margin={["auto", 4]} rounded={[4]} shadow={true}><MessageComponent message={this.state.command} open={true} /></FlexComponent> }
           { this.state.ruler && <FlexComponent className="animate fade-in" margin={["auto", 4]} rounded={[4]} shadow={true}><MessageComponent message={this.state.ruler} open={true} /></FlexComponent> }
@@ -130,8 +125,10 @@ export class HistoryComponent extends React.Component<Props, States> {
           <IconComponent color={ this.state.debug ? "green-fg" : "gray-fg" } font="" onClick={this.toggleDebug.bind(this)} />
           <IconComponent color="red-fg" font="" onClick={this.onClear.bind(this)} />
         </FlexComponent>
-        {this.state.messages.map((message, i) => <div key={i}><MessageComponent message={message} open={message.kind !== "debug" || this.state.select === i} onClick={() => this.toggleSelect(i)} /></div>)}
-        <div className="space" style={Highlights.style("0")} ref={this.bottom} />
+        <FlexComponent direction="column" grow={1} shrink={1} rounded={[4, 4, 0, 0]} overflow="auto">
+          {this.state.messages.map((message, i) => <div key={i}><MessageComponent message={message} open={message.kind !== "debug" || this.state.select === i} onClick={() => this.toggleSelect(i)} /></div>)}
+          <div className="space" style={Highlights.style("0")} ref={this.bottom} />
+        </FlexComponent>
       </FlexComponent>
     );
   }
