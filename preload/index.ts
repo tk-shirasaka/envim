@@ -20,16 +20,12 @@ const share = (event: string, ...args: any[]) => {
 const invoke = async (event: string, ...args: any[]) => {
   try {
     return await ipcRenderer.invoke(event, ...args);
-  } catch (e: Error | any) {
-    const reg = /^Error invoking remote method '[^']+': /;
-    const contents: { hl: string, content: string }[] = [];
+  } catch (e: any) {
     if (e instanceof Error) {
-      contents.push({ hl: "red", content: e.message.replace(reg, "")});
-    } else if (e instanceof String) {
-      contents.push({ hl: "red", content: e.toString().replace(reg, "")});
+      const reg = /^Error invoking remote method '[^']+': /;
+      const contents = [{ hl: "red", content: e.message.replace(reg, "") }];
+      share("messages:show", { kind: "debug", contents }, true);
     }
-
-    contents.length && share("messages:show", { kind: "debug", contents }, true);
   }
 };
 
