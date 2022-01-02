@@ -1,7 +1,6 @@
 import { NeovimClient } from "neovim";
 import { Response } from "neovim/lib/host";
-import { Tabpage } from "neovim/lib/api/Tabpage";
-import { Buffer } from "neovim/lib/api/Buffer";
+import { Tabpage, Buffer, Window } from "neovim/lib/api";
 
 import { ITab, IBuffer, IMode } from "common/interface";
 
@@ -71,10 +70,10 @@ export class App {
 
         /** ext_multigrid **/
         case "win_pos":
-          r.forEach(r => this.winPos(r[0], r[2], r[3], r[4], r[5], true, 3));
+          r.forEach(r => this.winPos(r[0], r[1], r[2], r[3], r[4], r[5], true, 3));
         break;
         case "win_float_pos":
-          r.forEach(r => this.winFloatPos(r[0], r[2], r[3], r[4], r[5], r[6]));
+          r.forEach(r => this.winFloatPos(r[0], r[1], r[2], r[3], r[4], r[5], r[6]));
         break;
         case "msg_set_pos":
           r.forEach(r => this.msgSetPos(r[0], r[1]));
@@ -243,16 +242,17 @@ export class App {
     Grids.get(grid).setScroll(top, bottom, left, right, rows, cols)
   }
 
-  private winPos(grid: number, row: number, col: number, width: number, height: number, focusable: boolean, zIndex: number) {
+  private winPos(grid: number, win: Window | null, row: number, col: number, width: number, height: number, focusable: boolean, zIndex: number) {
     const winsize = Grids.get().getInfo();
     const current = Grids.get(grid);
+    const winid = win ? win.id : 0;
     const overwidth = Math.max(0, col + width - winsize.width);
     const overheight = Math.max(0, row + height - winsize.height);
 
     col = Math.min(winsize.width - 1, Math.max(0, col - overwidth));
     row = Math.min(winsize.height - 1, Math.max(0, row - overheight));
 
-    current.setInfo({ x: col, y: row, width, height, zIndex: grid === 1 ? 1 : zIndex, focusable });
+    current.setInfo({ winid, x: col, y: row, width, height, zIndex: grid === 1 ? 1 : zIndex, focusable });
     Grids.setStatus(grid, "show")
 
     if (winsize.width < width || winsize.height < height) {
@@ -260,14 +260,14 @@ export class App {
     }
   }
 
-  private winFloatPos(grid: number, anchor: string, pgrid: number, row: number, col: number, focusable: boolean) {
+  private winFloatPos(grid: number, win: Window, anchor: string, pgrid: number, row: number, col: number, focusable: boolean) {
     const current = Grids.get(grid).getInfo();
     const { x, y, zIndex } = Grids.get(pgrid).getInfo();
 
     row = y + (anchor[0] === "N" ? row : row - current.height);
     col = x + (anchor[1] === "W" ? col : col - current.width);
 
-    this.winPos(grid, row, col, current.width, current.height, focusable, zIndex + 4);
+    this.winPos(grid, win, row, col, current.width, current.height, focusable, zIndex + 4);
   }
 
   private msgSetPos(grid: number, row: number) {
@@ -275,7 +275,7 @@ export class App {
     const width = winsize.width;
     const height = winsize.height - row;
 
-    this.winPos(grid, row, 0, width, height, false, winsize.zIndex + 3);
+    this.winPos(grid, null, row, 0, width, height, false, winsize.zIndex + 3);
   }
 
   private winHide(grid: number) {

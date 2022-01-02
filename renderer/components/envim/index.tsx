@@ -25,13 +25,17 @@ interface Props {
 interface States {
   pause: boolean;
   grids: { [k: string]: {
-    zIndex: number;
-    width: number;
-    height: number;
-    transform: string;
-    visibility: "visible" | "hidden";
-    cursor: "default" | "not-allowed";
-    pointerEvents: "none" | "auto";
+    grid: number;
+    winid: number;
+    style: {
+      zIndex: number;
+      width: number;
+      height: number;
+      transform: string;
+      visibility: "visible" | "hidden";
+      cursor: "default" | "not-allowed";
+      pointerEvents: "none" | "auto";
+    };
   }};
 }
 
@@ -105,22 +109,24 @@ export class EnvimComponent extends React.Component<Props, States> {
   private onWin(wins: IWindow[]) {
     const grids = this.state.grids;
 
-    wins.forEach(({ id, x, y, width, height, zIndex, focusable, status }) => {
-      const cursor: "default" | "not-allowed" = focusable ? "default" : "not-allowed";
-      const visibility: "visible" | "hidden" = status === "show" ? "visible" : "hidden";
-      const transform = `translate(${col2X(x)}px, ${row2Y(y)}px)`;
-      const pointerEvents: "none" | "auto" = grids[id]?.pointerEvents || "auto";
-
-      [ height, width ] = [ row2Y(height), col2X(width) ];
-
-      const next = { width, height, transform, cursor, visibility, pointerEvents, zIndex };
+    wins.forEach(({ id, winid, x, y, width, height, zIndex, focusable, status }) => {
+      const curr = grids[id]?.style || {};
+      const next = {
+        zIndex,
+        width: col2X(width),
+        height: row2Y(height),
+        transform: `translate(${col2X(x)}px, ${row2Y(y)}px)`,
+        visibility: status === "show" ? "visible" : "hidden" as "visible" | "hidden",
+        cursor: focusable ? "default" : "not-allowed" as "default" | "not-allowed",
+        pointerEvents: curr.pointerEvents || "auto" as "none" | "auto",
+      };
 
       this.refresh = this.refresh || status !== "show";
       if (status === "delete") {
         delete(grids[id]);
-      } else if (JSON.stringify(grids[id]) !== JSON.stringify(next)) {
-        this.refresh = this.refresh || (zIndex < 5 && (grids[id]?.width !== width || grids[id]?.height !== height));
-        grids[id] = next;
+      } else if (JSON.stringify(curr) !== JSON.stringify(next)) {
+        this.refresh = this.refresh || (zIndex < 5 && (curr.width !== next.width || curr.height !== next.height));
+        grids[id] = { grid: id, winid, style: next };
       }
     });
 
@@ -137,7 +143,7 @@ export class EnvimComponent extends React.Component<Props, States> {
     const grids = this.state.grids;
 
     Object.keys(grids).forEach(grid => {
-      grids[grid].pointerEvents = drag < 0 || drag === +grid ? "auto" : "none";
+      grids[grid].style.pointerEvents = drag < 0 || drag === +grid ? "auto" : "none";
     })
 
     this.setState({ grids });
@@ -158,8 +164,8 @@ export class EnvimComponent extends React.Component<Props, States> {
         <TablineComponent {...this.header} />
         <FlexComponent>
           <FlexComponent style={this.editor}>
-            { Object.keys(this.state.grids).reverse().map(grid => (
-              <EditorComponent key={grid} grid={+grid} editor={this.editor} style={this.state.grids[+grid]} />
+            { Object.values(this.state.grids).reverse().map(grid => (
+              <EditorComponent key={grid.grid} editor={this.editor} { ...grid } />
             )) }
             <CmdlineComponent />
             <PopupmenuComponent />

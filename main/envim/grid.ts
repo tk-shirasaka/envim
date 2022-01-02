@@ -10,7 +10,7 @@ class Grid {
   private dirty: { [k: string]: ICell } = {};
 
   constructor(id: number, width :number, height: number) {
-    this.info = { id, x: 0, y: 0, width: 0, height: 0, zIndex: 1, focusable: true, status: "show" };
+    this.info = { id, winid: 0, x: 0, y: 0, width: 0, height: 0, zIndex: 1, focusable: true, status: "show" };
     this.resize(width, height);
   }
 

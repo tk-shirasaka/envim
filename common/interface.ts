@@ -1,5 +1,6 @@
 export interface IWindow {
   id: number;
+  winid: number;
   x: number;
   y: number
   width: number;

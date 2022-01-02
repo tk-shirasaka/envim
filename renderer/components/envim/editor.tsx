@@ -8,9 +8,11 @@ import { Canvas } from "../../utils/canvas";
 import { y2Row, x2Col } from "../../utils/size";
 
 import { FlexComponent } from "../flex";
+import { IconComponent } from "../icon";
 
 interface Props {
   grid: number;
+  winid: number;
   editor: { width: number; height: number; };
   style: {
     zIndex: number;
@@ -24,10 +26,18 @@ interface Props {
 }
 
 interface States {
+  enter: boolean;
 }
 
 const position: "absolute" = "absolute";
 const styles = {
+  actions: {
+    top: 0,
+    right: 0,
+  },
+  icon: {
+    paddingLeft: 4,
+  },
   canvas: {
     position,
     transformOrigin: "0 0",
@@ -46,6 +56,7 @@ export class EditorComponent extends React.Component<Props, States> {
   constructor(props: Props) {
     super(props);
 
+    this.state = { enter: false };
     Emit.on(`clear:${this.props.grid}`, this.onClear.bind(this));
     Emit.on(`flush:${this.props.grid}`, this.onFlush.bind(this));
   }
@@ -83,6 +94,13 @@ export class EditorComponent extends React.Component<Props, States> {
       this.capture = { bg, fg, sp };
     }
     return true;
+  }
+
+  private runCommand(e: MouseEvent, command: string) {
+    e.stopPropagation();
+    e.preventDefault();
+
+    Emit.send("envim:api", "nvim_call_function", ["win_execute", [this.props.winid, command]]);
   }
 
   private onMouseEvent(e: MouseEvent, action: string, wheel: boolean = false) {
@@ -135,6 +153,15 @@ export class EditorComponent extends React.Component<Props, States> {
     }
   }
 
+  private onMouseEnter() {
+
+    this.setState({ enter: this.props.grid > 1 && this.props.style.cursor === "default" });
+  }
+
+  private onMouseLeave() {
+    this.setState({ enter: false });
+  }
+
   private onClear() {
     this.clear = true;
   }
@@ -153,11 +180,21 @@ export class EditorComponent extends React.Component<Props, States> {
         onMouseDown={this.onMouseDown.bind(this)}
         onMouseMove={this.onMouseMove.bind(this)}
         onMouseUp={this.onMouseUp.bind(this)}
+        onMouseEnter={this.onMouseEnter.bind(this)}
+        onMouseLeave={this.onMouseLeave.bind(this)}
         onWheel={this.onMouseWheel.bind(this)}
       >
         <canvas style={{ ...styles.canvas, transform: `scale(${1 / scale})` }} width={this.props.editor.width * scale} height={this.props.editor.height * scale} ref={this.bg} />
         <canvas style={{ ...styles.canvas, transform: `scale(${1 / scale})` }} width={this.props.editor.width * scale} height={this.props.editor.height * scale} ref={this.fg} />
         <canvas style={{ ...styles.canvas, transform: `scale(${1 / scale})` }} width={this.props.editor.width * scale} height={this.props.editor.height * scale} ref={this.sp} />
+        { this.state.enter === false ? null : (
+          <FlexComponent className="animate fade-in color-black" position="absolute" padding={[0, 4]} rounded={[0, 0, 0, 4]} shadow={true} style={styles.actions}>
+              <IconComponent color="gray-fg" font="" onClick={e => this.runCommand(e, "vnew")} />
+              <IconComponent color="gray-fg" font="" onClick={e => this.runCommand(e, "new")} />
+              <IconComponent color="gray-fg" font="" onClick={e => this.runCommand(e, "write")} />
+            <IconComponent color="gray-fg" style={styles.icon} font="" onClick={e => this.runCommand(e, "confirm quit")} />
+          </FlexComponent>
+        )}
       </FlexComponent>
     );
   }
