@@ -1,14 +1,16 @@
 import React, { createRef, RefObject, MouseEvent, WheelEvent } from "react";
 
-import { ICell, IScroll } from "common/interface";
+import { ICell, IScroll, IBuffer } from "common/interface";
 
 import { Emit } from "../../utils/emit";
 import { Setting } from "../../utils/setting";
+import { Buffers } from "../../utils/buffer";
 import { Canvas } from "../../utils/canvas";
 import { y2Row, x2Col } from "../../utils/size";
 
 import { FlexComponent } from "../flex";
 import { IconComponent } from "../icon";
+import { MenuComponent } from "../menu";
 
 interface Props {
   grid: number;
@@ -27,6 +29,7 @@ interface Props {
 
 interface States {
   enter: boolean;
+  bufs: IBuffer[];
 }
 
 const position: "absolute" = "absolute";
@@ -56,7 +59,7 @@ export class EditorComponent extends React.Component<Props, States> {
   constructor(props: Props) {
     super(props);
 
-    this.state = { enter: false };
+    this.state = { enter: false, bufs: [] };
     Emit.on(`clear:${this.props.grid}`, this.onClear.bind(this));
     Emit.on(`flush:${this.props.grid}`, this.onFlush.bind(this));
   }
@@ -82,6 +85,7 @@ export class EditorComponent extends React.Component<Props, States> {
 
   componentWillUnmount() {
     const grid = this.props.grid;
+    clearInterval(this.timer);
     Canvas.delete(grid);
     Emit.clear([`clear:${grid}`, `flush:${grid}`]);
   }
@@ -100,7 +104,7 @@ export class EditorComponent extends React.Component<Props, States> {
     e.stopPropagation();
     e.preventDefault();
 
-    Emit.send("envim:api", "nvim_call_function", ["win_execute", [this.props.winid, command]]);
+    command && Emit.send("envim:api", "nvim_call_function", ["win_execute", [this.props.winid, command]]);
   }
 
   private onMouseEvent(e: MouseEvent, action: string, wheel: boolean = false) {
@@ -154,8 +158,15 @@ export class EditorComponent extends React.Component<Props, States> {
   }
 
   private onMouseEnter() {
-
     this.setState({ enter: this.props.grid > 1 && this.props.style.cursor === "default" });
+  }
+
+  private onActionEnter() {
+    this.timer = +setInterval(() => this.setState({ bufs: Buffers.get() }));
+  }
+
+  private onActionLeave() {
+    clearInterval(this.timer);
   }
 
   private onMouseLeave() {
@@ -170,6 +181,18 @@ export class EditorComponent extends React.Component<Props, States> {
     this.clear && Canvas.clear(this.props.grid, x2Col(this.props.style.width), y2Row(this.props.style.height));
     flush.forEach(({ cells, scroll }) => Canvas.update(this.props.grid, cells, scroll))
     this.clear = false;
+  }
+
+  private renderMenu(label: string, command: { main: string; sub: string; }) {
+    return (
+      <MenuComponent color="gray-fg" style={styles.icon} onClick={e => this.runCommand(e, command.main)} label={label}>
+        { this.state.bufs.map(({ name, buffer, active }, i) => (
+          <FlexComponent className={`color-black ${active ? "active" : "clickable"}` } title={name} padding={[0, 4]} onClick={e => this.runCommand(e, `${command.sub}${buffer}`)} key={i}>
+            { name.replace(/.*\//, "…/") }
+          </FlexComponent>
+        )) }
+      </MenuComponent>
+    );
   }
 
   render() {
@@ -188,11 +211,17 @@ export class EditorComponent extends React.Component<Props, States> {
         <canvas style={{ ...styles.canvas, transform: `scale(${1 / scale})` }} width={this.props.editor.width * scale} height={this.props.editor.height * scale} ref={this.fg} />
         <canvas style={{ ...styles.canvas, transform: `scale(${1 / scale})` }} width={this.props.editor.width * scale} height={this.props.editor.height * scale} ref={this.sp} />
         { this.state.enter === false ? null : (
-          <FlexComponent className="animate fade-in color-black" position="absolute" padding={[0, 4]} rounded={[0, 0, 0, 4]} shadow={true} style={styles.actions}>
-              <IconComponent color="gray-fg" font="" onClick={e => this.runCommand(e, "vnew")} />
-              <IconComponent color="gray-fg" font="" onClick={e => this.runCommand(e, "new")} />
-              <IconComponent color="gray-fg" font="" onClick={e => this.runCommand(e, "write")} />
-            <IconComponent color="gray-fg" style={styles.icon} font="" onClick={e => this.runCommand(e, "confirm quit")} />
+          <FlexComponent className="animate fade-in color-black" position="absolute" overflow="visible" padding={[0, 4]} rounded={[0, 0, 0, 4]} shadow={true} style={styles.actions}
+            onMouseDown={e => this.runCommand(e, "")}
+            onMouseUp={e => this.runCommand(e, "")}
+            onMouseEnter={this.onActionEnter.bind(this)}
+            onMouseLeave={this.onActionLeave.bind(this)}
+          >
+            { this.renderMenu("", { main: "edit", sub: "buffer "}) }
+            { this.renderMenu("", { main: "vnew", sub: "vsplit #"}) }
+            { this.renderMenu("", { main: "new", sub: "split #"}) }
+            <IconComponent color="gray-fg" font="" onClick={e => this.runCommand(e, "write")} />
+            { this.renderMenu("", { main: "confirm quit", sub: "confirm bdelete "}) }
           </FlexComponent>
         )}
       </FlexComponent>

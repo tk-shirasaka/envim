@@ -4,6 +4,7 @@ import { ITab, IBuffer, IMode, IMenu } from "../../../common/interface";
 
 import { Emit } from "../../utils/emit";
 import { Setting } from "../../utils/setting";
+import { Buffers } from "../../utils/buffer";
 import { icons } from "../../utils/icons";
 
 import { FlexComponent } from "../flex";
@@ -18,7 +19,6 @@ interface Props {
 interface States {
   cwd: string;
   tabs: ITab[];
-  bufs: IBuffer[];
   menus: IMenu[];
   bookmarks: { path: string; name: string; selected: boolean; }[];
   mode?: IMode;
@@ -46,7 +46,7 @@ const styles = {
 export class TablineComponent extends React.Component<Props, States> {
   constructor(props: Props) {
     super(props);
-    this.state = { cwd: "", tabs: [], bufs: [], menus: [], bookmarks: Setting.bookmarks };
+    this.state = { cwd: "", tabs: [], menus: [], bookmarks: Setting.bookmarks };
 
     Emit.on("envim:cwd", this.onCwd.bind(this));
     Emit.on("tabline:update", this.onTabline.bind(this));
@@ -90,7 +90,8 @@ export class TablineComponent extends React.Component<Props, States> {
   }
 
   private onTabline(tabs: ITab[], bufs: IBuffer[]) {
-    this.setState({ tabs, bufs });
+    Buffers.set(bufs);
+    this.setState({ tabs });
   }
 
   private onMenu(menus: IMenu[]) {
@@ -110,7 +111,7 @@ export class TablineComponent extends React.Component<Props, States> {
     return (
       <FlexComponent key={i} className={`animate fade-in color-${icon.color}-fg-dark clickable`} title={tab.name} shrink={1} margin={[4, 4, 0, 0]} rounded={[4, 4, 0, 0]} shadow={tab.active} style={styles.tab}>
         <IconComponent style={styles.name} font={icon.font} text={tab.name.replace(/.*\//, "…/")} onClick={e => this.runCommand(e, `tabnext ${i + 1}`,)} />
-        <IconComponent color="gray-fg" style={styles.space} font="" onClick={e => this.runCommand(e, this.state.tabs.length > 1 ? `tabclose! ${i + 1}` : "quitall!")} />
+        <IconComponent color="gray-fg" style={styles.space} font="" onClick={e => this.runCommand(e, this.state.tabs.length > 1 ? `confirm tabclose ${i + 1}` : "confirm quitall")} />
       </FlexComponent>
     );
   }
@@ -156,17 +157,6 @@ export class TablineComponent extends React.Component<Props, States> {
     return (
       <FlexComponent className="color-black" overflow="visible" shadow={true} style={this.props}>
         {this.state.tabs.map((tab, i) => this.renderTab(i, tab))}
-        <MenuComponent color="white-fg" style={styles.space} label="">
-          { this.state.bufs.map(({ name, buffer, active }, i) => (
-            <FlexComponent className={`color-black ${active ? "active" : "clickable"}` } title={name} onClick={e => this.runCommand(e, `buffer ${buffer}`)} key={i}>
-              <FlexComponent vertical="center" grow={1} padding={[0, 4]}>{ name.replace(/.*\//, "…/") }</FlexComponent>
-              <IconComponent color="blue-fg" font="" onClick={e => this.runCommand(e, `vsplit #${buffer}`)} />
-              <IconComponent color="blue-fg" font="" onClick={e => this.runCommand(e, `split #${buffer}`)} />
-              <IconComponent color="blue-fg" font="ﱚ" onClick={e => this.runCommand(e, `tab sbuffer ${buffer}`)} />
-              <IconComponent color="red-fg" font="" onClick={e => this.runCommand(e, `bdelete! ${buffer}`)} />
-            </FlexComponent>
-          )) }
-        </MenuComponent>
         <MenuComponent color="green-fg" style={styles.space} onClick={e => this.runCommand(e, "$tabnew")} label="">
           { this.state.bookmarks.map(({ name, path }, i) => <div className="color-black clickable" key={i} onClick={e => this.runCommand(e, `$tabnew | cd ${path}`)}>{ name }</div>) }
         </MenuComponent>
