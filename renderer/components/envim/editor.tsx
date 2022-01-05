@@ -199,7 +199,7 @@ export class EditorComponent extends React.Component<Props, States> {
     const { scale } = Setting.font;
 
     return (
-      <FlexComponent className="animate fade-in" position="absolute" shadow={true} style={this.props.style}
+      <FlexComponent className="animate fade-in" position="absolute" overflow="visible" shadow={true} style={this.props.style}
         onMouseDown={this.onMouseDown.bind(this)}
         onMouseMove={this.onMouseMove.bind(this)}
         onMouseUp={this.onMouseUp.bind(this)}
@@ -207,9 +207,11 @@ export class EditorComponent extends React.Component<Props, States> {
         onMouseLeave={this.onMouseLeave.bind(this)}
         onWheel={this.onMouseWheel.bind(this)}
       >
-        <canvas style={{ ...styles.canvas, transform: `scale(${1 / scale})` }} width={this.props.editor.width * scale} height={this.props.editor.height * scale} ref={this.bg} />
-        <canvas style={{ ...styles.canvas, transform: `scale(${1 / scale})` }} width={this.props.editor.width * scale} height={this.props.editor.height * scale} ref={this.fg} />
-        <canvas style={{ ...styles.canvas, transform: `scale(${1 / scale})` }} width={this.props.editor.width * scale} height={this.props.editor.height * scale} ref={this.sp} />
+        <FlexComponent grow={1}>
+          <canvas style={{ ...styles.canvas, transform: `scale(${1 / scale})` }} width={this.props.editor.width * scale} height={this.props.editor.height * scale} ref={this.bg} />
+          <canvas style={{ ...styles.canvas, transform: `scale(${1 / scale})` }} width={this.props.editor.width * scale} height={this.props.editor.height * scale} ref={this.fg} />
+          <canvas style={{ ...styles.canvas, transform: `scale(${1 / scale})` }} width={this.props.editor.width * scale} height={this.props.editor.height * scale} ref={this.sp} />
+        </FlexComponent>
         { this.state.enter === false ? null : (
           <FlexComponent className="animate fade-in color-black" position="absolute" overflow="visible" padding={[0, 4]} rounded={[0, 0, 0, 4]} shadow={true} style={styles.actions}
             onMouseDown={e => this.runCommand(e, "")}
