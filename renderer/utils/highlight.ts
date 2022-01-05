@@ -4,6 +4,7 @@ import { Setting } from "./setting";
 interface IOptions {
   reverse?: boolean;
   normal?: boolean;
+  transparent?: boolean;
 };
 
 class Highlight {
@@ -66,8 +67,10 @@ export class Highlights {
   private static hls: { [k: string]: Highlight } = {};
 
   static setHighlight(id: string, ui: boolean, hl: IHighlight) {
-    const multiple = Setting.options.ext_multigrid ? 1 : 2;
-    const alpha = ui ? Math.sqrt((Setting.opacity / 100) ** multiple) * 100 : 0;
+    const opacity = id === "0" || Setting.options.ext_multigrid === false
+      ? Setting.opacity
+      : Math.sqrt(Setting.opacity / 100) * 100;
+    const alpha = ui ? opacity : 0;
 
     Highlights.hls[id] = new Highlight(hl, alpha);
   }
@@ -80,11 +83,15 @@ export class Highlights {
       type = type === "foreground" ? "background" : "foreground";
     }
 
-    if (Highlights.hls[id] && Highlights.hls[id][type][alpha]) return Highlights.hls[id][type][alpha];
-    if (Highlights.hls[0] && Highlights.hls[0][type][alpha]) return Highlights.hls[0][type][alpha];
-    if (Highlights.hls[-1] && Highlights.hls[-1][type][alpha]) return Highlights.hls[-1][type][alpha];
+    const color1 = Highlights.hls[0] && Highlights.hls[0][type][alpha] || "";
+    const color2 = Highlights.hls[id] && Highlights.hls[id][type][alpha] || color1;
+    const color3 = Highlights.hls[-1] && Highlights.hls[-1][type][alpha] || "";
 
-    return "rgba(0, 0, 0, 1)";
+    if (options.transparent && type === "background" && color1 === color2) {
+      return "rgba(0, 0, 0, 0)";
+    }
+
+    return color2 || color3 || "rgba(0, 0, 0, 1)";
   }
 
   static style(id: string, options: IOptions = {}) {

@@ -15,6 +15,7 @@ import { MenuComponent } from "../menu";
 interface Props {
   grid: number;
   winid: number;
+  transparent: boolean
   editor: { width: number; height: number; };
   style: {
     zIndex: number;
@@ -70,7 +71,7 @@ export class EditorComponent extends React.Component<Props, States> {
     const sp = this.sp.current?.getContext("2d");
 
     if (bg && fg && sp) {
-      Canvas.set(this.props.grid, bg, fg, sp);
+      Canvas.set(this.props.grid, bg, fg, sp, this.props.transparent);
       Canvas.clear(this.props.grid, x2Col(this.props.style.width), y2Row(this.props.style.height));
     }
   }

@@ -13,6 +13,7 @@ export class Context2D {
     private bg: CanvasRenderingContext2D,
     private fg: CanvasRenderingContext2D,
     private sp: CanvasRenderingContext2D,
+    private transparent: boolean,
   ) {
     const { size, width, height, scale } = Setting.font;
     this.font = { size: size * scale, width: width * scale, height: height * scale };
@@ -20,7 +21,7 @@ export class Context2D {
   }
 
   private style(hl: string, type: "foreground" | "background" | "special") {
-    const color = Highlights.color(hl, type);
+    const color = Highlights.color(hl, type, { transparent: this.transparent });
     const ctx = { foreground: this.fg, background: this.bg, special: this.sp }[type];
     const field = type === "special" ? "strokeStyle" : "fillStyle";
 

@@ -6,7 +6,8 @@ export interface IWindow {
   width: number;
   height: number;
   zIndex: number;
-  focusable: boolean
+  focusable: boolean;
+  transparent: boolean;
   status: "show" | "hide" | "delete";
 }
 

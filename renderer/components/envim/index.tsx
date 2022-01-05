@@ -27,6 +27,7 @@ interface States {
   grids: { [k: string]: {
     grid: number;
     winid: number;
+    transparent: boolean;
     style: {
       zIndex: number;
       width: number;
@@ -109,7 +110,7 @@ export class EnvimComponent extends React.Component<Props, States> {
   private onWin(wins: IWindow[]) {
     const grids = this.state.grids;
 
-    wins.forEach(({ id, winid, x, y, width, height, zIndex, focusable, status }) => {
+    wins.forEach(({ id, winid, x, y, width, height, zIndex, focusable, transparent, status }) => {
       const curr = grids[id]?.style || {};
       const next = {
         zIndex,
@@ -126,7 +127,7 @@ export class EnvimComponent extends React.Component<Props, States> {
         delete(grids[id]);
       } else if (JSON.stringify(curr) !== JSON.stringify(next)) {
         this.refresh = this.refresh || (zIndex < 5 && (curr.width !== next.width || curr.height !== next.height));
-        grids[id] = { grid: id, winid, style: next };
+        grids[id] = { grid: id, winid, transparent, style: next };
       }
     });
 

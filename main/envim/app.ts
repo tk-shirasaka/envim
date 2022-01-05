@@ -70,7 +70,7 @@ export class App {
 
         /** ext_multigrid **/
         case "win_pos":
-          r.forEach(r => this.winPos(r[0], r[1], r[2], r[3], r[4], r[5], true, 3));
+          r.forEach(r => this.winPos(r[0], r[1], r[2], r[3], r[4], r[5], true, 3, true));
         break;
         case "win_float_pos":
           r.forEach(r => this.winFloatPos(r[0], r[1], r[2], r[3], r[4], r[5], r[6]));
@@ -242,7 +242,7 @@ export class App {
     Grids.get(grid).setScroll(top, bottom, left, right, rows, cols)
   }
 
-  private winPos(grid: number, win: Window | null, row: number, col: number, width: number, height: number, focusable: boolean, zIndex: number) {
+  private winPos(grid: number, win: Window | null, row: number, col: number, width: number, height: number, focusable: boolean, zIndex: number, transparent: boolean) {
     const winsize = Grids.get().getInfo();
     const current = Grids.get(grid);
     const winid = win ? win.id : 0;
@@ -251,8 +251,10 @@ export class App {
 
     col = Math.min(winsize.width - 1, Math.max(0, col - overwidth));
     row = Math.min(winsize.height - 1, Math.max(0, row - overheight));
+    zIndex = grid === 1 ? 1 : zIndex;
+    transparent = grid === 1 ? false : transparent;
 
-    current.setInfo({ winid, x: col, y: row, width, height, zIndex: grid === 1 ? 1 : zIndex, focusable });
+    current.setInfo({ winid, x: col, y: row, width, height, zIndex, focusable, transparent });
     Grids.setStatus(grid, "show")
 
     if (winsize.width < width || winsize.height < height) {
@@ -267,7 +269,7 @@ export class App {
     row = y + (anchor[0] === "N" ? row : row - current.height);
     col = x + (anchor[1] === "W" ? col : col - current.width);
 
-    this.winPos(grid, win, row, col, current.width, current.height, focusable, zIndex + 4);
+    this.winPos(grid, win, row, col, current.width, current.height, focusable, zIndex + 4, false);
   }
 
   private msgSetPos(grid: number, row: number) {
@@ -275,7 +277,7 @@ export class App {
     const width = winsize.width;
     const height = winsize.height - row;
 
-    this.winPos(grid, null, row, 0, width, height, false, winsize.zIndex + 3);
+    this.winPos(grid, null, row, 0, width, height, false, winsize.zIndex + 3, false);
   }
 
   private winHide(grid: number) {

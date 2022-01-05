@@ -11,10 +11,11 @@ export class Canvas {
     bg: CanvasRenderingContext2D,
     fg: CanvasRenderingContext2D,
     sp: CanvasRenderingContext2D,
+    transparent: boolean,
   ) {
     Canvas.init || Canvas.render();
     Canvas.init = true;
-    Canvas.renderer[grid] = new Context2D(bg, fg, sp);
+    Canvas.renderer[grid] = new Context2D(bg, fg, sp, transparent);
   }
 
   static delete(grid: number) {
