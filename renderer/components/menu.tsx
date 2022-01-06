@@ -10,7 +10,7 @@ interface Props {
 }
 
 interface States {
-  active: boolean;
+  haschild: boolean;
 }
 
 const whiteSpace: "nowrap" = "nowrap";
@@ -33,11 +33,10 @@ const styles = {
 export class MenuComponent extends React.Component<Props, States> {
   private div: RefObject<HTMLDivElement> = createRef<HTMLDivElement>();
   private align: "left" | "right" = "left";
-  private haschild: boolean = false;
 
   constructor(props: Props) {
     super(props);
-    this.state = { active: false };
+    this.state = { haschild: false };
   }
 
   componentDidMount() {
@@ -49,27 +48,21 @@ export class MenuComponent extends React.Component<Props, States> {
   }
 
   private updateProperty() {
+    const haschild = !(Array.isArray(this.props.children) && this.props.children.length === 0);
+
+    this.state.haschild === haschild || this.setState({ haschild });
+
     if (this.div.current) {
       const { left } = this.div.current.getBoundingClientRect();
       this.align = window.innerWidth / 2 < left ? "right" : "left";
     }
-    this.haschild = this.haschild && !!this.props.children && !(Array.isArray(this.props.children) && this.props.children.length === 0);
-  }
-
-  onMouseEnter() {
-    this.haschild = !!this.props.children && !(Array.isArray(this.props.children) && this.props.children.length === 0);
-    this.setState({ active: true });
-  }
-
-  onMouseLeave() {
-    this.setState({ active: false });
   }
 
   private renderMenu() {
     const style = { ...styles.menu, ...(this.align === "left" ? styles.left : styles.right) };
 
-    return this.state.active === false || this.haschild === false ? null : (
-      <FlexComponent overflow="visible">
+    return this.state.haschild === false ? null : (
+      <FlexComponent className="contents" overflow="visible">
         <FlexComponent className="color-black" direction="column" position="absolute" overflow="visible" padding={[4]} border={[1]} rounded={[4]} shadow={true} style={style}>
           { this.props.children }
         </FlexComponent>
@@ -79,9 +72,9 @@ export class MenuComponent extends React.Component<Props, States> {
 
   render() {
     return (
-      <FlexComponent vertical="center" overflow="visible" onMouseEnter={this.onMouseEnter.bind(this)} onMouseLeave={this.onMouseLeave.bind(this)}>
-        <div ref={this.div}>
-          <div className={`color-${this.props.color} clickable ${this.state.active && "active"}`} style={this.props.style} onClick={this.props?.onClick}>{ this.props.label }</div>
+      <FlexComponent vertical="center" overflow="visible">
+        <div className="animate hover" ref={this.div}>
+          <div className={`color-${this.props.color} clickable`} style={this.props.style} onClick={this.props?.onClick}>{ this.props.label }</div>
           { this.renderMenu() }
         </div>
       </FlexComponent>

@@ -1,6 +1,6 @@
 .animate {
-  transition-property: transform, visibility, width, height;
-  transition-duration: .1s;
+  transition-property: transform, width, height;
+  transition-duration: 100ms;
   transition-timing-function: linear;
   animation-duration: .5s;
   animation-timing-function: ease-in-out;
@@ -26,6 +26,21 @@
     animation-timing-function: ease-in;
     animation-iteration-count: infinite;
     animation-name: fadeIn;
+  }
+
+  &.hover {
+    > .contents {
+      visibility: hidden;
+      opacity: 0;
+    }
+
+    &:hover {
+      > .contents {
+        visibility: visible;
+        opacity: 1;
+        transition-duration: 100ms;
+      }
+    }
   }
 }
 

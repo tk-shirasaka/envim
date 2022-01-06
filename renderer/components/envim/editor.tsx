@@ -29,7 +29,6 @@ interface Props {
 }
 
 interface States {
-  enter: boolean;
   bufs: IBuffer[];
 }
 
@@ -60,7 +59,7 @@ export class EditorComponent extends React.Component<Props, States> {
   constructor(props: Props) {
     super(props);
 
-    this.state = { enter: false, bufs: [] };
+    this.state = { bufs: [] };
     Emit.on(`clear:${this.props.grid}`, this.onClear.bind(this));
     Emit.on(`flush:${this.props.grid}`, this.onFlush.bind(this));
   }
@@ -159,19 +158,11 @@ export class EditorComponent extends React.Component<Props, States> {
   }
 
   private onMouseEnter() {
-    this.setState({ enter: this.props.grid > 1 && this.props.style.cursor === "default" });
-  }
-
-  private onActionEnter() {
     this.timer = +setInterval(() => this.setState({ bufs: Buffers.get() }));
   }
 
-  private onActionLeave() {
-    clearInterval(this.timer);
-  }
-
   private onMouseLeave() {
-    this.setState({ enter: false });
+    clearInterval(this.timer);
   }
 
   private onClear() {
@@ -200,12 +191,10 @@ export class EditorComponent extends React.Component<Props, States> {
     const { scale } = Setting.font;
 
     return (
-      <FlexComponent className="animate fade-in" position="absolute" overflow="visible" shadow={true} style={this.props.style}
+      <FlexComponent className="animate fade-in hover" position="absolute" overflow="visible" shadow={true} style={this.props.style}
         onMouseDown={this.onMouseDown.bind(this)}
         onMouseMove={this.onMouseMove.bind(this)}
         onMouseUp={this.onMouseUp.bind(this)}
-        onMouseEnter={this.onMouseEnter.bind(this)}
-        onMouseLeave={this.onMouseLeave.bind(this)}
         onWheel={this.onMouseWheel.bind(this)}
       >
         <FlexComponent grow={1}>
@@ -213,12 +202,12 @@ export class EditorComponent extends React.Component<Props, States> {
           <canvas style={{ ...styles.canvas, transform: `scale(${1 / scale})` }} width={this.props.editor.width * scale} height={this.props.editor.height * scale} ref={this.fg} />
           <canvas style={{ ...styles.canvas, transform: `scale(${1 / scale})` }} width={this.props.editor.width * scale} height={this.props.editor.height * scale} ref={this.sp} />
         </FlexComponent>
-        { this.state.enter === false ? null : (
-          <FlexComponent className="animate fade-in color-black" position="absolute" overflow="visible" padding={[0, 4]} rounded={[0, 0, 0, 4]} shadow={true} style={styles.actions}
+        { this.props.grid === 1 || this.props.style.cursor === "not-allowed" ? null : (
+          <FlexComponent className="contents color-black" position="absolute" overflow="visible" padding={[0, 4]} rounded={[0, 0, 0, 4]} shadow={true} style={styles.actions}
             onMouseDown={e => this.runCommand(e, "")}
             onMouseUp={e => this.runCommand(e, "")}
-            onMouseEnter={this.onActionEnter.bind(this)}
-            onMouseLeave={this.onActionLeave.bind(this)}
+            onMouseEnter={this.onMouseEnter.bind(this)}
+            onMouseLeave={this.onMouseLeave.bind(this)}
           >
             { this.renderMenu("", { main: "edit", sub: "buffer "}) }
             { this.renderMenu("", { main: "vnew", sub: "vsplit #"}) }
