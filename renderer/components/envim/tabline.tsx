@@ -31,7 +31,7 @@ const styles = {
   },
   name: {
     maxWidth: 300,
-    padding: "0 8px",
+    padding: "0",
   },
   menu: {
     padding: "2px 8px",
@@ -39,7 +39,7 @@ const styles = {
     cursor: "pointer",
   },
   space: {
-    paddingLeft: 4,
+    padding: "0 0 0 4px",
   },
 };
 
@@ -106,12 +106,10 @@ export class TablineComponent extends React.Component<Props, States> {
   private renderTab(i: number, tab: ITab) {
     const icon = icons.filter(icon => tab.filetype.search(icon.type) >= 0 || tab.buftype.search(icon.type) >= 0).shift();
 
-    if (!icon) return null;
-
-    return (
-      <FlexComponent key={i} className={`animate fade-in color-${icon.color}-fg-dark clickable`} title={tab.name} shrink={1} margin={[4, 4, 0, 0]} rounded={[4, 4, 0, 0]} shadow={tab.active} style={styles.tab}>
+    return !icon ? null : (
+      <FlexComponent key={i} className={`animate fade-in hover color-${icon.color}-fg-dark clickable`} title={tab.name} shrink={1} margin={[4, 4, 0, 0]} padding={[0, 0, 0, 8]} rounded={[4, 4, 0, 0]} shadow={tab.active} style={styles.tab}>
         <IconComponent style={styles.name} font={icon.font} text={tab.name.replace(/.*\//, "…/")} onClick={e => this.runCommand(e, `tabnext ${i + 1}`,)} />
-        <IconComponent color="gray-fg" style={styles.space} font="" onClick={e => this.runCommand(e, this.state.tabs.length > 1 ? `confirm tabclose ${i + 1}` : "confirm quitall")} />
+        <IconComponent color="gray-fg" style={styles.space} font="" onClick={e => this.runCommand(e, this.state.tabs.length > 1 ? `confirm tabclose ${i + 1}` : "confirm quitall")} hover />
       </FlexComponent>
     );
   }
@@ -155,7 +153,7 @@ export class TablineComponent extends React.Component<Props, States> {
 
   render() {
     return (
-      <FlexComponent className="color-black" overflow="visible" shadow={true} style={this.props}>
+      <FlexComponent className="color-black" overflow="visible" style={this.props} shadow>
         {this.state.tabs.map((tab, i) => this.renderTab(i, tab))}
         <MenuComponent color="green-fg" style={styles.space} onClick={e => this.runCommand(e, "$tabnew")} label="">
           { this.state.bookmarks.map(({ name, path }, i) => <div className="color-black clickable" key={i} onClick={e => this.runCommand(e, `$tabnew | cd ${path}`)}>{ name }</div>) }

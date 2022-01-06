@@ -63,7 +63,7 @@ export class MenuComponent extends React.Component<Props, States> {
 
     return this.state.haschild === false ? null : (
       <FlexComponent className="contents" overflow="visible">
-        <FlexComponent className="color-black" direction="column" position="absolute" overflow="visible" padding={[4]} border={[1]} rounded={[4]} shadow={true} style={style}>
+        <FlexComponent className="color-black" direction="column" position="absolute" overflow="visible" padding={[4]} border={[1]} rounded={[4]} style={style} shadow>
           { this.props.children }
         </FlexComponent>
       </FlexComponent>

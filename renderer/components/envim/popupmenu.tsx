@@ -98,7 +98,7 @@ export class PopupmenuComponent extends React.Component<Props, States> {
 
   render() {
     return this.state.items.length === 0 ? null : (
-      <FlexComponent className="animate fade-in" direction="column" position="absolute" overflow="auto" whiteSpace="pre-wrap" shadow={true} style={this.getScopeStyle()}>
+      <FlexComponent className="animate fade-in" direction="column" position="absolute" overflow="auto" whiteSpace="pre-wrap" style={this.getScopeStyle()} shadow>
         <div ref={this.scope}></div>
         {this.state.items.map(({ word, kind, menu }, i) => (
           <FlexComponent onClick={() => this.onItem(i)} key={i}>

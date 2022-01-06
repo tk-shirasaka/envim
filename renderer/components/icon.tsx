@@ -7,7 +7,7 @@ interface Props {
   color?: string;
   style?: { [k: string]: number | string };
   text?: number | string;
-  active?: boolean;
+  hover?: boolean;
   onClick?: (...args: any[]) => void,
 }
 
@@ -30,7 +30,7 @@ export class IconComponent extends React.Component<Props, States> {
     const classes = [];
 
     this.props.color && classes.push(`color-${this.props.color}`);
-    this.props.active && classes.push("active");
+    this.props.hover && classes.push("contents");
     this.props.onClick && classes.push("clickable");
 
     return (

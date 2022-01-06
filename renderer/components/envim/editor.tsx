@@ -191,7 +191,7 @@ export class EditorComponent extends React.Component<Props, States> {
     const { scale } = Setting.font;
 
     return (
-      <FlexComponent className="animate fade-in hover" position="absolute" overflow="visible" shadow={true} style={this.props.style}
+      <FlexComponent className="animate fade-in hover" position="absolute" overflow="visible" style={this.props.style} shadow
         onMouseDown={this.onMouseDown.bind(this)}
         onMouseMove={this.onMouseMove.bind(this)}
         onMouseUp={this.onMouseUp.bind(this)}
@@ -203,7 +203,7 @@ export class EditorComponent extends React.Component<Props, States> {
           <canvas style={{ ...styles.canvas, transform: `scale(${1 / scale})` }} width={this.props.editor.width * scale} height={this.props.editor.height * scale} ref={this.sp} />
         </FlexComponent>
         { this.props.grid === 1 || this.props.style.cursor === "not-allowed" ? null : (
-          <FlexComponent className="contents color-black" position="absolute" overflow="visible" padding={[0, 4]} rounded={[0, 0, 0, 4]} shadow={true} style={styles.actions}
+          <FlexComponent className="contents color-black" position="absolute" overflow="visible" padding={[0, 4]} rounded={[0, 0, 0, 4]} style={styles.actions} shadow
             onMouseDown={e => this.runCommand(e, "")}
             onMouseUp={e => this.runCommand(e, "")}
             onMouseEnter={this.onMouseEnter.bind(this)}
