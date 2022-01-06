@@ -31,6 +31,8 @@ const style = {
 
 export class InputComponent extends React.Component<Props, States> {
   private input: RefObject<HTMLInputElement> = createRef<HTMLInputElement>();
+  private queue?: { x: number, y: number, width: number, hl: string, zIndex: number };
+  private transition: boolean = false;
 
   constructor(props: Props) {
     super(props);
@@ -54,14 +56,20 @@ export class InputComponent extends React.Component<Props, States> {
   }
 
   private onCursor(cursor: { x: number, y: number, width: number, hl: string, zIndex: number }) {
-    const style = this.state.style;
+    if (this.transition) {
+      this.queue = cursor;
+    } else {
+      const style = this.state.style;
 
-    style.width = this.getWidth(cursor.width, this.state.shape);
-    style.transform = `translate(${col2X(cursor.x)}px, ${row2Y(cursor.y)}px)`;
-    style.zIndex = cursor.zIndex;
-    style.color = Highlights.color(cursor.hl, "foreground", { reverse: true, normal: true });
-    style.background = Highlights.color(cursor.hl, "background", { reverse: true, normal: true });
-    this.setState({ style });
+      style.width = this.getWidth(cursor.width, this.state.shape);
+      style.transform = `translate(${col2X(cursor.x)}px, ${row2Y(cursor.y)}px)`;
+      style.zIndex = cursor.zIndex;
+      style.color = Highlights.color(cursor.hl, "foreground", { reverse: true, normal: true });
+      style.background = Highlights.color(cursor.hl, "background", { reverse: true, normal: true });
+
+      delete(this.queue);
+      this.setState({ style });
+    }
   }
 
   private onBusy(busy: boolean) {
@@ -115,16 +123,25 @@ export class InputComponent extends React.Component<Props, States> {
     this.setState({ composit: false, style });
   }
 
+  private onTransitionEnd() {
+    this.transition = false;
+
+    this.queue && this.onCursor(this.queue);
+  }
+
   private getStyle() {
-    return { ...style, ...this.state.style };
+    return this.state.composit
+      ? { ...style, ...this.state.style, animationDuration: "0s" }
+      : { ...style, ...this.state.style };
   }
 
   render() {
     return (
-      <input className={this.state.composit ? "" : "animate blink"} style={this.getStyle()} autoFocus={true} ref={this.input}
+      <input className="animate blink" style={this.getStyle()} autoFocus={true} ref={this.input}
         onKeyDown={this.onKeyDown.bind(this)}
         onCompositionStart={this.onCompositionStart.bind(this)}
         onCompositionEnd={this.onCompositionEnd.bind(this)}
+        onTransitionEnd={this.onTransitionEnd.bind(this)}
       />
     );
   }
