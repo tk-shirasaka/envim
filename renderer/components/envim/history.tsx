@@ -128,7 +128,7 @@ export class HistoryComponent extends React.Component<Props, States> {
   render() {
     return (
       <FlexComponent className="animate" direction="column-reverse" position="absolute" style={this.getScopeStyle()} onMouseEnter={this.onMouseEnter.bind(this)} onMouseLeave={this.onMouseLeave.bind(this)} shadow>
-        <FlexComponent className="color-black" style={this.props}>
+        <FlexComponent color="black" style={this.props}>
           { this.state.mode && <FlexComponent className="animate fade-in" margin={["auto", 4]} rounded={[4]} shadow><MessageComponent message={this.state.mode} open /></FlexComponent> }
           { this.state.command && <FlexComponent className="animate fade-in" margin={["auto", 4]} rounded={[4]} shadow><MessageComponent message={this.state.command} open /></FlexComponent> }
           { this.state.ruler && <FlexComponent className="animate fade-in" margin={["auto", 4]} rounded={[4]} shadow><MessageComponent message={this.state.ruler} open /></FlexComponent> }

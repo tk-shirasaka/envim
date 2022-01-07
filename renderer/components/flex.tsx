@@ -2,6 +2,9 @@ import React, { MouseEvent, WheelEvent } from "react";
 
 interface Props {
   className?: string;
+  hover?: boolean;
+  color?: string;
+  active?: boolean;
   title?: string;
 
   onClick?: (e: MouseEvent) => void;
@@ -34,8 +37,22 @@ interface States {
 }
 
 export class FlexComponent extends React.Component<Props, States> {
+  private getClassName() {
+    const classes: string[] = [];
+    const props = this.props;
+
+    props.className && classes.push(props.className);
+    props.hover && classes.push("contents");
+    props.color && classes.push(`color-${props.color}`);
+    props.color && props.active && classes.push("active");
+    props.color && props.onClick && classes.push("clickable");
+
+    return classes.join(" ");
+  }
+
   private getStyle() {
     const props = this.props;
+
     return {
         display: "flex",
         borderStyle: "solid",
@@ -61,7 +78,7 @@ export class FlexComponent extends React.Component<Props, States> {
   render() {
     return (
       <div
-        className={this.props.className}
+        className={this.getClassName()}
         title={this.props.title}
         onClick={this.props.onClick}
         onMouseDown={this.props.onMouseDown}

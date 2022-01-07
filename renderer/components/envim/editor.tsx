@@ -179,7 +179,7 @@ export class EditorComponent extends React.Component<Props, States> {
     return (
       <MenuComponent color="gray-fg" style={styles.icon} onClick={e => this.runCommand(e, command.main)} label={label}>
         { this.state.bufs.map(({ name, buffer, active }, i) => (
-          <FlexComponent className={`color-black ${active ? "active" : "clickable"}` } title={name} padding={[0, 4]} onClick={e => this.runCommand(e, `${command.sub}${buffer}`)} key={i}>
+          <FlexComponent color="black" active={active} title={name} padding={[0, 4]} onClick={e => this.runCommand(e, `${command.sub}${buffer}`)} key={i}>
             { name.replace(/.*\//, "…/") }
           </FlexComponent>
         )) }
@@ -203,7 +203,7 @@ export class EditorComponent extends React.Component<Props, States> {
           <canvas style={{ ...styles.canvas, transform: `scale(${1 / scale})` }} width={this.props.editor.width * scale} height={this.props.editor.height * scale} ref={this.sp} />
         </FlexComponent>
         { this.props.grid === 1 || this.props.style.cursor === "not-allowed" ? null : (
-          <FlexComponent className="contents color-black" position="absolute" overflow="visible" padding={[0, 4]} rounded={[0, 0, 0, 4]} style={styles.actions} shadow
+          <FlexComponent color="black" position="absolute" overflow="visible" padding={[0, 4]} rounded={[0, 0, 0, 4]} style={styles.actions} shadow hover
             onMouseDown={e => this.runCommand(e, "")}
             onMouseUp={e => this.runCommand(e, "")}
             onMouseEnter={this.onMouseEnter.bind(this)}

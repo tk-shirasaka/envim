@@ -173,10 +173,10 @@ export class EnvimComponent extends React.Component<Props, States> {
             <NotificateComponent />
             <InputComponent />
           </FlexComponent>
-          <FlexComponent className="color-black" grow={1} shrink={1} shadow />
+          <FlexComponent color="black" grow={1} shrink={1} shadow />
         </FlexComponent>
         { Setting.options.ext_messages && <HistoryComponent {...this.footer} /> }
-        { this.state.pause && <FlexComponent className="color-black" position="absolute" style={styles.backdrop} /> }
+        { this.state.pause && <FlexComponent color="black" position="absolute" style={styles.backdrop} /> }
       </div>
     );
   }

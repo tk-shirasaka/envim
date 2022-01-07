@@ -107,8 +107,8 @@ export class TablineComponent extends React.Component<Props, States> {
     const icon = icons.filter(icon => tab.filetype.search(icon.type) >= 0 || tab.buftype.search(icon.type) >= 0).shift();
 
     return !icon ? null : (
-      <FlexComponent key={i} className={`animate fade-in hover color-${icon.color}-fg-dark clickable`} title={tab.name} shrink={1} margin={[4, 4, 0, 0]} padding={[0, 0, 0, 8]} rounded={[4, 4, 0, 0]} shadow={tab.active} style={styles.tab}>
-        <IconComponent style={styles.name} font={icon.font} text={tab.name.replace(/.*\//, "…/")} onClick={e => this.runCommand(e, `tabnext ${i + 1}`,)} />
+      <FlexComponent key={i} className="animate fade-in hover" color={`${icon.color}-fg-dark`} title={tab.name} shrink={1} margin={[4, 4, 0, 0]} padding={[0, 0, 0, 8]} rounded={[4, 4, 0, 0]} shadow={tab.active} style={styles.tab} onClick={e => this.runCommand(e, `tabnext ${i + 1}`,)}>
+        <IconComponent style={styles.name} font={icon.font} text={tab.name.replace(/.*\//, "…/")} />
         <IconComponent color="gray-fg" style={styles.space} font="" onClick={e => this.runCommand(e, this.state.tabs.length > 1 ? `confirm tabclose ${i + 1}` : "confirm quitall")} hover />
       </FlexComponent>
     );
@@ -121,8 +121,8 @@ export class TablineComponent extends React.Component<Props, States> {
         { menu.submenus?.map((submenu, i) => {
           const command = `emenu ${menu.name.replace(/([\. ])/g, "\\$1")}.${submenu.name.replace(/([\. ])/g, "\\$1")}`;
           return submenu.mappings[sname]?.enabled && submenu.mappings[sname]?.rhs
-            ? <div key={i} className="color-black clickable" onClick={e => this.runCommand(e, command)}>{ submenu.name }</div>
-            : <div key={i} className="color-gray-fg-dark" onClick={e => this.runCommand(e, "")}>{ submenu.name }</div>
+            ? <FlexComponent key={i} color="black" onClick={e => this.runCommand(e, command)}>{ submenu.name }</FlexComponent>
+            : <FlexComponent key={i} color="gray-fg-dark">{ submenu.name }</FlexComponent>
         })}
       </div>
     );
@@ -153,10 +153,10 @@ export class TablineComponent extends React.Component<Props, States> {
 
   render() {
     return (
-      <FlexComponent className="color-black" overflow="visible" style={this.props} shadow>
+      <FlexComponent color="black" overflow="visible" style={this.props} shadow>
         {this.state.tabs.map((tab, i) => this.renderTab(i, tab))}
         <MenuComponent color="green-fg" style={styles.space} onClick={e => this.runCommand(e, "$tabnew")} label="">
-          { this.state.bookmarks.map(({ name, path }, i) => <div className="color-black clickable" key={i} onClick={e => this.runCommand(e, `$tabnew | cd ${path}`)}>{ name }</div>) }
+          { this.state.bookmarks.map(({ name, path }, i) => <FlexComponent color="black" key={i} onClick={e => this.runCommand(e, `$tabnew | cd ${path}`)}>{ name }</FlexComponent>) }
         </MenuComponent>
         { this.renderBookmark() }
         <div className="space dragable" />

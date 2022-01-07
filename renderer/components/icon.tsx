@@ -27,14 +27,8 @@ const styles = {
 
 export class IconComponent extends React.Component<Props, States> {
   render() {
-    const classes = [];
-
-    this.props.color && classes.push(`color-${this.props.color}`);
-    this.props.hover && classes.push("contents");
-    this.props.onClick && classes.push("clickable");
-
     return (
-      <FlexComponent className={classes.join(" ")} vertical="center" shrink={1} padding={[0, 4]} style={this.props.style} onClick={this.props.onClick}>
+      <FlexComponent vertical="center" shrink={1} padding={[0, 4]} { ...this.props }>
         <i>{ this.props.font }</i>
         { this.props.text && <div style={styles.text}>{ this.props.text }</div> }
       </FlexComponent>

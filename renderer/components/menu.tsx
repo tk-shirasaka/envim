@@ -47,6 +47,9 @@ export class MenuComponent extends React.Component<Props, States> {
     this.updateProperty();
   }
 
+  private onClick() {
+  }
+
   private updateProperty() {
     const haschild = !(Array.isArray(this.props.children) && this.props.children.length === 0);
 
@@ -62,8 +65,8 @@ export class MenuComponent extends React.Component<Props, States> {
     const style = { ...styles.menu, ...(this.align === "left" ? styles.left : styles.right) };
 
     return this.state.haschild === false ? null : (
-      <FlexComponent className="contents" overflow="visible">
-        <FlexComponent className="color-black" direction="column" position="absolute" overflow="visible" padding={[4]} border={[1]} rounded={[4]} style={style} shadow>
+      <FlexComponent overflow="visible" hover>
+        <FlexComponent color="black" direction="column" position="absolute" overflow="visible" padding={[4]} border={[1]} rounded={[4]} style={style} shadow>
           { this.props.children }
         </FlexComponent>
       </FlexComponent>
@@ -74,7 +77,7 @@ export class MenuComponent extends React.Component<Props, States> {
     return (
       <FlexComponent vertical="center" overflow="visible">
         <div className="animate hover" ref={this.div}>
-          <div className={`color-${this.props.color} clickable`} style={this.props.style} onClick={this.props?.onClick}>{ this.props.label }</div>
+          <FlexComponent color={this.props.color} style={this.props.style} onClick={this.props.onClick || this.onClick}>{ this.props.label }</FlexComponent>
           { this.renderMenu() }
         </div>
       </FlexComponent>
