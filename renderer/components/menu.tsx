@@ -3,6 +3,7 @@ import React, { createRef, RefObject } from "react";
 import { FlexComponent } from "./flex";
 
 interface Props {
+  side?: boolean;
   label: string;
   color: string;
   style: Object;
@@ -22,11 +23,17 @@ const styles = {
     whiteSpace,
     boxSizing,
   },
-  left: {
+  vleft: {
     left: 0,
   },
-  right: {
+  vright: {
     right: 0,
+  },
+  hleft: {
+    left: "100%",
+  },
+  hright: {
+    right: "100%",
   },
 };
 
@@ -61,12 +68,14 @@ export class MenuComponent extends React.Component<Props, States> {
     }
   }
 
-  private renderMenu() {
-    const style = { ...styles.menu, ...(this.align === "left" ? styles.left : styles.right) };
+  private renderMenu(direction: "v" | "h") {
+    if (this.state.haschild === false || (this.props.side ? "h" : "v") !== direction) return null;
 
-    return this.state.haschild === false ? null : (
+    const style = { ...styles.menu, ...(styles[`${direction}${this.align}`]) };
+
+    return (
       <FlexComponent overflow="visible" hover>
-        <FlexComponent color="black" direction="column" position="absolute" overflow="visible" padding={[4]} border={[1]} rounded={[4]} style={style} shadow>
+        <FlexComponent color="black" direction="column" position="absolute" overflow="visible" padding={[4]} border={[1]} rounded={[2]} style={style} shadow>
           { this.props.children }
         </FlexComponent>
       </FlexComponent>
@@ -76,9 +85,10 @@ export class MenuComponent extends React.Component<Props, States> {
   render() {
     return (
       <FlexComponent vertical="center" overflow="visible">
-        <div className="animate hover" ref={this.div}>
+        <div className="animate hover space" ref={this.div}>
+          { this.renderMenu("h") }
           <FlexComponent color={this.props.color} style={this.props.style} onClick={this.props.onClick || this.onClick}>{ this.props.label }</FlexComponent>
-          { this.renderMenu() }
+          { this.renderMenu("v") }
         </div>
       </FlexComponent>
     );

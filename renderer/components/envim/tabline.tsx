@@ -95,7 +95,6 @@ export class TablineComponent extends React.Component<Props, States> {
   }
 
   private onMenu(menus: IMenu[]) {
-    menus = menus.filter(menu => !menu.hidden).map(menu => ({ ...menu, submenus: menu.submenus?.filter(submenu => !submenu.submenus && !submenu.hidden) }));
     this.setState({ menus });
   }
 
@@ -114,18 +113,22 @@ export class TablineComponent extends React.Component<Props, States> {
     );
   }
 
-  private renderSubmenu(menu: IMenu) {
+  private renderSubmenu(menus: IMenu[], base: string[]) {
     const sname = this.state.mode?.short_name;
-    return !sname ? null : (
-      <div>
-        { menu.submenus?.map((submenu, i) => {
-          const command = `emenu ${menu.name.replace(/([\. ])/g, "\\$1")}.${submenu.name.replace(/([\. ])/g, "\\$1")}`;
-          return submenu.mappings[sname]?.enabled && submenu.mappings[sname]?.rhs
-            ? <FlexComponent key={i} color="black" onClick={e => this.runCommand(e, command)}>{ submenu.name }</FlexComponent>
-            : <FlexComponent key={i} color="gray-fg-dark">{ submenu.name }</FlexComponent>
-        })}
-      </div>
-    );
+
+    return !sname ? null : menus.map((menu, i) => {
+      const command = [ ...base, menu.name.replace(/([\. ])/g, "\\$1") ];
+
+      return menu.submenus?.length ? (
+        <MenuComponent key={i} side={base.length > 0} color="black" style={base.length ? {} : styles.menu} label={menu.name}>
+          { this.renderSubmenu(menu.submenus, command)}
+        </MenuComponent>
+      ) : (
+        menu.mappings[sname]?.enabled && menu.mappings[sname]?.rhs
+          ? <FlexComponent key={i} color="black" onClick={e => this.runCommand(e, `emenu ${command.join(".")}`)}>{ menu.name }</FlexComponent>
+          : <FlexComponent key={i} color="gray-fg-dark">{ menu.name }</FlexComponent>
+      );
+    });
   }
 
   private renderBookmark() {
@@ -160,11 +163,7 @@ export class TablineComponent extends React.Component<Props, States> {
         </MenuComponent>
         { this.renderBookmark() }
         <div className="space dragable" />
-        { this.state.menus.map((menu, i) => (
-          <MenuComponent key={i} color="black" style={styles.menu} label={menu.name}>
-            { this.renderSubmenu(menu) }
-          </MenuComponent>
-        ))}
+        { this.renderSubmenu(this.state.menus, []) }
       </FlexComponent>
     );
   }
