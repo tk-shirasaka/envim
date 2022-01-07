@@ -36,7 +36,9 @@ const position: "absolute" = "absolute";
 const styles = {
   actions: {
     top: 0,
+    left: 0,
     right: 0,
+    bottom: 0,
   },
   icon: {
     paddingLeft: 4,
@@ -203,17 +205,19 @@ export class EditorComponent extends React.Component<Props, States> {
           <canvas style={{ ...styles.canvas, transform: `scale(${1 / scale})` }} width={this.props.editor.width * scale} height={this.props.editor.height * scale} ref={this.sp} />
         </FlexComponent>
         { this.props.grid === 1 || this.props.style.cursor === "not-allowed" ? null : (
-          <FlexComponent color="black" position="absolute" overflow="visible" padding={[0, 4]} rounded={[0, 0, 0, 4]} style={styles.actions} shadow hover
-            onMouseDown={e => this.runCommand(e, "")}
-            onMouseUp={e => this.runCommand(e, "")}
-            onMouseEnter={this.onMouseEnter.bind(this)}
-            onMouseLeave={this.onMouseLeave.bind(this)}
-          >
-            { this.renderMenu("", { main: "edit", sub: "buffer "}) }
-            { this.renderMenu("", { main: "vnew", sub: "vsplit #"}) }
-            { this.renderMenu("", { main: "new", sub: "split #"}) }
-            <IconComponent color="gray-fg" font="" onClick={e => this.runCommand(e, "write")} />
-            { this.renderMenu("", { main: "confirm quit", sub: "confirm bdelete "}) }
+          <FlexComponent color="black-fg" vertical="start" horizontal="end" position="absolute" overflow="visible" border={[1]} style={styles.actions} hover>
+            <FlexComponent color="black" overflow="visible" margin={[-1, -1, 0, 0]} padding={[0, 4]} rounded={[0, 0, 0, 4]} shadow
+              onMouseDown={e => this.runCommand(e, "")}
+              onMouseUp={e => this.runCommand(e, "")}
+              onMouseEnter={this.onMouseEnter.bind(this)}
+              onMouseLeave={this.onMouseLeave.bind(this)}
+            >
+              { this.renderMenu("", { main: "edit", sub: "buffer "}) }
+              { this.renderMenu("", { main: "vnew", sub: "vsplit #"}) }
+              { this.renderMenu("", { main: "new", sub: "split #"}) }
+              <IconComponent color="gray-fg" font="" onClick={e => this.runCommand(e, "write")} />
+              { this.renderMenu("", { main: "confirm quit", sub: "confirm bdelete "}) }
+            </FlexComponent>
           </FlexComponent>
         )}
       </FlexComponent>
