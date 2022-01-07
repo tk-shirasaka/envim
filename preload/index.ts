@@ -7,7 +7,6 @@ const counter: number[] = [];
 const on = (event: string, callback: (...args: any[]) => void) => {
   emit.on(event, callback);
   ipcRenderer.on(event, (_: IpcRendererEvent, ...args: any[]) => {
-    counter.length && share("envim:pause", false);
     share(event, ...args);
     share("debug", event, ...args);
   });
