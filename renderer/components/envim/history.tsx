@@ -20,7 +20,6 @@ interface States {
   command?: IMessage;
   ruler?: IMessage;
   enter: boolean;
-  select: number;
   debug: string;
 }
 
@@ -41,7 +40,7 @@ export class HistoryComponent extends React.Component<Props, States> {
   constructor(props: Props) {
     super(props);
 
-    this.state = { messages: [], enter: false, select: -1, debug: "" };
+    this.state = { messages: [], enter: false, debug: "" };
     Emit.on("messages:mode", this.onMode.bind(this));
     Emit.on("messages:command", this.onCommand.bind(this));
     Emit.on("messages:ruler", this.onRuler.bind(this));
@@ -79,7 +78,7 @@ export class HistoryComponent extends React.Component<Props, States> {
   }
 
   private onClear() {
-    this.setState({ messages: [], select: -1 });
+    this.setState({ messages: [] });
   }
 
   private onMouseEnter() {
@@ -115,12 +114,6 @@ export class HistoryComponent extends React.Component<Props, States> {
     }
   }
 
-  private toggleSelect(select: number) {
-    if (this.state.messages[select].kind === "debug") {
-      this.setState({ select: this.state.select === select ? -1 : select });
-    }
-  }
-
   private getScopeStyle() {
     return { ...styles.scope, ...this.props, ...( this.state.enter ? styles.open : {} ) };
   }
@@ -129,15 +122,15 @@ export class HistoryComponent extends React.Component<Props, States> {
     return (
       <FlexComponent className="animate" direction="column-reverse" position="absolute" style={this.getScopeStyle()} onMouseEnter={this.onMouseEnter.bind(this)} onMouseLeave={this.onMouseLeave.bind(this)} shadow>
         <FlexComponent color="black" style={this.props}>
-          { this.state.mode && <FlexComponent className="animate fade-in" margin={["auto", 4]} rounded={[4]} shadow><MessageComponent message={this.state.mode} open /></FlexComponent> }
-          { this.state.command && <FlexComponent className="animate fade-in" margin={["auto", 4]} rounded={[4]} shadow><MessageComponent message={this.state.command} open /></FlexComponent> }
-          { this.state.ruler && <FlexComponent className="animate fade-in" margin={["auto", 4]} rounded={[4]} shadow><MessageComponent message={this.state.ruler} open /></FlexComponent> }
+          { this.state.mode && <FlexComponent className="animate fade-in" margin={["auto", 4]} rounded={[4]} shadow><MessageComponent message={this.state.mode} open noaction /></FlexComponent> }
+          { this.state.command && <FlexComponent className="animate fade-in" margin={["auto", 4]} rounded={[4]} shadow><MessageComponent message={this.state.command} open noaction /></FlexComponent> }
+          { this.state.ruler && <FlexComponent className="animate fade-in" margin={["auto", 4]} rounded={[4]} shadow><MessageComponent message={this.state.ruler} open noaction /></FlexComponent> }
           <div className="space" />
           <IconComponent color={ this.state.debug ? "green-fg" : "gray-fg" } font="" onClick={this.toggleDebug.bind(this)} />
           <IconComponent color="red-fg" font="" onClick={this.onClear.bind(this)} />
         </FlexComponent>
         <FlexComponent direction="column" grow={1} shrink={1} rounded={[4, 4, 0, 0]} overflow="auto">
-          {this.state.messages.map((message, i) => <div key={i}><MessageComponent message={message} open={message.kind !== "debug" || this.state.select === i} onClick={() => this.toggleSelect(i)} /></div>)}
+          {this.state.messages.map((message, i) => <div key={i}><MessageComponent message={message} open={message.kind !== "debug"} /></div>)}
           <div className="space" style={Highlights.style("0")} ref={this.bottom} />
         </FlexComponent>
       </FlexComponent>

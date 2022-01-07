@@ -11,43 +11,70 @@ import { IconComponent } from "../icon";
 interface Props {
   message: IMessage;
   open: boolean;
-  onClick?: (...args: any[]) => void;
+  noaction?: boolean;
 }
 
 interface States {
+  open: boolean;
+  delete: boolean;
 }
 
 const styles = {
-  scope: {
-    cursor: "pointer",
-  },
   message: {
     textOverflow: "ellipsis",
     overflow: "hidden"
   },
+  action: {
+    height: 1,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
 };
 
 export class MessageComponent extends React.Component<Props, States> {
+  constructor(props: Props) {
+    super(props);
+
+    this.state = { open: this.props.open, delete: false };
+  }
+
+  private onToggleOpen() {
+    this.setState({ open: !this.state.open });
+  }
+
+  private onDelete() {
+    this.setState({ delete: true });
+  }
 
   private contentStyle(defaultStyle: { [k: string]: string }, style: { [k: string]: string }) {
     return { ...style, ...(defaultStyle.background === style.background ? { background: "" } : {}) };
   }
 
   render() {
-    if (this.props.message.contents.length === 0) return null;
+    if (this.props.message.contents.length === 0 || this.state.delete) return null;
 
     const icon = notificates.filter(icon => icon.kinds.indexOf(this.props.message.kind) >= 0)[0];
     const defaultHl = this.props.message.contents[0].hl;
     const defaultStyle = Highlights.style(defaultHl);
 
     return (
-      <FlexComponent grow={1} basis="0" style={styles.scope} onClick={this.props.onClick}>
+      <FlexComponent className="animate hover" grow={1} basis="0">
         <IconComponent font={icon.font} style={Highlights.style(defaultHl, { reverse: true })} />
-        <FlexComponent className="selectable" whiteSpace={this.props.open ? "pre-wrap" : "nowrap"} grow={1} shrink={1} basis="0" padding={[2, 4]} style={defaultStyle}>
+        <FlexComponent className="selectable" whiteSpace={this.state.open ? "pre-wrap" : "nowrap"} grow={1} shrink={1} basis="0" padding={[2, 4]} style={defaultStyle}>
           <div style={styles.message}>
             {this.props.message.contents.map(({hl, content}, i) => <span style={this.contentStyle(defaultStyle, hl === defaultHl ? defaultStyle : Highlights.style(hl))} key={i}>{ content }</span>)}
           </div>
         </FlexComponent>
+        { this.props.noaction ? null : (
+          <FlexComponent color="black" vertical="end" overflow="visible" position="absolute" style={styles.action} hover>
+            <div className="space" />
+            <FlexComponent color="black" shrink={1} padding={[0, 4]} rounded={[4, 0, 0, 0]} shadow>
+              <IconComponent color="gray-fg" font={this.state.open ? "" : "ﬥ"} onClick={this.onToggleOpen.bind(this)} />
+              <IconComponent color="gray-fg" font="" onClick={this.onDelete.bind(this)}/>
+            </FlexComponent>
+          </FlexComponent>
+        ) }
       </FlexComponent>
     );
   }

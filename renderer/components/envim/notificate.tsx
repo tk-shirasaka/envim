@@ -51,18 +51,11 @@ export class NotificateComponent extends React.Component<Props, States> {
     this.setState({ messages: [] });
   }
 
-  private onClose(i: number) {
-    const messages = this.state.messages;
-
-    messages.splice(i, 1);
-    this.setState({ messages });
-  }
-
   render() {
     return this.state.messages.length === 0 ? null : (
       <FlexComponent direction="column-reverse" padding={[0, 4]} position="absolute" style={styles.scope}>
         {this.state.messages.map((message, i) =>
-          <FlexComponent className="animate slide-right" margin={[4, 0]} rounded={[4]} style={styles.messages} key={i} shadow><MessageComponent message={message} onClick={() => this.onClose(i)} open /></FlexComponent>
+          <FlexComponent className="animate slide-right" margin={[4, 0]} rounded={[4]} style={styles.messages} key={i} shadow><MessageComponent message={message} open /></FlexComponent>
         )}
       </FlexComponent>
     );
