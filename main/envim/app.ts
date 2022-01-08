@@ -343,9 +343,9 @@ export class App {
   }
 
   private popupmenuShow(items: string[][], selected: number, row: number, col: number, grid: number) {
-    const height = Math.min(5, items.length);
     const { x, y } = Grids.exist(grid) ? Grids.get(grid).getInfo() : { y: 1, x: Grids.get().getInfo().width * 0.1 + 3 };
     const parent = Grids.get().getInfo();
+    const height = Math.min(Math.max(row, parent.height - row - 1), items.length);
 
     row += y;
     col += x;
@@ -359,6 +359,7 @@ export class App {
       start: 0,
       row,
       col,
+      height,
     });
   }
 

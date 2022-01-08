@@ -15,6 +15,7 @@ interface States {
   selected: number;
   row: number;
   col: number;
+  height: number;
 }
 
 const styles = {
@@ -24,14 +25,13 @@ const styles = {
 };
 
 export class PopupmenuComponent extends React.Component<Props, States> {
-  private maxline: number = 5;
   private width: number = 0;
   private scope: RefObject<HTMLDivElement> = createRef<HTMLDivElement>();
 
   constructor(props: Props) {
     super(props);
 
-    this.state = { items: [], selected: -1, row: 0, col: 0 };
+    this.state = { items: [], selected: -1, row: 0, col: 0, height: 0 };
     Emit.on("popupmenu:show", this.onPopupmenu);
     Emit.on("popupmenu:select", this.onSelect);
     Emit.on("popupmenu:hide", this.offPopupmenu);
@@ -39,11 +39,10 @@ export class PopupmenuComponent extends React.Component<Props, States> {
 
   componentDidUpdate() {
     if (this.scope.current && this.width === 0 && this.state.items.length > 0) {
-      const { row, col, items } = this.state;
+      const { row, col, height } = this.state;
       const width = x2Col(this.scope.current.clientWidth) + 2;
-      const length = Math.min(items.length, this.maxline);
 
-      Emit.send("envim:api", "nvim_ui_pum_set_bounds", [width, length, row, col]);
+      Emit.send("envim:api", "nvim_ui_pum_set_bounds", [width, height, row, col]);
     }
   }
 
@@ -59,7 +58,7 @@ export class PopupmenuComponent extends React.Component<Props, States> {
   }
 
   private onSelect = (selected: number) => {
-    const top = row2Y(Math.max(0, Math.min(selected, this.state.items.length - this.maxline)));
+    const top = row2Y(Math.max(0, Math.min(selected, this.state.items.length - this.state.height)));
 
     this.setState({ selected });
     setTimeout(() => this.scope.current?.parentElement?.scrollTo({ top, behavior: "smooth" }));
@@ -80,7 +79,7 @@ export class PopupmenuComponent extends React.Component<Props, States> {
     return {
       ...styles.scope,
       transform: `translate(${col2X(this.state.col)}px, ${row2Y(this.state.row)}px)`,
-      maxHeight: row2Y(this.maxline),
+      height: row2Y(this.state.height),
     };
   }
 
