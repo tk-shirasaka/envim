@@ -59,7 +59,7 @@ export class InputComponent extends React.Component<Props, States> {
     if (this.transition) {
       this.queue = cursor;
     } else {
-      const style = this.state.style;
+      const style = { ...this.state.style };
 
       style.width = this.getWidth(cursor.width, this.state.shape);
       style.transform = `translate(${col2X(cursor.x)}px, ${row2Y(cursor.y)}px)`;
@@ -68,6 +68,7 @@ export class InputComponent extends React.Component<Props, States> {
       style.background = Highlights.color(cursor.hl, "background", { reverse: true, normal: true });
 
       delete(this.queue);
+      this.transition = this.state.style.width !== style.width || this.state.style.transform !== style.transform;
       this.setState({ style });
     }
   }
