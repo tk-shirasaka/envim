@@ -14,6 +14,7 @@ interface Props {
   onMouseEnter?: (e: MouseEvent) => void;
   onMouseLeave?: (e: MouseEvent) => void;
   onWheel?: (e: WheelEvent) => void;
+  onTransitionEnd?: () => void;
 
   direction?: "row" | "column" | "row-reverse" | "column-reverse";
   shadow?: boolean;
@@ -87,6 +88,7 @@ export class FlexComponent extends React.Component<Props, States> {
         onMouseEnter={this.props.onMouseEnter}
         onMouseLeave={this.props.onMouseLeave}
         onWheel={this.props.onWheel}
+        onTransitionEnd={this.props.onTransitionEnd}
         style={this.getStyle()}
       >
         { this.props.children }

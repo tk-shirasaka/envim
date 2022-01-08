@@ -1,4 +1,4 @@
-import React, { createRef, RefObject, KeyboardEvent, CompositionEvent } from "react";
+import React, { createRef, RefObject, KeyboardEvent } from "react";
 
 import { IMode } from "../../../common/interface";
 
@@ -7,26 +7,31 @@ import { keycode } from "../../utils/keycode";
 import { Highlights } from "../../utils/highlight";
 import { row2Y, col2X } from "../../utils/size";
 
+import { FlexComponent } from "../flex";
+
 interface Props {
 }
 
 interface States {
-  style: { transform: string; width: number, zIndex: number; color: string; background: string; };
+  style: { pointerEvent: "none"; transform: string; minWidth: number, height: number, zIndex: number; color: string; background: string; };
   composit: boolean;
+  value: string;
   busy: boolean;
   shape: "block" | "vertical" | "horizontal";
 }
 
 const position: "absolute" = "absolute";
-const pointerEvents: "none" = "none";
-const style = {
-  position,
-  display: "block",
-  border: "none",
-  padding: 0,
-  margin: 0,
-  caretColor: "transparent",
-  pointerEvents,
+const styles = {
+  input: {
+    position,
+    width: "100%",
+    padding: 0,
+    margin: 0,
+    caretColor: "transparent",
+  },
+  text: {
+    visibility: "hidden",
+  },
 };
 
 export class InputComponent extends React.Component<Props, States> {
@@ -37,7 +42,7 @@ export class InputComponent extends React.Component<Props, States> {
   constructor(props: Props) {
     super(props);
 
-    this.state = { style: { transform: "", width: col2X(1), zIndex: 0, color: "none", background: "none" }, composit: false, busy: false, shape: "block" };
+    this.state = { style: { pointerEvent: "none", transform: "", minWidth: col2X(1), height: row2Y(1), zIndex: 0, color: "", background: "" }, composit: false, value: "", busy: false, shape: "block" };
     Emit.on("envim:focus", this.onFocus);
     Emit.on("grid:cursor", this.onCursor);
     Emit.on("grid:busy", this.onBusy);
@@ -61,14 +66,14 @@ export class InputComponent extends React.Component<Props, States> {
     } else {
       const style = { ...this.state.style };
 
-      style.width = this.getWidth(cursor.width, this.state.shape);
+      style.minWidth = this.getWidth(cursor.width, this.state.shape);
       style.transform = `translate(${col2X(cursor.x)}px, ${row2Y(cursor.y)}px)`;
       style.zIndex = cursor.zIndex;
       style.color = Highlights.color(cursor.hl, "foreground", { reverse: true, normal: true });
       style.background = Highlights.color(cursor.hl, "background", { reverse: true, normal: true });
 
       delete(this.queue);
-      this.transition = this.state.style.width !== style.width || this.state.style.transform !== style.transform;
+      this.transition = this.state.style.minWidth !== style.minWidth || this.state.style.transform !== style.transform;
       this.setState({ style });
     }
   }
@@ -81,47 +86,42 @@ export class InputComponent extends React.Component<Props, States> {
     const style = this.state.style;
     const shape = mode.cursor_shape;
 
-    style.width = this.getWidth(1, shape);
+    style.minWidth = this.getWidth(1, shape);
 
     this.setState({ style, shape });
   }
 
   private getWidth(width: number, shape: "block" | "vertical" | "horizontal") {
     if (this.state.busy) return 0;
-    if (width > 1) return col2X(width);
     return shape === "block" ? col2X(width) : 2;
   }
 
   private onKeyDown = (e: KeyboardEvent) => {
-    const input = e.target as HTMLInputElement;
+    if (this.state.composit) return;
     const code = keycode(e);
-
-    if (input.value && code === "<CR>") return;
 
     e.stopPropagation();
     e.preventDefault();
 
-    if (this.state.composit) {
-      const style = this.state.style;
-      style.width = this.getWidth(input.value.length * 2, this.state.shape);
-      this.setState({ style });
-    } else {
-      code && Emit.send("envim:input", code);
-    }
+    code && Emit.send("envim:input", code);
+  }
+
+  private onKeyUp = () => {
+    if (this.state.composit === false) return;
+
+    this.setState({ value: this.input.current?.value || "" });
   }
 
   private onCompositionStart = () => {
     this.setState({ composit: true });
   }
 
-  private onCompositionEnd = (e: CompositionEvent) => {
-    const input = e.target as HTMLInputElement;
-    const style = this.state.style;
-
-    input.value && Emit.send("envim:input", input.value);
-    input.value = "";
-    style.width = this.getWidth(1, this.state.shape);
-    this.setState({ composit: false, style });
+  private onCompositionEnd = () => {
+    if (this.input.current) {
+      Emit.send("envim:input", this.input.current.value);
+      this.input.current.value = "";
+    }
+    this.setState({ composit: false, value: "" });
   }
 
   private onTransitionEnd = () => {
@@ -130,20 +130,17 @@ export class InputComponent extends React.Component<Props, States> {
     this.queue && this.onCursor(this.queue);
   }
 
-  private getStyle() {
-    return this.state.composit
-      ? { ...style, ...this.state.style, animationDuration: "0s" }
-      : { ...style, ...this.state.style };
-  }
-
   render() {
     return (
-      <input className="animate blink" style={this.getStyle()} autoFocus={true} ref={this.input}
-        onKeyDown={this.onKeyDown}
-        onCompositionStart={this.onCompositionStart}
-        onCompositionEnd={this.onCompositionEnd}
-        onTransitionEnd={this.onTransitionEnd}
-      />
+      <FlexComponent className={this.state.composit ? "" : "animate blink"} style={this.state.style} onTransitionEnd={this.onTransitionEnd}>
+        <input type="text" style={styles.input} ref={this.input} autoFocus
+          onKeyDown={this.onKeyDown}
+          onKeyUp={this.onKeyUp}
+          onCompositionStart={this.onCompositionStart}
+          onCompositionEnd={this.onCompositionEnd}
+          />
+        <FlexComponent style={styles.text}>{ this.state.value }</FlexComponent>
+      </FlexComponent>
     );
   }
 }
