@@ -124,7 +124,7 @@ export class CmdlineComponent extends React.Component<Props, States> {
 
   render() {
     return this.state.cmdline.length > 0 && (
-      <FlexComponent className="animate slide-down" position="absolute" whiteSpace="pre-wrap" rounded={[0, 0, 4, 4]} style={this.getScopeStyle()} shadow>
+      <FlexComponent animate="slide-down" position="absolute" whiteSpace="pre-wrap" rounded={[0, 0, 4, 4]} style={this.getScopeStyle()} shadow>
         <div className="bold">{ this.state.prompt }</div>
         <div>
           {this.state.contents.map((content, i) => <div key={i}>{ this.renderCmdline(content) }</div>)}

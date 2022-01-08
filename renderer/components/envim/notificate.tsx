@@ -55,7 +55,7 @@ export class NotificateComponent extends React.Component<Props, States> {
     return this.state.messages.length === 0 ? null : (
       <FlexComponent direction="column-reverse" padding={[0, 4]} position="absolute" style={styles.scope}>
         {this.state.messages.map((message, i) =>
-          <FlexComponent className="animate slide-right" margin={[4, 0]} rounded={[4]} style={styles.messages} key={i} shadow><MessageComponent message={message} open /></FlexComponent>
+          <FlexComponent animate="slide-right" margin={[4, 0]} rounded={[4]} style={styles.messages} key={i} shadow><MessageComponent message={message} open /></FlexComponent>
         )}
       </FlexComponent>
     );

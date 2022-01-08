@@ -1,7 +1,8 @@
 import React, { MouseEvent, WheelEvent } from "react";
 
 interface Props {
-  className?: string;
+  selectable?: boolean;
+  animate?: string;
   hover?: boolean;
   color?: string;
   active?: boolean;
@@ -42,7 +43,8 @@ export class FlexComponent extends React.Component<Props, States> {
     const classes: string[] = [];
     const props = this.props;
 
-    props.className && classes.push(props.className);
+    props.selectable && classes.push("selectable");
+    props.animate && classes.push(`animate ${props.animate}`);
     props.hover && classes.push("contents");
     props.color && classes.push(`color-${props.color}`);
     props.color && props.active && classes.push("active");

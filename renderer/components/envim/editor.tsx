@@ -193,7 +193,7 @@ export class EditorComponent extends React.Component<Props, States> {
     const { scale } = Setting.font;
 
     return (
-      <FlexComponent className="animate fade-in hover" position="absolute" overflow="visible" style={this.props.style} shadow
+      <FlexComponent animate="fade-in hover" position="absolute" overflow="visible" style={this.props.style} shadow
         onMouseDown={this.onMouseDown}
         onMouseMove={this.onMouseMove}
         onMouseUp={this.onMouseUp}

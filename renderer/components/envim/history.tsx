@@ -3,7 +3,6 @@ import React, { createRef, RefObject } from "react";
 import { IMessage } from "../../../common/interface";
 
 import { Emit } from "../../utils/emit";
-import { Highlights } from "../../utils/highlight";
 
 import { FlexComponent } from "../flex";
 import { IconComponent } from "../icon";
@@ -19,7 +18,6 @@ interface States {
   mode?: IMessage;
   command?: IMessage;
   ruler?: IMessage;
-  enter: boolean;
   debug: string;
 }
 
@@ -28,8 +26,10 @@ const styles = {
     zIndex: 10,
     bottom: 0,
   },
-  open: {
-    height: "30%",
+  history: {
+    maxHeight: 200,
+    width: "100%",
+    bottom: 0,
   },
 };
 
@@ -40,7 +40,7 @@ export class HistoryComponent extends React.Component<Props, States> {
   constructor(props: Props) {
     super(props);
 
-    this.state = { messages: [], enter: false, debug: "" };
+    this.state = { messages: [], debug: "" };
     Emit.on("messages:mode", this.onMode);
     Emit.on("messages:command", this.onCommand);
     Emit.on("messages:ruler", this.onRuler);
@@ -83,19 +83,10 @@ export class HistoryComponent extends React.Component<Props, States> {
   private onMouseEnter = () => {
     Emit.send("envim:command", "messages");
     this.timer = +setInterval(() => Emit.send("envim:command", "messages"), 500);
-    this.setState({ enter: true})
   }
 
   private onMouseLeave = () => {
-    const timer = this.timer;
-    this.timer = 0;
-
-    setTimeout(() => {
-      if (this.timer) return;
-
-      clearInterval(timer);
-      this.setState({ enter: false})
-    }, 500);
+    clearInterval(this.timer);
   }
 
   private toggleDebug = async () => {
@@ -117,24 +108,22 @@ export class HistoryComponent extends React.Component<Props, States> {
     }
   }
 
-  private getScopeStyle() {
-    return { ...styles.scope, ...this.props, ...( this.state.enter ? styles.open : {} ) };
-  }
-
   render() {
     return (
-      <FlexComponent className="animate" direction="column-reverse" position="absolute" style={this.getScopeStyle()} onMouseEnter={this.onMouseEnter} onMouseLeave={this.onMouseLeave} shadow>
+      <FlexComponent animate="hover" direction="column-reverse" position="absolute" overflow="visible" style={styles.scope} onMouseEnter={this.onMouseEnter} onMouseLeave={this.onMouseLeave}>
         <FlexComponent color="black" style={this.props}>
-          { this.state.mode && <FlexComponent className="animate fade-in" margin={["auto", 4]} rounded={[4]} shadow><MessageComponent message={this.state.mode} open noaction /></FlexComponent> }
-          { this.state.command && <FlexComponent className="animate fade-in" margin={["auto", 4]} rounded={[4]} shadow><MessageComponent message={this.state.command} open noaction /></FlexComponent> }
-          { this.state.ruler && <FlexComponent className="animate fade-in" margin={["auto", 4]} rounded={[4]} shadow><MessageComponent message={this.state.ruler} open noaction /></FlexComponent> }
+          { this.state.mode && <FlexComponent animate="fade-in" margin={["auto", 4]} rounded={[4]} shadow><MessageComponent message={this.state.mode} open noaction /></FlexComponent> }
+          { this.state.command && <FlexComponent animate="fade-in" margin={["auto", 4]} rounded={[4]} shadow><MessageComponent message={this.state.command} open noaction /></FlexComponent> }
+          { this.state.ruler && <FlexComponent animate="fade-in" margin={["auto", 4]} rounded={[4]} shadow><MessageComponent message={this.state.ruler} open noaction /></FlexComponent> }
           <div className="space" />
           <IconComponent color={ this.state.debug ? "green-fg" : "gray-fg" } font="" onClick={this.toggleDebug} />
           <IconComponent color="red-fg" font="" onClick={this.onClear} />
         </FlexComponent>
-        <FlexComponent direction="column" grow={1} shrink={1} rounded={[4, 4, 0, 0]} overflow="auto">
-          {this.state.messages.map((message, i) => <div key={i}><MessageComponent message={message} open={message.kind !== "debug"} /></div>)}
-          <div className="space" style={Highlights.style("0")} ref={this.bottom} />
+        <FlexComponent overflow="visible" hover>
+          <FlexComponent direction="column" position="absolute" rounded={[4, 4, 0, 0]} overflow="auto" style={styles.history} shadow>
+            {this.state.messages.map((message, i) => <div key={i}><MessageComponent message={message} open={message.kind !== "debug"} /></div>)}
+            <div ref={this.bottom} />
+          </FlexComponent>
         </FlexComponent>
       </FlexComponent>
     );
