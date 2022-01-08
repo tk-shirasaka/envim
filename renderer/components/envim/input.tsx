@@ -73,7 +73,7 @@ export class InputComponent extends React.Component<Props, States> {
       style.background = Highlights.color(cursor.hl, "background", { reverse: true, normal: true });
 
       delete(this.queue);
-      this.transition = this.state.style.minWidth !== style.minWidth || this.state.style.transform !== style.transform;
+      this.transition = this.state.style.transform !== style.transform;
       this.setState({ style });
     }
   }
