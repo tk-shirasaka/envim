@@ -343,15 +343,13 @@ export class App {
   }
 
   private popupmenuShow(items: string[][], selected: number, row: number, col: number, grid: number) {
-    const { x, y } = Grids.exist(grid) ? Grids.get(grid).getInfo() : { y: 1, x: Grids.get().getInfo().width * 0.1 + 3 };
     const parent = Grids.get().getInfo();
-    const height = Math.min(Math.max(row, parent.height - row - 1), items.length);
+    const current = grid === -1 ? { y: 1, x: parent.width * 0.1 + 3 } : Grids.get(grid).getInfo();
+    const [ x, y ] = [ col + current.x, row + current.y ];
+    const height = Math.min(Math.max(y, parent.height - y - 1), items.length);
 
-    row += y;
-    col += x;
-
-    row = row + height >= parent.height ? row - height : row + 1;
-    col = Math.min(col, parent.width - 10);
+    row = y + height >= parent.height ? y - height : y + 1;
+    col = Math.min(x, parent.width - 10);
 
     Emit.send("popupmenu:show", {
       items: items.map(([ word, kind, menu ]) => ({ word, kind, menu })),

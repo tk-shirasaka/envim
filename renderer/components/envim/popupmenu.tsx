@@ -69,10 +69,7 @@ export class PopupmenuComponent extends React.Component<Props, States> {
   }
 
   private onItem(i: number) {
-    const num = i - this.state.selected;
-    const cmd = num < 0 ? "<C-p>" : "<C-n>";
-
-    Emit.send("envim:input", cmd.repeat(Math.abs(num)));
+    Emit.send("envim:api", "nvim_select_popupmenu_item", [i, true, false, {}]);
   }
 
   private getScopeStyle() {
