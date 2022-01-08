@@ -12,18 +12,18 @@ export class Envim {
   private connect: { process?: ChildProcess; socket?: Socket; } = {}
 
   constructor() {
-    Emit.on("envim:connect", this.onConnect.bind(this));
-    Emit.on("envim:attach", this.onAttach.bind(this));
-    Emit.on("envim:resize", this.onResize.bind(this));
-    Emit.on("envim:api", this.onApi.bind(this));
-    Emit.on("envim:mouse", this.onMouse.bind(this));
-    Emit.on("envim:input", this.onInput.bind(this));
-    Emit.on("envim:command", this.onCommand.bind(this));
-    process.on("uncaughtException", this.onError.bind(this));
-    process.on("unhandledRejection", this.onError.bind(this));
+    Emit.on("envim:connect", this.onConnect);
+    Emit.on("envim:attach", this.onAttach);
+    Emit.on("envim:resize", this.onResize);
+    Emit.on("envim:api", this.onApi);
+    Emit.on("envim:mouse", this.onMouse);
+    Emit.on("envim:input", this.onInput);
+    Emit.on("envim:command", this.onCommand);
+    process.on("uncaughtException", this.onError);
+    process.on("unhandledRejection", this.onError);
   }
 
-  private async onConnect(type: string, value: string, path: string ) {
+  private onConnect = async (type: string, value: string, path: string ) => {
     let reader, writer;
 
     switch (type) {
@@ -42,7 +42,7 @@ export class Envim {
       this.nvim = new NeovimClient;
       this.nvim.attach({ reader, writer });
       this.nvim.setClientInfo("Envim", { major: 0, minor: 0, patch: 1, prerelease: "dev" }, "ui", {}, {})
-      this.nvim.on("disconnect", this.onDisconnect.bind(this));
+      this.nvim.on("disconnect", this.onDisconnect);
       new App(this.nvim);
       Emit.send("app:start");
 
@@ -50,35 +50,35 @@ export class Envim {
     }
   }
 
-  private onAttach(width: number, height: number, options: UiAttachOptions) {
+  private onAttach = (width: number, height: number, options: UiAttachOptions) => {
     this.nvim.uiAttach(width, height, { ...{ ext_linegrid: true }, ...options });
   }
 
-  private onResize(grid: number, width: number, height: number) {
+  private onResize = (grid: number, width: number, height: number) => {
     this.nvim.uiTryResizeGrid(grid, width, height)
   }
 
-  private async onApi(fname: string, args: any[]) {
+  private onApi = async (fname: string, args: any[]) => {
     return await this.nvim.request(fname, args);
   }
 
-  private async onMouse(grid: number, button: string, action: string, modifier: string, row: number, col: number) {
+  private onMouse = async (grid: number, button: string, action: string, modifier: string, row: number, col: number) => {
     return await this.nvim.inputMouse(button, action, modifier, grid, row, col);
   }
 
-  private async onInput(input: string) {
+  private onInput = async (input: string) => {
     return await this.nvim.input(input);
   }
 
-  private async onCommand(command: string) {
+  private onCommand = async (command: string) => {
     return await this.nvim.command(command);
   }
 
-  private onDisconnect() {
+  private onDisconnect = () => {
     Emit.send("app:stop");
   }
 
-  private onError(e: Error | any) {
+  private onError = (e: Error | any) => {
     if (e instanceof Error) {
       dialog.showErrorBox('Error', `${e.message}\n${e.stack || ""}`);
     } else if (e instanceof String) {

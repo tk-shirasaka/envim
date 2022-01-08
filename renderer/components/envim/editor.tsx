@@ -62,8 +62,8 @@ export class EditorComponent extends React.Component<Props, States> {
     super(props);
 
     this.state = { bufs: [] };
-    Emit.on(`clear:${this.props.grid}`, this.onClear.bind(this));
-    Emit.on(`flush:${this.props.grid}`, this.onFlush.bind(this));
+    Emit.on(`clear:${this.props.grid}`, this.onClear);
+    Emit.on(`flush:${this.props.grid}`, this.onFlush);
   }
 
   componentDidMount() {
@@ -122,7 +122,7 @@ export class EditorComponent extends React.Component<Props, States> {
     Emit.send("envim:mouse", this.props.grid, button, action, modiffier.join("-"), row, col);
   }
 
-  private onMouseDown(e: MouseEvent) {
+  private onMouseDown = (e: MouseEvent) => {
     clearTimeout(this.timer);
     this.timer = +setTimeout(() => {
       this.drag = true;
@@ -132,7 +132,7 @@ export class EditorComponent extends React.Component<Props, States> {
     this.onMouseEvent(e, "press");
   }
 
-  private onMouseMove(e: MouseEvent) {
+  private onMouseMove = (e: MouseEvent) => {
     if (this.drag === false) return;
 
     clearTimeout(this.timer);
@@ -141,7 +141,7 @@ export class EditorComponent extends React.Component<Props, States> {
     });
   }
 
-  private onMouseUp(e: MouseEvent) {
+  private onMouseUp = (e: MouseEvent) => {
     clearTimeout(this.timer);
 
     if (this.drag) {
@@ -151,7 +151,7 @@ export class EditorComponent extends React.Component<Props, States> {
     }
   }
 
-  private onMouseWheel(e: WheelEvent) {
+  private onWheel = (e: WheelEvent) => {
     if (Math.abs(e.deltaY) < Math.abs(e.deltaX)) {
       this.onMouseEvent(e, e.deltaX < 0 ? "left" : "right", true);
     } else {
@@ -159,19 +159,19 @@ export class EditorComponent extends React.Component<Props, States> {
     }
   }
 
-  private onMouseEnter() {
+  private onMouseEnter = () => {
     this.timer = +setInterval(() => this.setState({ bufs: Buffers.get() }));
   }
 
-  private onMouseLeave() {
+  private onMouseLeave = () => {
     clearInterval(this.timer);
   }
 
-  private onClear() {
+  private onClear = () => {
     this.clear = true;
   }
 
-  private onFlush(flush: { cells: ICell[], scroll?: IScroll }[]) {
+  private onFlush = (flush: { cells: ICell[], scroll?: IScroll }[]) => {
     this.clear && Canvas.clear(this.props.grid, x2Col(this.props.style.width), y2Row(this.props.style.height));
     flush.forEach(({ cells, scroll }) => Canvas.update(this.props.grid, cells, scroll))
     this.clear = false;
@@ -194,10 +194,10 @@ export class EditorComponent extends React.Component<Props, States> {
 
     return (
       <FlexComponent className="animate fade-in hover" position="absolute" overflow="visible" style={this.props.style} shadow
-        onMouseDown={this.onMouseDown.bind(this)}
-        onMouseMove={this.onMouseMove.bind(this)}
-        onMouseUp={this.onMouseUp.bind(this)}
-        onWheel={this.onMouseWheel.bind(this)}
+        onMouseDown={this.onMouseDown}
+        onMouseMove={this.onMouseMove}
+        onMouseUp={this.onMouseUp}
+        onWheel={this.onWheel}
       >
         <FlexComponent grow={1}>
           <canvas style={{ ...styles.canvas, transform: `scale(${1 / scale})` }} width={this.props.editor.width * scale} height={this.props.editor.height * scale} ref={this.bg} />
@@ -209,8 +209,8 @@ export class EditorComponent extends React.Component<Props, States> {
             <FlexComponent color="black" overflow="visible" margin={[-1, -1, 0, 0]} padding={[0, 4]} rounded={[0, 0, 0, 4]} shadow
               onMouseDown={e => this.runCommand(e, "")}
               onMouseUp={e => this.runCommand(e, "")}
-              onMouseEnter={this.onMouseEnter.bind(this)}
-              onMouseLeave={this.onMouseLeave.bind(this)}
+              onMouseEnter={this.onMouseEnter}
+              onMouseLeave={this.onMouseLeave}
             >
               { this.renderMenu("", { main: "edit", sub: "buffer "}) }
               { this.renderMenu("", { main: "vnew", sub: "vsplit #"}) }

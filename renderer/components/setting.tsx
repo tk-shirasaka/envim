@@ -59,32 +59,32 @@ export class SettingComponent extends React.Component<Props, States> {
     this.state = { ...Setting.get() };
   }
 
-  private onToggleType(e: ChangeEvent) {
+  private onToggleType = (e: ChangeEvent) => {
     const type = (e.target as HTMLInputElement).value === "command" ? "command" : "address";
     Setting.type = type;
     this.setState({ type });
   }
 
-  private onChangePath(e: ChangeEvent) {
+  private onChangePath = (e: ChangeEvent) => {
     const path = (e.target as HTMLInputElement).value;
     Setting.path = path;
     this.setState({ path });
   }
 
-  private onChangeFont(e: ChangeEvent) {
+  private onChangeFont = (e: ChangeEvent) => {
     const size = +(e.target as HTMLInputElement).value;
     const font = { size: size, width: Math.floor(size / 2), height: Math.floor(size * 1.25), scale: window.devicePixelRatio };
     Setting.font = font;
     this.setState({ font });
   }
 
-  private onChangeOpacity(e: ChangeEvent) {
+  private onChangeOpacity = (e: ChangeEvent) => {
     const opacity = +(e.target as HTMLInputElement).value;
     Setting.opacity = opacity;
     this.setState({ opacity });
   }
 
-  private onToggleOption(e: ChangeEvent) {
+  private onToggleOption = (e: ChangeEvent) => {
     const input = e.target as HTMLInputElement;
     const options = this.state.options;
     options[input.name] = input.checked;
@@ -99,7 +99,7 @@ export class SettingComponent extends React.Component<Props, States> {
     this.setState({ bookmarks });
   }
 
-  private onSubmit(e: FormEvent) {
+  private onSubmit = (e: FormEvent) => {
     e.stopPropagation();
     e.preventDefault();
 
@@ -123,7 +123,7 @@ export class SettingComponent extends React.Component<Props, States> {
 
   render() {
     return (
-      <form className="color-white-fg" style={{ ...this.props, ...styles.scope }} onSubmit={this.onSubmit.bind(this)}>
+      <form className="color-white-fg" style={{ ...this.props, ...styles.scope }} onSubmit={this.onSubmit}>
         <div className="color-black" style={this.getStyle()}></div>
         <h1 className="bold">Welcome To Envim!</h1>
         <div>
@@ -135,21 +135,21 @@ export class SettingComponent extends React.Component<Props, States> {
         <div>
           <h3 className="bold">Neovim path</h3>
           <div>
-            <label><input type="radio" value="command" checked={this.state.type === "command"} onChange={this.onToggleType.bind(this)} />Command</label>
-            <label><input type="radio" value="address" checked={this.state.type === "address"} onChange={this.onToggleType.bind(this)} />Port</label>
+            <label><input type="radio" value="command" checked={this.state.type === "command"} onChange={this.onToggleType} />Command</label>
+            <label><input type="radio" value="address" checked={this.state.type === "address"} onChange={this.onToggleType} />Port</label>
           </div>
-          <label>Enter neovim path<input type="text" value={this.state.path} onChange={this.onChangePath.bind(this)} autoFocus={true} /></label>
+          <label>Enter neovim path<input type="text" value={this.state.path} onChange={this.onChangePath} autoFocus /></label>
           <div className="color-black divider" />
 
           <h3 className="bold">Appearance</h3>
-          <label>Font Size ({this.state.font.size}px)<input type="range" min="5" max="20" value={this.state.font.size} onChange={this.onChangeFont.bind(this)} /></label>
+          <label>Font Size ({this.state.font.size}px)<input type="range" min="5" max="20" value={this.state.font.size} onChange={this.onChangeFont} /></label>
           <div style={this.getExampleStyle()}>Example Text</div>
-          <label>Transparent ({this.state.opacity}%)<input type="range" min="0" max="50" value={this.state.opacity} onChange={this.onChangeOpacity.bind(this)} /></label>
+          <label>Transparent ({this.state.opacity}%)<input type="range" min="0" max="50" value={this.state.opacity} onChange={this.onChangeOpacity} /></label>
           <div className="color-black divider" />
 
           <h3 className="bold">Options</h3>
           { Object.keys(this.state.options).map((key, i) => (
-            <label key={i}><input type="checkbox" name={key} checked={this.state.options[key]} onChange={this.onToggleOption.bind(this)} />{ key }</label>
+            <label key={i}><input type="checkbox" name={key} checked={this.state.options[key]} onChange={this.onToggleOption} />{ key }</label>
           ))}
           <div className="color-black divider" />
 

@@ -18,19 +18,19 @@ export class App {
     Grids.init();
     Autocmd.setup(this.nvim);
     Clipboard.setup(this.nvim);
-    nvim.on("request", this.onRequest.bind(this));
-    nvim.on("notification", this.onNotification.bind(this));
+    nvim.on("request", this.onRequest);
+    nvim.on("notification", this.onNotification);
     this.menu();
   }
 
-  private onRequest(method: string, args: any, res: Response) {
+  private onRequest = (method: string, args: any, res: Response) => {
     switch (method) {
       case "envim_clipboard": return Clipboard.paste(res);
     }
     console.log({ method, args });
   }
 
-  private onNotification(method: string, args: any) {
+  private onNotification = (method: string, args: any) => {
     switch (method) {
       case "redraw" :return this.redraw(args);
       case "envim_clipboard": return Clipboard.copy(args[0], args[1]);

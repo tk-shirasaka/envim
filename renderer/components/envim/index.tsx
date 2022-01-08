@@ -64,11 +64,11 @@ export class EnvimComponent extends React.Component<Props, States> {
 
     this.setSize();
     this.state = { pause: false, grids: {} };
-    Emit.on("highlight:set", this.onHighlight.bind(this));
-    Emit.on("win:pos", this.onWin.bind(this));
-    Emit.on("option:set", this.onOption.bind(this));
-    Emit.on("envim:drag", this.onDrag.bind(this));
-    Emit.on("envim:pause", this.onPause.bind(this));
+    Emit.on("highlight:set", this.onHighlight);
+    Emit.on("win:pos", this.onWin);
+    Emit.on("option:set", this.onOption);
+    Emit.on("envim:drag", this.onDrag);
+    Emit.on("envim:pause", this.onPause);
     Emit.send("envim:attach", x2Col(this.editor.width), y2Row(this.editor.height), Setting.options);
   }
 
@@ -101,13 +101,13 @@ export class EnvimComponent extends React.Component<Props, States> {
     this.footer = { width: this.props.width, height: this.props.height - this.header.height - this.editor.height };
   }
 
-  private onHighlight(highlights: {id: string, ui: boolean, hl: IHighlight}[]) {
+  private onHighlight = (highlights: {id: string, ui: boolean, hl: IHighlight}[]) => {
     highlights.forEach(({id, ui, hl}) => {
       Highlights.setHighlight(id, ui, hl);
     });
   }
 
-  private onWin(wins: IWindow[]) {
+  private onWin = (wins: IWindow[]) => {
     const grids = this.state.grids;
 
     wins.forEach(({ id, winid, x, y, width, height, zIndex, focusable, transparent, status }) => {
@@ -136,11 +136,11 @@ export class EnvimComponent extends React.Component<Props, States> {
     this.refresh = false;
   }
 
-  private onOption(options: { [k: string]: boolean }) {
+  private onOption = (options: { [k: string]: boolean }) => {
     Setting.options = options;
   }
 
-  private onDrag(drag: number) {
+  private onDrag = (drag: number) => {
     const grids = this.state.grids;
 
     Object.keys(grids).forEach(grid => {
@@ -150,18 +150,18 @@ export class EnvimComponent extends React.Component<Props, States> {
     this.setState({ grids });
   }
 
-  private onPause(pause: boolean) {
+  private onPause = (pause: boolean) => {
     this.setState({ pause });
   }
 
-  private onMouseUp() {
+  private onMouseUp = () => {
     this.onDrag(-1);
     Emit.share("envim:focus");
   }
 
   render() {
     return (
-      <div style={this.main} onMouseUp={this.onMouseUp.bind(this)}>
+      <div style={this.main} onMouseUp={this.onMouseUp}>
         <TablineComponent {...this.header} />
         <FlexComponent>
           <FlexComponent style={this.editor}>

@@ -32,12 +32,12 @@ export class CmdlineComponent extends React.Component<Props, States> {
     super(props);
 
     this.state = { cmdline: [], contents: [], pos: 0, prompt: "", indent: 0 };
-    Emit.on("cmdline:show", this.onCmdline.bind(this));
-    Emit.on("cmdline:cursor", this.onCursor.bind(this));
-    Emit.on("cmdline:special", this.onSpecial.bind(this));
-    Emit.on("cmdline:hide", this.offCmdline.bind(this));
-    Emit.on("cmdline:blockshow", this.onBlock.bind(this));
-    Emit.on("cmdline:blockhide", this.offBlock.bind(this));
+    Emit.on("cmdline:show", this.onCmdline);
+    Emit.on("cmdline:cursor", this.onCursor);
+    Emit.on("cmdline:special", this.onSpecial);
+    Emit.on("cmdline:hide", this.offCmdline);
+    Emit.on("cmdline:blockshow", this.onBlock);
+    Emit.on("cmdline:blockhide", this.offBlock);
   }
 
   componentWillUnmount() {
@@ -67,7 +67,7 @@ export class CmdlineComponent extends React.Component<Props, States> {
     return result;
   }
 
-  private onCmdline(cmd: string[][], pos: number, prompt: string, indent: number) {
+  private onCmdline = (cmd: string[][], pos: number, prompt: string, indent: number) => {
     const cmdline = this.convertContent(cmd, indent)
 
     pos = this.getPos(cmdline, pos + indent);
@@ -76,7 +76,7 @@ export class CmdlineComponent extends React.Component<Props, States> {
     this.setState({ cmdline, pos, prompt, indent })
   }
 
-  private onCursor(pos: number) {
+  private onCursor = (pos: number) => {
     const cmdline = this.state.cmdline;
     pos = this.getPos(cmdline, pos + this.state.indent);
 
@@ -85,7 +85,7 @@ export class CmdlineComponent extends React.Component<Props, States> {
     this.setState({ cmdline, pos });
   }
 
-  private onSpecial(c: string, shift: boolean) {
+  private onSpecial = (c: string, shift: boolean) => {
     const cmdline = this.state.cmdline;
     const pos = shift ? this.state.pos + 1 : this.state.pos;
 
@@ -94,11 +94,11 @@ export class CmdlineComponent extends React.Component<Props, States> {
     this.setState({ cmdline, pos });
   }
 
-  private offCmdline() {
+  private offCmdline = () => {
     this.state.contents.length || this.setState({ cmdline: [] });
   }
 
-  private onBlock(lines: string[][][]) {
+  private onBlock = (lines: string[][][]) => {
     const contents = [
       ...this.state.contents,
       ...lines.map(line => this.convertContent(line, 0)),
@@ -106,7 +106,7 @@ export class CmdlineComponent extends React.Component<Props, States> {
     this.setState({ contents });
   }
 
-  private offBlock() {
+  private offBlock = () => {
     this.setState({ contents: [], cmdline: [] });
   }
 

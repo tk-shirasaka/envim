@@ -39,11 +39,11 @@ export class MessageComponent extends React.Component<Props, States> {
     this.state = { open: this.props.open, delete: false };
   }
 
-  private onToggleOpen() {
+  private onToggleOpen = () => {
     this.setState({ open: !this.state.open });
   }
 
-  private onDelete() {
+  private onDelete = () => {
     this.setState({ delete: true });
   }
 
@@ -70,8 +70,8 @@ export class MessageComponent extends React.Component<Props, States> {
           <FlexComponent color="black" vertical="end" overflow="visible" position="absolute" style={styles.action} hover>
             <div className="space" />
             <FlexComponent color="black" shrink={1} padding={[0, 4]} rounded={[4, 0, 0, 0]} shadow>
-              <IconComponent color="gray-fg" font={this.state.open ? "" : "ﬥ"} onClick={this.onToggleOpen.bind(this)} />
-              <IconComponent color="gray-fg" font="" onClick={this.onDelete.bind(this)}/>
+              <IconComponent color="gray-fg" font={this.state.open ? "" : "ﬥ"} onClick={this.onToggleOpen} />
+              <IconComponent color="gray-fg" font="" onClick={this.onDelete}/>
             </FlexComponent>
           </FlexComponent>
         ) }

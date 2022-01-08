@@ -18,22 +18,22 @@ export class AppComponent extends React.Component<Props, States> {
     super(props);
     this.state = { init: false, window: { width: window.innerWidth, height: window.innerHeight } };
 
-    window.addEventListener("resize", this.onResize.bind(this));
+    window.addEventListener("resize", this.onResize);
     (document as any).fonts.load("10px Editor Regular").then();
     (document as any).fonts.load("10px Editor Bold").then();
-    Emit.on("app:start", this.onStart.bind(this));
-    Emit.on("app:stop", this.onStop.bind(this));
+    Emit.on("app:start", this.onStart);
+    Emit.on("app:stop", this.onStop);
   }
 
-  private onResize() {
+  private onResize = () => {
     this.setState({ window: { width: window.innerWidth, height: window.innerHeight } });
   }
 
-  private onStart() {
+  private onStart = () => {
     this.setState({ init: true });
   }
 
-  private onStop() {
+  private onStop = () => {
     this.setState({ init: false });
   }
 

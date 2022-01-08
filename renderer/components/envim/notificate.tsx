@@ -33,21 +33,21 @@ export class NotificateComponent extends React.Component<Props, States> {
     super(props);
 
     this.state = { messages: [] };
-    Emit.on("messages:show", this.onShow.bind(this));
-    Emit.on("messages:clear", this.onClear.bind(this));
+    Emit.on("messages:show", this.onShow);
+    Emit.on("messages:clear", this.onClear);
   }
 
   componentWillUnmount() {
     Emit.clear(["messages:show", "messages:clear"]);
   }
 
-  private onShow(message: IMessage, replace: boolean) {
+  private onShow = (message: IMessage, replace: boolean) => {
     const messages = replace ? [] : this.state.messages.slice(-1);
 
     this.setState({ messages: [ ...messages, message ] });
   }
 
-  private onClear() {
+  private onClear = () => {
     this.setState({ messages: [] });
   }
 

@@ -38,24 +38,24 @@ export class InputComponent extends React.Component<Props, States> {
     super(props);
 
     this.state = { style: { transform: "", width: col2X(1), zIndex: 0, color: "none", background: "none" }, composit: false, busy: false, shape: "block" };
-    Emit.on("envim:focus", this.onFocus.bind(this));
-    Emit.on("grid:cursor", this.onCursor.bind(this));
-    Emit.on("grid:busy", this.onBusy.bind(this));
-    Emit.on("mode:change", this.changeMode.bind(this));
+    Emit.on("envim:focus", this.onFocus);
+    Emit.on("grid:cursor", this.onCursor);
+    Emit.on("grid:busy", this.onBusy);
+    Emit.on("mode:change", this.changeMode);
   }
 
   componentWillUnmount() {
     Emit.clear(["envim:focus", "grid:cursor", "grid:busy", "mode:change"]);
   }
 
-  private onFocus() {
+  private onFocus = () => {
     const selected = window.getSelection()?.toString();
 
     selected && navigator.clipboard.writeText(selected);
     this.input.current?.focus();
   }
 
-  private onCursor(cursor: { x: number, y: number, width: number, hl: string, zIndex: number }) {
+  private onCursor = (cursor: { x: number, y: number, width: number, hl: string, zIndex: number }) => {
     if (this.transition) {
       this.queue = cursor;
     } else {
@@ -72,11 +72,11 @@ export class InputComponent extends React.Component<Props, States> {
     }
   }
 
-  private onBusy(busy: boolean) {
+  private onBusy = (busy: boolean) => {
     this.setState({ busy });
   }
 
-  private changeMode(mode: IMode) {
+  private changeMode = (mode: IMode) => {
     const style = this.state.style;
     const shape = mode.cursor_shape;
 
@@ -91,7 +91,7 @@ export class InputComponent extends React.Component<Props, States> {
     return shape === "block" ? col2X(width) : 2;
   }
 
-  private onKeyDown(e: KeyboardEvent) {
+  private onKeyDown = (e: KeyboardEvent) => {
     const input = e.target as HTMLInputElement;
     const code = keycode(e);
 
@@ -109,11 +109,11 @@ export class InputComponent extends React.Component<Props, States> {
     }
   }
 
-  private onCompositionStart() {
+  private onCompositionStart = () => {
     this.setState({ composit: true });
   }
 
-  private onCompositionEnd(e: CompositionEvent) {
+  private onCompositionEnd = (e: CompositionEvent) => {
     const input = e.target as HTMLInputElement;
     const style = this.state.style;
 
@@ -123,7 +123,7 @@ export class InputComponent extends React.Component<Props, States> {
     this.setState({ composit: false, style });
   }
 
-  private onTransitionEnd() {
+  private onTransitionEnd = () => {
     this.transition = false;
 
     this.queue && this.onCursor(this.queue);
@@ -138,10 +138,10 @@ export class InputComponent extends React.Component<Props, States> {
   render() {
     return (
       <input className="animate blink" style={this.getStyle()} autoFocus={true} ref={this.input}
-        onKeyDown={this.onKeyDown.bind(this)}
-        onCompositionStart={this.onCompositionStart.bind(this)}
-        onCompositionEnd={this.onCompositionEnd.bind(this)}
-        onTransitionEnd={this.onTransitionEnd.bind(this)}
+        onKeyDown={this.onKeyDown}
+        onCompositionStart={this.onCompositionStart}
+        onCompositionEnd={this.onCompositionEnd}
+        onTransitionEnd={this.onTransitionEnd}
       />
     );
   }

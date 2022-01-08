@@ -32,9 +32,9 @@ export class PopupmenuComponent extends React.Component<Props, States> {
     super(props);
 
     this.state = { items: [], selected: -1, row: 0, col: 0 };
-    Emit.on("popupmenu:show", this.onPopupmenu.bind(this));
-    Emit.on("popupmenu:select", this.onSelect.bind(this));
-    Emit.on("popupmenu:hide", this.offPopupmenu.bind(this));
+    Emit.on("popupmenu:show", this.onPopupmenu);
+    Emit.on("popupmenu:select", this.onSelect);
+    Emit.on("popupmenu:hide", this.offPopupmenu);
   }
 
   componentDidUpdate() {
@@ -51,21 +51,21 @@ export class PopupmenuComponent extends React.Component<Props, States> {
     Emit.clear(["popupmenu:show", "popupmenu:select", "popupmenu:hide"]);
   }
 
-  private onPopupmenu(state: States) {
+  private onPopupmenu = (state: States) => {
     this.width = 0;
     state.col--;
 
     this.setState(state);
   }
 
-  private onSelect(selected: number) {
+  private onSelect = (selected: number) => {
     const top = row2Y(Math.max(0, Math.min(selected, this.state.items.length - this.maxline)));
 
     this.setState({ selected });
     setTimeout(() => this.scope.current?.parentElement?.scrollTo({ top, behavior: "smooth" }));
   }
 
-  private offPopupmenu() {
+  private offPopupmenu = () => {
     this.setState({ items: [] });
   }
 

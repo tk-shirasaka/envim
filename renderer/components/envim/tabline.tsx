@@ -48,17 +48,17 @@ export class TablineComponent extends React.Component<Props, States> {
     super(props);
     this.state = { cwd: "", tabs: [], menus: [], bookmarks: Setting.bookmarks };
 
-    Emit.on("envim:cwd", this.onCwd.bind(this));
-    Emit.on("tabline:update", this.onTabline.bind(this));
-    Emit.on("menu:update", this.onMenu.bind(this));
-    Emit.on("mode:change", this.changeMode.bind(this));
+    Emit.on("envim:cwd", this.onCwd);
+    Emit.on("tabline:update", this.onTabline);
+    Emit.on("menu:update", this.onMenu);
+    Emit.on("mode:change", this.changeMode);
   }
 
   componentWillUnmount() {
-    Emit.clear(["envim:cwd", "tabline:update", "menu:update", "mode:change", "messages:mode", "messages:command", "messages:ruler"]);
+    Emit.clear(["envim:cwd", "tabline:update", "menu:update", "mode:change"]);
   }
 
-  private onCwd(cwd: string) {
+  private onCwd = (cwd: string) => {
     this.setState({ cwd });
   }
 
@@ -89,16 +89,16 @@ export class TablineComponent extends React.Component<Props, States> {
     Emit.send("envim:command", command);
   }
 
-  private onTabline(tabs: ITab[], bufs: IBuffer[]) {
+  private onTabline = (tabs: ITab[], bufs: IBuffer[]) => {
     Buffers.set(bufs);
     this.setState({ tabs });
   }
 
-  private onMenu(menus: IMenu[]) {
+  private onMenu = (menus: IMenu[]) => {
     this.setState({ menus });
   }
 
-  private changeMode(mode: IMode) {
+  private changeMode = (mode: IMode) => {
     this.setState({ mode });
   }
 
