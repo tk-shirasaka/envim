@@ -45,7 +45,6 @@ export class HistoryComponent extends React.Component<Props, States> {
     Emit.on("messages:command", this.onCommand);
     Emit.on("messages:ruler", this.onRuler);
     Emit.on("messages:history", this.onHistory);
-    Emit.on("debug", this.onDebug);
   }
 
   componentWillUnmount() {
@@ -72,7 +71,7 @@ export class HistoryComponent extends React.Component<Props, States> {
   }
 
   private onDebug = (event: string, ...args: any[]) => {
-    if (!this.state.debug || event.search(this.state.debug) < 0) return;
+    if (event.search(this.state.debug) < 0) return;
 
     this.onHistory([{ contents: [{ hl: "0", content: `-- ${event} --\n${JSON.stringify(args, null, 2)}` }], kind: "debug" }]);
   }
@@ -105,6 +104,10 @@ export class HistoryComponent extends React.Component<Props, States> {
 
     try {
       "".search(debug);
+
+      this.state.debug === "" && debug && Emit.on("debug", this.onDebug);
+      debug === "" && Emit.clear(["debug"]);
+
       this.setState({ debug });
     } catch (e: any) {
       if (e instanceof Error) {
