@@ -7,20 +7,20 @@ export class Browser {
   constructor() {
     app.commandLine.appendSwitch('enable-transparent-visuals');
     app.disableHardwareAcceleration();
-    app.on("ready", this.onReady.bind(this));
-    app.on("activate", this.onActivate.bind(this));
-    app.on("window-all-closed", this.onQuit.bind(this));
+    app.on("ready", this.onReady);
+    app.on("activate", this.onActivate);
+    app.on("window-all-closed", this.onQuit);
   }
 
-  private onReady() {
+  private onReady = () => {
     this.create();
   }
 
-  private onActivate() {
+  private onActivate = () => {
     this.create();
   }
 
-  private onQuit() {
+  private onQuit = () => {
     app.quit();
   }
 
