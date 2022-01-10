@@ -1,28 +1,28 @@
 import { clipboard } from "electron";
-import { NeovimClient } from "neovim";
 import { Response } from "neovim/lib/host";
+
+import { Emit } from "../emit";
 
 export class Clipboard {
   private static lines: string[];
   private static type: "v" | "V" | "b";
 
-  static async setup(nvim: NeovimClient) {
-    const channelId = await nvim.channelId;
-    nvim.command([
+  static setup(channel: number) {
+    Emit.share("envim:command", [
       `let g:clipboard = {`,
       `  "name": "envim",`,
       `  "copy": {`,
-      `     "+": {lines, regtype -> rpcnotify(${channelId}, "envim_clipboard", lines, regtype)},`,
-      `     "*": {lines, regtype -> rpcnotify(${channelId}, "envim_clipboard", lines, regtype)},`,
+      `     "+": {lines, regtype -> rpcnotify(${channel}, "envim_clipboard", lines, regtype)},`,
+      `     "*": {lines, regtype -> rpcnotify(${channel}, "envim_clipboard", lines, regtype)},`,
       `   },`,
       `  "paste": {`,
-      `     "+": {-> rpcrequest(${channelId}, "envim_clipboard")},`,
-      `     "*": {-> rpcrequest(${channelId}, "envim_clipboard")},`,
+      `     "+": {-> rpcrequest(${channel}, "envim_clipboard")},`,
+      `     "*": {-> rpcrequest(${channel}, "envim_clipboard")},`,
       `  },`,
       `}`,
     ].join(""));
-    nvim.command("unlet! g:loaded_clipboard_provider")
-    nvim.command("runtime autoload/provider/clipboard.vim")
+    Emit.share("envim:command", "unlet! g:loaded_clipboard_provider");
+    Emit.share("envim:command", "runtime autoload/provider/clipboard.vim");
   }
 
   static copy(lines: string[], type: "v" | "V" | "b") {

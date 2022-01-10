@@ -14,10 +14,10 @@ export class App {
   private modes: IMode[] = [];
   private options: { [k: string]: string | number | boolean} = {};
 
-  constructor(private nvim: NeovimClient) {
+  constructor(private nvim: NeovimClient, channel: number) {
     Grids.init();
-    Autocmd.setup(this.nvim);
-    Clipboard.setup(this.nvim);
+    Autocmd.setup(channel);
+    Clipboard.setup(channel);
     nvim.on("request", this.onRequest);
     nvim.on("notification", this.onNotification);
     this.menu();

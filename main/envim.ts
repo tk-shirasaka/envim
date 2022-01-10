@@ -43,15 +43,16 @@ export class Envim {
       this.nvim.attach({ reader, writer });
       this.nvim.setClientInfo("Envim", { major: 0, minor: 0, patch: 1, prerelease: "dev" }, "ui", {}, {})
       this.nvim.on("disconnect", this.onDisconnect);
-      new App(this.nvim);
+      new App(this.nvim, await this.nvim.channelId);
       Emit.send("app:start");
 
-      path && setTimeout(() => this.nvim.command(`cd ${path}`), 200);
+      path && this.onCommand(`cd ${path}`);
     }
   }
 
-  private onAttach = (width: number, height: number, options: UiAttachOptions) => {
-    this.nvim.uiAttach(width, height, { ...{ ext_linegrid: true }, ...options });
+  private onAttach = async (width: number, height: number, options: UiAttachOptions) => {
+    await this.nvim.uiAttach(width, height, { ...{ ext_linegrid: true }, ...options });
+    await this.onCommand("doautocmd envim DirChanged");
   }
 
   private onResize = (grid: number, width: number, height: number) => {
