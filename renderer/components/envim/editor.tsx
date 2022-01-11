@@ -110,8 +110,7 @@ export class EditorComponent extends React.Component<Props, States> {
   }
 
   private onMouseEvent(e: MouseEvent, action: string, wheel: boolean = false) {
-    const { scale } = Setting.font;
-    const [col, row] = [ x2Col(e.nativeEvent.offsetX / scale), y2Row(e.nativeEvent.offsetY / scale) ];
+    const [col, row] = [ x2Col(e.nativeEvent.offsetX), y2Row(e.nativeEvent.offsetY) ];
     const button = wheel ? "wheel" : ["left", "middle", "right"][e.button] || "left";
     const modiffier = [];
 
