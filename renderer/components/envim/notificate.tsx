@@ -17,7 +17,7 @@ interface States {
 const styles = {
   scope: {
     overflow: "hidden auto",
-    zIndex: 10,
+    zIndex: 20,
     right: 0,
     bottom: 0,
     width: 300,

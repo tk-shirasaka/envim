@@ -162,8 +162,10 @@ export class Grids {
 
   static cursor(grid: number, row: number, col: number) {
     const cursor = Grids.get(grid).getCursorPos(row, col);
+    const active = Grids.get(Grids.active).getInfo();
 
     if (cursor.x >= 0 && cursor.y >= 0) {
+      active.id !== grid && active.status === "show" && Grids.setStatus(active.id, "show");
       Grids.active = grid;
       Grids.setStatus(grid, "show");
       Emit.send("grid:cursor", cursor);

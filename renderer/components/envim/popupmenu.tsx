@@ -20,7 +20,7 @@ interface States {
 
 const styles = {
   scope: {
-    zIndex: 10,
+    zIndex: 20,
   },
 };
 
