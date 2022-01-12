@@ -162,7 +162,7 @@ export class SettingComponent extends React.Component<Props, States> {
               <label><input type="radio" checked={bookmark.selected} onChange={() => this.onSelectBookmark(i)} />{ bookmark.name }</label>
             </div>
           ))}
-          </div>
+        </div>
 
         <button className="color-blue clickable" style={styles.button}>Start</button>
       </form>

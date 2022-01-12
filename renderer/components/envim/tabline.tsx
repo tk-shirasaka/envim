@@ -59,15 +59,21 @@ export class TablineComponent extends React.Component<Props, States> {
   }
 
   private onCwd = (cwd: string) => {
+    if (this.state.bookmarks.some(({ path }) => cwd === path)) {
+      Setting.bookmarks = this.state.bookmarks
+        .map(bookmark => ({ ...bookmark, selected: bookmark.path === cwd }))
+        .sort((a, b) => a.name > b.name ? 1 : -1);
+    }
     this.setState({ cwd });
   }
 
-  private async saveBookmark(index: number, bookmark: { path: string, name: string, selected: boolean }) {
-    const bookmarks = this.state.bookmarks;
+  private async saveBookmark(bookmark: { path: string, name: string, selected: boolean }) {
+    const bookmarks = this.state.bookmarks.filter(({ path }) => bookmark.path !== path);
     const args = ["input", ["Bookmark: ", bookmark.name]]
 
     bookmark.name = await Emit.send<string>("envim:api", "nvim_call_function", args) || bookmark.name;
-    index < 0 ? bookmarks.push(bookmark) : bookmarks.splice(index, 1, bookmark);
+    bookmark.selected = bookmark.path === this.state.cwd;
+    bookmarks.push(bookmark);
     Setting.bookmarks = bookmarks.sort((a, b) => a.name > b.name ? 1 : -1);
 
     this.setState({ bookmarks });
@@ -140,15 +146,12 @@ export class TablineComponent extends React.Component<Props, States> {
 
     return (
         <MenuComponent color={color} style={styles.space} label={label}>
-          <div className="color-gray-fg small">Path</div>
-          <div className="color-white-fg">{ bookmark.path }</div>
-          <div className="color-black divider" />
-          <div className="color-gray-fg small">Name</div>
           <div className="color-white-fg">{ index < 0 ? "-" : bookmark.name }</div>
+          <div className="color-gray-fg small">{ bookmark.path }</div>
           <div className="color-black divider" />
           <FlexComponent horizontal="end">
             { index >= 0 && <IconComponent color="red-fg" style={styles.space} font="" onClick={() => this.deleteBookmark(index)} /> }
-            <IconComponent color="blue-fg" font="" style={styles.space} onClick={() => this.saveBookmark(index, bookmark)} />
+            <IconComponent color="blue-fg" font="" style={styles.space} onClick={() => this.saveBookmark(bookmark)} />
           </FlexComponent>
         </MenuComponent>
     )
