@@ -47,8 +47,8 @@ const styles = {
     left: 0,
     width: "100%",
     height: "100%",
-    opacity: 0.4,
-    pointer: "wait",
+    opacity: 0.2,
+    cursor: "wait",
   }
 };
 
@@ -176,7 +176,11 @@ export class EnvimComponent extends React.Component<Props, States> {
           <FlexComponent color="black" grow={1} shrink={1} shadow />
         </FlexComponent>
         { Setting.options.ext_messages && <HistoryComponent {...this.footer} /> }
-        { this.state.pause && <FlexComponent color="black" position="absolute" style={styles.backdrop} /> }
+        { this.state.pause && (
+          <FlexComponent direction="column" horizontal="center" vertical="center" color="black" position="absolute" style={styles.backdrop}>
+            <div className="animate loading" />
+          </FlexComponent>
+        ) }
       </div>
     );
   }
