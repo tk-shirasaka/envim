@@ -110,7 +110,11 @@ export class EditorComponent extends React.Component<Props, States> {
   }
 
   private onMouseEvent(e: MouseEvent, action: string, wheel: boolean = false) {
-    const [col, row] = [ x2Col(e.nativeEvent.offsetX), y2Row(e.nativeEvent.offsetY) ];
+    const target = e.target as HTMLDivElement;
+    const origin = target.offsetWidth;
+    const actual = target.getBoundingClientRect().width;
+    const scale = Math.floor(origin / actual);
+    const [col, row] = [ x2Col(e.nativeEvent.offsetX / scale), y2Row(e.nativeEvent.offsetY / scale) ];
     const button = wheel ? "wheel" : ["left", "middle", "right"][e.button] || "left";
     const modiffier = [];
 
@@ -206,8 +210,6 @@ export class EditorComponent extends React.Component<Props, States> {
         { this.props.grid === 1 || this.props.style.cursor === "not-allowed" ? null : (
           <FlexComponent color="black-fg" vertical="start" horizontal="end" position="absolute" overflow="visible" border={[1]} style={styles.actions} hover>
             <FlexComponent color="black" overflow="visible" margin={[-1, -1, 0, 0]} padding={[0, 4]} rounded={[0, 0, 0, 4]} shadow
-              onMouseDown={e => this.runCommand(e, "")}
-              onMouseUp={e => this.runCommand(e, "")}
               onMouseEnter={this.onMouseEnter}
               onMouseLeave={this.onMouseLeave}
             >
