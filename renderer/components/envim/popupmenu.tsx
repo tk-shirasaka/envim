@@ -37,13 +37,16 @@ export class PopupmenuComponent extends React.Component<Props, States> {
     Emit.on("popupmenu:hide", this.offPopupmenu);
   }
 
-  componentDidUpdate() {
-    if (this.scope.current && this.width === 0 && this.state.items.length > 0) {
-      const { row, col, height } = this.state;
-      const width = x2Col(this.scope.current.clientWidth) + 2;
+  componentDidUpdate(_: Props, state: States) {
+    if (!this.scope.current || this.state.items.length === 0) return;
 
-      Emit.send("envim:api", "nvim_ui_pum_set_bounds", [width, height, row, col]);
-    }
+    const { row, col, height } = this.state;
+    const width = x2Col(this.scope.current.clientWidth) + 2;
+
+    if (row === state.row && col === state.col && height === state.height && this.width === width) return;
+
+    this.width = width;
+    Emit.send("envim:api", "nvim_ui_pum_set_bounds", [width, height, row, col]);
   }
 
   componentWillUnmount() {
@@ -51,7 +54,6 @@ export class PopupmenuComponent extends React.Component<Props, States> {
   }
 
   private onPopupmenu = (state: States) => {
-    this.width = 0;
     state.col--;
 
     this.setState(state);
