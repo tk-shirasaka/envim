@@ -56,6 +56,7 @@ export class EditorComponent extends React.Component<Props, States> {
   private clear: boolean = true;
   private timer: number = 0;
   private drag: boolean = false;
+  private delta: { x: number; y: number } = { x: 0, y: 0 };
   private capture?: { bg: ImageData; fg: ImageData; sp: ImageData };
 
   constructor(props: Props) {
@@ -155,10 +156,19 @@ export class EditorComponent extends React.Component<Props, States> {
   }
 
   private onWheel = (e: WheelEvent) => {
-    if (Math.abs(e.deltaY) < Math.abs(e.deltaX)) {
-      this.onMouseEvent(e, e.deltaX < 0 ? "left" : "right", true);
-    } else {
+    this.delta.x = this.delta.x * e.deltaX >= 0 ? this.delta.x + e.deltaX : 0;
+    this.delta.y = this.delta.y * e.deltaY >= 0 ? this.delta.y + e.deltaY : 0;
+
+    const row = y2Row(this.delta.y);
+    const col = x2Col(this.delta.x);
+
+    if (row) {
+      this.delta.y = 0;
       this.onMouseEvent(e, e.deltaY < 0 ? "up" : "down", true);
+    }
+    if (col) {
+      this.delta.x = 0;
+      this.onMouseEvent(e, e.deltaX < 0 ? "left" : "right", true);
     }
   }
 

@@ -1,11 +1,13 @@
 import { Setting } from "./setting"
 
 export const y2Row = (y: number) => {
-  return Math.floor(y / Setting.font.height);
+  const fname = y < 0 ? "ceil" : "floor";
+  return Math[fname](y / Setting.font.height);
 }
 
 export const x2Col = (x: number) => {
-  return Math.floor(x / Setting.font.width);
+  const fname = x < 0 ? "ceil" : "floor";
+  return Math[fname](x / Setting.font.width);
 }
 
 export const row2Y = (row: number) => {
