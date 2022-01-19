@@ -8,6 +8,7 @@ export class Context2D {
   private queues: { cells?: ICell[], scroll?: IScroll }[] = [];
   private move: { x: number, y: number } = { x: 0, y: 0 };
   private scrolltmp?: { i: number; bg: ImageData; fg: ImageData; sp: ImageData; };
+  private rendering: boolean = false;
 
   constructor(
     private bg: CanvasRenderingContext2D,
@@ -140,13 +141,19 @@ export class Context2D {
   }
 
   render() {
-    const flush = this.queues.shift();
+    const flush = this.rendering ? {} : this.queues.shift();
+
+    this.rendering = true;
 
     if (flush?.scroll) {
       this.scroll(5, flush.scroll);
     } else if (flush?.cells) {
       this.flush(flush.cells);
+      this.rendering = false;
+      this.render();
     }
+
+    this.rendering = false;
   }
 
   push(cells: ICell[], scroll?: IScroll) {
