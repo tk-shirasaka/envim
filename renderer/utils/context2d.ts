@@ -35,10 +35,10 @@ export class Context2D {
     }
   }
 
-  private decoration(x: number, y: number, width: number, hl: string) {
+  private decoration(x: number, y: number, width: number, hl: string, dirty: number) {
     const type = Highlights.decoration(hl);
 
-    if (type !== "none") {
+    if (type !== "none" && dirty & 0b100) {
       this.style(hl, "special");
       this.sp.beginPath();
 
@@ -127,7 +127,7 @@ export class Context2D {
     cells.forEach(cell => {
       const [y, x] = [cell.row * this.font.height, cell.col * this.font.width];
       this.rect(x, y, cell.width, 1, cell.hl, cell.dirty);
-      this.decoration(x, y, cell.width, cell.hl);
+      this.decoration(x, y, cell.width, cell.hl, cell.dirty);
     });
 
     cells.forEach(cell => {
