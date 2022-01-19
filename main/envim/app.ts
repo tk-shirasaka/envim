@@ -8,6 +8,7 @@ import { Emit } from "../emit";
 import { Autocmd } from "./autocmd";
 import { Clipboard } from "./clipboard";
 import { Grids } from "./grid";
+import { Tablines } from "./tabline";
 import { Highlights } from "./highlight";
 
 export class App {
@@ -311,7 +312,8 @@ export class App {
       next.bufs.push({ name, buffer: +buffer.data, active });
     }
 
-    Emit.send("tabline:update", next.tabs, next.bufs);
+    Tablines.settabs(next.tabs);
+    Tablines.setbufs(next.bufs);
   }
 
   private cmdlineShow(content: string[][], pos: number, prompt: string, indent: number) {
@@ -436,6 +438,7 @@ export class App {
   }
 
   private flush() {
+    Tablines.flush();
     Grids.flush();
   }
 }

@@ -131,7 +131,7 @@ export class EditorComponent extends React.Component<Props, States> {
     this.timer = +setTimeout(() => {
       this.drag = true;
       Emit.share("envim:drag", this.props.grid)
-    });
+    }, 200);
 
     this.onMouseEvent(e, "press");
   }
