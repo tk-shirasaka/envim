@@ -207,9 +207,8 @@ export class App {
     highlights = highlights.map(([id, hl, _, info]) => {
       const ui = info.some((info: { kind: string }) => info.kind === "ui");
 
-      Highlights.set(id, hl, ui);
       return {id, ui, hl }
-    });
+    }).filter(({ id, hl, ui }) => Highlights.set(id, hl, ui));
     Emit.send("highlight:set", highlights);
   }
 
