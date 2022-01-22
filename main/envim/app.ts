@@ -176,32 +176,9 @@ export class App {
     Grids.setStatus(grid, "show");
   }
 
-  private async defaultColorsSet(foreground: number, background: number, special: number) {
+  private defaultColorsSet(foreground: number, background: number, special: number) {
     Highlights.set("0", {}, true);
     Emit.send("highlight:set", [{id: "0", ui: true, hl: { foreground, background, special }}]);
-
-    const black = await this.nvim.getColorByName("black");
-    const white = await this.nvim.getColorByName("white");
-    const blue = await this.nvim.getColorByName("blue1");
-    const lightblue = await this.nvim.getColorByName("steelblue2");
-    const green = await this.nvim.getColorByName("springgreen1");
-    const yellow = await this.nvim.getColorByName("yellow1");
-    const orange = await this.nvim.getColorByName("orange1");
-    const red = await this.nvim.getColorByName("firebrick1");
-    const pink = await this.nvim.getColorByName("deeppink1");
-    const purple = await this.nvim.getColorByName("purple1");
-
-    Emit.send("highlight:set", [
-      {id: "-1", ui: true, hl: { foreground: white, background: black, special: red }},
-      {id: "blue", ui: true, hl: { foreground: blue }},
-      {id: "lightblue", ui: true, hl: { foreground: lightblue }},
-      {id: "green", ui: true, hl: { foreground: green }},
-      {id: "yellow", ui: true, hl: { foreground: yellow }},
-      {id: "orange", ui: true, hl: { foreground: orange }},
-      {id: "red", ui: true, hl: { foreground: red }},
-      {id: "pink", ui: true, hl: { foreground: pink }},
-      {id: "purple", ui: true, hl: { foreground: purple }},
-    ]);
   }
 
   private hlAttrDefine(highlights: any[]) {

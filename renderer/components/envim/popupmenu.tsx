@@ -101,7 +101,7 @@ export class PopupmenuComponent extends React.Component<Props, States> {
         {this.state.items.map(({ word, kind, menu }, i) => (
           <FlexComponent onClick={() => this.onItem(i)} key={i}>
             <FlexComponent padding={[0, Setting.font.width]} grow={1} style={Highlights.style("0", { reverse: this.state.selected === i })}>{ word }</FlexComponent>
-            <FlexComponent padding={[0, Setting.font.width]} style={Highlights.style(this.getKindStyle(`${kind} ${menu}`), { reverse: this.state.selected !== i })}>{ kind } { menu }</FlexComponent>
+            { `${kind}${menu}` && <FlexComponent padding={[0, Setting.font.width]} style={Highlights.style(this.getKindStyle(`${kind}${menu}`), { reverse: this.state.selected !== i })}>{ kind } { menu }</FlexComponent> }
           </FlexComponent>
         ))}
       </FlexComponent>

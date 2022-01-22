@@ -52,6 +52,18 @@ const styles = {
   }
 };
 
+const colors = {
+  gray: 0xabadb7,
+  blue: 0x2295c5,
+  lightblue: 0x69aab9,
+  green: 0x79d691,
+  yellow: 0xb7c161,
+  orange: 0xea953b,
+  red: 0xde5252,
+  pink: 0xd25fa9,
+  purple: 0x9e7ec1,
+}
+
 export class EnvimComponent extends React.Component<Props, States> {
   private refresh: boolean = false;
   private main: { fontSize: number; lineHeight: string; } = { fontSize: 0, lineHeight: "" };
@@ -64,6 +76,15 @@ export class EnvimComponent extends React.Component<Props, States> {
 
     this.setSize();
     this.state = { pause: false, grids: {} };
+    Highlights.setHighlight("-1", true, { special: colors.red });
+    Highlights.setHighlight("blue", true, { foreground: colors.blue });
+    Highlights.setHighlight("lightblue", true, { foreground: colors.lightblue });
+    Highlights.setHighlight("green", true, { foreground: colors.green });
+    Highlights.setHighlight("yellow", true, { foreground: colors.yellow });
+    Highlights.setHighlight("orange", true, { foreground: colors.orange });
+    Highlights.setHighlight("red", true, { foreground: colors.red });
+    Highlights.setHighlight("pink", true, { foreground: colors.pink });
+    Highlights.setHighlight("purple", true, { foreground: colors.purple });
     Emit.on("highlight:set", this.onHighlight);
     Emit.on("win:pos", this.onWin);
     Emit.on("option:set", this.onOption);
