@@ -7,6 +7,11 @@ export class Tablines {
   private static bufs: IBuffer[] = [];
   private static dirty: boolean = false;
 
+  static init() {
+    Tablines.tabs = [];
+    Tablines.bufs = [];
+  }
+
   static settabs(tabs: ITab[]) {
     const update = JSON.stringify(Tablines.tabs) !== JSON.stringify(tabs);
 
