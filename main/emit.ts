@@ -5,6 +5,11 @@ import { Browser } from "./browser";
 
 export class Emit {
   private static emit = new EventEmitter;
+  private static cache: { [k: string ]: string } = {};
+
+  static init() {
+    Emit.cache = {};
+  }
 
   static on(event: string, callback: (...args: any[]) => void) {
     Emit.emit.on(event, callback);
@@ -20,6 +25,15 @@ export class Emit {
 
   static send(event: string, ...args: any[]) {
     Browser.win?.webContents.send(event, ...args);
+  }
+
+  static update(event: string, ...args: any[]) {
+    const json = JSON.stringify(args);
+
+    if (Emit.cache[event] !== json) {
+      Emit.cache[event] = json;
+      Emit.send(event, ...args);
+    }
   }
 
   static clear(events: string[]) {

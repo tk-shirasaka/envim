@@ -8,16 +8,14 @@ import { Emit } from "../emit";
 import { Autocmd } from "./autocmd";
 import { Clipboard } from "./clipboard";
 import { Grids } from "./grid";
-import { Tablines } from "./tabline";
 import { Highlights } from "./highlight";
 
 export class App {
   private modes: IMode[] = [];
-  private options: { [k: string]: string | number | boolean} = {};
 
   constructor(private nvim: NeovimClient, channel: number) {
+    Emit.init();
     Grids.init();
-    Tablines.init();
     Autocmd.setup(channel);
     Clipboard.setup(channel);
     nvim.on("request", this.onRequest);
@@ -178,7 +176,7 @@ export class App {
 
   private defaultColorsSet(foreground: number, background: number, special: number) {
     Highlights.set("0", {}, true);
-    Emit.send("highlight:set", [{id: "0", ui: true, hl: { foreground, background, special }}]);
+    Emit.update("highlight:set", [{id: "0", ui: true, hl: { foreground, background, special }}]);
   }
 
   private hlAttrDefine(highlights: any[]) {
@@ -187,7 +185,7 @@ export class App {
 
       return {id, ui, hl }
     }).filter(({ id, hl, ui }) => Highlights.set(id, hl, ui));
-    Emit.send("highlight:set", highlights);
+    Emit.update("highlight:set", highlights);
   }
 
   private gridLine(grid: number, row: number, col: number, cells: string[][]) {
@@ -289,8 +287,7 @@ export class App {
       next.bufs.push({ name, buffer: +buffer.data, active });
     }
 
-    Tablines.settabs(next.tabs);
-    Tablines.setbufs(next.bufs);
+    Emit.update("tabline:update", next.tabs, next.bufs);
   }
 
   private cmdlineShow(content: string[][], pos: number, prompt: string, indent: number) {
@@ -349,7 +346,7 @@ export class App {
   }
 
   private msgShow(kind: string, contents: string[][], replace: boolean) {
-    Emit.send("messages:show", this.convertMessage(kind, contents), replace);
+    Emit.update("messages:show", this.convertMessage(kind, contents), replace);
   }
 
   private msgClear() {
@@ -357,15 +354,15 @@ export class App {
   }
 
   private msgShowmode(contents: string[][]) {
-    Emit.send("messages:mode", this.convertMessage("mode", contents));
+    Emit.update("messages:mode", this.convertMessage("mode", contents));
   }
 
   private msgShowcmd(contents: string[][]) {
-    Emit.send("messages:command", this.convertMessage("command", contents));
+    Emit.update("messages:command", this.convertMessage("command", contents));
   }
 
   private msgRuler(contents: string[][]) {
-    Emit.send("messages:ruler", this.convertMessage("ruler", contents));
+    Emit.update("messages:ruler", this.convertMessage("ruler", contents));
   }
 
   private msgHistoryShow(entries: any[]) {
@@ -391,31 +388,26 @@ export class App {
   }
 
   private modeChange(index: number) {
-    Emit.send("mode:change", this.modes[index]);
+    Emit.update("mode:change", this.modes[index]);
   }
 
   private optionsSet(options: string[][]) {
-    const diff = options.filter(([name, value]) => {
-      const result = this.options[name] !== value;
-      this.options[name] = value;
-
-      return result;
-    }).length > 0;
-
-    diff && Emit.send("option:set", this.options);
+    Emit.update("option:set", options.reduce((obj: { [k: string]: string }, [name, value]) => {
+      obj[name] = value;
+      return obj;
+    }, {}));
   }
 
   private busy(busy: boolean) {
-    Emit.send("grid:busy", busy);
+    Emit.update("grid:busy", busy);
   }
 
   private async menu() {
     const menus = await this.nvim.call("menu_get", [""]);
-    Emit.send("menu:update", menus);
+    Emit.update("menu:update", menus);
   }
 
   private flush() {
-    Tablines.flush();
     Grids.flush();
   }
 }

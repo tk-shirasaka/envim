@@ -168,7 +168,7 @@ export class Grids {
       active.id !== grid && active.status === "show" && Grids.setStatus(active.id, "show");
       Grids.active = grid;
       Grids.setStatus(grid, "show");
-      Emit.send("grid:cursor", cursor);
+      Emit.update("grid:cursor", cursor);
     }
   }
 
@@ -192,7 +192,7 @@ export class Grids {
     });
 
     Grids.changes = {};
-    wins.length && Emit.send("win:pos", wins);
+    wins.length && Emit.update("win:pos", wins);
 
     Object.values(Grids.grids).map(grid => {
       const { id } = grid.getInfo();
