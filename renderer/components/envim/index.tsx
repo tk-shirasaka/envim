@@ -143,7 +143,7 @@ export class EnvimComponent extends React.Component<Props, States> {
         pointerEvents: curr.pointerEvents || "auto" as "none" | "auto",
       };
 
-      this.refresh = this.refresh || status !== "show";
+      this.refresh = this.refresh || (status !== "show" && zIndex < 5);
       if (status === "delete") {
         delete(grids[id]);
       } else if (JSON.stringify(curr) !== JSON.stringify(next)) {
