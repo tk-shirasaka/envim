@@ -126,7 +126,7 @@ export class App {
 
         /** ext_messages **/
         case "msg_show":
-          r.forEach(r => this.msgShow(r[0], r[1], r[2]));
+          this.msgShow(r);
         break;
         case "msg_showmode":
           r.forEach(r => this.msgShowmode(r[0]));
@@ -345,12 +345,15 @@ export class App {
     Emit.send("popupmenu:hide");
   }
 
-  private msgShow(kind: string, contents: string[][], replace: boolean) {
-    Emit.update("messages:show", this.convertMessage(kind, contents), replace);
+  private msgShow(messages: [string, string[][], boolean][]) {
+    const replace = messages.some(message => message[2]);
+    const entries = messages.map(message => this.convertMessage(message[0], message[1]));
+
+    Emit.update("messages:show", entries, replace);
   }
 
   private msgClear() {
-    Emit.send("messages:clear");
+    Emit.update("messages:show", [], true);
   }
 
   private msgShowmode(contents: string[][]) {
