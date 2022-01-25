@@ -101,7 +101,7 @@ export class App {
           r.forEach(r => this.cmdlineSpecialChar(r[0], r[1]));
         break;
         case "cmdline_hide":
-          this.cmdlineHide();
+          this.cmdlineShow([], 0, "", 0);
         break;
         case "cmdline_block_show":
           r.forEach(r => this.cmdlineBlockShow(r[0]));
@@ -291,7 +291,7 @@ export class App {
   }
 
   private cmdlineShow(content: string[][], pos: number, prompt: string, indent: number) {
-    Emit.send("cmdline:show", content, pos, prompt, indent);
+    Emit.update("cmdline:show", content, pos, prompt, indent);
   }
 
   private cmdlinePos(pos: number) {
@@ -300,10 +300,6 @@ export class App {
 
   private cmdlineSpecialChar(c: string, shift: boolean) {
     Emit.send("cmdline:special", c, shift);
-  }
-
-  private cmdlineHide() {
-    Emit.send("cmdline:hide");
   }
 
   private cmdlineBlockShow(lines: string[][][]) {

@@ -35,13 +35,12 @@ export class CmdlineComponent extends React.Component<Props, States> {
     Emit.on("cmdline:show", this.onCmdline);
     Emit.on("cmdline:cursor", this.onCursor);
     Emit.on("cmdline:special", this.onSpecial);
-    Emit.on("cmdline:hide", this.offCmdline);
     Emit.on("cmdline:blockshow", this.onBlock);
     Emit.on("cmdline:blockhide", this.offBlock);
   }
 
   componentWillUnmount() {
-    Emit.clear(["cmdline:show", "cmdline:cursor", "cmdline:special", "cmdline:hide", "cmdline:blockshow", "cmdline:blockhide"]);
+    Emit.clear(["cmdline:show", "cmdline:cursor", "cmdline:special", "cmdline:blockshow", "cmdline:blockhide"]);
   }
 
   private getPos(cmdline: States["cmdline"], pos: number) {
@@ -62,7 +61,7 @@ export class CmdlineComponent extends React.Component<Props, States> {
     content.forEach(([hl, text]) => {
       result = result.concat(text.split("").map(c => ({ hl, reverse: false, c })))
     });
-    result.push({ hl: "0", reverse: false, c: " " });
+    content.length && result.push({ hl: "0", reverse: false, c: " " });
 
     return result;
   }
@@ -70,8 +69,10 @@ export class CmdlineComponent extends React.Component<Props, States> {
   private onCmdline = (cmd: string[][], pos: number, prompt: string, indent: number) => {
     const cmdline = this.convertContent(cmd, indent)
 
-    pos = this.getPos(cmdline, pos + indent);
-    cmdline[pos].reverse = true;
+    if (cmdline.length) {
+      pos = this.getPos(cmdline, pos + indent);
+      cmdline[pos].reverse = true;
+    }
 
     this.setState({ cmdline, pos, prompt, indent })
   }
@@ -92,10 +93,6 @@ export class CmdlineComponent extends React.Component<Props, States> {
     shift || (cmdline[this.state.pos].reverse = false);
     cmdline.splice(this.state.pos, 0, { hl: "0", c, reverse: true });
     this.setState({ cmdline, pos });
-  }
-
-  private offCmdline = () => {
-    this.state.contents.length || this.setState({ cmdline: [] });
   }
 
   private onBlock = (lines: string[][][]) => {
