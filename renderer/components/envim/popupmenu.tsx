@@ -99,9 +99,9 @@ export class PopupmenuComponent extends React.Component<Props, States> {
       <FlexComponent animate="fade-in" direction="column" position="absolute" overflow="auto" whiteSpace="pre-wrap" style={this.getScopeStyle()} shadow>
         <div ref={this.scope}></div>
         {this.state.items.map(({ word, kind, menu }, i) => (
-          <FlexComponent onClick={() => this.onItem(i)} key={i}>
-            <FlexComponent padding={[0, Setting.font.width]} grow={1} style={Highlights.style("0", { reverse: this.state.selected === i })}>{ word }</FlexComponent>
-            { `${kind}${menu}` && <FlexComponent padding={[0, Setting.font.width]} style={Highlights.style(this.getKindStyle(`${kind}${menu}`), { reverse: this.state.selected !== i })}>{ kind } { menu }</FlexComponent> }
+          <FlexComponent active={this.state.selected === i} onClick={() => this.onItem(i)} key={i}>
+            <FlexComponent padding={[0, Setting.font.width]} grow={1} style={Highlights.style("0")}>{ word }</FlexComponent>
+            { `${kind}${menu}` && <FlexComponent padding={[0, Setting.font.width]} style={Highlights.style(this.getKindStyle(`${kind}${menu}`), { reverse: true })}>{ kind } { menu }</FlexComponent> }
           </FlexComponent>
         ))}
       </FlexComponent>

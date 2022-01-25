@@ -17,24 +17,6 @@ $color-purple: #9e7ec1;
       background-color: $bg;
       border-color: lighten($bg, 10%);
     }
-
-    &.clickable, &.active {
-      cursor: pointer;
-      &:hover {
-        color: lighten($fg, 10%);
-        @if $bg != null {
-          border-color: lighten($bg, 20%);
-          background-color: lighten($bg, 10%);
-        }
-      }
-    }
-    &.active {
-      color: lighten($fg, 5%);
-      @if $bg != null {
-        border-color: lighten($bg, 15%);
-        background-color: lighten($bg, 5%);
-      }
-    }
   }
 }
 
@@ -56,3 +38,19 @@ $color-purple: #9e7ec1;
 @include make-color-all("red", $color-black, $color-red);
 @include make-color-all("pink", $color-black, $color-pink);
 @include make-color-all("purple", $color-black, $color-purple);
+
+.clickable, .active {
+  cursor: pointer;
+}
+
+.clickable:hover {
+  filter: brightness(1.8);
+}
+
+.active {
+  filter: brightness(1.4);
+
+  &:hover {
+    filter: brightness(2.2);
+  }
+}

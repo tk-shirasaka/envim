@@ -47,8 +47,8 @@ export class FlexComponent extends React.Component<Props, States> {
     props.animate && classes.push(`animate ${props.animate}`);
     props.hover && classes.push("contents");
     props.color && classes.push(`color-${props.color}`);
-    props.color && props.active && classes.push("active");
-    props.color && props.onClick && classes.push("clickable");
+    props.active && classes.push("active");
+    props.onClick && classes.push("clickable");
 
     return classes.join(" ");
   }
