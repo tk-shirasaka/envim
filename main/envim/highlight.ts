@@ -3,6 +3,10 @@ import { IHighlight } from "common/interface";
 export class Highlights {
   private static hls: { [k: string]: { fg: number; bg: number; sp: number; } } = {};
 
+  static init() {
+    Highlights.hls = {};
+  }
+
   static set(id: string, hl: IHighlight, ui: boolean) {
     const highlight = { fg: 0x01000000, bg: 0x02000000, sp: 0x03000000 };
     const old = Highlights.get(id) || {};

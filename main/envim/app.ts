@@ -15,6 +15,7 @@ export class App {
 
   constructor(private nvim: NeovimClient, channel: number) {
     Emit.init();
+    Highlights.init();
     Grids.init();
     Autocmd.setup(channel);
     Clipboard.setup(channel);
