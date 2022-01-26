@@ -103,7 +103,7 @@ export class HistoryComponent extends React.Component<Props, States> {
     } catch (e: any) {
       if (e instanceof Error) {
         const contents = [{ hl: "red", content: e.message }];
-        Emit.share("messages:show", { kind: "debug", contents }, true);
+        Emit.share("messages:show", [{ kind: "debug", contents }], true);
       }
     }
   }

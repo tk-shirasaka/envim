@@ -23,7 +23,7 @@ const invoke = async (event: string, ...args: any[]) => {
     if (e instanceof Error) {
       const reg = /^Error invoking remote method '[^']+': /;
       const contents = [{ hl: "red", content: e.message.replace(reg, "") }];
-      share("messages:show", { kind: "debug", contents }, true);
+      share("messages:show", [{ kind: "debug", contents }], true);
     }
   }
 };
