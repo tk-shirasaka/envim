@@ -1,10 +1,17 @@
 export class Emit {
+  private static events: { [k: string]: ((...args: any[]) => void)[] } = {};
+
   static on(event: string, callback: (...args: any[]) => void) {
-    window.envimIPC.on(event, callback);
+    if (!Emit.events[event]) {
+      window.envimIPC.on(event, (...args) => Emit.share(event, ...args));
+      Emit.events[event] = [];
+    }
+
+    Emit.events[event].push(callback);
   }
 
   static share(event: string, ...args: any[]) {
-    window.envimIPC.share(event, ...args);
+    Emit.events[event].forEach(callback => callback(...args))
   }
 
   static send<T>(event: string, ...args: any[]): Promise<T> {
@@ -12,6 +19,6 @@ export class Emit {
   }
 
   static clear(events: string[]) {
-    window.envimIPC.clear(events);
+    events.forEach(event => Emit.events[event] = []);
   }
 }

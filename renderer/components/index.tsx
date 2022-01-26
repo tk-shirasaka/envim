@@ -9,9 +9,7 @@ declare global {
   interface Window {
     envimIPC: {
       on: (event: string, callback: (...args: any[]) => void) => void,
-      share: (event: string, ...args: any[]) => void,
       send: <T>(event: string, ...args: any[]) => Promise<T>,
-      clear: (events: string[]) => void,
     }
   }
 

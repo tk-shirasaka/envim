@@ -42,11 +42,4 @@ const send = async (event: string, ...args: any[]) => {
   return result;
 };
 
-const clear = (events: string[]) => {
-  events.forEach(event => {
-    emit.removeAllListeners(event);
-    ipcRenderer.removeAllListeners(event);
-  });
-};
-
-contextBridge.exposeInMainWorld("envimIPC", { on, share, send, clear });
+contextBridge.exposeInMainWorld("envimIPC", { on, send });

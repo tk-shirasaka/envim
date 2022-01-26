@@ -5,6 +5,7 @@ import { Browser } from "./browser";
 
 export class Emit {
   private static emit = new EventEmitter;
+  private static events: { [k: string]: ((...args: any[]) => void)[] } = {};
   private static cache: { [k: string ]: string } = {};
 
   static init() {
@@ -12,13 +13,17 @@ export class Emit {
   }
 
   static on(event: string, callback: (...args: any[]) => void) {
-    Emit.emit.on(event, callback);
-    ipcMain.handle(event, (_: IpcMainInvokeEvent, ...args: any[]) => Emit.share(event, ...args));
+    if (!Emit.events[event]) {
+      ipcMain.handle(event, (_: IpcMainInvokeEvent, ...args: any[]) => Emit.share(event, ...args));
+      Emit.emit.on(event, (...args) => Emit.share(event, ...args));
+      Emit.events[event] = [];
+    }
+
+    Emit.events[event].push(callback);
   }
 
   static share(event: string, ...args: any[]) {
-    return Emit.emit
-      .listeners(event)
+    return Emit.events[event]
       .map(callback => callback(...args))
       .find(result => result);
   }
@@ -37,9 +42,6 @@ export class Emit {
   }
 
   static clear(events: string[]) {
-    events.forEach(event => {
-      Emit.emit.removeAllListeners(event);
-      ipcMain.removeAllListeners(event);
-    });
+    events.forEach(event => Emit.events[event] = []);
   }
 }
