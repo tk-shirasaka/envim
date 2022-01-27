@@ -39,8 +39,12 @@ export class CmdlineComponent extends React.Component<Props, States> {
     Emit.on("cmdline:blockhide", this.offBlock);
   }
 
-  componentWillUnmount() {
-    Emit.clear(["cmdline:show", "cmdline:cursor", "cmdline:special", "cmdline:blockshow", "cmdline:blockhide"]);
+  componentWillUnmount = () => {
+    Emit.off("cmdline:show", this.onCmdline);
+    Emit.off("cmdline:cursor", this.onCursor);
+    Emit.off("cmdline:special", this.onSpecial);
+    Emit.off("cmdline:blockshow", this.onBlock);
+    Emit.off("cmdline:blockhide", this.offBlock);
   }
 
   private getPos(cmdline: States["cmdline"], pos: number) {

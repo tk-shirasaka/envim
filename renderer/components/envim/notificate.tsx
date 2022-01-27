@@ -36,8 +36,8 @@ export class NotificateComponent extends React.Component<Props, States> {
     Emit.on("messages:show", this.onShow);
   }
 
-  componentWillUnmount() {
-    Emit.clear(["messages:show"]);
+  componentWillUnmount = () => {
+    Emit.off("messages:show", this.onShow);
   }
 
   private onShow = (messages: IMessage[], replace: boolean) => {

@@ -86,11 +86,12 @@ export class EditorComponent extends React.Component<Props, States> {
     }
   }
 
-  componentWillUnmount() {
+  componentWillUnmount = () => {
     const grid = this.props.grid;
     clearInterval(this.timer);
     Canvas.delete(grid);
-    Emit.clear([`clear:${grid}`, `flush:${grid}`]);
+    Emit.off(`clear:${this.props.grid}`, this.onClear);
+    Emit.off(`flush:${this.props.grid}`, this.onFlush);
   }
 
   shouldComponentUpdate(props: Props) {

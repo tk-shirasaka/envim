@@ -100,8 +100,12 @@ export class EnvimComponent extends React.Component<Props, States> {
     Emit.send("envim:resize", 1, x2Col(this.editor.width), y2Row(this.editor.height));
   }
 
-  componentWillUnmount() {
-    Emit.clear(["highlight:set", "win:pos", "option:set", "envim:drag", "envim:pause"]);
+  componentWillUnmount = () => {
+    Emit.off("highlight:set", this.onHighlight);
+    Emit.off("win:pos", this.onWin);
+    Emit.off("option:set", this.onOption);
+    Emit.off("envim:drag", this.onDrag);
+    Emit.off("envim:pause", this.onPause);
   }
 
   private setSize() {

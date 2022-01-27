@@ -49,8 +49,10 @@ export class PopupmenuComponent extends React.Component<Props, States> {
     Emit.send("envim:api", "nvim_ui_pum_set_bounds", [width, height, row, col]);
   }
 
-  componentWillUnmount() {
-    Emit.clear(["popupmenu:show", "popupmenu:select", "popupmenu:hide"]);
+  componentWillUnmount = () => {
+    Emit.off("popupmenu:show", this.onPopupmenu);
+    Emit.off("popupmenu:select", this.onSelect);
+    Emit.off("popupmenu:hide", this.offPopupmenu);
   }
 
   private onPopupmenu = (state: States) => {

@@ -18,7 +18,7 @@ export class Emit {
     return window.envimIPC.send<T>(event, ...args);
   }
 
-  static clear(events: string[]) {
-    events.forEach(event => Emit.events[event] = []);
+  static off(event: string, callback: (...args: any[]) => void) {
+    Emit.events[event] = Emit.events[event]?.filter(stored => callback !== stored) || [];
   }
 }

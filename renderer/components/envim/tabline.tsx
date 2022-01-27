@@ -54,8 +54,11 @@ export class TablineComponent extends React.Component<Props, States> {
     Emit.on("mode:change", this.changeMode);
   }
 
-  componentWillUnmount() {
-    Emit.clear(["envim:cwd", "tabline:update", "menu:update", "mode:change"]);
+  componentWillUnmount = () => {
+    Emit.off("envim:cwd", this.onCwd);
+    Emit.off("tabline:update", this.onTabline);
+    Emit.off("menu:update", this.onMenu);
+    Emit.off("mode:change", this.changeMode);
   }
 
   private onCwd = (cwd: string) => {

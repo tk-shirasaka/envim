@@ -47,9 +47,13 @@ export class HistoryComponent extends React.Component<Props, States> {
     Emit.on("messages:history", this.onHistory);
   }
 
-  componentWillUnmount() {
+  componentWillUnmount = () => {
     clearInterval(this.timer);
-    Emit.clear(["messages:mode", "messages:command", "messages:ruler", "messages:history", "debug"]);
+    Emit.off("messages:mode", this.onMode);
+    Emit.off("messages:command", this.onCommand);
+    Emit.off("messages:ruler", this.onRuler);
+    Emit.off("messages:history", this.onHistory);
+    Emit.off("debug", this.onDebug);
   }
 
   private onMode = (message: IMessage) => {
@@ -97,7 +101,7 @@ export class HistoryComponent extends React.Component<Props, States> {
       "".search(debug);
 
       this.state.debug === "" && debug && Emit.on("debug", this.onDebug);
-      debug === "" && Emit.clear(["debug"]);
+      debug === "" && Emit.off("debug", this.onDebug);
 
       this.setState({ debug });
     } catch (e: any) {

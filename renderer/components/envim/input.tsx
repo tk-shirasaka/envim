@@ -49,8 +49,11 @@ export class InputComponent extends React.Component<Props, States> {
     Emit.on("mode:change", this.changeMode);
   }
 
-  componentWillUnmount() {
-    Emit.clear(["envim:focus", "grid:cursor", "grid:busy", "mode:change"]);
+  componentWillUnmount = () => {
+    Emit.off("envim:focus", this.onFocus);
+    Emit.off("grid:cursor", this.onCursor);
+    Emit.off("grid:busy", this.onBusy);
+    Emit.off("mode:change", this.changeMode);
   }
 
   private onFocus = () => {
