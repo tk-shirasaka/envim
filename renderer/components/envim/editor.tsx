@@ -1,10 +1,9 @@
 import React, { createRef, RefObject, MouseEvent, WheelEvent } from "react";
 
-import { ICell, IScroll, IBuffer } from "common/interface";
+import { ICell, IScroll, ITab, IBuffer } from "common/interface";
 
 import { Emit } from "../../utils/emit";
 import { Setting } from "../../utils/setting";
-import { Buffers } from "../../utils/buffer";
 import { Canvas } from "../../utils/canvas";
 import { y2Row, x2Col } from "../../utils/size";
 
@@ -24,12 +23,14 @@ interface Props {
     transform: string;
     visibility: "visible" | "hidden";
     cursor: "default" | "not-allowed";
-    pointerEvents: "none" | "auto";
   };
 }
 
 interface States {
   bufs: IBuffer[];
+  style: {
+    pointerEvents: "none" | "auto";
+  }
 }
 
 const position: "absolute" = "absolute";
@@ -50,6 +51,8 @@ const styles = {
 };
 
 export class EditorComponent extends React.Component<Props, States> {
+  private static bufs: IBuffer[] = [];
+
   private bg: RefObject<HTMLCanvasElement> = createRef<HTMLCanvasElement>();
   private fg: RefObject<HTMLCanvasElement> = createRef<HTMLCanvasElement>();
   private sp: RefObject<HTMLCanvasElement> = createRef<HTMLCanvasElement>();
@@ -62,9 +65,11 @@ export class EditorComponent extends React.Component<Props, States> {
   constructor(props: Props) {
     super(props);
 
-    this.state = { bufs: [] };
+    this.state = { bufs: EditorComponent.bufs, style: { pointerEvents: "auto" } };
     Emit.on(`clear:${this.props.grid}`, this.onClear);
     Emit.on(`flush:${this.props.grid}`, this.onFlush);
+    Emit.on("envim:drag", this.onDrag);
+    Emit.on("tabline:update", this.onTabline);
   }
 
   componentDidMount() {
@@ -92,6 +97,8 @@ export class EditorComponent extends React.Component<Props, States> {
     Canvas.delete(grid);
     Emit.off(`clear:${this.props.grid}`, this.onClear);
     Emit.off(`flush:${this.props.grid}`, this.onFlush);
+    Emit.off("envim:drag", this.onDrag);
+    Emit.off("tabline:update", this.onTabline);
   }
 
   shouldComponentUpdate(props: Props) {
@@ -173,14 +180,6 @@ export class EditorComponent extends React.Component<Props, States> {
     }
   }
 
-  private onMouseEnter = () => {
-    this.timer = +setInterval(() => this.setState({ bufs: Buffers.get() }));
-  }
-
-  private onMouseLeave = () => {
-    clearInterval(this.timer);
-  }
-
   private onClear = () => {
     this.clear = true;
   }
@@ -189,6 +188,17 @@ export class EditorComponent extends React.Component<Props, States> {
     this.clear && Canvas.clear(this.props.grid, x2Col(this.props.style.width), y2Row(this.props.style.height));
     flush.forEach(({ cells, scroll }) => Canvas.update(this.props.grid, cells, scroll))
     this.clear = false;
+  }
+
+  private onDrag = (grid: number) => {
+    const pointerEvents = grid < 0 || grid === this.props.grid ? "auto" : "none";
+
+    this.setState({ style: { pointerEvents } });
+  }
+
+  private onTabline = (_: ITab[], bufs: IBuffer[]) => {
+    EditorComponent.bufs = bufs;
+    this.setState({ bufs });
   }
 
   private renderMenu(label: string, command: { main: string; sub: string; }) {
@@ -207,7 +217,7 @@ export class EditorComponent extends React.Component<Props, States> {
     const { scale } = Setting.font;
 
     return (
-      <FlexComponent animate="fade-in hover" position="absolute" overflow="visible" style={this.props.style} shadow
+      <FlexComponent animate="fade-in hover" position="absolute" overflow="visible" style={{ ...this.props.style, ...this.state.style }} shadow
         onMouseDown={this.onMouseDown}
         onMouseMove={this.onMouseMove}
         onMouseUp={this.onMouseUp}
@@ -220,10 +230,7 @@ export class EditorComponent extends React.Component<Props, States> {
         </FlexComponent>
         { this.props.grid === 1 || this.props.style.cursor === "not-allowed" ? null : (
           <FlexComponent color="black-fg" vertical="start" horizontal="end" position="absolute" overflow="visible" border={[1]} style={styles.actions} hover>
-            <FlexComponent color="black" overflow="visible" margin={[-1, -1, 0, 0]} padding={[0, 4]} rounded={[0, 0, 0, 4]} shadow
-              onMouseEnter={this.onMouseEnter}
-              onMouseLeave={this.onMouseLeave}
-            >
+            <FlexComponent color="black" overflow="visible" margin={[-1, -1, 0, 0]} padding={[0, 4]} rounded={[0, 0, 0, 4]} shadow>
               { this.renderMenu("", { main: "edit", sub: "buffer "}) }
               { this.renderMenu("", { main: "vnew", sub: "vsplit #"}) }
               { this.renderMenu("", { main: "new", sub: "split #"}) }

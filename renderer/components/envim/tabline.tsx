@@ -4,7 +4,6 @@ import { ITab, IBuffer, IMode, IMenu } from "../../../common/interface";
 
 import { Emit } from "../../utils/emit";
 import { Setting } from "../../utils/setting";
-import { Buffers } from "../../utils/buffer";
 import { icons } from "../../utils/icons";
 
 import { FlexComponent } from "../flex";
@@ -98,8 +97,7 @@ export class TablineComponent extends React.Component<Props, States> {
     Emit.send("envim:command", command);
   }
 
-  private onTabline = (tabs: ITab[], bufs: IBuffer[]) => {
-    Buffers.set(bufs);
+  private onTabline = (tabs: ITab[], _: IBuffer[]) => {
     this.setState({ tabs });
   }
 
