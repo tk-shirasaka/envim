@@ -42,8 +42,6 @@ interface States {
 const styles = {
   backdrop: {
     zIndex: 100,
-    top: 0,
-    left: 0,
     width: "100%",
     height: "100%",
     opacity: 0.2,
@@ -188,7 +186,7 @@ export class EnvimComponent extends React.Component<Props, States> {
         </FlexComponent>
         { Setting.options.ext_messages && <HistoryComponent {...this.footer} /> }
         { this.state.pause && (
-          <FlexComponent direction="column" horizontal="center" vertical="center" color="black" position="absolute" style={styles.backdrop}>
+          <FlexComponent direction="column" horizontal="center" vertical="center" color="black" position="absolute" inset={[0]} style={styles.backdrop}>
             <div className="animate loading" />
           </FlexComponent>
         ) }

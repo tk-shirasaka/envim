@@ -26,9 +26,6 @@ const styles = {
   },
   action: {
     height: 1,
-    left: 0,
-    right: 0,
-    bottom: 0,
   },
 };
 
@@ -67,7 +64,7 @@ export class MessageComponent extends React.Component<Props, States> {
           </div>
         </FlexComponent>
         { this.props.noaction ? null : (
-          <FlexComponent color="black" vertical="end" overflow="visible" position="absolute" style={styles.action} hover>
+          <FlexComponent color="black" vertical="end" overflow="visible" position="absolute" inset={["auto", 0, 0]} style={styles.action} hover>
             <div className="space" />
             <FlexComponent color="black" shrink={1} padding={[0, 4]} rounded={[4, 0, 0, 0]} shadow>
               <IconComponent color="gray-fg" font={this.state.open ? "" : "ﬥ"} onClick={this.onToggleOpen} />

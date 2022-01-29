@@ -24,6 +24,7 @@ interface Props {
   basis?: "auto" | "0";
   vertical?: "stretch" | "start" | "center" | "end";
   horizontal?: "stretch" | "start" | "center" | "end";
+  inset?: (number | "auto")[];
   margin?: (number | "auto")[];
   padding?: number[];
   border?: number[];
@@ -67,6 +68,7 @@ export class FlexComponent extends React.Component<Props, States> {
         justifyContent: props.horizontal || "stretch",
         boxShadow: props.shadow ? "rgba(0, 0, 0, 0.5) 0 0 4px 2px" : "none",
         padding: props.padding && props.padding.map(px => `${px}px`).join(" ") || 0,
+        inset: props.inset && props.inset.map(px => px === "auto" ? "auto" : `${px}px`).join(" ") || "auto",
         margin: props.margin && props.margin.map(px => px === "auto" ? "auto" : `${px}px`).join(" ") || 0,
         borderWidth: props.border && props.border.map(px => `${px}px`).join(" ") || 0,
         borderRadius: props.rounded && props.rounded.map(px => `${px}px`).join(" ") || 0,

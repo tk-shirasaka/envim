@@ -39,12 +39,6 @@ interface States {
 
 const position: "absolute" = "absolute";
 const styles = {
-  actions: {
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-  },
   icon: {
     paddingLeft: 4,
   },
@@ -244,7 +238,7 @@ export class EditorComponent extends React.Component<Props, States> {
           <canvas style={{ ...styles.canvas, transform: `scale(${1 / scale})` }} width={this.props.editor.width * scale} height={this.props.editor.height * scale} ref={this.sp} />
         </FlexComponent>
         { this.props.grid === 1 || this.props.style.cursor === "not-allowed" ? null : (
-          <FlexComponent color="black-fg" direction="column-reverse" vertical="end" position="absolute" overflow="visible" border={[1]} style={styles.actions} hover>
+          <FlexComponent color="black-fg" direction="column-reverse" vertical="end" position="absolute" overflow="visible" border={[1]} inset={[0]} hover>
             <FlexComponent color="black" grow={1} shadow>
               <FlexComponent animate="fade-in" color="blue" padding={[0, 2]} rounded={[2]} style={this.state.scroll} shadow></FlexComponent>
             </FlexComponent>
