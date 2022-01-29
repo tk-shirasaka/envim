@@ -85,6 +85,9 @@ export class App {
         case "win_close":
           r.forEach(r => this.winClose(r[0]));
         break;
+        case "win_viewport":
+          r.forEach(r => this.winViewport(r[0], r[2], r[3], r[6]));
+        break;
 
         /** ext_tabline **/
         case "tabline_update":
@@ -263,6 +266,10 @@ export class App {
 
   private winClose(grid: number) {
     Grids.setStatus(grid, "delete");
+  }
+
+  private winViewport(grid: number, top: number, bottom: number, total: number) {
+    Emit.update(`viewport:${grid}`, top, bottom, total);
   }
 
   private async tablineUpdate(ctab: Tabpage, tabs: { tab: Tabpage, name: string }[], cbuf: Buffer, bufs: { buffer: Buffer, name: string }[]) {

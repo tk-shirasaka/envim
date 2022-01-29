@@ -135,7 +135,7 @@ export class EnvimComponent extends React.Component<Props, States> {
     wins.forEach(({ id, winid, x, y, width, height, zIndex, focusable, transparent, status }) => {
       const curr = grids[id]?.style || {};
       const next = {
-        zIndex,
+        zIndex: status === "show" ? zIndex : -1,
         width: col2X(width),
         height: row2Y(height),
         transform: `translate(${col2X(x)}px, ${row2Y(y)}px)`,

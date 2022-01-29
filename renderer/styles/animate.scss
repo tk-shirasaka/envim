@@ -1,5 +1,5 @@
 .animate {
-  transition-property: transform, width, height;
+  transition-property: transform, width, height, inset;
   transition-duration: 100ms;
   transition-timing-function: linear;
   animation-duration: .5s;
@@ -26,6 +26,7 @@
     width: 10em;
     height: 10em;
   }
+
   &.loading {
     border-top: 1.1em solid rgba(255, 255, 255, 0.2);
     border-right: 1.1em solid rgba(255, 255, 255, 0.2);

@@ -28,9 +28,13 @@ interface Props {
 
 interface States {
   bufs: IBuffer[];
-  style: {
+  editor: {
     pointerEvents: "none" | "auto";
-  }
+  };
+  scroll: {
+    height: string;
+    top: string;
+  };
 }
 
 const position: "absolute" = "absolute";
@@ -65,9 +69,10 @@ export class EditorComponent extends React.Component<Props, States> {
   constructor(props: Props) {
     super(props);
 
-    this.state = { bufs: EditorComponent.bufs, style: { pointerEvents: "auto" } };
+    this.state = { bufs: EditorComponent.bufs, editor: { pointerEvents: "auto" }, scroll: { height: "100%", top: "" } };
     Emit.on(`clear:${this.props.grid}`, this.onClear);
     Emit.on(`flush:${this.props.grid}`, this.onFlush);
+    Emit.on(`viewport:${this.props.grid}`, this.onViewport);
     Emit.on("envim:drag", this.onDrag);
     Emit.on("tabline:update", this.onTabline);
   }
@@ -97,6 +102,7 @@ export class EditorComponent extends React.Component<Props, States> {
     Canvas.delete(grid);
     Emit.off(`clear:${this.props.grid}`, this.onClear);
     Emit.off(`flush:${this.props.grid}`, this.onFlush);
+    Emit.off(`viewport:${this.props.grid}`, this.onViewport);
     Emit.off("envim:drag", this.onDrag);
     Emit.off("tabline:update", this.onTabline);
   }
@@ -190,10 +196,19 @@ export class EditorComponent extends React.Component<Props, States> {
     this.clear = false;
   }
 
+  private onViewport = (top: number, bottom: number, total: number) => {
+    if (total) {
+      this.setState({ scroll: {
+        height: `${Math.floor((bottom - top) / total * 100)}%`,
+        top: `${Math.floor(top / total * 100)}%`,
+      }});
+    }
+  }
+
   private onDrag = (grid: number) => {
     const pointerEvents = grid < 0 || grid === this.props.grid ? "auto" : "none";
 
-    this.setState({ style: { pointerEvents } });
+    this.setState({ editor: { pointerEvents } });
   }
 
   private onTabline = (_: ITab[], bufs: IBuffer[]) => {
@@ -217,7 +232,7 @@ export class EditorComponent extends React.Component<Props, States> {
     const { scale } = Setting.font;
 
     return (
-      <FlexComponent animate="fade-in hover" position="absolute" overflow="visible" style={{ ...this.props.style, ...this.state.style }} shadow
+      <FlexComponent animate="fade-in hover" position="absolute" overflow="visible" style={{ ...this.props.style, ...this.state.editor }} shadow
         onMouseDown={this.onMouseDown}
         onMouseMove={this.onMouseMove}
         onMouseUp={this.onMouseUp}
@@ -229,7 +244,10 @@ export class EditorComponent extends React.Component<Props, States> {
           <canvas style={{ ...styles.canvas, transform: `scale(${1 / scale})` }} width={this.props.editor.width * scale} height={this.props.editor.height * scale} ref={this.sp} />
         </FlexComponent>
         { this.props.grid === 1 || this.props.style.cursor === "not-allowed" ? null : (
-          <FlexComponent color="black-fg" vertical="start" horizontal="end" position="absolute" overflow="visible" border={[1]} style={styles.actions} hover>
+          <FlexComponent color="black-fg" direction="column-reverse" vertical="end" position="absolute" overflow="visible" border={[1]} style={styles.actions} hover>
+            <FlexComponent color="black" grow={1} shadow>
+              <FlexComponent animate="fade-in" color="blue" padding={[0, 2]} rounded={[2]} style={this.state.scroll} shadow></FlexComponent>
+            </FlexComponent>
             <FlexComponent color="black" overflow="visible" margin={[-1, -1, 0, 0]} padding={[0, 4]} rounded={[0, 0, 0, 4]} shadow>
               { this.renderMenu("", { main: "edit", sub: "buffer "}) }
               { this.renderMenu("", { main: "vnew", sub: "vsplit #"}) }
