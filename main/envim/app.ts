@@ -175,7 +175,7 @@ export class App {
 
   private gridResize(grid: number, width: number, height: number) {
     Grids.get(grid).resize(width, height);
-    Grids.setStatus(grid, "show");
+    Grids.setStatus(grid, "show", true);
   }
 
   private defaultColorsSet(foreground: number, background: number, special: number) {
@@ -211,7 +211,7 @@ export class App {
   }
 
   private gridDestory(grid: number) {
-    Grids.setStatus(grid, "delete");
+    Grids.setStatus(grid, "delete", false);
   }
 
   private gridCursorGoto(grid: number, row: number, col: number) {
@@ -234,8 +234,8 @@ export class App {
     zIndex = grid === 1 ? 1 : zIndex;
     transparent = grid === 1 ? false : transparent;
 
-    current.setInfo({ winid, x: col, y: row, width, height, zIndex, focusable, transparent });
-    Grids.setStatus(grid, "show")
+    const update = current.setInfo({ winid, x: col, y: row, width, height, zIndex, focusable, transparent });
+    Grids.setStatus(grid, "show", update);
 
     if (winsize.width < width || winsize.height < height) {
       Emit.share("envim:resize", grid, Math.min(winsize.width - 2, width), Math.min(winsize.height - 2, height));
@@ -261,11 +261,11 @@ export class App {
   }
 
   private winHide(grid: number) {
-    Grids.setStatus(grid, "hide");
+    Grids.setStatus(grid, "hide", false);
   }
 
   private winClose(grid: number) {
-    Grids.setStatus(grid, "delete");
+    Grids.setStatus(grid, "delete", false);
   }
 
   private winViewport(grid: number, top: number, bottom: number, total: number) {

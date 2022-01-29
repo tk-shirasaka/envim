@@ -16,9 +16,15 @@ class Grid {
 
   setInfo(info: Object) {
     const { id, ...curr } = this.info;
-    const next = { ...curr, ...info, id };
-    this.resize(next.width, next.height);
-    this.info = next;
+    const next = { ...curr, ...info };
+    const update = JSON.stringify(curr) !== JSON.stringify(next);
+
+    if (update) {
+      this.resize(next.width, next.height);
+      this.info = { id, ...next };
+    }
+
+    return update;
   }
 
   getInfo() {
@@ -165,16 +171,17 @@ export class Grids {
     const active = Grids.exist(Grids.active) ? Grids.get(Grids.active).getInfo() : null;
 
     if (cursor.x >= 0 && cursor.y >= 0) {
-      active && active.id !== grid && active.status === "show" && Grids.setStatus(active.id, "show");
+      active && active.id !== grid &&  Grids.setStatus(active.id, active.status, active.status === "show");
       Grids.active = grid;
-      Grids.setStatus(grid, "show");
+      Grids.setStatus(grid, "show", true);
       Emit.update("grid:cursor", cursor);
     }
   }
 
-  static setStatus(grid: number, status: "show" | "hide" | "delete") {
-    Grids.changes[grid] = grid;
-    Grids.get(grid).setInfo({ status });
+  static setStatus(grid: number, status: "show" | "hide" | "delete", update: boolean) {
+    if (Grids.get(grid).setInfo({ status }) || update) {
+      Grids.changes[grid] = grid;
+    }
   }
 
   static flush() {
