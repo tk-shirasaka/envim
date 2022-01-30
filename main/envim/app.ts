@@ -269,7 +269,7 @@ export class App {
   }
 
   private winViewport(grid: number, top: number, bottom: number, total: number) {
-    Emit.update(`viewport:${grid}`, top, bottom, total);
+    setTimeout(() => Emit.update(`viewport:${grid}`, top, bottom, total), 200);
   }
 
   private async tablineUpdate(ctab: Tabpage, tabs: { tab: Tabpage, name: string }[], cbuf: Buffer, bufs: { buffer: Buffer, name: string }[]) {
@@ -349,7 +349,7 @@ export class App {
     Emit.send("popupmenu:hide");
   }
 
-  private msgShow(messages: [string, string[][], boolean][]) {
+  private msgShow(messages: [string, [string, string][], boolean][]) {
     const replace = messages.some(message => message[2]);
     const entries = messages.map(message => this.convertMessage(message[0], message[1]));
 
@@ -360,19 +360,19 @@ export class App {
     Emit.update("messages:show", [], true);
   }
 
-  private msgShowmode(contents: string[][]) {
+  private msgShowmode(contents: [string, string][]) {
     Emit.update("messages:mode", this.convertMessage("mode", contents));
   }
 
-  private msgShowcmd(contents: string[][]) {
+  private msgShowcmd(contents: [string, string][]) {
     Emit.update("messages:command", this.convertMessage("command", contents));
   }
 
-  private msgRuler(contents: string[][]) {
+  private msgRuler(contents: [string, string][]) {
     Emit.update("messages:ruler", this.convertMessage("ruler", contents));
   }
 
-  private msgHistoryShow(entries: any[]) {
+  private msgHistoryShow(entries: [string, [string, string][]][]) {
     if (entries.length) {
       this.nvim.command("messages clear");
       Emit.send("messages:history", entries.map(
@@ -381,7 +381,7 @@ export class App {
     }
   }
 
-  private convertMessage(kind: string, contents: string[][]) {
+  private convertMessage(kind: string, contents: [string, string][]) {
     return {
       kind,
       contents: contents

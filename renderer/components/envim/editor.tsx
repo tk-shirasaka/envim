@@ -63,7 +63,7 @@ export class EditorComponent extends React.Component<Props, States> {
   constructor(props: Props) {
     super(props);
 
-    this.state = { bufs: EditorComponent.bufs, editor: { pointerEvents: "auto" }, scroll: { height: "100%", top: "" } };
+    this.state = { bufs: EditorComponent.bufs, editor: { pointerEvents: "auto" }, scroll: { height: "0", top: "" } };
     Emit.on(`clear:${this.props.grid}`, this.onClear);
     Emit.on(`flush:${this.props.grid}`, this.onFlush);
     Emit.on(`viewport:${this.props.grid}`, this.onViewport);
@@ -192,8 +192,10 @@ export class EditorComponent extends React.Component<Props, States> {
 
   private onViewport = (top: number, bottom: number, total: number) => {
     if (total) {
+      const height = Math.floor((bottom - top) / total * 100);
+
       this.setState({ scroll: {
-        height: `${Math.floor((bottom - top) / total * 100)}%`,
+        height: height ? `${height}%` : "1px",
         top: `${Math.floor(top / total * 100)}%`,
       }});
     }
