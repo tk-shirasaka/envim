@@ -192,7 +192,7 @@ export class EditorComponent extends React.Component<Props, States> {
 
   private onViewport = (top: number, bottom: number, total: number) => {
     if (total) {
-      const height = Math.floor((bottom - top) / total * 100);
+      const height = Math.min(Math.floor((bottom - top) / total * 100), 100);
 
       this.setState({ scroll: {
         height: height ? `${height}%` : "1px",
