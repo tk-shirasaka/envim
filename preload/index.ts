@@ -13,7 +13,7 @@ const on = (event: string, callback: (...args: any[]) => void) => {
   emit.on(event, callback);
   ipcRenderer.on(event, (_: IpcRendererEvent, ...args: any[]) => {
     share(event, ...args);
-    share("debug", event, ...args);
+    share("debug", "receive", event, ...args);
   });
 };
 
@@ -23,6 +23,7 @@ const share = (event: string, ...args: any[]) => {
 
 const invoke = async (event: string, ...args: any[]) => {
   try {
+    share("debug", "send", event, ...args);
     return await ipcRenderer.invoke(event, ...args);
   } catch (e: any) {
     if (e instanceof Error) {

@@ -74,10 +74,13 @@ export class HistoryComponent extends React.Component<Props, States> {
     setTimeout(() => this.bottom.current?.scrollIntoView({ behavior: "smooth" }));
   }
 
-  private onDebug = (event: string, ...args: any[]) => {
-    if (event.search(this.state.debug) < 0) return;
+  private onDebug = (direction: "send" | "receive", event: string, ...args: any[]) => {
+    if (`${direction} ${event}`.search(this.state.debug) < 0) return;
 
-    this.onHistory([{ contents: [{ hl: "0", content: `-- ${event} --\n${JSON.stringify(args, null, 2)}` }], kind: "debug" }]);
+    this.onHistory([{ contents: [
+      direction === "send" ? { hl: "yellow", content: `[ 祝${event} ]\n` } : { hl: "blue", content: `[  ${event} ]\n` },
+      { hl: "0", content: JSON.stringify(args, null, 2) }], kind: "debug" }
+    ]);
   }
 
   private onClear = () => {
