@@ -1,6 +1,10 @@
 export class Emit {
   private static events: { [k: string]: ((...args: any[]) => void)[] } = {};
 
+  static initialize() {
+    window.envimIPC.initialize();
+  }
+
   static on(event: string, callback: (...args: any[]) => void) {
     if (!Emit.events[event]) {
       window.envimIPC.on(event, (...args) => Emit.share(event, ...args));

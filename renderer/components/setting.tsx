@@ -103,6 +103,7 @@ export class SettingComponent extends React.Component<Props, States> {
     e.stopPropagation();
     e.preventDefault();
 
+    Emit.initialize();
     Emit.send("envim:connect", this.state.type, this.state.path, this.state.bookmarks.find(({ selected }) => selected)?.path);
   }
 

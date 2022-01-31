@@ -4,6 +4,11 @@ import { EventEmitter } from "events";
 const emit = new EventEmitter;
 const counter: number[] = [];
 
+const initialize = () => {
+  counter.forEach(timer => clearTimeout(timer));
+  counter.splice(0);
+}
+
 const on = (event: string, callback: (...args: any[]) => void) => {
   emit.on(event, callback);
   ipcRenderer.on(event, (_: IpcRendererEvent, ...args: any[]) => {
@@ -42,4 +47,4 @@ const send = async (event: string, ...args: any[]) => {
   return result;
 };
 
-contextBridge.exposeInMainWorld("envimIPC", { on, send });
+contextBridge.exposeInMainWorld("envimIPC", { initialize, on, send });
