@@ -18,8 +18,6 @@ const styles = {
   scope: {
     overflow: "hidden auto",
     zIndex: 20,
-    right: 0,
-    bottom: 0,
     width: 300,
     maxHeight: "100%",
   },
@@ -48,7 +46,7 @@ export class NotificateComponent extends React.Component<Props, States> {
 
   render() {
     return this.state.messages.length === 0 ? null : (
-      <FlexComponent direction="column-reverse" padding={[0, 4]} position="absolute" style={styles.scope}>
+      <FlexComponent direction="column" padding={[0, 4]} inset={["auto", 0, 0, "auto"]} position="absolute" style={styles.scope}>
         {this.state.messages.map((message, i) =>
           <FlexComponent animate="slide-right" margin={[4, 0]} rounded={[4]} style={styles.messages} key={i} shadow><MessageComponent message={message} open /></FlexComponent>
         )}
