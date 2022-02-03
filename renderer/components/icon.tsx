@@ -8,6 +8,7 @@ interface Props {
   style?: { [k: string]: number | string };
   text?: number | string;
   hover?: boolean;
+  active?: boolean;
   onClick?: (...args: any[]) => void,
 }
 

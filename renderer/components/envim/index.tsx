@@ -42,8 +42,6 @@ interface States {
 const styles = {
   backdrop: {
     zIndex: 100,
-    width: "100%",
-    height: "100%",
     opacity: 0.2,
     cursor: "wait",
   }
@@ -116,7 +114,7 @@ export class EnvimComponent extends React.Component<Props, States> {
     };
     this.editor = {
       width: col2X(x2Col(this.props.width)),
-      height: row2Y(y2Row(this.props.height - this.header.height - (Setting.options.ext_messages ? font.height + 4 : 0))),
+      height: row2Y(y2Row(this.props.height - this.header.height - font.height + 4)),
     };
     this.footer = { width: this.props.width, height: this.props.height - this.header.height - this.editor.height };
   }
@@ -184,7 +182,7 @@ export class EnvimComponent extends React.Component<Props, States> {
           </FlexComponent>
           <FlexComponent color="black" grow={1} shrink={1} shadow />
         </FlexComponent>
-        { Setting.options.ext_messages && <HistoryComponent {...this.footer} /> }
+        <HistoryComponent {...this.footer} />
         { this.state.pause && (
           <FlexComponent direction="column" horizontal="center" vertical="center" color="black" position="absolute" inset={[0]} style={styles.backdrop}>
             <div className="animate loading" />

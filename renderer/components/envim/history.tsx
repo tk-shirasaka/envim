@@ -3,6 +3,7 @@ import React, { createRef, RefObject } from "react";
 import { IMessage } from "../../../common/interface";
 
 import { Emit } from "../../utils/emit";
+import { Setting } from "../../utils/setting";
 
 import { FlexComponent } from "../flex";
 import { IconComponent } from "../icon";
@@ -88,8 +89,10 @@ export class HistoryComponent extends React.Component<Props, States> {
   }
 
   private onMouseEnter = () => {
-    Emit.send("envim:command", "messages");
-    this.timer = +setInterval(() => Emit.send("envim:command", "messages"), 500);
+    if (Setting.options.ext_multigrid && this.state.debug === "") {
+      Emit.send("envim:command", "messages");
+      this.timer = +setInterval(() => Emit.send("envim:command", "messages"), 500);
+    }
   }
 
   private onMouseLeave = () => {
@@ -103,8 +106,11 @@ export class HistoryComponent extends React.Component<Props, States> {
     try {
       "".search(debug);
 
+      this.onMouseLeave();
       this.state.debug === "" && debug && Emit.on("debug", this.onDebug);
       debug === "" && Emit.off("debug", this.onDebug);
+      setTimeout(() => this.onMouseEnter());
+
 
       this.setState({ debug });
     } catch (e: any) {
@@ -123,7 +129,7 @@ export class HistoryComponent extends React.Component<Props, States> {
           { this.state.command && <FlexComponent animate="fade-in" margin={["auto", 4]} rounded={[4]} shadow><MessageComponent message={this.state.command} open noaction /></FlexComponent> }
           { this.state.ruler && <FlexComponent animate="fade-in" margin={["auto", 4]} rounded={[4]} shadow><MessageComponent message={this.state.ruler} open noaction /></FlexComponent> }
           <div className="space" />
-          <IconComponent color={ this.state.debug ? "green-fg" : "gray-fg" } font="" onClick={this.toggleDebug} />
+          <IconComponent color="green-fg" active={this.state.debug.length > 0} font="" onClick={this.toggleDebug} />
           <IconComponent color="red-fg" font="" onClick={this.onClear} />
         </FlexComponent>
         <FlexComponent overflow="visible" hover>
