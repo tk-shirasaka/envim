@@ -105,8 +105,8 @@ export class EnvimComponent extends React.Component<Props, States> {
 
   private setSize() {
     const font  = Setting.font;
-    const titlebar = navigator.windowControlsOverlay.getBoundingClientRect
-      ? navigator.windowControlsOverlay.getBoundingClientRect()
+    const titlebar = navigator.windowControlsOverlay.getTitlebarAreaRect
+      ? navigator.windowControlsOverlay.getTitlebarAreaRect()
       : { x: 0, y: 0, width: 0, height: 0, left: 0, right: 0 };
 
     this.main = { fontSize: font.size, lineHeight: `${font.height}px` };

@@ -16,7 +16,7 @@ declare global {
 
   interface Navigator {
     windowControlsOverlay: {
-      getBoundingClientRect?: () => DOMRect,
+      getTitlebarAreaRect?: () => DOMRect,
     }
   }
 }
