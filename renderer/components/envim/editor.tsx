@@ -54,7 +54,6 @@ export class EditorComponent extends React.Component<Props, States> {
   private bg: RefObject<HTMLCanvasElement> = createRef<HTMLCanvasElement>();
   private fg: RefObject<HTMLCanvasElement> = createRef<HTMLCanvasElement>();
   private sp: RefObject<HTMLCanvasElement> = createRef<HTMLCanvasElement>();
-  private clear: boolean = true;
   private timer: number = 0;
   private drag: boolean = false;
   private delta: { x: number; y: number } = { x: 0, y: 0 };
@@ -181,13 +180,11 @@ export class EditorComponent extends React.Component<Props, States> {
   }
 
   private onClear = () => {
-    this.clear = true;
+    Canvas.clear(this.props.grid, x2Col(this.props.style.width), y2Row(this.props.style.height));
   }
 
   private onFlush = (flush: { cells: ICell[], scroll?: IScroll }[]) => {
-    this.clear && Canvas.clear(this.props.grid, x2Col(this.props.style.width), y2Row(this.props.style.height));
     flush.forEach(({ cells, scroll }) => Canvas.update(this.props.grid, cells, scroll))
-    this.clear = false;
   }
 
   private onViewport = (top: number, bottom: number, total: number) => {
