@@ -11,9 +11,6 @@ export class Highlights {
     const highlight = { fg: 0x01000000, bg: 0x02000000, sp: 0x03000000 };
     const old = Highlights.get(id) || {};
 
-    if (hl.foreground === -1) delete(hl.foreground);
-    if (hl.background === -1) delete(hl.background);
-    if (hl.special === -1) delete(hl.special);
     if (hl.foreground) highlight.fg = hl.foreground;
     if (hl.background) highlight.bg = hl.background;
     if (hl.special) highlight.sp = hl.special;

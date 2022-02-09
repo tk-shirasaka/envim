@@ -83,7 +83,7 @@ class Grid {
     [ cell.text, cell.hl, cell.width, cell.dirty ] = [ text, hl, text.length, dirty ];
     (cell.dirty) && (this.dirty[`${cell.row},${cell.col}`] = cell);
 
-    if ((cell.dirty & 0b001) && (hl1.fg | hl2.fg & 0x08000000)) {
+    if (cell.dirty & 0b001 && (hl1.fg | hl2.fg) & 0x08000000) {
       const next = this.getCell(row, col + 1);
       next.dirty |= 0b001;
       this.dirty[`${next.row},${next.col}`] = next;

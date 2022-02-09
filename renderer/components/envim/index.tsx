@@ -71,7 +71,6 @@ export class EnvimComponent extends React.Component<Props, States> {
 
     this.setSize();
     this.state = { pause: false, grids: {} };
-    Highlights.setHighlight("-1", true, { special: colors.red });
     Highlights.setHighlight("blue", true, { foreground: colors.blue });
     Highlights.setHighlight("lightblue", true, { foreground: colors.lightblue });
     Highlights.setHighlight("green", true, { foreground: colors.green });

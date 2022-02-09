@@ -78,20 +78,20 @@ export class Highlights {
   static color(id: string, type: "foreground" | "background" | "special", options: IOptions = {}) {
     const alpha = type === "background" && !options.normal ? "alpha" : "normal";
     const reverse = Highlights.hls[id]?.reverse ? !options.reverse : options.reverse;
+    const transparent = options.transparent && reverse === false && type === "background";
 
     if (reverse && type !== "special") {
       type = type === "foreground" ? "background" : "foreground";
     }
 
-    const color1 = Highlights.hls[0] && Highlights.hls[0][type][alpha] || "";
+    const color1 = Highlights.hls[0] && Highlights.hls[0][type][alpha];
     const color2 = Highlights.hls[id] && Highlights.hls[id][type][alpha] || color1;
-    const color3 = Highlights.hls[-1] && Highlights.hls[-1][type][alpha] || "";
 
-    if (options.transparent && type === "background" && color1 === color2) {
+    if (transparent && color1 === color2) {
       return "rgba(0, 0, 0, 0)";
     }
 
-    return color2 || color3 || "rgba(0, 0, 0, 1)";
+    return color2 || { foreground: "#fff", background: "#000", special: "#f00" }[type];
   }
 
   static style(id: string, options: IOptions = {}) {
