@@ -135,7 +135,7 @@ export class InputComponent extends React.Component<Props, States> {
 
   render() {
     return (
-      <FlexComponent animate={this.state.composit ? "" : "blink"} style={this.state.style} onTransitionEnd={this.onTransitionEnd}>
+      <FlexComponent animate={this.state.composit ? "" : "blink"} style={this.state.style} onTransitionEnd={this.onTransitionEnd} nomouse>
         <input type="text" style={styles.input} ref={this.input} autoFocus
           onKeyDown={this.onKeyDown}
           onKeyUp={this.onKeyUp}

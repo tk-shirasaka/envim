@@ -33,6 +33,7 @@ interface Props {
   overflow?: "hidden" | "auto" | "visible";
   wordBreak?: "break-all";
   whiteSpace?: "nowrap" | "pre-wrap";
+  nomouse?: boolean;
   style?: Object;
 }
 
@@ -58,25 +59,26 @@ export class FlexComponent extends React.Component<Props, States> {
     const props = this.props;
 
     return {
-        display: "flex",
-        borderStyle: "solid",
-        flexDirection: props.direction || "row",
-        flexGrow: props.grow || 0,
-        flexShrink: props.shrink || 0,
-        flexBasis: props.basis || "auto",
-        alignItems: props.vertical || "stretch",
-        justifyContent: props.horizontal || "stretch",
-        boxShadow: props.shadow ? "rgba(0, 0, 0, 0.5) 0 0 4px 2px" : "none",
-        padding: props.padding && props.padding.map(px => `${px}px`).join(" ") || 0,
-        inset: props.inset && props.inset.map(px => px === "auto" ? "auto" : `${px}px`).join(" ") || "auto",
-        margin: props.margin && props.margin.map(px => px === "auto" ? "auto" : `${px}px`).join(" ") || 0,
-        borderWidth: props.border && props.border.map(px => `${px}px`).join(" ") || 0,
-        borderRadius: props.rounded && props.rounded.map(px => `${px}px`).join(" ") || 0,
-        position: props.position || "relative",
-        overflow: props.overflow || "hidden",
-        wordBreak: this.props.wordBreak || "break-all",
-        whiteSpace: this.props.whiteSpace || "nowrap",
-        ...( props.style || {} )
+      display: "flex",
+      borderStyle: "solid",
+      flexDirection: props.direction || "row",
+      flexGrow: props.grow || 0,
+      flexShrink: props.shrink || 0,
+      flexBasis: props.basis || "auto",
+      alignItems: props.vertical || "stretch",
+      justifyContent: props.horizontal || "stretch",
+      boxShadow: props.shadow ? "rgba(0, 0, 0, 0.5) 0 0 4px 2px" : "none",
+      padding: props.padding && props.padding.map(px => `${px}px`).join(" ") || 0,
+      inset: props.inset && props.inset.map(px => px === "auto" ? "auto" : `${px}px`).join(" ") || "auto",
+      margin: props.margin && props.margin.map(px => px === "auto" ? "auto" : `${px}px`).join(" ") || 0,
+      borderWidth: props.border && props.border.map(px => `${px}px`).join(" ") || 0,
+      borderRadius: props.rounded && props.rounded.map(px => `${px}px`).join(" ") || 0,
+      position: props.position || "relative",
+      overflow: props.overflow || "hidden",
+      wordBreak: this.props.wordBreak || "break-all",
+      whiteSpace: this.props.whiteSpace || "nowrap",
+      ...( props.nomouse ? { pointerEvents: "none" as "none" } : {} ),
+      ...( props.style || {} )
     };
   }
 

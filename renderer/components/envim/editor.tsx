@@ -28,9 +28,7 @@ interface Props {
 
 interface States {
   bufs: IBuffer[];
-  editor: {
-    pointerEvents: "none" | "auto";
-  };
+  nomouse: boolean;
   scroll: {
     height: string;
     top: string;
@@ -62,7 +60,7 @@ export class EditorComponent extends React.Component<Props, States> {
   constructor(props: Props) {
     super(props);
 
-    this.state = { bufs: EditorComponent.bufs, editor: { pointerEvents: "auto" }, scroll: { height: "0", top: "" } };
+    this.state = { bufs: EditorComponent.bufs, nomouse: false, scroll: { height: "0", top: "" } };
     Emit.on(`clear:${this.props.grid}`, this.onClear);
     Emit.on(`flush:${this.props.grid}`, this.onFlush);
     Emit.on(`viewport:${this.props.grid}`, this.onViewport);
@@ -199,9 +197,9 @@ export class EditorComponent extends React.Component<Props, States> {
   }
 
   private onDrag = (grid: number) => {
-    const pointerEvents = grid < 0 || grid === this.props.grid ? "auto" : "none";
+    const nomouse = !(grid < 0 || grid === this.props.grid);
 
-    this.setState({ editor: { pointerEvents } });
+    this.setState({ nomouse });
   }
 
   private onTabline = (_: ITab[], bufs: IBuffer[]) => {
@@ -225,7 +223,7 @@ export class EditorComponent extends React.Component<Props, States> {
     const { scale } = Setting.font;
 
     return (
-      <FlexComponent animate="fade-in hover" position="absolute" overflow="visible" style={{ ...this.props.style, ...this.state.editor }} shadow
+      <FlexComponent animate="fade-in hover" position="absolute" overflow="visible" nomouse={this.state.nomouse} style={this.props.style} shadow
         onMouseDown={this.onMouseDown}
         onMouseMove={this.onMouseMove}
         onMouseUp={this.onMouseUp}
