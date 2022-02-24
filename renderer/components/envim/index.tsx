@@ -48,6 +48,8 @@ const styles = {
 };
 
 const colors = {
+  black: 0x333435,
+  white: 0xececec,
   gray: 0xabadb7,
   blue: 0x2295c5,
   lightblue: 0x69aab9,
@@ -71,6 +73,8 @@ export class EnvimComponent extends React.Component<Props, States> {
 
     this.setSize();
     this.state = { pause: false, grids: {} };
+    Highlights.setHighlight("0", true, { background: colors.black, foreground: colors.white, special: colors.red });
+    Highlights.setHighlight("default", true, { background: colors.black, foreground: colors.white, special: colors.red });
     Highlights.setHighlight("blue", true, { foreground: colors.blue });
     Highlights.setHighlight("lightblue", true, { foreground: colors.lightblue });
     Highlights.setHighlight("green", true, { foreground: colors.green });

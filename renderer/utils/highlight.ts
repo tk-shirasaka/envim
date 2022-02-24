@@ -86,12 +86,13 @@ export class Highlights {
 
     const color1 = Highlights.hls[0] && Highlights.hls[0][type][alpha];
     const color2 = Highlights.hls[id] && Highlights.hls[id][type][alpha] || color1;
+    const color3 = Highlights.hls["default"][type][alpha];
 
     if (transparent && color1 === color2) {
       return "rgba(0, 0, 0, 0)";
     }
 
-    return color2 || { foreground: "#fff", background: "#000", special: "#f00" }[type];
+    return color2 || color3;
   }
 
   static style(id: string, options: IOptions = {}) {
