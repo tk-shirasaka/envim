@@ -57,7 +57,7 @@ export class MessageComponent extends React.Component<Props, States> {
 
     return (
       <FlexComponent animate="hover" grow={1} basis="0">
-        <IconComponent font={icon.font} style={Highlights.style(defaultHl, { reverse: true })} />
+        <IconComponent font={icon.font} style={Highlights.style(defaultHl, { reverse: true, normal: true })} />
         <FlexComponent whiteSpace={this.state.open ? "pre-wrap" : "nowrap"} grow={1} shrink={1} basis="0" padding={[2, 4]} style={defaultStyle} selectable>
           <div style={styles.message}>
             {this.props.message.contents.map(({hl, content}, i) => <span style={this.contentStyle(defaultStyle, hl === defaultHl ? defaultStyle : Highlights.style(hl))} key={i}>{ content }</span>)}
