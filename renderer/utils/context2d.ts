@@ -80,7 +80,7 @@ export class Context2D {
   }
 
   clear(x: number, y: number, width: number, height: number) {
-    this.rect(x * this.font.width, y * this.font.height - 1, width, height, "0", 0b111);
+    this.rect(x * this.font.width, y * this.font.height, width, height, "0", 0b111);
   }
 
   getCapture(x: number, y: number, width: number, height: number) {

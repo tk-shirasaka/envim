@@ -179,6 +179,7 @@ export class App {
   }
 
   private defaultColorsSet(foreground: number, background: number, special: number) {
+    Grids.refresh();
     Highlights.set("0", {}, true);
     Emit.update("highlight:set", [{id: "0", ui: true, hl: { foreground, background, special }}]);
   }
@@ -187,7 +188,7 @@ export class App {
     highlights = highlights.map(([id, hl, _, info]) => {
       const ui = info.some((info: { kind: string }) => info.kind === "ui");
 
-      return {id, ui, hl }
+      return { id, ui, hl }
     }).filter(({ id, hl, ui }) => Highlights.set(id, hl, ui));
     Emit.update("highlight:set", highlights);
   }

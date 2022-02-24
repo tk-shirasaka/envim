@@ -61,6 +61,13 @@ class Grid {
     return { row, col, text: " ", hl: "0", width: 0, dirty: 0 };
   }
 
+  refresh() {
+    this.lines.forEach(line => line.forEach(cell => {
+      cell.dirty = 0b111;
+      this.dirty[`${cell.row},${cell.col}`] = cell;
+    }));
+  }
+
   getCell(row: number, col: number) {
     return (this.lines[row] && this.lines[row][col]) ? this.lines[row][col] : this.getDefault(row, col);
   }
@@ -73,17 +80,17 @@ class Grid {
 
     const hl1 = Highlights.get(hl);
     const hl2 = Highlights.get(cell.hl);
-    const dirty = (this.dirty[`${cell.row},${cell.col}`]?.dirty || 0)
-      | (hl1.fg === hl2.fg && cell.text === text ? 0 : 0b001)
+    const dirty1 = (hl1.fg === hl2.fg && cell.text === text ? 0 : 0b001)
       | (hl1.bg === hl2.bg ? 0 : 0b010)
       | (hl1.sp === hl2.sp ? 0 : 0b100);
+    const dirty2 = this.dirty[`${cell.row},${cell.col}`]?.dirty || 0;
 
     (text === "") && (prev.width = 2);
 
-    [ cell.text, cell.hl, cell.width, cell.dirty ] = [ text, hl, text.length, dirty ];
+    [ cell.text, cell.hl, cell.width, cell.dirty ] = [ text, hl, text.length, dirty1 | dirty2 ];
     (cell.dirty) && (this.dirty[`${cell.row},${cell.col}`] = cell);
 
-    if (cell.dirty & 0b001 && (hl1.fg | hl2.fg) & 0x08000000) {
+    if (dirty1 & 0b001) {
       const next = this.getCell(row, col + 1);
       next.dirty |= 0b001;
       this.dirty[`${next.row},${next.col}`] = next;
@@ -182,6 +189,10 @@ export class Grids {
     if (Grids.get(grid).setInfo({ status }) || update) {
       Grids.changes[grid] = grid;
     }
+  }
+
+  static refresh() {
+    Object.values(Grids.grids).forEach(grid => grid.refresh());
   }
 
   static flush() {
