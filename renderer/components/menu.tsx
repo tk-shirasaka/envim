@@ -14,32 +14,24 @@ interface States {
   haschild: boolean;
 }
 
+const position: "relative" = "relative";
 const whiteSpace: "nowrap" = "nowrap";
 const boxSizing: "border-box" = "border-box";
 const styles = {
+  wrap: {
+    position,
+  },
   menu: {
     zIndex: 20,
     minWidth: "100%",
     whiteSpace,
     boxSizing,
   },
-  vleft: {
-    left: 0,
-  },
-  vright: {
-    right: 0,
-  },
-  hleft: {
-    left: "100%",
-  },
-  hright: {
-    right: "100%",
-  },
 };
 
 export class MenuComponent extends React.Component<Props, States> {
   private div: RefObject<HTMLDivElement> = createRef<HTMLDivElement>();
-  private align: "left" | "right" = "left";
+  private inset: (0 | "100%" | "auto")[] = ["auto", "auto", "auto", "auto"];
 
   constructor(props: Props) {
     super(props);
@@ -63,21 +55,34 @@ export class MenuComponent extends React.Component<Props, States> {
     this.state.haschild === haschild || this.setState({ haschild });
 
     if (this.div.current) {
-      const { left } = this.div.current.getBoundingClientRect();
-      this.align = window.innerWidth / 2 < left ? "right" : "left";
+      const { top, left } = this.div.current.getBoundingClientRect();
+      const vert = window.innerHeight / 2 < top ? "top" : "bottom";
+      const hori = window.innerWidth / 2 < left ? "left" : "right";
+
+      this.inset = ["auto", "auto", "auto", "auto"];
+      if (vert === "bottom") {
+        this.inset[0] = this.props.side ? 0 : "100%";
+      }
+      if (hori === "left") {
+        this.inset[1] = this.props.side ? "100%" : 0;
+      }
+      if (vert === "top") {
+        this.inset[2] = this.props.side ? 0 : "100%";
+      }
+      if (hori === "right") {
+        this.inset[3] = this.props.side ? "100%" : 0;
+      }
     }
   }
 
-  private renderMenu(direction: "v" | "h") {
-    if (this.state.haschild === false || (this.props.side ? "h" : "v") !== direction) return null;
+  private renderMenu() {
+    if (this.state.haschild === false) return null;
 
-    const style = { ...styles.menu, ...(styles[`${direction}${this.align}`]) };
+    const style = { ...styles.menu, ...{ inset: this.inset.join(" ") } };
 
     return (
-      <FlexComponent overflow="visible" hover>
-        <FlexComponent color="black" direction="column" position="absolute" overflow="visible" padding={[4]} border={[1]} rounded={[2]} style={style} shadow>
-          { this.props.children }
-        </FlexComponent>
+      <FlexComponent color="black" direction="column" position="absolute" overflow="visible" padding={[4]} border={[1]} rounded={[2]} style={style} shadow hover>
+        { this.props.children }
       </FlexComponent>
     );
   }
@@ -85,10 +90,9 @@ export class MenuComponent extends React.Component<Props, States> {
   render() {
     return (
       <FlexComponent vertical="center" overflow="visible">
-        <div className="animate hover space" ref={this.div}>
-          { this.renderMenu("h") }
+        <div className="animate hover space" style={styles.wrap} ref={this.div}>
           <FlexComponent color={this.props.color} style={this.props.style} onClick={this.props.onClick || this.onClick}>{ this.props.label }</FlexComponent>
-          { this.renderMenu("v") }
+          { this.renderMenu() }
         </div>
       </FlexComponent>
     );
