@@ -112,6 +112,7 @@ export class InputComponent extends React.Component<Props, States> {
   private onKeyUp = () => {
     if (this.state.composit === false) return;
 
+    this.transition = false;
     this.setState({ value: this.input.current?.value || "" });
   }
 
