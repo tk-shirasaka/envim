@@ -42,6 +42,7 @@ export class Context2D {
     if (type !== "none" && dirty & 0b100) {
       this.style(hl, "special");
       this.sp.beginPath();
+      this.sp.setLineDash([]);
 
       switch(type) {
         case "strikethrough":
@@ -50,6 +51,21 @@ export class Context2D {
 
           this.sp.moveTo(x, y + line);
           this.sp.lineTo(x + width * this.font.width, y + line);
+          break;
+
+        case "underlineline":
+          this.sp.moveTo(x, y + this.font.height - 1);
+          this.sp.lineTo(x + width * this.font.width, y + this.font.height - 1);
+          this.sp.moveTo(x, y + this.font.height - this.sp.lineWidth - 2);
+          this.sp.lineTo(x + width * this.font.width, y + this.font.height - this.sp.lineWidth - 2);
+          break;
+
+        case "underdot":
+        case "underdash":
+          const segment = this.sp.lineWidth * (type === "underdot" ? 1 : 2);
+          this.sp.setLineDash([segment, segment]);
+          this.sp.moveTo(x, y + this.font.height - 1);
+          this.sp.lineTo(x + width * this.font.width, y + this.font.height - 1);
           break;
 
         case "undercurl":

@@ -13,7 +13,7 @@ class Highlight {
   public special: { normal: string; alpha: string; };
   public reverse?: boolean;
   private type: "normal" | "bold" | "italic";
-  private decorate: "none" | "strikethrough" | "underline" | "undercurl";
+  private decorate: "none" | "strikethrough" | "underline" | "underlineline" | "undercurl" | "underdot" | "underdash";
 
   constructor(highlight: IHighlight, alpha: number) {
     alpha = highlight.blend === undefined ? alpha : highlight.blend;
@@ -31,7 +31,10 @@ class Highlight {
     this.decorate = "none";
     if (highlight.strikethrough) this.decorate = "strikethrough";
     if (highlight.underline) this.decorate = "underline";
+    if (highlight.underlineline) this.decorate = "underlineline";
     if (highlight.undercurl) this.decorate = "undercurl";
+    if (highlight.underdot) this.decorate = "underdot";
+    if (highlight.underdash) this.decorate = "underdash";
   }
 
   private intToColor(color: number | undefined, a: number) {
@@ -101,7 +104,16 @@ export class Highlights {
     const special = Highlights.color(id, "special");
     const fontFamily = Highlights.fontFamily(id);
     const fontStyle = Highlights.fontStyle(id);
-    const textDecoration = { none: "", strikethrough: `line-through ${special}`, underline: `underline ${special}`, undercurl: `underline wavy ${special}`}[Highlights.decoration(id)];
+    const textDecoration = {
+      none: "",
+      strikethrough: `line-through ${special}`,
+      underline: `underline solid ${special}`,
+      underlineline: `underline double ${special}`,
+      undercurl: `underline wavy ${special}`,
+      underdot: `underline dotted ${special}`,
+      underdash: `underline dashed ${special}`,
+
+    }[Highlights.decoration(id)];
 
     return { background, color: foreground, borderColor: foreground, fontFamily, fontStyle, textDecoration };
   }
