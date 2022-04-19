@@ -7,7 +7,7 @@ export interface IWindow {
   height: number;
   zIndex: number;
   focusable: boolean;
-  transparent: boolean;
+  floating: boolean;
   status: "show" | "hide" | "delete";
 }
 
