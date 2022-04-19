@@ -1,5 +1,5 @@
 import React from "react";
-import ReactDom from "react-dom";
+import { createRoot } from "react-dom/client";
 
 import "../styles/index.scss";
 
@@ -21,4 +21,5 @@ declare global {
   }
 }
 
-ReactDom.render(<AppComponent />, document.getElementById("app"));
+const element = document.getElementById("app");
+element && createRoot(element).render(<AppComponent />);

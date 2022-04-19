@@ -1,4 +1,4 @@
-import React, { createRef, RefObject } from "react";
+import React, { PropsWithChildren, createRef, RefObject } from "react";
 
 import { FlexComponent } from "./flex";
 
@@ -29,7 +29,7 @@ const styles = {
   },
 };
 
-export class MenuComponent extends React.Component<Props, States> {
+export class MenuComponent extends React.Component<PropsWithChildren<Props>, States> {
   private div: RefObject<HTMLDivElement> = createRef<HTMLDivElement>();
   private inset: (0 | "100%" | "auto")[] = ["auto", "auto", "auto", "auto"];
 

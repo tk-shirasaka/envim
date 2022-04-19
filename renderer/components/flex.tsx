@@ -1,4 +1,4 @@
-import React, { MouseEvent, WheelEvent } from "react";
+import React, { PropsWithChildren, MouseEvent, WheelEvent } from "react";
 
 interface Props {
   selectable?: boolean;
@@ -40,7 +40,7 @@ interface Props {
 interface States {
 }
 
-export class FlexComponent extends React.Component<Props, States> {
+export class FlexComponent extends React.Component<PropsWithChildren<Props>, States> {
   private getClassName() {
     const classes: string[] = [];
     const props = this.props;
