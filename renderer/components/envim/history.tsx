@@ -89,8 +89,9 @@ export class HistoryComponent extends React.Component<Props, States> {
   }
 
   private onMouseEnter = () => {
-    if (Setting.options.ext_multigrid && this.state.debug === "") {
+    if (Setting.options.ext_messages && this.state.debug === "") {
       Emit.send("envim:command", "messages");
+      clearInterval(this.timer);
       this.timer = +setInterval(() => Emit.send("envim:command", "messages"), 500);
     }
   }
