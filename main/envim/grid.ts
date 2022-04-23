@@ -8,6 +8,7 @@ class Grid {
   private lines: ICell[][] = [];
   private flush: { cells: ICell[], scroll?: IScroll }[] = [];
   private dirty: { [k: string]: ICell } = {};
+  private ready: boolean = false;
 
   constructor(id: number, width :number, height: number) {
     this.info = { id, winid: 0, x: 0, y: 0, width: 0, height: 0, zIndex: 1, focusable: true, floating: false, status: "show" };
@@ -31,9 +32,9 @@ class Grid {
     return this.info;
   }
 
-  resize(width :number, height: number) {
-    if (this.info.width === width && this.info.height === height) return;
-    const old = this.lines;
+  resize(width :number, height: number, clear: boolean = false) {
+    if (clear === false && this.info.width === width && this.info.height === height) return;
+    const old = clear ? [] : this.lines;
 
     this.info.width = width;
     this.info.height = height;
@@ -135,6 +136,8 @@ class Grid {
   }
 
   getFlush() {
+    if (!this.ready) return [];
+
     const flush = this.flush;
     this.flush = [];
 
@@ -142,6 +145,10 @@ class Grid {
     cells.length && flush.push({ cells });
 
     return flush;
+  }
+
+  onReady() {
+    this.ready = true;
   }
 }
 
@@ -167,10 +174,6 @@ export class Grids {
     }
 
     return Grids.grids[grid];
-  }
-
-  static delete(grid: number) {
-    Grids.exist(grid) && delete(Grids.grids[grid]);
   }
 
   static cursor(grid: number, row: number, col: number) {

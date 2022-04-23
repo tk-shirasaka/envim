@@ -76,6 +76,7 @@ export class EditorComponent extends React.Component<Props, States> {
     if (bg && fg && sp) {
       Canvas.set(this.props.grid, bg, fg, sp, this.props.lighten);
       Canvas.clear(this.props.grid, x2Col(this.props.style.width), y2Row(this.props.style.height));
+      Emit.send("envim:ready", this.props.grid);
     }
   }
 

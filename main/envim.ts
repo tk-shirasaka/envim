@@ -6,6 +6,7 @@ import { UiAttachOptions } from "neovim/lib/api/Neovim"
 
 import { Emit } from "./emit";
 import { App } from "./envim/app";
+import { Grids } from "./envim/grid";
 
 export class Envim {
   private nvim = new NeovimClient;
@@ -19,6 +20,7 @@ export class Envim {
     Emit.on("envim:mouse", this.onMouse);
     Emit.on("envim:input", this.onInput);
     Emit.on("envim:command", this.onCommand);
+    Emit.on("envim:ready", this.onReady);
     process.on("uncaughtException", this.onError);
     process.on("unhandledRejection", this.onError);
   }
@@ -73,6 +75,11 @@ export class Envim {
 
   private onCommand = async (command: string) => {
     return await this.nvim.command(command);
+  }
+
+  private onReady = (grid: number) => {
+    Grids.get(grid).onReady();
+    Grids.flush();
   }
 
   private onDisconnect = () => {

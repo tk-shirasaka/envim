@@ -204,10 +204,9 @@ export class App {
   }
 
   private gridClear(grid: number) {
-    const { x, y, width, height, zIndex, focusable } = Grids.get(grid).getInfo();
+    const { width, height } = Grids.get(grid).getInfo();
 
-    Grids.delete(grid);
-    Grids.get(grid).setInfo({ x, y, width, height, zIndex, focusable });
+    Grids.get(grid).resize(width, height, true);
     Emit.send(`clear:${grid}`);
   }
 
