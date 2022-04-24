@@ -8,6 +8,7 @@ class Grid {
   private lines: ICell[][] = [];
   private flush: { cells: ICell[], scroll?: IScroll }[] = [];
   private dirty: { [k: string]: ICell } = {};
+  private viewport: { top: number; bottom: number; total: number; } = { top: 0, bottom: 0, total: 0 };
   private ready: boolean = false;
 
   constructor(id: number, width :number, height: number) {
@@ -56,6 +57,10 @@ class Grid {
     x = this.info.status === "show" && this.info.width > x ? x + this.info.x : -1;
 
     return { x, y, width, hl, zIndex: this.info.zIndex + 1 };
+  }
+
+  setViewport(top: number, bottom: number, total: number) {
+    this.viewport = { top, bottom, total };
   }
 
   getDefault(row: number, col: number) {
@@ -136,15 +141,15 @@ class Grid {
   }
 
   getFlush() {
-    if (!this.ready) return [];
+    if (!this.ready) return {};
 
-    const flush = this.flush;
+    const { flush, viewport } = this;
     this.flush = [];
 
     const cells = this.getDirty();
     cells.length && flush.push({ cells });
 
-    return flush;
+    return { flush, viewport };
   }
 
   onReady() {
@@ -217,8 +222,9 @@ export class Grids {
 
     Object.values(Grids.grids).map(grid => {
       const { id } = grid.getInfo();
-      const flush = grid.getFlush();
-      flush.length && Emit.send(`flush:${id}`, flush);
+      const { flush, viewport } = grid.getFlush();
+      flush && flush.length && Emit.send(`flush:${id}`, flush);
+      viewport && Emit.update(`viewport:${id}`, true, viewport.top, viewport.bottom, viewport.total);
     });
   }
 }
