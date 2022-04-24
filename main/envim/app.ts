@@ -181,7 +181,7 @@ export class App {
   private defaultColorsSet(foreground: number, background: number, special: number) {
     Grids.refresh();
     Highlights.set("0", {}, true);
-    Emit.update("highlight:set", [{id: "0", ui: true, hl: { foreground, background, special }}]);
+    Emit.update("highlight:set", false, [{id: "0", ui: true, hl: { foreground, background, special }}]);
   }
 
   private hlAttrDefine(highlights: any[]) {
@@ -190,7 +190,7 @@ export class App {
 
       return { id, ui, hl }
     }).filter(({ id, hl, ui }) => Highlights.set(id, hl, ui));
-    Emit.update("highlight:set", highlights);
+    Emit.update("highlight:set", false, highlights);
   }
 
   private gridLine(grid: number, row: number, col: number, cells: string[][]) {
@@ -268,7 +268,7 @@ export class App {
   }
 
   private winViewport(grid: number, top: number, bottom: number, total: number) {
-    setTimeout(() => Emit.update(`viewport:${grid}`, top, bottom, total), 200);
+    setTimeout(() => Emit.update(`viewport:${grid}`, true, top, bottom, total), 200);
   }
 
   private async tablineUpdate(ctab: Tabpage, tabs: { tab: Tabpage, name: string }[], cbuf: Buffer, bufs: { buffer: Buffer, name: string }[]) {
@@ -294,11 +294,11 @@ export class App {
       next.bufs.push({ name, buffer: +buffer.data, active });
     }
 
-    Emit.update("tabline:update", next.tabs, next.bufs);
+    Emit.update("tabline:update", true, next.tabs, next.bufs);
   }
 
   private cmdlineShow(content: string[][], pos: number, prompt: string, indent: number) {
-    Emit.update("cmdline:show", content, pos, prompt, indent);
+    Emit.update("cmdline:show", true, content, pos, prompt, indent);
   }
 
   private cmdlinePos(pos: number) {
@@ -352,23 +352,23 @@ export class App {
     const replace = messages.some(message => message[2]);
     const entries = messages.map(message => this.convertMessage(message[0], message[1]));
 
-    Emit.update("messages:show", entries, replace);
+    Emit.update("messages:show", false, entries, replace);
   }
 
   private msgClear() {
-    Emit.update("messages:show", [], true);
+    Emit.update("messages:show", false, [], true);
   }
 
   private msgShowmode(contents: [string, string][]) {
-    Emit.update("messages:mode", this.convertMessage("mode", contents));
+    Emit.update("messages:mode", true, this.convertMessage("mode", contents));
   }
 
   private msgShowcmd(contents: [string, string][]) {
-    Emit.update("messages:command", this.convertMessage("command", contents));
+    Emit.update("messages:command", true, this.convertMessage("command", contents));
   }
 
   private msgRuler(contents: [string, string][]) {
-    Emit.update("messages:ruler", this.convertMessage("ruler", contents));
+    Emit.update("messages:ruler", true, this.convertMessage("ruler", contents));
   }
 
   private msgHistoryShow(entries: [string, [string, string][]][]) {
@@ -394,23 +394,23 @@ export class App {
   }
 
   private modeChange(index: number) {
-    Emit.update("mode:change", this.modes[index]);
+    Emit.update("mode:change", true, this.modes[index]);
   }
 
   private optionsSet(options: string[][]) {
-    Emit.update("option:set", options.reduce((obj: { [k: string]: string }, [name, value]) => {
+    Emit.update("option:set", true, options.reduce((obj: { [k: string]: string }, [name, value]) => {
       obj[name] = value;
       return obj;
     }, {}));
   }
 
   private busy(busy: boolean) {
-    Emit.update("grid:busy", busy);
+    Emit.update("grid:busy", true, busy);
   }
 
   private async menu() {
     const menus = await this.nvim.call("menu_get", [""]);
-    Emit.update("menu:update", menus);
+    Emit.update("menu:update", true, menus);
   }
 
   private flush() {

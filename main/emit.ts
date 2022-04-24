@@ -6,7 +6,7 @@ import { Browser } from "./browser";
 export class Emit {
   private static emit = new EventEmitter;
   private static events: { [k: string]: ((...args: any[]) => void)[] } = {};
-  private static cache: { [k: string ]: string } = {};
+  private static cache: { [k: string ]: { json: string; timer: number; } } = {};
 
   static init() {
     Emit.cache = {};
@@ -32,12 +32,22 @@ export class Emit {
     Browser.win?.webContents.send(event, ...args);
   }
 
-  static update(event: string, ...args: any[]) {
+  static update(event: string, async: boolean, ...args: any[]) {
     const json = JSON.stringify(args);
+    const cache = Emit.cache[event] || { json: "", timer: 0 };
 
-    if (Emit.cache[event] !== json) {
-      Emit.cache[event] = json;
-      Emit.send(event, ...args);
+    if (cache.json !== json) {
+      cache.json = json;
+      cache.timer || Emit.send(event, ...args);
+
+      if (async && cache.timer === 0) {
+        cache.timer = +setTimeout(() => {
+          cache.timer = 0;
+          cache.json === json || Emit.send(event, ...JSON.parse(cache.json));
+        }, 200);
+      }
+
+      Emit.cache[event] = cache;
     }
   }
 
