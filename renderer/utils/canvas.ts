@@ -8,14 +8,12 @@ export class Canvas {
 
   static set(
     grid: number,
-    bg: CanvasRenderingContext2D,
-    fg: CanvasRenderingContext2D,
-    sp: CanvasRenderingContext2D,
+    ctx: CanvasRenderingContext2D,
     lighten: boolean,
   ) {
     Canvas.init || Canvas.render();
     Canvas.init = true;
-    Canvas.renderer[grid] = new Context2D(bg, fg, sp, lighten);
+    Canvas.renderer[grid] = new Context2D(ctx, lighten);
   }
 
   static delete(grid: number) {
@@ -30,8 +28,8 @@ export class Canvas {
     return Canvas.renderer[grid]?.getCapture(0, 0, width, height);
   }
 
-  static putCapture(grid: number, bg: ImageData, fg: ImageData, sp: ImageData) {
-    Canvas.renderer[grid]?.putCapture(bg, fg, sp, 0, 0)
+  static putCapture(grid: number, capture: ImageData) {
+    Canvas.renderer[grid]?.putCapture(capture, 0, 0)
   }
 
   static update(grid: number, cells: ICell[], scroll: IScroll | undefined) {

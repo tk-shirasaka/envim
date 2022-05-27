@@ -17,7 +17,6 @@ export interface ICell {
   text: string;
   hl: string;
   width: number;
-  dirty: number;
 }
 
 export interface IScroll {

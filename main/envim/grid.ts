@@ -64,12 +64,11 @@ class Grid {
   }
 
   getDefault(row: number, col: number) {
-    return { row, col, text: " ", hl: "0", width: 0, dirty: 0 };
+    return { row, col, text: " ", hl: "0", width: 0 };
   }
 
   refresh() {
     this.lines.forEach(line => line.forEach(cell => {
-      cell.dirty = 0b111;
       this.dirty[`${cell.row},${cell.col}`] = cell;
     }));
   }
@@ -86,19 +85,15 @@ class Grid {
 
     const hl1 = Highlights.get(hl);
     const hl2 = Highlights.get(cell.hl);
-    const dirty1 = (hl1.fg === hl2.fg && cell.text === text ? 0 : 0b001)
-      | (hl1.bg === hl2.bg ? 0 : 0b010)
-      | (hl1.sp === hl2.sp ? 0 : 0b100);
-    const dirty2 = this.dirty[`${cell.row},${cell.col}`]?.dirty || 0;
+    const dirty = (hl1.fg ^ hl2.fg || cell.text !== text) || (hl1.bg ^ hl2.bg) || (hl1.sp ^ hl2.sp);
 
     (text === "") && (prev.width = 2);
 
-    [ cell.text, cell.hl, cell.width, cell.dirty ] = [ text, hl, text.length, dirty1 | dirty2 ];
-    (cell.dirty) && (this.dirty[`${cell.row},${cell.col}`] = cell);
-
-    if (dirty1 & 0b001) {
+    if (dirty) {
       const next = this.getCell(row, col + 1);
-      next.dirty |= 0b001;
+      [ cell.text, cell.hl, cell.width ] = [ text, hl, text.length ];
+
+      this.dirty[`${cell.row},${cell.col}`] = cell;
       this.dirty[`${next.row},${next.col}`] = next;
     }
   }

@@ -49,13 +49,11 @@ const styles = {
 export class EditorComponent extends React.Component<Props, States> {
   private static bufs: IBuffer[] = [];
 
-  private bg: RefObject<HTMLCanvasElement> = createRef<HTMLCanvasElement>();
-  private fg: RefObject<HTMLCanvasElement> = createRef<HTMLCanvasElement>();
-  private sp: RefObject<HTMLCanvasElement> = createRef<HTMLCanvasElement>();
+  private canvas: RefObject<HTMLCanvasElement> = createRef<HTMLCanvasElement>();
   private timer: number = 0;
   private drag: boolean = false;
   private delta: { x: number; y: number } = { x: 0, y: 0 };
-  private capture?: { bg: ImageData; fg: ImageData; sp: ImageData };
+  private capture?: ImageData;
 
   constructor(props: Props) {
     super(props);
@@ -69,12 +67,10 @@ export class EditorComponent extends React.Component<Props, States> {
   }
 
   componentDidMount() {
-    const bg = this.bg.current?.getContext("2d");
-    const fg = this.fg.current?.getContext("2d");
-    const sp = this.sp.current?.getContext("2d");
+    const ctx = this.canvas.current?.getContext("2d");
 
-    if (bg && fg && sp) {
-      Canvas.set(this.props.grid, bg, fg, sp, this.props.lighten);
+    if (ctx) {
+      Canvas.set(this.props.grid, ctx, this.props.lighten);
       Canvas.clear(this.props.grid, x2Col(this.props.style.width), y2Row(this.props.style.height));
       Emit.send("envim:ready", this.props.grid);
     }
@@ -83,7 +79,7 @@ export class EditorComponent extends React.Component<Props, States> {
   componentDidUpdate() {
     if (this.capture) {
       Canvas.clear(this.props.grid, x2Col(this.props.style.width), y2Row(this.props.style.height));
-      Canvas.putCapture(this.props.grid, this.capture.bg, this.capture.fg, this.capture.sp);
+      Canvas.putCapture(this.props.grid, this.capture);
       delete(this.capture);
     }
   }
@@ -103,8 +99,7 @@ export class EditorComponent extends React.Component<Props, States> {
     const prev = this.props;
     const next = props;
     if (prev.style.width < next.style.width || prev.style.height < next.style.height || prev.editor.width !== next.editor.width || prev.editor.height !== next.editor.height) {
-      const [ bg, fg, sp ] = Canvas.getCapture(this.props.grid, x2Col(Math.min(prev.style.width, next.style.width)), y2Row(Math.min(prev.style.height, next.style.height)));
-      this.capture = { bg, fg, sp };
+      this.capture = Canvas.getCapture(this.props.grid, x2Col(Math.min(prev.style.width, next.style.width)), y2Row(Math.min(prev.style.height, next.style.height)));
     }
     return true;
   }
@@ -231,9 +226,7 @@ export class EditorComponent extends React.Component<Props, States> {
         onWheel={this.onWheel}
       >
         <FlexComponent grow={1}>
-          <canvas style={{ ...styles.canvas, transform: `scale(${1 / scale})` }} width={this.props.editor.width * scale} height={this.props.editor.height * scale} ref={this.bg} />
-          <canvas style={{ ...styles.canvas, transform: `scale(${1 / scale})` }} width={this.props.editor.width * scale} height={this.props.editor.height * scale} ref={this.fg} />
-          <canvas style={{ ...styles.canvas, transform: `scale(${1 / scale})` }} width={this.props.editor.width * scale} height={this.props.editor.height * scale} ref={this.sp} />
+          <canvas style={{ ...styles.canvas, transform: `scale(${1 / scale})` }} width={this.props.editor.width * scale} height={this.props.editor.height * scale} ref={this.canvas} />
         </FlexComponent>
         { this.props.grid === 1 || this.props.style.cursor === "not-allowed" ? null : (
           <FlexComponent color="black-fg" direction="column-reverse" vertical="end" position="absolute" overflow="visible" border={[1]} inset={[0]} hover>
