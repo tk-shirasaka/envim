@@ -66,7 +66,7 @@ export class TablineComponent extends React.Component<Props, States> {
         .map(bookmark => ({ ...bookmark, selected: bookmark.path === cwd }))
         .sort((a, b) => a.name > b.name ? 1 : -1);
     }
-    this.setState({ cwd });
+    this.setState({ cwd, bookmarks: Setting.bookmarks });
   }
 
   private async saveBookmark(bookmark: { path: string, name: string, selected: boolean }) {
@@ -163,7 +163,7 @@ export class TablineComponent extends React.Component<Props, States> {
       <FlexComponent color="black" overflow="visible" style={this.props} shadow>
         {this.state.tabs.map((tab, i) => this.renderTab(i, tab))}
         <MenuComponent color="green-fg" style={styles.space} onClick={e => this.runCommand(e, "$tabnew")} label="">
-          { this.state.bookmarks.map(({ name, path }, i) => <FlexComponent color="black" key={i} onClick={e => this.runCommand(e, `$tabnew | cd ${path}`)}>{ name }</FlexComponent>) }
+          { this.state.bookmarks.map(({ name, path, selected }, i) => <FlexComponent color="black" active={selected} key={i} onClick={e => this.runCommand(e, `$tabnew | cd ${path}`)}>{ name }</FlexComponent>) }
         </MenuComponent>
         { this.renderBookmark() }
         <div className="space dragable" />
