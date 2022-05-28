@@ -105,8 +105,8 @@ export class Context2D {
     const { x, y, width, height, rows, cols } = scroll;
     const i = Math.min(limit, this.scrolltmp.i + 1);
     const { capture } = this.scrolltmp;
-    const ox = cols * (i / limit);
-    const oy = rows * (i / limit);
+    const ox = Math.ceil(cols * (i / limit));
+    const oy = Math.ceil(rows * (i / limit));
 
     this.clear(x, y, width, height);
     this.putCapture(capture, x - ox, y - oy, Math.max(0, ox), Math.max(0, oy), width - Math.abs(ox), height - Math.abs(oy));
