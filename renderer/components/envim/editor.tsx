@@ -29,6 +29,7 @@ interface Props {
 interface States {
   bufs: IBuffer[];
   nomouse: boolean;
+  scrolling: number;
   scroll: {
     height: string;
     top: string;
@@ -58,7 +59,7 @@ export class EditorComponent extends React.Component<Props, States> {
   constructor(props: Props) {
     super(props);
 
-    this.state = { bufs: EditorComponent.bufs, nomouse: false, scroll: { height: "0", top: "" } };
+    this.state = { bufs: EditorComponent.bufs, nomouse: false, scrolling: 0, scroll: { height: "0", top: "" } };
     Emit.on(`clear:${this.props.grid}`, this.onClear);
     Emit.on(`flush:${this.props.grid}`, this.onFlush);
     Emit.on(`viewport:${this.props.grid}`, this.onViewport);
@@ -184,8 +185,11 @@ export class EditorComponent extends React.Component<Props, States> {
   private onViewport = (top: number, bottom: number, total: number) => {
     if (total) {
       const height = Math.min(Math.floor((bottom - top) / total * 100), 100);
+      const scrolling = +setTimeout(() => {
+        this.state.scrolling === scrolling && this.setState({ scrolling: 0 });
+      }, 1000);
 
-      this.setState({ scroll: {
+      this.setState({ scrolling, scroll: {
         height: height ? `${height}%` : "1px",
         top: `${Math.floor(top / total * 100)}%`,
       }});
@@ -229,7 +233,7 @@ export class EditorComponent extends React.Component<Props, States> {
           <canvas style={{ ...styles.canvas, transform: `scale(${1 / scale})` }} width={this.props.editor.width * scale} height={this.props.editor.height * scale} ref={this.canvas} />
         </FlexComponent>
         { this.props.grid === 1 || this.props.style.cursor === "not-allowed" ? null : (
-          <FlexComponent color="black-fg" direction="column-reverse" vertical="end" position="absolute" overflow="visible" border={[1]} inset={[0]} hover>
+          <FlexComponent color="black-fg" direction="column-reverse" vertical="end" position="absolute" overflow="visible" border={[1]} inset={[0]} hover={this.state.scrolling === 0}>
             <FlexComponent color="black" grow={1} shadow>
               <FlexComponent animate="fade-in" color="blue" padding={[0, 2]} rounded={[2]} style={this.state.scroll} shadow></FlexComponent>
             </FlexComponent>
