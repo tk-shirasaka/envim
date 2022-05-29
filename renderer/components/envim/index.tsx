@@ -65,7 +65,7 @@ export class EnvimComponent extends React.Component<Props, States> {
   private refresh: boolean = false;
   private main: { fontSize: number; lineHeight: string; } = { fontSize: 0, lineHeight: "" };
   private editor: { width: number; height: number; } = { width: 0, height: 0 };
-  private header: { height: number; padding: string } = { height: 0, padding: "" };
+  private header: { width: number; height: number; padding: string } = { width: 0, height: 0, padding: "" };
   private footer: { width: number; height: number; } = { width: 0, height: 0 };
 
   constructor(props: Props) {
@@ -112,12 +112,13 @@ export class EnvimComponent extends React.Component<Props, States> {
 
     this.main = { fontSize: font.size, lineHeight: `${font.height}px` };
     this.header = {
+      width: titlebar.width,
       height: Math.min(row2Y(2), (titlebar.y * 2) + titlebar.height || row2Y(2)),
-      padding: titlebar.left ? `0 0 0 ${titlebar.left}px` : `0 ${titlebar.width}px 0 0`,
+      padding: titlebar.left ? `0 0 0 ${titlebar.left}px` : `0`,
     };
     this.editor = {
       width: col2X(x2Col(this.props.width)),
-      height: row2Y(y2Row(this.props.height - this.header.height - font.height + 4)),
+      height: row2Y(y2Row(this.props.height - this.header.height - font.height - 4)),
     };
     this.footer = { width: this.props.width, height: this.props.height - this.header.height - this.editor.height };
   }

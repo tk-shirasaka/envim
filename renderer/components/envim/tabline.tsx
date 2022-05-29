@@ -11,6 +11,7 @@ import { IconComponent } from "../icon";
 import { MenuComponent } from "../menu";
 
 interface Props {
+  width: number;
   height: number;
   padding: string;
 }
