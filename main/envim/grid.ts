@@ -5,7 +5,7 @@ import { Highlights } from "./highlight";
 
 class Grid {
   private info: IWindow;
-  private lines: ICell[][] = [];
+  private lines: { cell: ICell, hl: { fg: number; bg: number; sp: number } }[][] = [];
   private flush: { cells: ICell[], scroll?: IScroll }[] = [];
   private dirty: { [k: string]: ICell } = {};
   private viewport: { top: number; bottom: number; total: number; } = { top: 0, bottom: 0, total: 0 };
@@ -51,7 +51,7 @@ class Grid {
   }
 
   getCursorPos(y: number, x: number) {
-    const { width, hl } = this.getCell(y, x);
+    const { width, hl } = this.getCell(y, x).cell;
 
     y = this.info.status === "show" && this.info.height > y ? y + this.info.y : -1;
     x = this.info.status === "show" && this.info.width > x ? x + this.info.x : -1;
@@ -64,34 +64,38 @@ class Grid {
   }
 
   getDefault(row: number, col: number) {
-    return { row, col, text: " ", hl: "0", width: 0 };
+    return {
+      cell: { row, col, text: " ", hl: "0", width: 0 },
+      hl: { fg: 0, bg: 0, sp: 0 },
+    };
   }
 
   refresh() {
-    this.lines.forEach(line => line.forEach(cell => {
+    this.lines.forEach(line => line.forEach(({ cell }) => {
       this.dirty[`${cell.row},${cell.col}`] = cell;
     }));
   }
 
-  getCell(row: number, col: number) {
+  private getCell(row: number, col: number) {
     return (this.lines[row] && this.lines[row][col]) ? this.lines[row][col] : this.getDefault(row, col);
   }
 
   setCell(row: number, col: number, text: string, hl: string) {
-    const prev = this.getCell(row, col - 1);
-    const cell = this.getCell(row, col);
+    const prev = this.getCell(row, col - 1).cell;
+    const cell = this.getCell(row, col).cell;
 
     hl = +hl < 0 ? prev.hl : hl;
 
     const hl1 = Highlights.get(hl);
-    const hl2 = Highlights.get(cell.hl);
+    const hl2 = this.getCell(row, col).hl;
     const dirty = (hl1.fg ^ hl2.fg || cell.text !== text) || (hl1.bg ^ hl2.bg) || (hl1.sp ^ hl2.sp);
 
     (text === "") && (prev.width = 2);
 
     if (dirty) {
-      const next = this.getCell(row, col + 1);
+      const next = this.getCell(row, col + 1).cell;
       [ cell.text, cell.hl, cell.width ] = [ text, hl, text.length ];
+      [ hl2.fg, hl2.bg, hl2.sp, ] = [ hl1.fg, hl1.bg, hl1.sp ];
 
       this.dirty[`${cell.row},${cell.col}`] = cell;
       this.dirty[`${next.row},${next.col}`] = next;
@@ -115,10 +119,11 @@ class Grid {
         const tcol = x.start + x.direction * j;
         const scol = tcol + cols;
 
-        const { text, hl, width } = this.getCell(srow, scol);
-        const cell = this.getCell(trow, tcol);
+        const scell = this.getCell(srow, scol);
+        const tcell = this.getCell(trow, tcol);
 
-        [ cell.text, cell.hl, cell.width ] = [ text, hl, width ];
+        [ tcell.cell.text, tcell.cell.hl, tcell.cell.width ] = [ scell.cell.text, scell.cell.hl, scell.cell.width ];
+        [ tcell.hl.fg, tcell.hl.bg, tcell.hl.sp ] = [ scell.hl.fg, scell.hl.bg, scell.hl.sp ];
       }
     }
 
