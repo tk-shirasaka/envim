@@ -185,7 +185,7 @@ export class EditorComponent extends React.Component<Props, States> {
   private onViewport = (top: number, bottom: number, total: number) => {
     if (total) {
       const height = Math.min(Math.floor((bottom - top) / total * 100), 100);
-      const scrolling = +setTimeout(() => {
+      const scrolling = height === 100 ? 0 : +setTimeout(() => {
         this.state.scrolling === scrolling && this.setState({ scrolling: 0 });
       }, 1000);
 
