@@ -23,6 +23,8 @@ export class Emit {
   }
 
   static off(event: string, callback: (...args: any[]) => void) {
-    Emit.events[event] = Emit.events[event]?.filter(stored => callback !== stored) || [];
+    if (Emit.events[event]) {
+      Emit.events[event] = Emit.events[event].filter(stored => callback !== stored);
+    }
   }
 }
