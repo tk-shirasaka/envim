@@ -185,7 +185,7 @@ export class Grids {
     const cursor = Grids.get(grid).getCursorPos(row, col);
     const active = Grids.exist(Grids.active) ? Grids.get(Grids.active).getInfo() : null;
 
-    if (cursor.x >= 0 && cursor.y >= 0) {
+    if (cursor.x >= 0 && cursor.y >= 0 && (Object.keys(Grids.grids).length <= 1 || grid !== Grids.default)) {
       active && active.id !== grid &&  Grids.setStatus(active.id, active.status, active.status === "show");
       Grids.active = grid;
       Grids.setStatus(grid, "show", true);

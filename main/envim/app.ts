@@ -268,7 +268,7 @@ export class App {
   }
 
   private winViewport(grid: number, top: number, bottom: number, total: number) {
-    Grids.get(grid).setViewport(top, bottom, total);
+    Grids.exist(grid) && Grids.get(grid).setViewport(top, bottom, total);
   }
 
   private async tablineUpdate(ctab: Tabpage, tabs: { tab: Tabpage, name: string }[], cbuf: Buffer, bufs: { buffer: Buffer, name: string }[]) {

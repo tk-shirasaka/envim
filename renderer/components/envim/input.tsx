@@ -36,8 +36,6 @@ const styles = {
 
 export class InputComponent extends React.Component<Props, States> {
   private input: RefObject<HTMLInputElement> = createRef<HTMLInputElement>();
-  private queue?: { x: number, y: number, width: number, hl: string, zIndex: number };
-  private transition: boolean = false;
 
   constructor(props: Props) {
     super(props);
@@ -64,21 +62,15 @@ export class InputComponent extends React.Component<Props, States> {
   }
 
   private onCursor = (cursor: { x: number, y: number, width: number, hl: string, zIndex: number }) => {
-    if (this.transition) {
-      this.queue = cursor;
-    } else {
-      const style = { ...this.state.style };
+    const style = { ...this.state.style };
 
-      style.minWidth = this.getWidth(cursor.width, this.state.shape);
-      style.transform = `translate(${col2X(cursor.x)}px, ${row2Y(cursor.y)}px)`;
-      style.zIndex = cursor.zIndex;
-      style.color = Highlights.color(cursor.hl, "foreground", { reverse: true, normal: true });
-      style.background = Highlights.color(cursor.hl, "background", { reverse: true, normal: true });
+    style.minWidth = this.getWidth(cursor.width, this.state.shape);
+    style.transform = `translate(${col2X(cursor.x)}px, ${row2Y(cursor.y)}px)`;
+    style.zIndex = cursor.zIndex;
+    style.color = Highlights.color(cursor.hl, "foreground", { reverse: true, normal: true });
+    style.background = Highlights.color(cursor.hl, "background", { reverse: true, normal: true });
 
-      delete(this.queue);
-      this.transition = this.state.style.transform !== style.transform;
-      this.setState({ style });
-    }
+    this.setState({ style });
   }
 
   private onBusy = (busy: boolean) => {
@@ -86,7 +78,7 @@ export class InputComponent extends React.Component<Props, States> {
   }
 
   private changeMode = (mode: IMode) => {
-    const style = this.state.style;
+    const style = { ...this.state.style };
     const shape = mode.cursor_shape;
 
     style.minWidth = this.getWidth(1, shape);
@@ -112,7 +104,6 @@ export class InputComponent extends React.Component<Props, States> {
   private onKeyUp = () => {
     if (this.state.composit === false) return;
 
-    this.transition = false;
     this.setState({ value: this.input.current?.value || "" });
   }
 
@@ -128,15 +119,9 @@ export class InputComponent extends React.Component<Props, States> {
     this.setState({ composit: false, value: "" });
   }
 
-  private onTransitionEnd = () => {
-    this.transition = false;
-
-    this.queue && this.onCursor(this.queue);
-  }
-
   render() {
     return (
-      <FlexComponent animate={this.state.composit ? "" : "blink"} style={this.state.style} onTransitionEnd={this.onTransitionEnd} nomouse>
+      <FlexComponent animate={this.state.composit ? "" : "blink"} style={this.state.style} nomouse>
         <input type="text" style={styles.input} ref={this.input} autoFocus
           onKeyDown={this.onKeyDown}
           onKeyUp={this.onKeyUp}
