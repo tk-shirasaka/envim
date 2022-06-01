@@ -256,7 +256,7 @@ export class App {
     const width = winsize.width;
     const height = winsize.height - row;
 
-    this.winPos(grid, null, row, 0, width, height, false, winsize.zIndex + 3, true);
+    this.winPos(grid, null, row, 0, width, height, false, 50, true);
   }
 
   private winHide(grid: number) {

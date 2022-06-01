@@ -28,6 +28,7 @@ interface States {
     grid: number;
     winid: number;
     lighten: boolean;
+    order: number;
     style: {
       zIndex: number;
       width: number;
@@ -131,9 +132,11 @@ export class EnvimComponent extends React.Component<Props, States> {
 
   private onWin = (wins: IWindow[]) => {
     const grids = this.state.grids;
+    const nextOrder = Object.values(grids).reduce((order, grid) => Math.max(order, grid.order), 1);
 
-    wins.forEach(({ id, winid, x, y, width, height, zIndex, focusable, floating, status }) => {
+    wins.reverse().forEach(({ id, winid, x, y, width, height, zIndex, focusable, floating, status }, i) => {
       const curr = grids[id]?.style || {};
+      const order = grids[id]?.order || i + nextOrder;
       const next = {
         zIndex: status === "show" ? zIndex : -1,
         width: col2X(width),
@@ -148,7 +151,7 @@ export class EnvimComponent extends React.Component<Props, States> {
         delete(grids[id]);
       } else if (JSON.stringify(curr) !== JSON.stringify(next)) {
         this.refresh = this.refresh || (zIndex < 5 && (curr.width !== next.width || curr.height !== next.height));
-        grids[id] = { grid: id, winid, lighten: !floating, style: next };
+        grids[id] = { grid: id, winid, lighten: !floating, order, style: next };
       }
     });
 
@@ -176,7 +179,7 @@ export class EnvimComponent extends React.Component<Props, States> {
         <TablineComponent {...this.header} />
         <FlexComponent>
           <FlexComponent style={this.editor}>
-            { Object.values(this.state.grids).reverse().map(grid => (
+            { Object.values(this.state.grids).sort((a, b) => a.order - b.order).map(grid => (
               <EditorComponent key={grid.grid} editor={this.editor} { ...grid } />
             )) }
             <CmdlineComponent />
