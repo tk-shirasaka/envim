@@ -132,12 +132,9 @@ class Grid {
 
   private getDirty() {
     const dirty = this.dirty;
-    const cells: ICell[] = [];
 
     this.dirty = {};
-    Object.keys(dirty).forEach(k => dirty[k].width && cells.push(dirty[k]));
-
-    return JSON.parse(JSON.stringify(cells.sort((a, b) => (+a.hl) - (+b.hl))));
+    return JSON.parse(JSON.stringify(Object.values(dirty).filter(({ width }) => width)));
   }
 
   getFlush() {

@@ -128,6 +128,10 @@ export class Context2D {
     cells.forEach(cell => {
       const [y, x] = [cell.row * this.font.height, cell.col * this.font.width];
       this.rect(x, y, cell.width, 1, cell.hl);
+    });
+
+    cells.forEach(cell => {
+      const [y, x] = [cell.row * this.font.height, cell.col * this.font.width];
       this.decoration(x, y, cell.width, cell.hl);
     });
 
@@ -149,7 +153,15 @@ export class Context2D {
       this.rendering = this.scroll(this.move < 2 ? 5 : 1, flush.scroll);
       this.render();
     } else if (flush?.cells) {
-      this.flush(flush.cells);
+      const cells: { [k: string]: ICell } = {};
+
+      this.queues.unshift(flush);
+      while (this.queues.length && this.queues[0].cells) {
+        (this.queues.shift()?.cells || []).forEach(cell => {
+          cells[`${cell.row}.${cell.col}`] = cell;
+        })
+      }
+      this.flush(Object.values(cells).sort((a, b) => (+a.hl) - (+b.hl)));
       this.rendering = false;
       this.render();
     }
