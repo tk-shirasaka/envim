@@ -62,16 +62,16 @@ export class TablineComponent extends React.Component<Props, States> {
   }
 
   private onCwd = (cwd: string) => {
-    if (this.state.bookmarks.some(({ path }) => cwd === path)) {
-      Setting.bookmarks = this.state.bookmarks
-        .map(bookmark => ({ ...bookmark, selected: bookmark.path === cwd }))
-        .sort((a, b) => a.name > b.name ? 1 : -1);
-    }
+    Setting.bookmarks = this.state.bookmarks
+      .map(bookmark => ({ ...bookmark, selected: bookmark.path === cwd }));
+
     this.setState({ cwd, bookmarks: Setting.bookmarks });
   }
 
   private async saveBookmark(bookmark: { path: string, name: string, selected: boolean }) {
-    const bookmarks = this.state.bookmarks.filter(({ path }) => bookmark.path !== path);
+    const bookmarks = this.state.bookmarks
+      .map(bookmark => ({ ...bookmark, selected: false }))
+      .filter(({ path }) => bookmark.path !== path);
     const args = ["input", ["Bookmark: ", bookmark.name]]
 
     bookmark.name = await Emit.send<string>("envim:api", "nvim_call_function", args) || bookmark.name;
