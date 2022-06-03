@@ -17,7 +17,6 @@ interface States {
   composit: boolean;
   value: string;
   busy: boolean;
-  shape: "block" | "vertical" | "horizontal";
 }
 
 const position: "absolute" = "absolute";
@@ -36,11 +35,12 @@ const styles = {
 
 export class InputComponent extends React.Component<Props, States> {
   private input: RefObject<HTMLInputElement> = createRef<HTMLInputElement>();
+  private cursor: { x: number, y: number, width: number, hl: string, zIndex: number, shape: "block" | "vertical" | "horizontal" } = { x: 0, y: 0, width: 0, hl: "0", zIndex: 0, shape: "block" };
 
   constructor(props: Props) {
     super(props);
 
-    this.state = { style: { pointerEvent: "none", transform: "", minWidth: col2X(1), height: row2Y(1), zIndex: 0, color: "", background: "" }, composit: false, value: "", busy: false, shape: "block" };
+    this.state = { style: { pointerEvent: "none", transform: "", minWidth: col2X(1), height: row2Y(1), zIndex: 0, color: "", background: "" }, composit: false, value: "", busy: false };
     Emit.on("envim:focus", this.onFocus);
     Emit.on("grid:cursor", this.onCursor);
     Emit.on("grid:busy", this.onBusy);
@@ -62,13 +62,7 @@ export class InputComponent extends React.Component<Props, States> {
   }
 
   private onCursor = (cursor: { x: number, y: number, width: number, hl: string, zIndex: number }) => {
-    const style = { ...this.state.style };
-
-    style.minWidth = this.getWidth(cursor.width, this.state.shape);
-    style.transform = `translate(${col2X(cursor.x)}px, ${row2Y(cursor.y)}px)`;
-    style.zIndex = cursor.zIndex;
-    style.color = Highlights.color(cursor.hl, "foreground", { reverse: true, normal: true });
-    style.background = Highlights.color(cursor.hl, "background", { reverse: true, normal: true });
+    const style = this.makeStyle(cursor);
 
     this.setState({ style });
   }
@@ -78,12 +72,24 @@ export class InputComponent extends React.Component<Props, States> {
   }
 
   private changeMode = (mode: IMode) => {
-    const style = { ...this.state.style };
-    const shape = mode.cursor_shape;
+    const style = this.makeStyle({ shape: mode.cursor_shape });
 
-    style.minWidth = this.getWidth(1, shape);
+    this.setState({ style });
+  }
 
-    this.setState({ style, shape });
+  private makeStyle(cursor: { x?: number, y?: number, width?: number, hl?: string, zIndex?: number, shape?: "block" | "vertical" | "horizontal" }) {
+    const pointerEvent: "none" = "none";
+    this.cursor = { ...this.cursor, ...cursor };
+
+    return {
+        pointerEvent,
+        height: row2Y(1),
+        minWidth: this.getWidth(this.cursor.width, this.cursor.shape),
+        transform: `translate(${col2X(this.cursor.x)}px, ${row2Y(this.cursor.y)}px)`,
+        zIndex: this.cursor.zIndex,
+        color: Highlights.color(this.cursor.hl, "foreground", { reverse: true, normal: true }),
+        background: Highlights.color(this.cursor.hl, "background", { reverse: true, normal: true }),
+    };
   }
 
   private getWidth(width: number, shape: "block" | "vertical" | "horizontal") {
