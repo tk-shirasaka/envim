@@ -72,7 +72,7 @@ class Grid {
 
   refresh() {
     this.lines.forEach(line => line.forEach(({ cell }) => {
-      this.dirty[`${cell.row},${cell.col}`] = cell;
+      this.setCell(cell.row, cell.col, cell.text, cell.hl);
     }));
   }
 

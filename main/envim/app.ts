@@ -179,8 +179,8 @@ export class App {
   }
 
   private defaultColorsSet(foreground: number, background: number, special: number) {
+    Highlights.set("0", { foreground, background, special }, true);
     Grids.refresh();
-    Highlights.set("0", {}, true);
     Emit.update("highlight:set", false, [{id: "0", ui: true, hl: { foreground, background, special }}]);
   }
 
