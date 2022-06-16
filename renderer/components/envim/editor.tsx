@@ -53,6 +53,7 @@ export class EditorComponent extends React.Component<Props, States> {
   private canvas: RefObject<HTMLCanvasElement> = createRef<HTMLCanvasElement>();
   private timer: number = 0;
   private drag: boolean = false;
+  private pointer: { row: number; col: number } = { row: 0, col: 0 };
   private delta: { x: number; y: number } = { x: 0, y: 0 };
   private capture?: ImageData;
 
@@ -120,12 +121,14 @@ export class EditorComponent extends React.Component<Props, States> {
     const [col, row] = [ x2Col(e.nativeEvent.offsetX / scale), y2Row(e.nativeEvent.offsetY / scale) ];
     const button = wheel ? "wheel" : ["left", "middle", "right"][e.button] || "left";
     const modiffier = [];
+    const skip = action === 'drag' && row === this.pointer.row && col === this.pointer.col;
 
     e.shiftKey && modiffier.push("S");
     e.ctrlKey && modiffier.push("C");
     e.altKey && modiffier.push("A");
 
-    Emit.send("envim:mouse", this.props.grid, button, action, modiffier.join("-"), row, col);
+    this.pointer = { row, col };
+    skip || Emit.send("envim:mouse", this.props.grid, button, action, modiffier.join("-"), row, col);
   }
 
   private onMouseDown = (e: MouseEvent) => {
