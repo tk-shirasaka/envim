@@ -18,7 +18,6 @@ interface States {
 }
 
 const flexDirection: "column" = "column";
-const boxSizing: "border-box" = "border-box";
 const position: "absolute" = "absolute";
 const styles = {
   scope: {
@@ -27,7 +26,6 @@ const styles = {
     alignItems: "center",
     overflow: "auto",
     flexDirection,
-    boxSizing,
   },
   backdrop: {
     width: "100%",

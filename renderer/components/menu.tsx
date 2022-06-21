@@ -16,7 +16,6 @@ interface States {
 
 const position: "relative" = "relative";
 const whiteSpace: "nowrap" = "nowrap";
-const boxSizing: "border-box" = "border-box";
 const styles = {
   wrap: {
     position,
@@ -25,7 +24,6 @@ const styles = {
     zIndex: 20,
     minWidth: "100%",
     whiteSpace,
-    boxSizing,
   },
 };
 

@@ -82,13 +82,13 @@ export class InputComponent extends React.Component<Props, States> {
     this.cursor = { ...this.cursor, ...cursor };
 
     return {
-        pointerEvent,
-        height: row2Y(1),
-        minWidth: this.getWidth(this.cursor.width, this.cursor.shape),
-        transform: `translate(${col2X(this.cursor.x)}px, ${row2Y(this.cursor.y)}px)`,
-        zIndex: this.cursor.zIndex,
-        color: Highlights.color(this.cursor.hl, "foreground", { reverse: true, normal: true }),
-        background: Highlights.color(this.cursor.hl, "background", { reverse: true, normal: true }),
+      pointerEvent,
+      height: row2Y(1),
+      minWidth: this.getWidth(this.cursor.width, this.cursor.shape),
+      transform: `translate(${col2X(this.cursor.x)}px, ${row2Y(this.cursor.y)}px)`,
+      zIndex: this.cursor.zIndex,
+      color: Highlights.color(this.cursor.hl, "foreground", { reverse: true, normal: true }),
+      background: Highlights.color(this.cursor.hl, "background", { reverse: true, normal: true }),
     };
   }
 
