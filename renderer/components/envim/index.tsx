@@ -113,7 +113,7 @@ export class EnvimComponent extends React.Component<Props, States> {
 
     this.main = { fontSize: font.size, lineHeight: `${font.height}px` };
     this.header = {
-      width: titlebar.width,
+      width: titlebar.width + titlebar.left,
       height: Math.min(row2Y(2), (titlebar.y * 2) + titlebar.height || row2Y(2)),
       padding: titlebar.left ? `0 0 0 ${titlebar.left}px` : `0`,
     };
