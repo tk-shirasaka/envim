@@ -121,7 +121,7 @@ export class EditorComponent extends React.Component<Props, States> {
     const [col, row] = [ x2Col(e.nativeEvent.offsetX / scale), y2Row(e.nativeEvent.offsetY / scale) ];
     const button = wheel ? "wheel" : ["left", "middle", "right"][e.button] || "left";
     const modiffier = [];
-    const skip = action === 'drag' && row === this.pointer.row && col === this.pointer.col;
+    const skip = action === "drag" && row === this.pointer.row && col === this.pointer.col;
 
     e.shiftKey && modiffier.push("S");
     e.ctrlKey && modiffier.push("C");

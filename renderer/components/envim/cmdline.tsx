@@ -10,8 +10,8 @@ interface Props {
 }
 
 interface States {
-  cmdline: { hl: string, reverse: boolean, c: string }[];
-  contents: { hl: string, reverse: boolean, c: string }[][];
+  cmdline: { hl: string, c: string }[];
+  contents: { hl: string, c: string }[][];
   pos: number;
   prompt: string;
   indent: number;
@@ -58,12 +58,12 @@ export class CmdlineComponent extends React.Component<Props, States> {
     let i = 0;
 
     for (; i < indent; i++) {
-      result.push({ hl: "0", reverse: false, c: " " });
+      result.push({ hl: "0", c: " " });
     }
     content.forEach(([hl, text]) => {
-      result = result.concat(text.split("").map(c => ({ hl, reverse: false, c })))
+      result = result.concat(text.split("").map(c => ({ hl, c })))
     });
-    content.length && result.push({ hl: "0", reverse: false, c: " " });
+    content.length && result.push({ hl: "0", c: " " });
 
     return result;
   }
@@ -73,7 +73,6 @@ export class CmdlineComponent extends React.Component<Props, States> {
 
     if (cmdline.length) {
       pos = this.getPos(cmdline, pos + indent);
-      cmdline[pos].reverse = true;
     }
 
     this.setState({ cmdline, pos, prompt, indent })
@@ -81,19 +80,19 @@ export class CmdlineComponent extends React.Component<Props, States> {
 
   private onCursor = (pos: number) => {
     const cmdline = this.state.cmdline;
-    pos = this.getPos(cmdline, pos + this.state.indent);
 
-    cmdline[this.state.pos].reverse = false;
-    cmdline[pos].reverse = true;
-    this.setState({ cmdline, pos });
+    if (pos < cmdline.length) {
+      pos = this.getPos(cmdline, pos + this.state.indent);
+
+      this.setState({ pos });
+    }
   }
 
   private onSpecial = (c: string, shift: boolean) => {
     const cmdline = this.state.cmdline;
     const pos = shift ? this.state.pos + 1 : this.state.pos;
 
-    shift || (cmdline[this.state.pos].reverse = false);
-    cmdline.splice(this.state.pos, 0, { hl: "0", c, reverse: true });
+    cmdline.splice(this.state.pos, 0, { hl: "0", c });
     this.setState({ cmdline, pos });
   }
 
@@ -114,8 +113,9 @@ export class CmdlineComponent extends React.Component<Props, States> {
     return { padding: height, ...Highlights.style("0"), ...styles.scope };
   }
 
-  private renderCmdline(cmdline: States["cmdline"]) {
-    return cmdline.map(({hl, reverse, c}, i) => {
+  private renderCmdline(cmdline: States["cmdline"], cursor: boolean) {
+    return cmdline.map(({hl, c}, i) => {
+      const reverse = cursor && i === this.state.pos;
       c = c.charCodeAt(0) < 0x20 ? `^${String.fromCharCode(c.charCodeAt(0) + 0x40)}` : c;
       return (hl || reverse) ? <div className="inline-block" style={Highlights.style(hl, { reverse })} key={i}>{ c }</div> : c;
     });
@@ -126,8 +126,8 @@ export class CmdlineComponent extends React.Component<Props, States> {
       <FlexComponent animate="slide-down" position="absolute" whiteSpace="pre-wrap" rounded={[0, 0, 4, 4]} style={this.getScopeStyle()} shadow nomouse>
         <div className="bold">{ this.state.prompt }</div>
         <div>
-          {this.state.contents.map((content, i) => <div key={i}>{ this.renderCmdline(content) }</div>)}
-          <div>{ this.renderCmdline(this.state.cmdline) }</div>
+          {this.state.contents.map((content, i) => <div key={i}>{ this.renderCmdline(content, false) }</div>)}
+          <div>{ this.renderCmdline(this.state.cmdline, true) }</div>
         </div>
       </FlexComponent>
     );

@@ -302,7 +302,7 @@ export class App {
   }
 
   private cmdlinePos(pos: number) {
-    Emit.send("cmdline:cursor", pos);
+    Emit.update("cmdline:cursor", true, pos);
   }
 
   private cmdlineSpecialChar(c: string, shift: boolean) {
@@ -310,15 +310,15 @@ export class App {
   }
 
   private cmdlineBlockShow(lines: string[][][]) {
-    Emit.send("cmdline:blockshow", lines);
+    Emit.update("cmdline:blockshow", true, lines);
   }
 
   private cmdlineBlockAppend(line: string[][]) {
-    Emit.send("cmdline:blockshow", [line]);
+    Emit.update("cmdline:blockshow", true, [line]);
   }
 
   private cmdlineBlockHide() {
-    Emit.send("cmdline:blockhide");
+    Emit.update("cmdline:blockhide", true);
   }
 
   private popupmenuShow(items: string[][], selected: number, row: number, col: number, grid: number) {
