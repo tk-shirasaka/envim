@@ -164,15 +164,15 @@ export class EditorComponent extends React.Component<Props, States> {
     this.delta.x = this.delta.x * e.deltaX >= 0 ? this.delta.x + e.deltaX : 0;
     this.delta.y = this.delta.y * e.deltaY >= 0 ? this.delta.y + e.deltaY : 0;
 
-    const row = y2Row(this.delta.y);
-    const col = x2Col(this.delta.x);
+    const row = Math.abs(y2Row(this.delta.y));
+    const col = Math.abs(x2Col(this.delta.x));
 
-    if (row) {
-      this.delta.y = 0;
+    for (let i = 0; i < row; i++) {
+      this.delta = { x: 0, y: 0 };
       this.onMouseEvent(e, e.deltaY < 0 ? "up" : "down", true);
     }
-    if (col) {
-      this.delta.x = 0;
+    for (let i = 0; i < col; i++) {
+      this.delta = { x: 0, y: 0 };
       this.onMouseEvent(e, e.deltaX < 0 ? "left" : "right", true);
     }
   }
@@ -194,7 +194,7 @@ export class EditorComponent extends React.Component<Props, States> {
 
       this.setState({ scrolling, scroll: {
         height: height ? `${height}%` : "1px",
-        top: `${Math.floor(top / total * 100)}%`,
+        top: `${Math.floor(top / total * 10000) / 100}%`,
       }});
     }
   }
