@@ -8,12 +8,13 @@ export class Canvas {
 
   static set(
     grid: number,
+    canvas: HTMLCanvasElement,
     ctx: CanvasRenderingContext2D,
     lighten: boolean,
   ) {
     Canvas.init || Canvas.render();
     Canvas.init = true;
-    Canvas.renderer[grid] = new Context2D(ctx, lighten);
+    Canvas.renderer[grid] = new Context2D(canvas, ctx, lighten);
   }
 
   static delete(grid: number) {
@@ -24,11 +25,11 @@ export class Canvas {
     Canvas.renderer[grid]?.clear(0, 0, width, height);
   }
 
-  static getCapture(grid: number, width: number, height: number) {
-    return Canvas.renderer[grid]?.getCapture(0, 0, width, height);
+  static getCapture(grid: number) {
+    return Canvas.renderer[grid]?.getCapture();
   }
 
-  static putCapture(grid: number, capture: ImageData) {
+  static putCapture(grid: number, capture: HTMLCanvasElement) {
     Canvas.renderer[grid]?.putCapture(capture, 0, 0)
   }
 

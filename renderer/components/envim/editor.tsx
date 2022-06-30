@@ -55,7 +55,7 @@ export class EditorComponent extends React.Component<Props, States> {
   private drag: boolean = false;
   private pointer: { row: number; col: number } = { row: 0, col: 0 };
   private delta: { x: number; y: number } = { x: 0, y: 0 };
-  private capture?: ImageData;
+  private capture?: HTMLCanvasElement;
 
   constructor(props: Props) {
     super(props);
@@ -71,8 +71,8 @@ export class EditorComponent extends React.Component<Props, States> {
   componentDidMount() {
     const ctx = this.canvas.current?.getContext("2d");
 
-    if (ctx) {
-      Canvas.set(this.props.grid, ctx, this.props.lighten);
+    if (this.canvas.current && ctx) {
+      Canvas.set(this.props.grid, this.canvas.current, ctx, this.props.lighten);
       Canvas.clear(this.props.grid, x2Col(this.props.style.width), y2Row(this.props.style.height));
       Emit.send("envim:ready", this.props.grid);
     }
@@ -101,7 +101,7 @@ export class EditorComponent extends React.Component<Props, States> {
     const prev = this.props;
     const next = props;
     if (prev.style.width < next.style.width || prev.style.height < next.style.height || prev.editor.width !== next.editor.width || prev.editor.height !== next.editor.height) {
-      this.capture = Canvas.getCapture(this.props.grid, x2Col(Math.min(prev.style.width, next.style.width)), y2Row(Math.min(prev.style.height, next.style.height)));
+      this.capture = Canvas.getCapture(this.props.grid);
     }
     return true;
   }

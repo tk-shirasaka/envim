@@ -7,10 +7,11 @@ export class Context2D {
   private font: { size: number; width: number; height: number; } = { size: 0, width: 0, height: 0 };
   private queues: { cells?: ICell[], scroll?: IScroll }[] = [];
   private move: number = 0;
-  private scrolltmp?: { i: number; capture: ImageData; };
+  private scrolltmp?: { i: number; capture: HTMLCanvasElement; };
   private rendering: boolean = false;
 
   constructor(
+    private canvas: HTMLCanvasElement,
     private ctx: CanvasRenderingContext2D,
     private lighten: boolean,
   ) {
@@ -88,17 +89,28 @@ export class Context2D {
     this.rect(x * this.font.width, y * this.font.height, width, height, "0");
   }
 
-  getCapture(x: number, y: number, width: number, height: number) {
-    return this.ctx.getImageData(x * this.font.width, y * this.font.height, width * this.font.width, height * this.font.height);
+  getCapture() {
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+
+    canvas.width = this.canvas.width;
+    canvas.height = this.canvas.height;
+
+    ctx && ctx.drawImage(this.canvas, 0, 0);
+
+    return canvas;
   }
 
-  putCapture(capture: ImageData, x: number, y: number, dx: number = 0, dy: number = 0, dwidth: number = 0, dheight: number = 0) {
-    this.ctx.putImageData(capture, x * this.font.width, y * this.font.height, dx * this.font.width, dy * this.font.height, dwidth * this.font.width || capture.width, dheight * this.font.height || capture.height);
+  putCapture(capture: HTMLCanvasElement, x: number, y: number, dx: number = 0, dy: number = 0, dwidth: number = 0, dheight: number = 0) {
+    const width = dwidth * this.font.width || capture.width;
+    const height = dheight * this.font.height || capture.height;
+    this.ctx.clearRect(dx * this.font.width, dy * this.font.height, width, height);
+    this.ctx.drawImage(capture, x * this.font.width, y * this.font.height, width, height, dx * this.font.width, dy * this.font.height, width, height);
   }
 
   private scroll(limit: number, scroll: IScroll) {
     if (!this.scrolltmp) {
-      const capture = this.getCapture(scroll.x, scroll.y, scroll.width, scroll.height);
+      const capture = this.getCapture();
       this.scrolltmp = { i: 0, capture };
     }
 
@@ -109,11 +121,11 @@ export class Context2D {
     const oy = Math.ceil(rows * (i / limit) * this.font.height) / this.font.height;
 
     this.clear(x, y, width, height);
-    this.putCapture(capture, x - ox, y - oy, Math.max(0, ox), Math.max(0, oy), width - Math.abs(ox), height - Math.abs(oy));
+    this.putCapture(capture, Math.max(x, x + ox), Math.max(y, y + oy), Math.max(x, x - ox), Math.max(y, y - oy), width - Math.abs(ox), height - Math.abs(oy));
 
     if (ox === cols && oy === rows) {
-      rows && this.putCapture(capture, x, y, 0, rows < 0 ? 0 : height - rows, width, Math.abs(rows));
-      cols && this.putCapture(capture, x, y, cols < 0 ? 0 : width - cols, 0, Math.abs(cols), height);
+      rows && this.putCapture(capture, x, rows < 0 ? y : height - rows + 1, 0, rows < 0 ? y : height - rows + 1, width, Math.abs(rows));
+      cols && this.putCapture(capture, cols < 0 ? x : width - cols + 1, y, cols < 0 ? x : width - cols + 1, 0, Math.abs(cols), height);
       this.move--;
       delete(this.scrolltmp);
     } else {
