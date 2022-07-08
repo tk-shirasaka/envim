@@ -14,7 +14,16 @@ export class Canvas {
   ) {
     Canvas.init || Canvas.render();
     Canvas.init = true;
-    Canvas.renderer[grid] = new Context2D(canvas, ctx, lighten);
+
+    const bgcanvas = document.createElement("canvas");
+    const bgctx = bgcanvas.getContext("2d");
+
+    if (bgctx) {
+      bgcanvas.width = canvas.width;
+      bgcanvas.height = canvas.height;
+
+      Canvas.renderer[grid] = new Context2D(canvas, ctx, bgcanvas, bgctx, lighten);
+    }
   }
 
   static delete(grid: number) {
