@@ -125,8 +125,8 @@ export class Context2D {
     this.putCapture(capture, Math.max(x, x + ox), Math.max(y, y + oy), Math.max(x, x - ox), Math.max(y, y - oy), width - Math.abs(ox), height - Math.abs(oy));
 
     if (ox === cols && oy === rows) {
-      rows && this.putCapture(capture, x, rows < 0 ? y : height - rows + 1, 0, rows < 0 ? y : height - rows + 1, width, Math.abs(rows));
-      cols && this.putCapture(capture, cols < 0 ? x : width - cols + 1, y, cols < 0 ? x : width - cols + 1, 0, Math.abs(cols), height);
+      rows && this.putCapture(capture, x, rows < 0 ? y : y + height - rows, x, rows < 0 ? y : y + height - rows, width, Math.abs(rows));
+      cols && this.putCapture(capture, cols < 0 ? x : x + width - cols, y, cols < 0 ? x : x + width - cols, y, Math.abs(cols), height);
       delete(this.scrolltmp);
     } else {
       this.scrolltmp.i = i;
