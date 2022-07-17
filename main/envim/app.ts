@@ -2,7 +2,7 @@ import { NeovimClient } from "neovim";
 import { Response } from "neovim/lib/host";
 import { Tabpage, Buffer, Window } from "neovim/lib/api";
 
-import { ITab, IBuffer, IMode } from "common/interface";
+import { ITab, IBuffer, IMode, IMenu } from "common/interface";
 
 import { Emit } from "../emit";
 import { Autocmd } from "./autocmd";
@@ -409,8 +409,8 @@ export class App {
   }
 
   private async menu() {
-    const menus = await this.nvim.call("menu_get", [""]);
-    Emit.update("menu:update", true, menus);
+    const menus: IMenu[] = await this.nvim.call("menu_get", [""]);
+    Emit.update("menu:update", true, menus.filter(({ name }) => !name.match(/^PopUp/)));
   }
 
   private flush() {
