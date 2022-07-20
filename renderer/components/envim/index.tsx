@@ -27,15 +27,15 @@ interface States {
   grids: { [k: string]: {
     grid: number;
     winid: number;
-    lighten: boolean;
     order: number;
+    focusable: boolean;
+    lighten: boolean;
     style: {
       zIndex: number;
       width: number;
       height: number;
       transform: string;
       visibility: "visible" | "hidden";
-      cursor: "default" | "not-allowed";
     };
   }};
 }
@@ -143,7 +143,6 @@ export class EnvimComponent extends React.Component<Props, States> {
         height: row2Y(height),
         transform: `translate(${col2X(x)}px, ${row2Y(y)}px)`,
         visibility: status === "show" ? "visible" : "hidden" as "visible" | "hidden",
-        cursor: focusable ? "default" : "not-allowed" as "default" | "not-allowed",
       };
 
       this.refresh = this.refresh || (status !== "show" && zIndex < 5);
@@ -151,7 +150,7 @@ export class EnvimComponent extends React.Component<Props, States> {
         delete(grids[id]);
       } else if (JSON.stringify(curr) !== JSON.stringify(next)) {
         this.refresh = this.refresh || (zIndex < 5 && (curr.width !== next.width || curr.height !== next.height));
-        grids[id] = { grid: id, winid, lighten: !floating, order, style: next };
+        grids[id] = { grid: id, winid, order, focusable, lighten: !floating, style: next };
       }
     });
 

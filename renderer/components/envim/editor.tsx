@@ -14,6 +14,7 @@ import { MenuComponent } from "../menu";
 interface Props {
   grid: number;
   winid: number;
+  focusable: boolean;
   lighten: boolean
   editor: { width: number; height: number; };
   style: {
@@ -22,7 +23,6 @@ interface Props {
     height: number;
     transform: string;
     visibility: "visible" | "hidden";
-    cursor: "default" | "not-allowed";
   };
 }
 
@@ -235,7 +235,7 @@ export class EditorComponent extends React.Component<Props, States> {
         <FlexComponent grow={1}>
           <canvas style={{ ...styles.canvas, transform: `scale(${1 / scale})` }} width={this.props.editor.width * scale} height={this.props.editor.height * scale} ref={this.canvas} />
         </FlexComponent>
-        { this.props.grid === 1 || this.props.style.cursor === "not-allowed" ? null : (
+        { this.props.grid === 1 || !this.props.focusable ? null : (
           <FlexComponent color="black-fg" direction="column-reverse" vertical="end" position="absolute" overflow="visible" border={[1]} inset={[0]} hover={this.state.scrolling === 0}>
             <FlexComponent color="black" grow={1} shadow>
               <FlexComponent animate="fade-in" color="blue" padding={[0, 2]} rounded={[2]} style={this.state.scroll} shadow></FlexComponent>
