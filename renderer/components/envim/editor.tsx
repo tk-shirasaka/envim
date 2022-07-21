@@ -126,6 +126,8 @@ export class EditorComponent extends React.Component<Props, States> {
     e.shiftKey && modiffier.push("S");
     e.ctrlKey && modiffier.push("C");
     e.altKey && modiffier.push("A");
+    e.stopPropagation();
+    e.preventDefault();
 
     this.pointer = { row, col };
     skip || Emit.send("envim:mouse", this.props.grid, button, action, modiffier.join("-"), row, col);

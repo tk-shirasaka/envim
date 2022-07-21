@@ -11,7 +11,7 @@ interface Props {
 interface States {
   type: "command" | "address";
   path: string;
-  font: { width: number; height: number; size: number; };
+  font: { width: number; height: number; size: number; scale: number; };
   opacity: number;
   options: { [k: string]: boolean; };
   bookmarks: { path: string; name: string; selected: boolean; }[];
@@ -59,26 +59,21 @@ export class SettingComponent extends React.Component<Props, States> {
 
   private onToggleType = (e: ChangeEvent) => {
     const type = (e.target as HTMLInputElement).value === "command" ? "command" : "address";
-    Setting.type = type;
     this.setState({ type });
   }
 
   private onChangePath = (e: ChangeEvent) => {
     const path = (e.target as HTMLInputElement).value;
-    Setting.path = path;
     this.setState({ path });
   }
 
   private onChangeFont = (e: ChangeEvent) => {
     const size = +(e.target as HTMLInputElement).value;
-    const font = { size: size, width: Math.floor(size / 2), height: Math.floor(size * 1.25), scale: Math.ceil(window.devicePixelRatio) };
-    Setting.font = font;
-    this.setState({ font });
+    this.setState({ font: { ...this.state.font, size } });
   }
 
   private onChangeOpacity = (e: ChangeEvent) => {
     const opacity = +(e.target as HTMLInputElement).value;
-    Setting.opacity = opacity;
     this.setState({ opacity });
   }
 
@@ -86,23 +81,30 @@ export class SettingComponent extends React.Component<Props, States> {
     const input = e.target as HTMLInputElement;
     const options = this.state.options;
     options[input.name] = input.checked;
-    Setting.options = options;
     this.setState({ options });
   }
 
   private onSelectBookmark(index: number) {
     const bookmarks = this.state.bookmarks.map((bookmark, i) => ({ ...bookmark, selected: i === index }));
 
-    Setting.bookmarks = bookmarks;
     this.setState({ bookmarks });
   }
 
   private onSubmit = (e: FormEvent) => {
+    const { type, path, font, opacity, options, bookmarks } = this.state;
+
     e.stopPropagation();
     e.preventDefault();
 
+    Setting.type = type;
+    Setting.path = path;
+    Setting.font = { size: font.size, width: Math.floor(font.size * 0.6), height: Math.floor(font.size * 1.30), scale: Math.ceil(window.devicePixelRatio) };
+    Setting.opacity = opacity;
+    Setting.options = options;
+    Setting.bookmarks = bookmarks;
+
     Emit.initialize();
-    Emit.send("envim:connect", this.state.type, this.state.path, this.state.bookmarks.find(({ selected }) => selected)?.path);
+    Emit.send("envim:connect", type, path, bookmarks.find(({ selected }) => selected)?.path);
   }
 
   private getStyle() {
