@@ -18,7 +18,10 @@
   "author": "tk.shirasaka@gmail.com",
   "license": "CC0-1.0",
   "build": {
-    "appId": "local.nvim.envim"
+    "appId": "local.nvim.envim",
+    "win": {
+      "signAndEditExecutable": false
+    }
   },
   "devDependencies": {
     "@types/react": "^18.0.5",
