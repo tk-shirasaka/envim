@@ -40,6 +40,8 @@ $color-purple: #9e7ec1;
 @include make-color-all("purple", $color-black, $color-purple);
 
 .clickable, .active {
+  transition-property: filter;
+  transition-duration: 100ms;
   cursor: pointer;
 }
 

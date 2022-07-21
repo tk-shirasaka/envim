@@ -1,8 +1,8 @@
 .animate {
-  transition-property: transform, width, height, inset;
-  transition-duration: 100ms;
+  transition-property: transform, width, height;
+  transition-duration: 100ms, 300ms, 300ms;
   transition-timing-function: linear;
-  animation-duration: .5s;
+  animation-duration: 300ms;
   animation-timing-function: ease-in-out;
 
   &.slide-right {
@@ -48,14 +48,15 @@
   &.hover {
     > .contents {
       visibility: hidden;
-      opacity: 0;
+      filter: opacity(0);
+      transition-property: visibility, filter;
+      transition-duration: 300ms;
     }
 
     &:hover {
       > .contents {
         visibility: visible;
-        opacity: 1;
-        transition-duration: 100ms;
+        filter: opacity(1);
       }
     }
   }
@@ -82,7 +83,7 @@
 
 @keyframes fadeIn {
   from {
-    opacity: 0;
+    filter: opacity(0);
   }
 }
 
