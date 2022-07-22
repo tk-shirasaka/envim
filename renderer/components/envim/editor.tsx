@@ -5,7 +5,7 @@ import { ICell, IScroll, ITab, IBuffer } from "common/interface";
 import { Emit } from "../../utils/emit";
 import { Setting } from "../../utils/setting";
 import { Canvas } from "../../utils/canvas";
-import { y2Row, x2Col } from "../../utils/size";
+import { y2Row, x2Col, row2Y } from "../../utils/size";
 
 import { FlexComponent } from "../flex";
 import { IconComponent } from "../icon";
@@ -32,7 +32,7 @@ interface States {
   scrolling: number;
   scroll: {
     height: string;
-    top: string;
+    transform: string;
   };
 }
 
@@ -60,7 +60,7 @@ export class EditorComponent extends React.Component<Props, States> {
   constructor(props: Props) {
     super(props);
 
-    this.state = { bufs: EditorComponent.bufs, nomouse: false, scrolling: 0, scroll: { height: "0", top: "" } };
+    this.state = { bufs: EditorComponent.bufs, nomouse: false, scrolling: 0, scroll: { height: "0", transform: "" } };
     Emit.on(`clear:${this.props.grid}`, this.onClear);
     Emit.on(`flush:${this.props.grid}`, this.onFlush);
     Emit.on(`viewport:${this.props.grid}`, this.onViewport);
@@ -126,8 +126,6 @@ export class EditorComponent extends React.Component<Props, States> {
     e.shiftKey && modiffier.push("S");
     e.ctrlKey && modiffier.push("C");
     e.altKey && modiffier.push("A");
-    e.stopPropagation();
-    e.preventDefault();
 
     this.pointer = { row, col };
     skip || Emit.send("envim:mouse", this.props.grid, button, action, modiffier.join("-"), row, col);
@@ -196,7 +194,7 @@ export class EditorComponent extends React.Component<Props, States> {
 
       this.setState({ scrolling, scroll: {
         height: height ? `${height}%` : "1px",
-        top: `${Math.floor(top / total * 10000) / 100}%`,
+        transform: `translateY(${Math.floor(top / total * (this.props.style.height - row2Y(1)))}px)`,
       }});
     }
   }
