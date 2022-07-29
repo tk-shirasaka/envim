@@ -114,11 +114,7 @@ export class EditorComponent extends React.Component<Props, States> {
   }
 
   private onMouseEvent(e: MouseEvent, action: string, wheel: boolean = false) {
-    const target = e.target as HTMLDivElement;
-    const origin = target.offsetWidth;
-    const actual = target.getBoundingClientRect().width;
-    const scale = Math.floor(origin / actual);
-    const [col, row] = [ x2Col(e.nativeEvent.offsetX / scale), y2Row(e.nativeEvent.offsetY / scale) ];
+    const [col, row] = [ x2Col(e.nativeEvent.offsetX), y2Row(e.nativeEvent.offsetY) ];
     const button = wheel ? "wheel" : ["left", "middle", "right"][e.button] || "left";
     const modiffier = [];
     const skip = action === "drag" && row === this.pointer.row && col === this.pointer.col;
@@ -232,7 +228,7 @@ export class EditorComponent extends React.Component<Props, States> {
         onMouseUp={this.onMouseUp}
         onWheel={this.onWheel}
       >
-        <FlexComponent grow={1}>
+        <FlexComponent grow={1} nomouse>
           <canvas style={{ ...styles.canvas, transform: `scale(${1 / scale})` }} width={this.props.editor.width * scale} height={this.props.editor.height * scale} ref={this.canvas} />
         </FlexComponent>
         { this.props.grid === 1 || !this.props.focusable ? null : (
@@ -240,7 +236,9 @@ export class EditorComponent extends React.Component<Props, States> {
             <FlexComponent color="black" grow={1} shadow>
               <FlexComponent animate="fade-in" color="blue" padding={[0, 2]} rounded={[2]} style={this.state.scroll} shadow></FlexComponent>
             </FlexComponent>
-            <FlexComponent color="black" overflow="visible" margin={[-1, -1, 0, 0]} padding={[0, 4]} rounded={[0, 0, 0, 4]} shadow>
+            <FlexComponent color="black" overflow="visible" margin={[-1, -1, 0, 0]} padding={[0, 4]} rounded={[0, 0, 0, 4]} shadow
+              onMouseDown={e => this.runCommand(e, "")}
+            >
               { this.renderMenu("", { main: "edit", sub: "buffer "}) }
               { this.renderMenu("", { main: "vnew", sub: "vsplit #"}) }
               { this.renderMenu("", { main: "new", sub: "split #"}) }
