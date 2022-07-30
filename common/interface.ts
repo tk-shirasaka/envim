@@ -37,10 +37,10 @@ export interface IHighlight {
   bold?: boolean,
   strikethrough?: boolean,
   underline?: boolean,
-  underlineline?: boolean,
+  underdouble?: boolean,
   undercurl?: boolean,
-  underdot?: boolean,
-  underdash?: boolean,
+  underdotted?: boolean,
+  underdashed?: boolean,
   blend?: number,
 }
 

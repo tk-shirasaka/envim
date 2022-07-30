@@ -37,6 +37,8 @@ export class Context2D {
 
   private decoration(x: number, y: number, width: number, hl: string) {
     const type = Highlights.decoration(hl);
+    const font = this.font
+    const lineWidth = this.bgctx.lineWidth;
 
     if (type !== "none") {
       this.style(hl, "special");
@@ -46,32 +48,32 @@ export class Context2D {
       switch(type) {
         case "strikethrough":
         case "underline":
-          const line = type === "underline" ? this.font.height - 1 : Math.floor(this.font.height / 2);
+          const line = type === "underline" ? font.height - lineWidth : Math.floor((font.height + lineWidth) / 2);
 
           this.bgctx.moveTo(x, y + line);
           this.bgctx.lineTo(x + width * this.font.width, y + line);
           break;
 
-        case "underlineline":
-          this.bgctx.moveTo(x, y + this.font.height - 1);
-          this.bgctx.lineTo(x + width * this.font.width, y + this.font.height - 1);
-          this.bgctx.moveTo(x, y + this.font.height - this.bgctx.lineWidth - 2);
-          this.bgctx.lineTo(x + width * this.font.width, y + this.font.height - this.bgctx.lineWidth - 2);
+        case "underdouble":
+          this.bgctx.moveTo(x, y + font.height - lineWidth);
+          this.bgctx.lineTo(x + width * font.width, y + font.height - lineWidth);
+          this.bgctx.moveTo(x, y + font.height - lineWidth * 3);
+          this.bgctx.lineTo(x + width * font.width, y + font.height - lineWidth * 3);
           break;
 
-        case "underdot":
-        case "underdash":
-          const segment = this.bgctx.lineWidth * (type === "underdot" ? 1 : 2);
-          this.bgctx.setLineDash([segment, segment]);
-          this.bgctx.moveTo(x, y + this.font.height - 1);
-          this.bgctx.lineTo(x + width * this.font.width, y + this.font.height - 1);
+        case "underdotted":
+        case "underdashed":
+          const segment = type === "underdotted" ? [lineWidth * 2] : [lineWidth * 3, lineWidth];
+          this.bgctx.setLineDash(segment);
+          this.bgctx.moveTo(x, y + font.height - lineWidth);
+          this.bgctx.lineTo(x + width * font.width, y + font.height - lineWidth);
           break;
 
         case "undercurl":
-          const cycle = this.font.width / 8;
+          const cycle = font.width / 8;
           for (let i = 0; i < width * 2; i++) {
-            this.bgctx.arc(x + (i * 4 + 1) * cycle, y + this.font.height - cycle * 2.0, cycle, 0.9 * Math.PI, 0.1 * Math.PI, true);
-            this.bgctx.arc(x + (i * 4 + 3) * cycle, y + this.font.height - cycle * 1.5, cycle, 1.1 * Math.PI, 1.9 * Math.PI, false);
+            this.bgctx.arc(x + (i * 4 + 1) * cycle, y + font.height - cycle * 2.0, cycle, 0.9 * Math.PI, 0.1 * Math.PI, true);
+            this.bgctx.arc(x + (i * 4 + 3) * cycle, y + font.height - cycle * 1.5, cycle, 1.1 * Math.PI, 1.9 * Math.PI, false);
           }
           break;
       }

@@ -23,10 +23,10 @@ export class Highlights {
     if (hl.blend) highlight.bg = (hl.blend << 28) | highlight.bg;
     if (hl.strikethrough) highlight.sp = 0x04000000 | highlight.sp;
     if (hl.underline) highlight.sp = 0x08000000 | highlight.sp;
-    if (hl.underlineline) highlight.sp = 0x10000000 | highlight.sp;
+    if (hl.underdouble) highlight.sp = 0x10000000 | highlight.sp;
     if (hl.undercurl) highlight.sp = 0x20000000 | highlight.sp;
-    if (hl.underdot) highlight.sp = 0x40000000 | highlight.sp;
-    if (hl.underdash) highlight.sp = 0x80000000 | highlight.sp;
+    if (hl.underdotted) highlight.sp = 0x40000000 | highlight.sp;
+    if (hl.underdashed) highlight.sp = 0x80000000 | highlight.sp;
 
     Highlights.hls[id] = highlight;
 
