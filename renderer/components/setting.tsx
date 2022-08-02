@@ -59,12 +59,22 @@ export class SettingComponent extends React.Component<Props, States> {
 
   private onToggleType = (e: ChangeEvent) => {
     const type = (e.target as HTMLInputElement).value === "command" ? "command" : "address";
-    this.setState({ type });
+
+    if (type === this.state.type) {
+      this.setState({ type });
+    } else {
+      this.setState({ ...Setting.loadCache(type, this.state.path) });
+    }
   }
 
   private onChangePath = (e: ChangeEvent) => {
     const path = (e.target as HTMLInputElement).value;
-    this.setState({ path });
+
+    if (path === this.state.path) {
+      this.setState({ path });
+    } else {
+      this.setState({ ...Setting.loadCache(this.state.type, path) });
+    }
   }
 
   private onChangeFont = (e: ChangeEvent) => {
@@ -102,6 +112,7 @@ export class SettingComponent extends React.Component<Props, States> {
     Setting.opacity = opacity;
     Setting.options = options;
     Setting.bookmarks = bookmarks;
+    Setting.saveCache();
 
     Emit.initialize();
     Emit.send("envim:connect", type, path, bookmarks.find(({ selected }) => selected)?.path);
