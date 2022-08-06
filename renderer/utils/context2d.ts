@@ -167,15 +167,7 @@ export class Context2D {
       this.rendering = this.scroll(this.queues.length < 2 ? 5 : 1, flush.scroll);
       this.render(true);
     } else if (flush?.cells) {
-      const cells: { [k: string]: ICell } = {};
-
-      this.queues.unshift(flush);
-      while (this.queues.length && this.queues[0].cells) {
-        (this.queues.shift()?.cells || []).forEach(cell => {
-          cells[`${cell.row}.${cell.col}`] = cell;
-        })
-      }
-      this.flush(Object.values(cells).sort((a, b) => (+a.hl) - (+b.hl)));
+      this.flush(flush.cells);
       this.rendering = false;
       this.render(true);
     }
