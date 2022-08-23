@@ -35,8 +35,6 @@ export class Browser {
       titleBarStyle: "hidden",
       titleBarOverlay: true,
       webPreferences: {
-        nodeIntegration: false,
-        contextIsolation: true,
         preload: join(__dirname, "preload.js"),
       },
     });
