@@ -1,21 +1,38 @@
-$color-white: #ececec;
-$color-black: #333435;
-$color-gray: #abadb7;
-$color-blue: #2295c5;
-$color-lightblue: #69aab9;
-$color-green: #79d691;
-$color-yellow: #b7c161;
-$color-orange: #ea953b;
-$color-red: #de5252;
-$color-pink: #d25fa9;
-$color-purple: #9e7ec1;
+:root {
+  --color-blue: #2295c5;
+  --color-lightblue: #69aab9;
+  --color-green: #79d691;
+  --color-yellow: #b7c161;
+  --color-orange: #ea953b;
+  --color-red: #de5252;
+  --color-pink: #d25fa9;
+  --color-purple: #9e7ec1;
+}
+
+.theme-dark {
+  --color-fg: #ececec;
+  --color-bg: #333435;
+  --color-gray: #abadb7;
+  --brightness-light: 1.4;
+  --brightness-normal: 1.8;
+  --brightness-deep: 2.2;
+}
+
+.theme-light {
+  --color-fg: #333435;
+  --color-bg: #ececec;
+  --color-gray: #787884;
+  --brightness-light: 0.9;
+  --brightness-normal: 0.8;
+  --brightness-deep: 0.6;
+}
 
 @mixin make-color($name, $fg, $bg) {
   .color-#{$name} {
-    color: $fg;
+    color: var(--color-#{$fg});
     @if $bg != null {
-      background-color: $bg;
-      border-color: lighten($bg, 10%);
+      background-color: var(--color-#{$bg});
+      border-color: var(--color-#{$bg});
     }
   }
 }
@@ -23,21 +40,21 @@ $color-purple: #9e7ec1;
 @mixin make-color-all($name, $fg, $bg) {
   @include make-color($name, $fg, $bg);
   @include make-color("#{$name}-fg", $bg, null);
-  @include make-color("#{$name}-fg-light", $bg, $color-white);
-  @include make-color("#{$name}-fg-dark", $bg, $color-black);
+  @include make-color("#{$name}-fg-light", $bg, "fg");
+  @include make-color("#{$name}-fg-dark", $bg, "bg");
 }
 
-@include make-color-all("white", $color-black, $color-white);
-@include make-color-all("black", $color-white, $color-black);
-@include make-color-all("gray", $color-black, $color-gray);
-@include make-color-all("blue", $color-white, $color-blue);
-@include make-color-all("lightblue", $color-black, $color-lightblue);
-@include make-color-all("green", $color-black, $color-green);
-@include make-color-all("yellow", $color-black, $color-yellow);
-@include make-color-all("orange", $color-black, $color-orange);
-@include make-color-all("red", $color-black, $color-red);
-@include make-color-all("pink", $color-black, $color-pink);
-@include make-color-all("purple", $color-black, $color-purple);
+@include make-color-all("inverse", "bg", "fg");
+@include make-color-all("default", "fg", "bg");
+@include make-color-all("gray", "bg", "gray");
+@include make-color-all("blue", "fg", "blue");
+@include make-color-all("lightblue", "bg", "lightblue");
+@include make-color-all("green", "bg", "green");
+@include make-color-all("yellow", "bg", "yellow");
+@include make-color-all("orange", "bg", "orange");
+@include make-color-all("red", "bg", "red");
+@include make-color-all("pink", "bg", "pink");
+@include make-color-all("purple", "bg", "purple");
 
 .clickable, .active {
   transition-property: filter;
@@ -46,13 +63,13 @@ $color-purple: #9e7ec1;
 }
 
 .clickable:hover {
-  filter: brightness(1.8);
+  filter: brightness(var(--brightness-normal));
 }
 
 .active {
-  filter: brightness(1.4);
+  filter: brightness(var(--brightness-light));
 
   &:hover {
-    filter: brightness(2.2);
+    filter: brightness(var(--brightness-deep));
   }
 }

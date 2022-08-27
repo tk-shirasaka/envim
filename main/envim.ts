@@ -1,4 +1,4 @@
-import { dialog } from "electron";
+import { dialog, nativeTheme } from "electron";
 import { createConnection, Socket } from "net";
 import { spawn, ChildProcess } from "child_process";
 import { NeovimClient } from "neovim";
@@ -21,8 +21,10 @@ export class Envim {
     Emit.on("envim:input", this.onInput);
     Emit.on("envim:command", this.onCommand);
     Emit.on("envim:ready", this.onReady);
+    Emit.on("envim:theme", this.onTheme);
     process.on("uncaughtException", this.onError);
     process.on("unhandledRejection", this.onError);
+    nativeTheme.on("updated", this.handleTheme);
   }
 
   private onConnect = async (type: string, value: string, path: string ) => {
@@ -46,8 +48,9 @@ export class Envim {
       this.nvim.setClientInfo("Envim", { major: 0, minor: 0, patch: 1, prerelease: "dev" }, "ui", {}, {})
       this.nvim.on("disconnect", this.onDisconnect);
       new App(this.nvim, await this.nvim.channelId);
-      Emit.send("app:start");
+      Emit.send("app:switch", true);
 
+      this.handleTheme();
       path && this.onCommand(`cd ${path}`);
     }
   }
@@ -83,7 +86,7 @@ export class Envim {
   }
 
   private onDisconnect = () => {
-    Emit.send("app:stop");
+    Emit.send("app:switch", false);
   }
 
   private onError = (e: Error | any) => {
@@ -93,5 +96,20 @@ export class Envim {
       dialog.showErrorBox('Error', e.toString());
     }
     this.onDisconnect();
+  }
+
+  private onTheme = (theme: "dark" | "light" | "system") => {
+    if (theme === "system") {
+      theme = nativeTheme.shouldUseDarkColors ? "dark" : "light"
+    }
+
+    Emit.update("app:theme", false, theme);
+
+    return theme;
+  }
+
+  private handleTheme = () => {
+    const theme = this.onTheme("system");
+    this.nvim.isApiReady && this.onCommand(`set background=${theme}`)
   }
 }

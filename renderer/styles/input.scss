@@ -13,14 +13,15 @@ input {
     color: inherit;
     background: none;
     border: none;
-    border-bottom: solid 2px $color-gray;
+    border-bottom: solid 2px var(--color-gray);
 
     &:focus {
-      border-color: $color-blue;
+      border-color: var(--color-blue);
     }
 
     &:hover {
-      border-color: lighten($color-blue, 10%);
+      border-color: var(--color-blue);
+      filter: brightness(var(--brightness-light));
     }
   }
 
@@ -33,16 +34,17 @@ input {
       margin: -4px;
       cursor: pointer;
       content: "祿";
-      color: $color-white;
+      color: var(--color-fg);
     }
 
     &:checked:before {
       content: "綠";
-      color: $color-blue;
+      color: var(--color-blue);
     }
 
     &:hover:before {
-      color: lighten($color-blue, 10%);
+      color: var(--color-blue);
+      filter: brightness(var(--brightness-light));
     }
   }
 
@@ -55,16 +57,17 @@ input {
       margin: -4px;
       cursor: pointer;
       content: "";
-      color: $color-white;
+      color: var(--color-fg);
     }
 
     &:checked:before {
       content: "";
-      color: $color-blue;
+      color: var(--color-blue);
     }
 
     &:hover:before {
-      color: lighten($color-blue, 10%);
+      color: var(--color-blue);
+      filter: brightness(var(--brightness-light));
     }
   }
 
@@ -80,10 +83,11 @@ input {
       margin-top: -5px;
       border: none;
       border-radius: 6px;
-      background: $color-gray;
+      background: var(--color-gray);
 
       &:hover {
-        background: $color-blue;
+        background: var(--color-blue);
+        filter: brightness(var(--brightness-light));
       }
     }
 
@@ -92,11 +96,11 @@ input {
       height: 2px;
       border: none;
       border-radius: 2px;
-      background: $color-white;
+      background: var(--color-fg);
       cursor: pointer;
 
       &:hover {
-        background: $color-blue;
+        background: var(--color-blue);
       }
     }
   }

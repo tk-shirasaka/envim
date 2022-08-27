@@ -79,7 +79,7 @@ export class MenuComponent extends React.Component<PropsWithChildren<Props>, Sta
     const style = { ...styles.menu, ...{ inset: this.inset.join(" ") } };
 
     return (
-      <FlexComponent color="black" direction="column" position="absolute" overflow="visible" padding={[4]} border={[1]} rounded={[2]} style={style} shadow hover>
+      <FlexComponent color="default" direction="column" position="absolute" overflow="visible" padding={[4]} border={[1]} rounded={[2]} style={style} shadow hover>
         { this.props.children }
       </FlexComponent>
     );

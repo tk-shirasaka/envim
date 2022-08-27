@@ -135,12 +135,12 @@ export class SettingComponent extends React.Component<Props, States> {
 
   render() {
     return (
-      <form className="color-white-fg" style={{ ...this.props, ...styles.scope }} onSubmit={this.onSubmit}>
-        <div className="color-black" style={this.getStyle()}></div>
+      <form className="color-inverse-fg" style={{ ...this.props, ...styles.scope }} onSubmit={this.onSubmit}>
+        <div className="color-default" style={this.getStyle()}></div>
         <h1 className="bold">Welcome To Envim!</h1>
         <div>
           <i className="color-green-fg" style={styles.logo}></i>
-          <i className="color-white-fg" style={styles.icon}></i>
+          <i className="color-inverse-fg" style={styles.icon}></i>
           <i className="color-lightblue-fg" style={styles.logo}></i>
         </div>
 
@@ -151,19 +151,19 @@ export class SettingComponent extends React.Component<Props, States> {
             <label><input type="radio" value="address" checked={this.state.type === "address"} onChange={this.onToggleType} />Port</label>
           </div>
           <label>Enter neovim path<input type="text" value={this.state.path} onChange={this.onChangePath} autoFocus /></label>
-          <div className="color-black divider" />
+          <div className="color-default divider" />
 
           <h3 className="bold">Appearance</h3>
           <label>Font Size ({this.state.font.size}px)<input type="range" min="5" max="20" value={this.state.font.size} onChange={this.onChangeFont} /></label>
           <div style={this.getExampleStyle()}>Example Text</div>
           <label>Transparent ({this.state.opacity}%)<input type="range" min="0" max="50" value={this.state.opacity} onChange={this.onChangeOpacity} /></label>
-          <div className="color-black divider" />
+          <div className="color-default divider" />
 
           <h3 className="bold">Options</h3>
           { Object.keys(this.state.options).map((key, i) => (
             <label key={i}><input type="checkbox" name={key} checked={this.state.options[key]} onChange={this.onToggleOption} />{ key }</label>
           ))}
-          <div className="color-black divider" />
+          <div className="color-default divider" />
 
           <h3 className="bold">Bookmarks</h3>
           <div>

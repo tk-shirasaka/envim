@@ -128,12 +128,12 @@ export class TablineComponent extends React.Component<Props, States> {
       const command = [ ...base, menu.name.replace(/([\. ])/g, "\\$1") ];
 
       return menu.submenus?.length ? (
-        <MenuComponent key={i} side={base.length > 0} color="black" style={base.length ? {} : styles.menu} label={menu.name}>
+        <MenuComponent key={i} side={base.length > 0} color="default" style={base.length ? {} : styles.menu} label={menu.name}>
           { this.renderSubmenu(menu.submenus, command)}
         </MenuComponent>
       ) : (
         menu.mappings[sname]?.enabled && menu.mappings[sname]?.rhs
-          ? <FlexComponent key={i} color="black" onClick={e => this.runCommand(e, `emenu ${command.join(".")}`)}>{ menu.name }</FlexComponent>
+          ? <FlexComponent key={i} color="default" onClick={e => this.runCommand(e, `emenu ${command.join(".")}`)}>{ menu.name }</FlexComponent>
           : <FlexComponent key={i} color="gray-fg-dark">{ menu.name }</FlexComponent>
       );
     });
@@ -148,9 +148,9 @@ export class TablineComponent extends React.Component<Props, States> {
 
     return (
         <MenuComponent color={color} style={styles.space} label={label}>
-          <div className="color-white-fg">{ index < 0 ? "-" : bookmark.name }</div>
+          <div className="color-inverse-fg">{ index < 0 ? "-" : bookmark.name }</div>
           <div className="color-gray-fg small">{ bookmark.path }</div>
-          <div className="color-black divider" />
+          <div className="color-default divider" />
           <FlexComponent horizontal="end">
             { index >= 0 && <IconComponent color="red-fg" style={styles.space} font="" onClick={() => this.deleteBookmark(index)} /> }
             <IconComponent color="blue-fg" font="" style={styles.space} onClick={() => this.saveBookmark(bookmark)} />
@@ -161,10 +161,10 @@ export class TablineComponent extends React.Component<Props, States> {
 
   render() {
     return (
-      <FlexComponent color="black" overflow="visible" style={this.props} shadow>
+      <FlexComponent color="default" overflow="visible" style={this.props} shadow>
         {this.state.tabs.map((tab, i) => this.renderTab(i, tab))}
         <MenuComponent color="green-fg" style={styles.space} onClick={e => this.runCommand(e, "$tabnew")} label="">
-          { this.state.bookmarks.map(({ name, path, selected }, i) => <FlexComponent color="black" active={selected} key={i} onClick={e => this.runCommand(e, `$tabnew | cd ${path}`)}>{ name }</FlexComponent>) }
+          { this.state.bookmarks.map(({ name, path, selected }, i) => <FlexComponent color="default" active={selected} key={i} onClick={e => this.runCommand(e, `$tabnew | cd ${path}`)}>{ name }</FlexComponent>) }
         </MenuComponent>
         { this.renderBookmark() }
         <div className="space dragable" />

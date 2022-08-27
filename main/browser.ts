@@ -1,6 +1,8 @@
 import { app, BrowserWindow, Menu } from "electron";
 import { join } from "path";
 
+import { Emit } from "./emit";
+
 export class Browser {
   static win?: BrowserWindow;
 
@@ -42,5 +44,6 @@ export class Browser {
     Browser.win.maximize();
     Browser.win.loadFile(join(__dirname, "index.html"));
     Browser.win.on("closed", () => delete(Browser.win));
+    Browser.win.once("ready-to-show", () => Emit.share("envim:theme", "system"));
   }
 }

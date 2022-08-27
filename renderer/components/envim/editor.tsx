@@ -210,7 +210,7 @@ export class EditorComponent extends React.Component<Props, States> {
     return (
       <MenuComponent color="gray-fg" style={styles.icon} onClick={e => this.runCommand(e, command.main)} label={label}>
         { this.state.bufs.map(({ name, buffer, active }, i) => (
-          <FlexComponent color="black" active={active} title={name} padding={[0, 4]} onClick={e => this.runCommand(e, `${command.sub}${buffer}`)} key={i}>
+          <FlexComponent color="default" active={active} title={name} padding={[0, 4]} onClick={e => this.runCommand(e, `${command.sub}${buffer}`)} key={i}>
             { name.replace(/.*\//, "…/") }
           </FlexComponent>
         )) }
@@ -232,11 +232,11 @@ export class EditorComponent extends React.Component<Props, States> {
           <canvas style={{ ...styles.canvas, transform: `scale(${1 / scale})` }} width={this.props.editor.width * scale} height={this.props.editor.height * scale} ref={this.canvas} />
         </FlexComponent>
         { this.props.grid === 1 || !this.props.focusable ? null : (
-          <FlexComponent color="black-fg" direction="column-reverse" vertical="end" position="absolute" overflow="visible" border={[1]} inset={[0]} hover={this.state.scrolling === 0}>
-            <FlexComponent color="black" grow={1} shadow>
+          <FlexComponent color="default-fg" direction="column-reverse" vertical="end" position="absolute" overflow="visible" border={[1]} inset={[0]} hover={this.state.scrolling === 0}>
+            <FlexComponent color="default" grow={1} shadow>
               <FlexComponent animate="fade-in" color="blue" padding={[0, 2]} rounded={[2]} style={this.state.scroll} shadow></FlexComponent>
             </FlexComponent>
-            <FlexComponent color="black" overflow="visible" margin={[-1, -1, 0, 0]} padding={[0, 4]} rounded={[0, 0, 0, 4]} shadow
+            <FlexComponent color="default" overflow="visible" margin={[-1, -1, 0, 0]} padding={[0, 4]} rounded={[0, 0, 0, 4]} shadow
               onMouseDown={e => this.runCommand(e, "")}
             >
               { this.renderMenu("", { main: "edit", sub: "buffer "}) }
