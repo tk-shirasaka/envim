@@ -5,6 +5,7 @@ export class Autocmd {
     Emit.share("envim:command", `augroup envim`);
     Emit.share("envim:command", `  autocmd!`);
     Emit.share("envim:command", `  autocmd DirChanged * call rpcnotify(${channel}, "envim_dirchanged", getcwd())`);
+    Emit.share("envim:command", `  autocmd OptionSet background call rpcnotify(${channel}, "envim_setbackground", &background)`);
     Emit.share("envim:command", `augroup END`);
   }
 
