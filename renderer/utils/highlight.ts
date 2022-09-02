@@ -22,8 +22,8 @@ class Highlight {
 
     this.background = this.intToColor(highlight.background, alpha, lighten);
     this.foreground = this.intToColor(highlight.foreground, alpha, lighten);
-    this.special = this.intToColor(highlight.special, alpha, lighten);
-    this.reverse = highlight.reverse;
+    this.special = highlight.special ? this.intToColor(highlight.special, alpha, lighten) : this.foreground;
+    this.reverse = highlight.reverse || false;
 
     this.type = "normal";
     if (highlight.bold) this.type = "bold";
@@ -82,13 +82,13 @@ export class Highlights {
   }
 
   static color(id: string, type: "foreground" | "background" | "special", options: IOptions = {}) {
-    const alpha = type === "background" && !options.normal ? "alpha" : "normal";
-    const reverse = Highlights.hls[id]?.reverse ? !options.reverse : options.reverse;
+    const reverse = !!Highlights.hls[id]?.reverse !== !!options.reverse;
 
     if (reverse && type !== "special") {
       type = type === "foreground" ? "background" : "foreground";
     }
 
+    const alpha = type === "background" && !options.normal ? "alpha" : "normal";
     const color1 = Highlights.hls[0] && Highlights.hls[0][type];
     const color2 = Highlights.hls[id] && Highlights.hls[id][type] || color1;
 

@@ -180,6 +180,10 @@ export class App {
   }
 
   private defaultColorsSet(foreground: number, background: number, special: number) {
+    foreground = foreground >= 0 ? foreground : 0xffffff;
+    background = background >= 0 ? background : 0x000000;
+    special = special >= 0 ? special : foreground;
+
     Highlights.set("0", { foreground, background, special }, true);
     Grids.refresh();
     Emit.update("highlight:set", false, [{id: "0", ui: true, hl: { foreground, background, special }}]);
