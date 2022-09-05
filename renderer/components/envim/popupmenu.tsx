@@ -59,6 +59,7 @@ export class PopupmenuComponent extends React.Component<Props, States> {
     state.col--;
 
     this.setState(state);
+    Emit.share("envim:drag", -2);
   }
 
   private onSelect = (selected: number) => {
@@ -70,6 +71,7 @@ export class PopupmenuComponent extends React.Component<Props, States> {
 
   private offPopupmenu = () => {
     this.setState({ items: [] });
+    Emit.share("envim:drag", -1);
   }
 
   private onItem(i: number) {

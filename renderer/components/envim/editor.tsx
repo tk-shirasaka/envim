@@ -51,7 +51,7 @@ export class EditorComponent extends React.Component<Props, States> {
   private static bufs: IBuffer[] = [];
 
   private canvas: RefObject<HTMLCanvasElement> = createRef<HTMLCanvasElement>();
-  private timer: number = 0;
+  private timer: { click: number; move: number } = { click: 0, move: 0 };
   private drag: boolean = false;
   private pointer: { row: number; col: number } = { row: 0, col: 0 };
   private delta: { x: number; y: number } = { x: 0, y: 0 };
@@ -88,7 +88,8 @@ export class EditorComponent extends React.Component<Props, States> {
 
   componentWillUnmount = () => {
     const grid = this.props.grid;
-    clearInterval(this.timer);
+    clearInterval(this.timer.click);
+    clearInterval(this.timer.move);
     Canvas.delete(grid);
     Emit.off(`clear:${this.props.grid}`, this.onClear);
     Emit.off(`flush:${this.props.grid}`, this.onFlush);
@@ -113,11 +114,12 @@ export class EditorComponent extends React.Component<Props, States> {
     command && Emit.send("envim:api", "nvim_call_function", ["win_execute", [this.props.winid, command]]);
   }
 
-  private onMouseEvent(e: MouseEvent, action: string, wheel: boolean = false) {
+  private onMouseEvent(e: MouseEvent, action: string, button: string = "") {
+    button = button || ["left", "middle", "right"][e.button] || "left";
+
     const [col, row] = [ x2Col(e.nativeEvent.offsetX), y2Row(e.nativeEvent.offsetY) ];
-    const button = wheel ? "wheel" : ["left", "middle", "right"][e.button] || "left";
     const modiffier = [];
-    const skip = action === "drag" && row === this.pointer.row && col === this.pointer.col;
+    const skip = (button === "move" || action === "drag") && row === this.pointer.row && col === this.pointer.col;
 
     e.shiftKey && modiffier.push("S");
     e.ctrlKey && modiffier.push("C");
@@ -128,8 +130,8 @@ export class EditorComponent extends React.Component<Props, States> {
   }
 
   private onMouseDown = (e: MouseEvent) => {
-    clearTimeout(this.timer);
-    this.timer = +setTimeout(() => {
+    clearTimeout(this.timer.click);
+    this.timer.click = +setTimeout(() => {
       this.drag = true;
       Emit.share("envim:drag", this.props.grid)
     }, 200);
@@ -138,16 +140,14 @@ export class EditorComponent extends React.Component<Props, States> {
   }
 
   private onMouseMove = (e: MouseEvent) => {
-    if (this.drag === false) return;
-
-    clearTimeout(this.timer);
-    this.timer = +setTimeout(() => {
-      this.onMouseEvent(e, "drag");
+    clearTimeout(this.timer.move);
+    this.timer.move = +setTimeout(() => {
+      this.onMouseEvent(e, "drag", this.drag ? "" : "move");
     });
   }
 
   private onMouseUp = (e: MouseEvent) => {
-    clearTimeout(this.timer);
+    clearTimeout(this.timer.click);
 
     if (this.drag) {
       this.drag = false;
@@ -165,11 +165,11 @@ export class EditorComponent extends React.Component<Props, States> {
 
     for (let i = 0; i < row; i++) {
       this.delta = { x: 0, y: 0 };
-      this.onMouseEvent(e, e.deltaY < 0 ? "up" : "down", true);
+      this.onMouseEvent(e, e.deltaY < 0 ? "up" : "down", "wheel");
     }
     for (let i = 0; i < col; i++) {
       this.delta = { x: 0, y: 0 };
-      this.onMouseEvent(e, e.deltaX < 0 ? "left" : "right", true);
+      this.onMouseEvent(e, e.deltaX < 0 ? "left" : "right", "wheel");
     }
   }
 
@@ -196,7 +196,7 @@ export class EditorComponent extends React.Component<Props, States> {
   }
 
   private onDrag = (grid: number) => {
-    const nomouse = !(grid < 0 || grid === this.props.grid);
+    const nomouse = [-1, this.props.grid].indexOf(grid) < 0;
 
     this.setState({ nomouse });
   }
