@@ -1,11 +1,14 @@
 import { IHighlight } from "common/interface";
 import { Setting } from "./setting";
+import { Cache } from "./cache";
 
 interface IOptions {
   reverse?: boolean;
   normal?: boolean;
   lighten?: boolean;
 };
+
+const TYPE = "highlight";
 
 class Highlight {
   public foreground: { normal: string; alpha: string; lighten: string; };
@@ -72,25 +75,23 @@ class Highlight {
 }
 
 export class Highlights {
-  private static hls: { [k: string]: Highlight } = {};
-
   static setHighlight(id: string, ui: boolean, hl: IHighlight) {
     const alpha = ui ? Setting.opacity : 0;
     const lighten = alpha && Setting.options.ext_multigrid ? Math.sqrt(alpha / 100) * 100 : alpha;
 
-    Highlights.hls[id] = new Highlight(hl, alpha, lighten);
+    Cache.set<Highlight>(TYPE, id, new Highlight(hl, alpha, lighten));
   }
 
   static color(id: string, type: "foreground" | "background" | "special", options: IOptions = {}) {
-    const reverse = !!Highlights.hls[id]?.reverse !== !!options.reverse;
+    const reverse = !!Cache.get<Highlight>(TYPE, id)?.reverse !== !!options.reverse;
 
     if (reverse && type !== "special") {
       type = type === "foreground" ? "background" : "foreground";
     }
 
     const alpha = type === "background" && !options.normal ? "alpha" : "normal";
-    const color1 = Highlights.hls[0] && Highlights.hls[0][type];
-    const color2 = Highlights.hls[id] && Highlights.hls[id][type] || color1;
+    const color1 = Cache.get<Highlight>(TYPE, 0) && Cache.get<Highlight>(TYPE, 0)[type];
+    const color2 = Cache.get<Highlight>(TYPE, id) && Cache.get<Highlight>(TYPE, id)[type] || color1;
 
     if (options.lighten && type === "background") {
       return color2.lighten || color1.lighten;
@@ -120,18 +121,18 @@ export class Highlights {
   }
 
   static font(id: string, size: number) {
-    return Highlights.hls[id]?.font(size) || "";
+    return Cache.get<Highlight>(TYPE, id)?.font(size) || "";
   }
 
   static fontFamily(id: string) {
-    return Highlights.hls[id]?.fontFamily(false) || "";
+    return Cache.get<Highlight>(TYPE, id)?.fontFamily(false) || "";
   }
 
   static fontStyle(id: string) {
-    return Highlights.hls[id]?.fontStyle() || "";
+    return Cache.get<Highlight>(TYPE, id)?.fontStyle() || "";
   }
 
   static decoration(id: string) {
-    return Highlights.hls[id]?.decoration() || "none";
+    return Cache.get<Highlight>(TYPE, id)?.decoration() || "none";
   }
 }

@@ -5,6 +5,7 @@ import { ICell, IScroll, ITab, IBuffer } from "common/interface";
 import { Emit } from "../../utils/emit";
 import { Setting } from "../../utils/setting";
 import { Canvas } from "../../utils/canvas";
+import { Cache } from "../../utils/cache";
 import { y2Row, x2Col, row2Y } from "../../utils/size";
 
 import { FlexComponent } from "../flex";
@@ -47,9 +48,9 @@ const styles = {
   },
 };
 
-export class EditorComponent extends React.Component<Props, States> {
-  private static bufs: IBuffer[] = [];
+const TYPE = "editor";
 
+export class EditorComponent extends React.Component<Props, States> {
   private canvas: RefObject<HTMLCanvasElement> = createRef<HTMLCanvasElement>();
   private timer: { click: number; move: number } = { click: 0, move: 0 };
   private drag: boolean = false;
@@ -60,7 +61,7 @@ export class EditorComponent extends React.Component<Props, States> {
   constructor(props: Props) {
     super(props);
 
-    this.state = { bufs: EditorComponent.bufs, nomouse: false, scrolling: 0, scroll: { height: "0", transform: "" } };
+    this.state = { bufs: Cache.get<IBuffer[]>(TYPE, "bufs") || [], nomouse: Cache.get<boolean>(TYPE, "nomouse"), scrolling: 0, scroll: { height: "0", transform: "" } };
     Emit.on(`clear:${this.props.grid}`, this.onClear);
     Emit.on(`flush:${this.props.grid}`, this.onFlush);
     Emit.on(`viewport:${this.props.grid}`, this.onViewport);
@@ -199,10 +200,11 @@ export class EditorComponent extends React.Component<Props, States> {
     const nomouse = [-1, this.props.grid].indexOf(grid) < 0;
 
     this.setState({ nomouse });
+    Cache.set<boolean>(TYPE, "nomouse", grid >= 0);
   }
 
   private onTabline = (_: ITab[], bufs: IBuffer[]) => {
-    EditorComponent.bufs = bufs;
+    Cache.set<IBuffer[]>(TYPE, "bufs", bufs)
     this.setState({ bufs });
   }
 

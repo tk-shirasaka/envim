@@ -1,9 +1,11 @@
 import { ICell, IScroll } from "common/interface";
 
 import { Context2D } from "./context2d";
+import { Cache } from "./cache";
+
+const TYPE = "renderer";
 
 export class Canvas {
-  private static renderer: { [k: number]: Context2D} = {};
   private static init = false;
 
   static set(
@@ -22,32 +24,32 @@ export class Canvas {
       bgcanvas.width = canvas.width;
       bgcanvas.height = canvas.height;
 
-      Canvas.renderer[grid] = new Context2D(canvas, ctx, bgcanvas, bgctx, lighten);
+      Cache.set<Context2D>(TYPE, grid, new Context2D(canvas, ctx, bgcanvas, bgctx, lighten));
     }
   }
 
   static delete(grid: number) {
-    delete(Canvas.renderer[grid]);
+    Cache.delete(TYPE, grid);
   }
 
   static clear(grid: number, width: number, height: number) {
-    Canvas.renderer[grid]?.clear(0, 0, width, height);
+    Cache.get<Context2D>(TYPE, grid)?.clear(0, 0, width, height);
   }
 
   static getCapture(grid: number) {
-    return Canvas.renderer[grid]?.getCapture();
+    return Cache.get<Context2D>(TYPE, grid)?.getCapture();
   }
 
   static putCapture(grid: number, capture: HTMLCanvasElement) {
-    Canvas.renderer[grid]?.putCapture(capture, 0, 0)
+    Cache.get<Context2D>(TYPE, grid)?.putCapture(capture, 0, 0)
   }
 
   static update(grid: number, cells: ICell[], scroll: IScroll | undefined) {
-    Canvas.renderer[grid]?.push(cells, scroll)
+    Cache.get<Context2D>(TYPE, grid)?.push(cells, scroll)
   }
 
   private static render() {
-    Object.values(Canvas.renderer).forEach(renderer => renderer.render());
+    Cache.each<Context2D>(TYPE, (renderer) => renderer.render());
     requestAnimationFrame(Canvas.render);
   }
 }
