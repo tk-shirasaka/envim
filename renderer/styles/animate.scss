@@ -38,13 +38,6 @@
     animation-iteration-count: infinite;
   }
 
-  &.blink {
-    animation-duration: 1s;
-    animation-timing-function: ease-in;
-    animation-iteration-count: infinite;
-    animation-name: fadeIn;
-  }
-
   &.hover {
     > .contents {
       visibility: hidden;
