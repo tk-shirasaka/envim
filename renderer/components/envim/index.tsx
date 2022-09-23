@@ -79,6 +79,7 @@ export class EnvimComponent extends React.Component<Props, States> {
     Emit.off("win:pos", this.onWin);
     Emit.off("option:set", this.onOption);
     Emit.off("envim:pause", this.onPause);
+    Emit.send("browser:control", "close");
   }
 
   private setSize() {

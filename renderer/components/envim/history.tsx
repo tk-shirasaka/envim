@@ -100,6 +100,13 @@ export class HistoryComponent extends React.Component<Props, States> {
     clearInterval(this.timer);
   }
 
+  private openBrowser = async () => {
+    const args = ["input", ["URL: "]]
+    const url = await Emit.send<string>("envim:api", "nvim_call_function", args);
+
+    Emit.send("browser:url", url);
+  }
+
   private toggleDebug = async () => {
     const args = ["input", ["Event name: "]]
     const debug = await Emit.send<string>("envim:api", "nvim_call_function", args);
@@ -111,7 +118,6 @@ export class HistoryComponent extends React.Component<Props, States> {
       this.state.debug === "" && debug && Emit.on("debug", this.onDebug);
       debug === "" && Emit.off("debug", this.onDebug);
       setTimeout(() => this.onMouseEnter());
-
 
       this.setState({ debug });
     } catch (e: any) {
@@ -130,6 +136,7 @@ export class HistoryComponent extends React.Component<Props, States> {
           { this.state.command && <FlexComponent animate="fade-in" margin={["auto", 4]} rounded={[4]} shadow><MessageComponent message={this.state.command} open noaction /></FlexComponent> }
           { this.state.ruler && <FlexComponent animate="fade-in" margin={["auto", 4]} rounded={[4]} shadow><MessageComponent message={this.state.ruler} open noaction /></FlexComponent> }
           <div className="space" />
+          <IconComponent color="blue-fg" font="爵" onClick={this.openBrowser} />
           <IconComponent color="green-fg" active={this.state.debug.length > 0} font="" onClick={this.toggleDebug} />
           <IconComponent color="red-fg" font="" onClick={this.onClear} />
         </FlexComponent>

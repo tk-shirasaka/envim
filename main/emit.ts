@@ -29,7 +29,7 @@ export class Emit {
   }
 
   static send(event: string, ...args: any[]) {
-    Browser.win?.webContents.send(event, ...args);
+    Browser.main?.webContents.send(event, ...args);
   }
 
   static update(event: string, async: boolean, ...args: any[]) {
