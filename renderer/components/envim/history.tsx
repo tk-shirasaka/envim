@@ -104,7 +104,7 @@ export class HistoryComponent extends React.Component<Props, States> {
     const args = ["input", ["URL: "]]
     const url = await Emit.send<string>("envim:api", "nvim_call_function", args);
 
-    Emit.send("browser:url", url);
+    Emit.send("browser:open", url);
   }
 
   private toggleDebug = async () => {

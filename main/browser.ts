@@ -1,4 +1,4 @@
-import { app, BrowserWindow, Menu } from "electron";
+import { app, BrowserWindow, Menu, Input } from "electron";
 import { join } from "path";
 
 import { Emit } from "./emit";
@@ -12,8 +12,8 @@ export class Browser {
     app.on("ready", this.onReady);
     app.on("activate", this.onActivate);
     app.on("window-all-closed", this.onQuit);
-    Emit.on("browser:url", this.openUrl);
-    Emit.on("browser:control", this.control);
+    Emit.on("browser:open", this.openUrl);
+    Emit.on("browser:close", this.closeUrl);
   }
 
   private onReady = () => {
@@ -56,14 +56,7 @@ export class Browser {
       Browser.sub.on("ready-to-show", () => Browser.sub?.show());
       Browser.sub.on("close", () => delete(Browser.sub));
       Browser.sub.webContents.session.clearStorageData();
-      Browser.sub.webContents.on("before-input-event", (e: Event, input: Electron.Input) => {
-        if (input.type === "keyUp" || (!input.control && !input.meta)) return;
-        input.key === "h" && this.control("prev");
-        input.key === "l" && this.control("next");
-        input.key === "r" && this.control("reload");
-        input.key === "i" && this.control("devtool");
-        e.preventDefault();
-      });
+      this.openBrowser(Browser.sub);
     }
 
     if (url.search(/^https?:\/\/\w+/) < 0) {
@@ -73,20 +66,19 @@ export class Browser {
     Browser.sub.loadURL(url);
   }
 
-  private control(control: "prev" | "next" | "reload" | "devtool" | "close") {
-    if (!Browser.sub) return;
+  private openBrowser(win: BrowserWindow) {
+    win.webContents.on("did-create-window", (win: BrowserWindow) => this.openBrowser(win));
+    win.webContents.on("before-input-event", (e: Event, input: Input) => {
+      if (input.type === "keyUp" || (!input.control && !input.meta)) return;
+      input.key === "h" && win.webContents.goBack();
+      input.key === "l" && win.webContents.goForward();
+      input.key === "r" && win.webContents.reloadIgnoringCache();
+      input.key === "i" && win.webContents.toggleDevTools();
+      e.preventDefault();
+    });
+  }
 
-    switch (control) {
-      case "prev":
-        return Browser.sub.webContents.goBack();
-      case "next":
-        return Browser.sub.webContents.goForward();
-      case "reload":
-        return Browser.sub.webContents.reloadIgnoringCache();
-      case "devtool":
-        return Browser.sub.webContents.toggleDevTools();
-      case "close":
-        return Browser.sub.close();
-    }
+  private closeUrl() {
+    Browser.sub?.close();
   }
 }
