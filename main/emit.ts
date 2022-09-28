@@ -22,7 +22,7 @@ export class Emit {
     Emit.events[event].push(callback);
   }
 
-  static share(event: string, ...args: any[]) {
+  static async share(event: string, ...args: any[]) {
     return Emit.events[event]
       .map(callback => callback(...args))
       .find(result => result);

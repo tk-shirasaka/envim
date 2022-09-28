@@ -68,6 +68,8 @@ export class Browser {
   }
 
   private openBrowser(win: BrowserWindow) {
+    let search: string = "";
+
     win.webContents.on("did-create-window", (win: BrowserWindow) => this.openBrowser(win));
     win.webContents.on("before-input-event", (e: Event, input: Input) => {
       if (input.type === "keyUp" || (!input.control && !input.meta)) return;
@@ -81,6 +83,17 @@ export class Browser {
       input.key === "l" && win.webContents.goForward();
       input.key === "r" && win.webContents.reloadIgnoringCache();
       input.key === "i" && win.webContents.toggleDevTools();
+      input.key === "n" && search && win.webContents.findInPage(search, { forward: true });
+      input.key === "N" && search && win.webContents.findInPage(search, { forward: false });
+      input.key === "f" && (async () => {
+        Browser.main?.focus();
+
+        const args = ["input", ["Search: ", search]]
+        search = await Emit.share("envim:api", "nvim_call_function", args) || "";
+        search ? win.webContents.findInPage(search) : win.webContents.stopFindInPage("clearSelection");
+
+        win.focus();
+      })();
       e.preventDefault();
     });
     win.webContents.on("did-finish-load", () => {
