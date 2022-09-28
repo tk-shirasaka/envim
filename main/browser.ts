@@ -45,14 +45,15 @@ export class Browser {
 
     Browser.main.maximize();
     Browser.main.loadFile(join(__dirname, "index.html"));
-    Browser.main.on("closed", () => delete(Browser.main));
+    Browser.main.on("closed", () => delete(Browser.main) && Browser.sub?.close());
     Browser.main.once("ready-to-show", () => Emit.share("envim:theme", "system"));
   }
 
   private openUrl = (url: string) => {
     if (!Browser.main) return;
     if (!Browser.sub) {
-      Browser.sub = new BrowserWindow({ parent: Browser.main, show: false });
+      const { x, y, width, height } = Browser.main.getBounds()
+      Browser.sub = new BrowserWindow({ show: false, x: x + width / 2, y: y, width: width / 2, height: height });
       Browser.sub.on("ready-to-show", () => Browser.sub?.show());
       Browser.sub.on("close", () => delete(Browser.sub));
       Browser.sub.webContents.session.clearStorageData();
@@ -70,11 +71,22 @@ export class Browser {
     win.webContents.on("did-create-window", (win: BrowserWindow) => this.openBrowser(win));
     win.webContents.on("before-input-event", (e: Event, input: Input) => {
       if (input.type === "keyUp" || (!input.control && !input.meta)) return;
+      input.key === "a" && win.webContents.selectAll();
+      input.key === "c" && win.webContents.copy();
+      input.key === "v" && win.webContents.paste();
+      input.key === "x" && win.webContents.cut();
+      input.key === "z" && win.webContents.undo();
+      input.key === "y" && win.webContents.redo();
       input.key === "h" && win.webContents.goBack();
       input.key === "l" && win.webContents.goForward();
       input.key === "r" && win.webContents.reloadIgnoringCache();
       input.key === "i" && win.webContents.toggleDevTools();
       e.preventDefault();
+    });
+    win.webContents.on("did-finish-load", () => {
+      const url = win.webContents.getURL();
+      const title = win.getTitle();
+      win.setTitle(`[${url}] ${title}`);
     });
   }
 
