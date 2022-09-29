@@ -11,7 +11,7 @@ interface Props {
 interface States {
   type: "command" | "address";
   path: string;
-  font: { width: number; height: number; size: number; scale: number; };
+  font: { width: number; height: number; size: number; lspace: number; scale: number; };
   opacity: number;
   options: { [k: string]: boolean; };
   bookmarks: { path: string; name: string; selected: boolean; }[];
@@ -82,6 +82,11 @@ export class SettingComponent extends React.Component<Props, States> {
     this.setState({ font: { ...this.state.font, size } });
   }
 
+  private onChangeLspace = (e: ChangeEvent) => {
+    const lspace = +(e.target as HTMLInputElement).value;
+    this.setState({ font: { ...this.state.font, lspace } });
+  }
+
   private onChangeOpacity = (e: ChangeEvent) => {
     const opacity = +(e.target as HTMLInputElement).value;
     this.setState({ opacity });
@@ -108,7 +113,7 @@ export class SettingComponent extends React.Component<Props, States> {
 
     Setting.type = type;
     Setting.path = path;
-    Setting.font = { size: font.size, width: Math.floor(font.size * 0.6), height: Math.floor(font.size * 1.30), scale: Math.ceil(window.devicePixelRatio) };
+    Setting.font = { size: font.size, width: Math.floor(font.size * 0.6), height: font.size + font.lspace, lspace: font.lspace, scale: Math.ceil(window.devicePixelRatio) };
     Setting.opacity = opacity;
     Setting.options = options;
     Setting.bookmarks = bookmarks;
@@ -154,9 +159,10 @@ export class SettingComponent extends React.Component<Props, States> {
           <div className="color-default divider" />
 
           <h3 className="bold">Appearance</h3>
-          <label>Font Size ({this.state.font.size}px)<input type="range" min="5" max="20" value={this.state.font.size} onChange={this.onChangeFont} /></label>
+          <div><label>Font Size ({this.state.font.size}px)<input type="range" min="5" max="20" value={this.state.font.size} onChange={this.onChangeFont} /></label></div>
+          <div><label>Line Space ({this.state.font.lspace}px)<input type="range" min="0" max="10" value={this.state.font.lspace} onChange={this.onChangeLspace} /></label></div>
           <div style={this.getExampleStyle()}>Example Text</div>
-          <label>Transparent ({this.state.opacity}%)<input type="range" min="0" max="50" value={this.state.opacity} onChange={this.onChangeOpacity} /></label>
+          <div><label>Transparent ({this.state.opacity}%)<input type="range" min="0" max="50" value={this.state.opacity} onChange={this.onChangeOpacity} /></label></div>
           <div className="color-default divider" />
 
           <h3 className="bold">Options</h3>

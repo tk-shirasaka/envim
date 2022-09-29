@@ -3,7 +3,7 @@ import { Localstorage } from "./localstorage";
 interface ISetting {
   type: "command" | "address";
   path: string;
-  font: { size: number; width: number; height: number; scale: number; };
+  font: { size: number; width: number; height: number; lspace: number; scale: number; };
   opacity: number;
   options: { [k: string]: boolean; };
   bookmarks: { name: string; path: string; selected: boolean }[];
@@ -12,7 +12,7 @@ interface ISetting {
 const defaultSetting: ISetting = {
   type: "command",
   path: "",
-  font: { size: 16, width: 8, height: 17, scale: window.devicePixelRatio },
+  font: { size: 16, width: 8, height: 17, lspace: 2, scale: window.devicePixelRatio },
   opacity: 0,
   options: {
     ext_multigrid: true,
