@@ -5,7 +5,6 @@ import { Emit } from "./emit";
 
 export class Browser {
   static main?: BrowserWindow;
-  static sub?: BrowserWindow;
 
   constructor() {
     app.disableHardwareAcceleration();
@@ -45,26 +44,22 @@ export class Browser {
 
     Browser.main.maximize();
     Browser.main.loadFile(join(__dirname, "index.html"));
-    Browser.main.on("closed", () => delete(Browser.main) && Browser.sub?.close());
+    Browser.main.on("closed", () => delete(Browser.main) && this.closeUrl());
     Browser.main.once("ready-to-show", () => Emit.share("envim:theme", "system"));
   }
 
   private openUrl = (url: string) => {
     if (!Browser.main) return;
-    if (!Browser.sub) {
-      const { x, y, width, height } = Browser.main.getBounds()
-      Browser.sub = new BrowserWindow({ show: false, x: x + width / 2, y: y, width: width / 2, height: height });
-      Browser.sub.on("ready-to-show", () => Browser.sub?.show());
-      Browser.sub.on("close", () => delete(Browser.sub));
-      Browser.sub.webContents.session.clearStorageData();
-      this.openBrowser(Browser.sub);
-    }
+    const { x, y, width, height } = Browser.main.getBounds()
+    const  win = new BrowserWindow({ show: false, x: x + width / 2, y: y, width: width / 2, height: height });
+    win.on("ready-to-show", () => win?.show());
+    this.openBrowser(win);
 
     if (url.search(/^https?:\/\/\w+/) < 0) {
       url = `https://google.com/search?q=${encodeURI(url)}`;
     }
 
-    Browser.sub.loadURL(url);
+    win.loadURL(url);
   }
 
   private openBrowser(win: BrowserWindow) {
@@ -104,6 +99,8 @@ export class Browser {
   }
 
   private closeUrl() {
-    Browser.sub?.close();
+    BrowserWindow.getAllWindows().forEach((win: BrowserWindow) =>
+      win.id === Browser.main?.id || win.close()
+    );
   }
 }
