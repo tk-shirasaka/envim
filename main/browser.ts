@@ -48,23 +48,35 @@ export class Browser {
     Browser.main.once("ready-to-show", () => Emit.share("envim:theme", "system"));
   }
 
-  private openUrl = (url: string) => {
+  private openUrl = (id: number, url?: string) => {
     if (!Browser.main) return;
     const { x, y, width, height } = Browser.main.getBounds()
-    const  win = new BrowserWindow({ show: false, x: x + width / 2, y: y, width: width / 2, height: height });
-    win.on("ready-to-show", () => win?.show());
-    this.openBrowser(win);
+    const  win = this.getBrowserWindows().find(win => win.id === id) || new BrowserWindow({
+      x: x + width / 2,
+      y: y,
+      width: width / 2,
+      height: height,
+      webPreferences: { partition: "browser" },
+    });
+    win.id === id || this.openBrowser(win);
 
-    if (url.search(/^https?:\/\/\w+/) < 0) {
+    if (url && url.search(/^https?:\/\/\w+/) < 0) {
       url = `https://google.com/search?q=${encodeURI(url)}`;
     }
 
-    win.loadURL(url);
+    url && win.loadURL(url);
+    win.show();
   }
 
   private openBrowser(win: BrowserWindow) {
     let search: string = "";
 
+    win.on("show", () => {
+      this.getBrowserWindows().forEach(w => w.id === win.id || w.hide());
+      this.browserUpdate();
+    });
+    win.on("close", () => this.getBrowserWindows().length > 1 || win.webContents.session.clearStorageData());
+    win.on("closed", () => this.browserUpdate());
     win.webContents.on("did-create-window", (win: BrowserWindow) => this.openBrowser(win));
     win.webContents.on("before-input-event", (e: Event, input: Input) => {
       if (input.type === "keyUp" || (!input.control && !input.meta)) return;
@@ -91,16 +103,20 @@ export class Browser {
       })();
       e.preventDefault();
     });
-    win.webContents.on("did-finish-load", () => {
-      const url = win.webContents.getURL();
-      const title = win.getTitle();
-      win.setTitle(`[${url}] ${title}`);
-    });
+    win.webContents.on("did-finish-load", () => this.browserUpdate());
   }
 
-  private closeUrl() {
-    BrowserWindow.getAllWindows().forEach((win: BrowserWindow) =>
-      win.id === Browser.main?.id || win.close()
-    );
+  private closeUrl = () => {
+    this.getBrowserWindows().forEach(win => win.close())
+  }
+
+  private browserUpdate() {
+    Emit.send("browser:update", this.getBrowserWindows().map(win => (
+      { id: win.id, title: win.getTitle(), url: win.webContents.getURL(), active: win.isVisible() }
+    )));
+  }
+
+  private getBrowserWindows() {
+    return BrowserWindow.getAllWindows().filter(win => win.id !== Browser.main?.id);
   }
 }

@@ -6,6 +6,7 @@ import { Emit } from "../../utils/emit";
 import { Setting } from "../../utils/setting";
 
 import { FlexComponent } from "../flex";
+import { MenuComponent } from "../menu";
 import { IconComponent } from "../icon";
 import { MessageComponent } from "./message";
 
@@ -20,6 +21,7 @@ interface States {
   command?: IMessage;
   ruler?: IMessage;
   debug: string;
+  browser: { id: number; title: string; url: string; active: boolean; }[];
 }
 
 const styles = {
@@ -41,11 +43,12 @@ export class HistoryComponent extends React.Component<Props, States> {
   constructor(props: Props) {
     super(props);
 
-    this.state = { messages: [], debug: "" };
+    this.state = { messages: [], debug: "", browser: [] };
     Emit.on("messages:mode", this.onMode);
     Emit.on("messages:command", this.onCommand);
     Emit.on("messages:ruler", this.onRuler);
     Emit.on("messages:history", this.onHistory);
+    Emit.on("browser:update", this.browserUpdate);
   }
 
   componentWillUnmount = () => {
@@ -54,6 +57,7 @@ export class HistoryComponent extends React.Component<Props, States> {
     Emit.off("messages:command", this.onCommand);
     Emit.off("messages:ruler", this.onRuler);
     Emit.off("messages:history", this.onHistory);
+    Emit.off("browser:update", this.browserUpdate);
     Emit.off("debug", this.onDebug);
   }
 
@@ -73,6 +77,10 @@ export class HistoryComponent extends React.Component<Props, States> {
     messages = [ ...this.state.messages, ...messages ];
     this.setState({ messages: messages.slice(-1000) });
     setTimeout(() => this.bottom.current?.scrollIntoView({ behavior: "smooth" }));
+  }
+
+  private browserUpdate = (browser: { id: number, title: string, url: string, active: boolean }[]) => {
+    this.setState({ browser });
   }
 
   private onDebug = (direction: "send" | "receive", event: string, ...args: any[]) => {
@@ -100,11 +108,15 @@ export class HistoryComponent extends React.Component<Props, States> {
     clearInterval(this.timer);
   }
 
-  private openBrowser = async () => {
-    const args = ["input", ["Browser: "]]
-    const url = await Emit.send<string>("envim:api", "nvim_call_function", args);
+  private openBrowser = async (browser?: { id: number, title: string, url: string, active: boolean }) => {
+    if (browser && !browser.active) {
+      Emit.send("browser:open", browser.id);
+    } else {
+      const args = ["input", ["Browser: ", browser?.url || ""]]
+      const url = await Emit.send<string>("envim:api", "nvim_call_function", args);
 
-    Emit.send("browser:open", url);
+      url && Emit.send("browser:open", browser?.id || -1, url);
+    }
   }
 
   private toggleDebug = async () => {
@@ -131,12 +143,14 @@ export class HistoryComponent extends React.Component<Props, States> {
   render() {
     return (
       <FlexComponent animate="hover" direction="column-reverse" position="absolute" overflow="visible" style={styles.scope} onMouseEnter={this.onMouseEnter} onMouseLeave={this.onMouseLeave}>
-        <FlexComponent color="default" style={this.props}>
+        <FlexComponent color="default" overflow="visible" style={this.props}>
           { this.state.mode && <FlexComponent animate="fade-in" margin={["auto", 4]} rounded={[4]} shadow><MessageComponent message={this.state.mode} open noaction /></FlexComponent> }
           { this.state.command && <FlexComponent animate="fade-in" margin={["auto", 4]} rounded={[4]} shadow><MessageComponent message={this.state.command} open noaction /></FlexComponent> }
           { this.state.ruler && <FlexComponent animate="fade-in" margin={["auto", 4]} rounded={[4]} shadow><MessageComponent message={this.state.ruler} open noaction /></FlexComponent> }
           <div className="space" />
-          <IconComponent color="blue-fg" font="爵" onClick={this.openBrowser} />
+          <MenuComponent color="blue-fg" style={{}} label="爵" onClick={() => this.openBrowser()}>
+            { this.state.browser.map(browser => <FlexComponent color="default" key={browser.id} active={browser.active} onClick={() => this.openBrowser(browser)}>{ browser.title }</FlexComponent>) }
+          </MenuComponent>
           <IconComponent color="green-fg" active={this.state.debug.length > 0} font="" onClick={this.toggleDebug} />
           <IconComponent color="red-fg" font="" onClick={this.onClear} />
         </FlexComponent>

@@ -32,7 +32,7 @@ export class Clipboard {
 
     const options = { message: "Open a url?", buttons: ["Yes", "no"], defaultId: 0 };
     if (lines[0].search(/^https?:\/\/\w+/) === 0 && dialog.showMessageBoxSync(options) === 0) {
-      Emit.share("browser:open", lines[0])
+      Emit.share("browser:open", -1, lines[0])
     }
   }
 
