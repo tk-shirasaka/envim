@@ -106,8 +106,8 @@ export class Browser {
     win.webContents.on("did-finish-load", () => this.browserUpdate());
   }
 
-  private closeUrl = () => {
-    this.getBrowserWindows().forEach(win => win.close())
+  private closeUrl = (id: number = -1) => {
+    this.getBrowserWindows().forEach(win => [win.id, -1].indexOf(id) < 0 || win.close())
   }
 
   private browserUpdate() {
