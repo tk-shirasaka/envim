@@ -72,8 +72,17 @@ export class Browser {
     let search: string = "";
 
     win.on("show", () => {
-      this.getBrowserWindows().forEach(w => w.id === win.id || w.hide());
+      const isOpenDevTools = this.getBrowserWindows().filter(w => {
+        if (w.id === win.id) return false;
+
+        const result = w.webContents.isDevToolsOpened();
+        result && w.webContents.closeDevTools();
+        w.hide();
+
+        return result;
+      }).length > 0;
       this.browserUpdate();
+      isOpenDevTools && win.webContents.openDevTools();
     });
     win.on("close", () => this.getBrowserWindows().length > 1 || win.webContents.session.clearStorageData());
     win.on("closed", () => this.browserUpdate());
@@ -88,8 +97,11 @@ export class Browser {
       input.key === "y" && win.webContents.redo();
       input.key === "h" && win.webContents.goBack();
       input.key === "l" && win.webContents.goForward();
+      input.key === "j" && this.rotateWindows(win, -1);
+      input.key === "k" && this.rotateWindows(win, 1);
       input.key === "r" && win.webContents.reloadIgnoringCache();
       input.key === "i" && win.webContents.toggleDevTools();
+      input.key === "w" && this.rotateWindows(win, -1) && win.close();
       input.key === "n" && search && win.webContents.findInPage(search, { forward: true });
       input.key === "N" && search && win.webContents.findInPage(search, { forward: false });
       input.key === "f" && (async () => {
@@ -104,6 +116,7 @@ export class Browser {
       e.preventDefault();
     });
     win.webContents.on("did-finish-load", () => this.browserUpdate());
+    win.webContents.on("devtools-opened", () => win.focus());
   }
 
   private closeUrl = (id: number = -1) => {
@@ -114,6 +127,15 @@ export class Browser {
     Emit.send("browser:update", this.getBrowserWindows().map(win => (
       { id: win.id, title: win.getTitle(), url: win.webContents.getURL(), active: win.isVisible() }
     )));
+  }
+
+  private rotateWindows(win: BrowserWindow, direction: 1 | -1) {
+    const windows = this.getBrowserWindows();
+    const index = (windows.length + windows.indexOf(win) + direction) % windows.length;
+    const result = windows.length > 0;
+
+    result && windows[index].show();
+    return result;
   }
 
   private getBrowserWindows() {
