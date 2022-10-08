@@ -1,4 +1,4 @@
-import { app, BrowserWindow, Menu, Input } from "electron";
+import { app, dialog, BrowserWindow, Menu, Input } from "electron";
 import { join } from "path";
 
 import { Emit } from "./emit";
@@ -97,8 +97,8 @@ export class Browser {
       input.key === "y" && win.webContents.redo();
       input.key === "h" && win.webContents.goBack();
       input.key === "l" && win.webContents.goForward();
-      input.key === "j" && this.rotateWindows(win, -1);
-      input.key === "k" && this.rotateWindows(win, 1);
+      input.key === "j" && this.rotateWindows(win, 1);
+      input.key === "k" && this.rotateWindows(win, -1);
       input.key === "r" && win.webContents.reloadIgnoringCache();
       input.key === "i" && win.webContents.toggleDevTools();
       input.key === "w" && this.rotateWindows(win, -1) && win.close();
@@ -114,6 +114,12 @@ export class Browser {
         win.focus();
       })();
       e.preventDefault();
+    });
+    win.webContents.on("will-prevent-unload", (e: Event) => {
+      const options = { message: "Leave this page?", buttons: ["Yes", "no"], defaultId: 0 };
+      if (dialog.showMessageBoxSync(options) === 0) {
+        e.preventDefault();
+      }
     });
     win.webContents.on("did-finish-load", () => this.browserUpdate());
     win.webContents.on("devtools-opened", () => win.focus());
