@@ -1,27 +1,49 @@
+$color-light: #ececec;
+$color-dark: #333435;
+$color-gray-dark: #abadb7;
+$color-gray-light: #787884;
+$color-blue: #2295c5;
+$color-lightblue: #69aab9;
+$color-green: #79d691;
+$color-yellow: #b7c161;
+$color-orange: #ea953b;
+$color-red: #de5252;
+$color-pink: #d25fa9;
+$color-purple: #9e7ec1;
+
+@mixin make-variable($name, $color, $dark) {
+  --color-#{$name}: #{$color};
+  @if $dark == true {
+    --color-border-#{$name}: #{darken($color, 15%)};
+  } @else {
+    --color-border-#{$name}: #{lighten($color, 15%)};
+  }
+}
+
 :root {
-  --color-blue: #2295c5;
-  --color-lightblue: #69aab9;
-  --color-green: #79d691;
-  --color-yellow: #b7c161;
-  --color-orange: #ea953b;
-  --color-red: #de5252;
-  --color-pink: #d25fa9;
-  --color-purple: #9e7ec1;
+  @include make-variable("blue", $color-blue, true);
+  @include make-variable("lightblue", $color-lightblue, true);
+  @include make-variable("green", $color-green, true);
+  @include make-variable("yellow", $color-yellow, true);
+  @include make-variable("orange", $color-orange, true);
+  @include make-variable("red", $color-red, true);
+  @include make-variable("pink", $color-pink, true);
+  @include make-variable("purple", $color-purple, true);
 }
 
 .theme-dark {
-  --color-fg: #ececec;
-  --color-bg: #333435;
-  --color-gray: #abadb7;
+  @include make-variable("fg", $color-light, true);
+  @include make-variable("bg", $color-dark, false);
+  @include make-variable("gray", $color-gray-dark, true);
   --brightness-light: 1.4;
   --brightness-normal: 1.8;
   --brightness-deep: 2.2;
 }
 
 .theme-light {
-  --color-fg: #333435;
-  --color-bg: #ececec;
-  --color-gray: #787884;
+  @include make-variable("fg", $color-dark, false);
+  @include make-variable("bg", $color-light, true);
+  @include make-variable("gray", $color-gray-light, true);
   --brightness-light: 0.9;
   --brightness-normal: 0.8;
   --brightness-deep: 0.6;
@@ -32,7 +54,7 @@
     color: var(--color-#{$fg});
     @if $bg != null {
       background-color: var(--color-#{$bg});
-      border-color: var(--color-#{$bg});
+      border-color: var(--color-border-#{$bg});
     }
   }
 }
