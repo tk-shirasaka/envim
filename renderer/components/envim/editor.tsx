@@ -54,6 +54,7 @@ export class EditorComponent extends React.Component<Props, States> {
   private canvas: RefObject<HTMLCanvasElement> = createRef<HTMLCanvasElement>();
   private timer: { click: number; move: number } = { click: 0, move: 0 };
   private drag: boolean = false;
+  private busy: boolean = false;
   private pointer: { row: number; col: number } = { row: 0, col: 0 };
   private delta: { x: number; y: number } = { x: 0, y: 0 };
   private capture?: HTMLCanvasElement;
@@ -66,6 +67,7 @@ export class EditorComponent extends React.Component<Props, States> {
     Emit.on(`flush:${this.props.grid}`, this.onFlush);
     Emit.on(`viewport:${this.props.grid}`, this.onViewport);
     Emit.on("envim:drag", this.onDrag);
+    Emit.on("grid:busy", this.onBusy);
     Emit.on("tabline:update", this.onTabline);
   }
 
@@ -96,6 +98,7 @@ export class EditorComponent extends React.Component<Props, States> {
     Emit.off(`flush:${this.props.grid}`, this.onFlush);
     Emit.off(`viewport:${this.props.grid}`, this.onViewport);
     Emit.off("envim:drag", this.onDrag);
+    Emit.off("grid:busy", this.onBusy);
     Emit.off("tabline:update", this.onTabline);
   }
 
@@ -143,6 +146,8 @@ export class EditorComponent extends React.Component<Props, States> {
   private onMouseMove = (e: MouseEvent) => {
     clearTimeout(this.timer.move);
     this.timer.move = +setTimeout(() => {
+      if (!this.drag && this.busy) return;
+
       this.onMouseEvent(e, "drag", this.drag ? "" : "move");
     });
   }
@@ -201,6 +206,10 @@ export class EditorComponent extends React.Component<Props, States> {
 
     this.setState({ nomouse });
     Cache.set<boolean>(TYPE, "nomouse", grid >= 0);
+  }
+
+  private onBusy = (busy: boolean) => {
+    this.busy = busy
   }
 
   private onTabline = (_: ITab[], bufs: IBuffer[]) => {
