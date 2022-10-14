@@ -14,7 +14,7 @@ interface States {
   font: { width: number; height: number; size: number; lspace: number; scale: number; };
   opacity: number;
   options: { [k: string]: boolean; };
-  bookmarks: { path: string; name: string; selected: boolean; }[];
+  bookmarks: { name: string; group: string; path: string; selected: boolean; }[];
 }
 
 const flexDirection: "column" = "column";

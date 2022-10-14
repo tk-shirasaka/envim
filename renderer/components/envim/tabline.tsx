@@ -20,7 +20,7 @@ interface States {
   cwd: string;
   tabs: ITab[];
   menus: IMenu[];
-  bookmarks: { path: string; name: string; selected: boolean; }[];
+  bookmarks: { name: string; group: string; path: string; selected: boolean; }[];
   mode?: IMode;
 }
 
@@ -68,26 +68,32 @@ export class TablineComponent extends React.Component<Props, States> {
     this.setState({ cwd, bookmarks: Setting.bookmarks });
   }
 
-  private async saveBookmark(bookmark: { path: string, name: string, selected: boolean }) {
+  private async saveBookmark(bookmark: { name: string, group: string, path: string, selected: boolean }) {
     const bookmarks = this.state.bookmarks
       .map(bookmark => ({ ...bookmark, selected: false }))
       .filter(({ path }) => bookmark.path !== path);
-    const args = ["input", ["Bookmark: ", bookmark.name]]
+    const args1 = ["input", ["Bookmark: ", bookmark.name]]
+    const args2 = ["input", ["Group: ", bookmark.group || ""]]
+    const name = await Emit.send<string>("envim:api", "nvim_call_function", args1);
 
-    bookmark.name = await Emit.send<string>("envim:api", "nvim_call_function", args) || bookmark.name;
-    bookmark.selected = bookmark.path === this.state.cwd;
-    bookmarks.push(bookmark);
-    Setting.bookmarks = bookmarks.sort((a, b) => a.name > b.name ? 1 : -1);
+    if (name) {
+      bookmark.name = name;
+      bookmark.group = await Emit.send<string>("envim:api", "nvim_call_function", args2);
+      bookmark.selected = bookmark.path === this.state.cwd;
+      bookmarks.push(bookmark);
+      Setting.bookmarks = bookmarks.sort((a, b) => a.name > b.name ? 1 : -1);
 
-    this.setState({ bookmarks });
+      this.setState({ bookmarks });
+    }
   }
 
-  private deleteBookmark(index: number) {
-    const bookmarks = this.state.bookmarks;
+  private deleteBookmark(e: MouseEvent, path: string) {
+    const bookmarks = this.state.bookmarks.filter(bookmark => bookmark.path !== path);
 
-    bookmarks.splice(index, 1);
+    e.stopPropagation();
+    e.preventDefault();
+
     Setting.bookmarks = bookmarks;
-
     this.setState({ bookmarks });
   }
 
@@ -142,30 +148,41 @@ export class TablineComponent extends React.Component<Props, States> {
   private renderBookmark() {
     const cwd = this.state.cwd
     const index = this.state.bookmarks.findIndex(({ path }) => path === cwd);
-    const { color, label, bookmark } = index >= 0
-      ? { color: "blue-fg", label: "", bookmark: this.state.bookmarks[index] }
-      : { color: "gray-fg", label: "", bookmark: { path: cwd, name: cwd, selected: false } };
+    const bookmark = index >= 0 ? this.state.bookmarks[index] : { name: cwd, group: "", path: cwd, selected: false };
+    const icon = index >= 0 ? { color: "blue-fg", label: ` ${bookmark.name}` } : { color: "gray-fg", label: "" };
+    const groups = this.state.bookmarks.map(({ group }) => group).sort().filter((group, i, self) => group && self.indexOf(group) === i);
 
     return (
-        <MenuComponent color={color} style={styles.space} label={label}>
-          <div className="color-inverse-fg">{ index < 0 ? "-" : bookmark.name }</div>
-          <div className="color-gray-fg small">{ bookmark.path }</div>
-          <div className="color-default divider" />
-          <FlexComponent horizontal="end">
-            { index >= 0 && <IconComponent color="red-fg" style={styles.space} font="" onClick={() => this.deleteBookmark(index)} /> }
-            <IconComponent color="blue-fg" font="" style={styles.space} onClick={() => this.saveBookmark(bookmark)} />
-          </FlexComponent>
-        </MenuComponent>
+      <MenuComponent { ...icon } style={styles.space} onClick={() => this.saveBookmark(bookmark)}>
+        { this.renderBookmarkMenu() }
+        { groups.map(group =>
+          <MenuComponent color="lightblue-fg-dark" style={{}} label={` ${group}`} side>
+            { this.renderBookmarkMenu(group) }
+          </MenuComponent>
+        ) }
+      </MenuComponent>
     )
+  }
+
+  private renderBookmarkMenu(base?: string) {
+    const bookmarks = this.state.bookmarks.filter(({ group }) => base ? group === base : !group)
+
+    return bookmarks.map(({ name, path, selected }, i) =>
+      <FlexComponent color="default" active={selected} key={`${base}-${i}`} onClick={e => this.runCommand(e, `cd ${path}`)}>
+        <FlexComponent grow={1} direction="column" padding={[0, 8, 0, 0]}>
+          { name }
+          <div className="color-gray-fg small">{ path }</div>
+        </FlexComponent>
+        <IconComponent color="gray-fg" font="" onClick={e => this.deleteBookmark(e, path)} hover />
+      </FlexComponent>
+    );
   }
 
   render() {
     return (
       <FlexComponent color="default" overflow="visible" style={this.props} shadow>
         {this.state.tabs.map((tab, i) => this.renderTab(i, tab))}
-        <MenuComponent color="green-fg" style={styles.space} onClick={e => this.runCommand(e, "$tabnew")} label="">
-          { this.state.bookmarks.map(({ name, path, selected }, i) => <FlexComponent color="default" active={selected} key={i} onClick={e => this.runCommand(e, `$tabnew | cd ${path}`)}>{ name }</FlexComponent>) }
-        </MenuComponent>
+        <IconComponent color="green-fg" font="" style={styles.space} onClick={e => this.runCommand(e, "$tabnew")} />
         { this.renderBookmark() }
         <div className="space dragable" />
         { this.renderSubmenu(this.state.menus, []) }

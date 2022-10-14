@@ -6,7 +6,7 @@ interface ISetting {
   font: { size: number; width: number; height: number; lspace: number; scale: number; };
   opacity: number;
   options: { [k: string]: boolean; };
-  bookmarks: { name: string; path: string; selected: boolean }[];
+  bookmarks: { name: string, group: string; path: string; selected: boolean }[];
 }
 
 const defaultSetting: ISetting = {
