@@ -7,6 +7,7 @@ export class Browser {
   static main?: BrowserWindow;
 
   constructor() {
+    app.commandLine.appendSwitch('remote-debugging-port', '8315');
     app.disableHardwareAcceleration();
     app.on("ready", this.onReady);
     app.on("activate", this.onActivate);
