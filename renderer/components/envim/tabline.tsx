@@ -149,11 +149,13 @@ export class TablineComponent extends React.Component<Props, States> {
     const cwd = this.state.cwd
     const index = this.state.bookmarks.findIndex(({ path }) => path === cwd);
     const bookmark = index >= 0 ? this.state.bookmarks[index] : { name: cwd, group: "", path: cwd, selected: false };
-    const icon = index >= 0 ? { color: "blue-fg", label: ` ${bookmark.name}` } : { color: "gray-fg", label: "" };
+    const icon = index >= 0 ? { color: "blue-fg", label: "" } : { color: "gray-fg", label: "" };
     const groups = this.state.bookmarks.map(({ group }) => group).sort().filter((group, i, self) => group && self.indexOf(group) === i);
+    const selected = this.state.bookmarks.find(({ selected }) => selected)?.name;
 
     return (
       <MenuComponent { ...icon } style={styles.space} onClick={() => this.saveBookmark(bookmark)}>
+        { selected && <FlexComponent color="blue" margin={[-4, -4, 4]} padding={[4]} border={[0, 0, 2]}>{ selected }</FlexComponent> }
         { this.renderBookmarkMenu() }
         { groups.map(group =>
           <MenuComponent color="lightblue-fg-dark" style={{}} label={` ${group}`} side>
