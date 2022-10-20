@@ -158,7 +158,7 @@ export class TablineComponent extends React.Component<Props, States> {
         { selected && <FlexComponent color="blue" margin={[-4, -4, 4]} padding={[4]} border={[0, 0, 2]}>{ selected }</FlexComponent> }
         { this.renderBookmarkMenu() }
         { groups.map(group =>
-          <MenuComponent color="lightblue-fg-dark" style={{}} label={` ${group}`} side>
+          <MenuComponent key={group} color="lightblue-fg-dark" style={{}} label={` ${group}`} side>
             { this.renderBookmarkMenu(group) }
           </MenuComponent>
         ) }
