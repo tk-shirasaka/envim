@@ -120,7 +120,7 @@ export class TablineComponent extends React.Component<Props, States> {
     const icon = icons.filter(icon => tab.filetype.search(icon.type) >= 0 || tab.buftype.search(icon.type) >= 0).shift();
 
     return !icon ? null : (
-      <FlexComponent key={i} animate="fade-in hover" color={`${icon.color}-fg-dark`} title={tab.name} shrink={1} margin={[4, 4, 0, 0]} padding={[0, 0, 0, 8]} rounded={[4, 4, 0, 0]} shadow={tab.active} style={styles.tab} onClick={e => this.runCommand(e, `tabnext ${i + 1}`,)}>
+      <FlexComponent key={i} animate="fade-in hover" color={icon.color} title={tab.name} shrink={1} margin={[4, 4, 0, 0]} padding={[0, 0, 0, 8]} rounded={[4, 4, 0, 0]} shadow={tab.active} style={styles.tab} onClick={e => this.runCommand(e, `tabnext ${i + 1}`,)}>
         <IconComponent style={styles.name} font={icon.font} text={tab.name.replace(/.*\//, "…/")} />
         <IconComponent color="gray-fg" style={styles.space} font="" onClick={e => this.runCommand(e, this.state.tabs.length > 1 ? `confirm tabclose ${i + 1}` : "confirm quitall")} hover />
       </FlexComponent>
@@ -140,7 +140,7 @@ export class TablineComponent extends React.Component<Props, States> {
       ) : (
         menu.mappings[sname]?.enabled && menu.mappings[sname]?.rhs
           ? <FlexComponent key={i} color="default" onClick={e => this.runCommand(e, `emenu ${command.join(".")}`)}>{ menu.name }</FlexComponent>
-          : <FlexComponent key={i} color="gray-fg-dark">{ menu.name }</FlexComponent>
+          : <FlexComponent key={i} color="gray-fg">{ menu.name }</FlexComponent>
       );
     });
   }
@@ -158,7 +158,7 @@ export class TablineComponent extends React.Component<Props, States> {
         { selected && <FlexComponent color="blue" margin={[-4, -4, 4]} padding={[4]} border={[0, 0, 2]}>{ selected }</FlexComponent> }
         { this.renderBookmarkMenu() }
         { groups.map(group =>
-          <MenuComponent key={group} color="lightblue-fg-dark" style={{}} label={` ${group}`} side>
+          <MenuComponent key={group} color="lightblue-fg" style={{}} label={` ${group}`} side>
             { this.renderBookmarkMenu(group) }
           </MenuComponent>
         ) }
@@ -170,7 +170,7 @@ export class TablineComponent extends React.Component<Props, States> {
     const bookmarks = this.state.bookmarks.filter(({ group }) => base ? group === base : !group)
 
     return bookmarks.map(({ name, path, selected }, i) =>
-      <FlexComponent color="default" active={selected} key={`${base}-${i}`} onClick={e => this.runCommand(e, `cd ${path}`)}>
+      <FlexComponent animate="hover" color="default" active={selected} key={`${base}-${i}`} onClick={e => this.runCommand(e, `cd ${path}`)}>
         <FlexComponent grow={1} direction="column" padding={[0, 8, 0, 0]}>
           { name }
           <div className="color-gray-fg small">{ path }</div>

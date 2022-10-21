@@ -45,8 +45,8 @@ const styles = {
   },
   button: {
     marginTop: "1em",
-    padding: ".2em .4em",
-    border: "none",
+    padding: ".5em 1em",
+    borderWidth: 1,
     borderRadius: ".2em",
   },
 };
@@ -156,20 +156,20 @@ export class SettingComponent extends React.Component<Props, States> {
             <label><input type="radio" value="address" checked={this.state.type === "address"} onChange={this.onToggleType} />Port</label>
           </div>
           <label>Enter neovim path<input type="text" value={this.state.path} onChange={this.onChangePath} autoFocus /></label>
-          <div className="color-default divider" />
+          <div className="color-gray divider" />
 
           <h3 className="bold">Appearance</h3>
           <div><label>Font Size ({this.state.font.size}px)<input type="range" min="5" max="20" value={this.state.font.size} onChange={this.onChangeFont} /></label></div>
           <div><label>Line Space ({this.state.font.lspace}px)<input type="range" min="0" max="10" value={this.state.font.lspace} onChange={this.onChangeLspace} /></label></div>
           <div style={this.getExampleStyle()}>Example Text</div>
           <div><label>Transparent ({this.state.opacity}%)<input type="range" min="0" max="50" value={this.state.opacity} onChange={this.onChangeOpacity} /></label></div>
-          <div className="color-default divider" />
+          <div className="color-gray divider" />
 
           <h3 className="bold">Options</h3>
           { Object.keys(this.state.options).map((key, i) => (
             <label key={i}><input type="checkbox" name={key} checked={this.state.options[key]} onChange={this.onToggleOption} />{ key }</label>
           ))}
-          <div className="color-default divider" />
+          <div className="color-gray divider" />
 
           <h3 className="bold">Bookmarks</h3>
           <div>

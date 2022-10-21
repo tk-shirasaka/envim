@@ -151,7 +151,7 @@ export class HistoryComponent extends React.Component<Props, States> {
     const icon = browser.url.search(/^https/) < 0 ? { color: "gray-fg", font: "" } : { color: "green-fg", font: "" };
 
     return (
-      <FlexComponent color="default" key={browser.id} active={browser.active} onClick={() => this.openBrowser(browser)}>
+      <FlexComponent animate="hover" color="default" key={browser.id} active={browser.active} onClick={() => this.openBrowser(browser)}>
         <FlexComponent grow={1} direction="column" padding={[0, 8, 0, 0]}>
           { browser.title }
           <div className="small">{ <IconComponent { ...icon } text={browser.url.replace(/^https?:\/\/([^\/]+)\/.*$/, "$1")} /> }</div>

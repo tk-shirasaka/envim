@@ -1,82 +1,74 @@
 $color-light: #ececec;
-$color-dark: #333435;
-$color-gray-dark: #abadb7;
-$color-gray-light: #787884;
-$color-blue: #2295c5;
-$color-lightblue: #69aab9;
-$color-green: #79d691;
-$color-yellow: #b7c161;
-$color-orange: #ea953b;
-$color-red: #de5252;
-$color-pink: #d25fa9;
-$color-purple: #9e7ec1;
+$color-dark: #28292a;
+$color-gray: #767a8e;
+$color-blue: #225ec5;
+$color-lightblue: #5195c0;
+$color-green: #36a26c;
+$color-yellow: #c6c55e;
+$color-orange: #b07537;
+$color-red: #b12828;
+$color-pink: #a2315b;
+$color-purple: #723eac;
 
-@mixin make-variable($name, $color, $dark) {
+@mixin make-variable($name, $color) {
   --color-#{$name}: #{$color};
-  @if $dark == true {
-    --color-border-#{$name}: #{darken($color, 15%)};
-  } @else {
-    --color-border-#{$name}: #{lighten($color, 15%)};
-  }
+  --color-#{$name}-alpha: #{rgba($color, 40%)};
 }
 
 :root {
-  @include make-variable("blue", $color-blue, true);
-  @include make-variable("lightblue", $color-lightblue, true);
-  @include make-variable("green", $color-green, true);
-  @include make-variable("yellow", $color-yellow, true);
-  @include make-variable("orange", $color-orange, true);
-  @include make-variable("red", $color-red, true);
-  @include make-variable("pink", $color-pink, true);
-  @include make-variable("purple", $color-purple, true);
+  @include make-variable("gray", $color-gray);
+  @include make-variable("blue", $color-blue);
+  @include make-variable("lightblue", $color-lightblue);
+  @include make-variable("green", $color-green);
+  @include make-variable("yellow", $color-yellow);
+  @include make-variable("orange", $color-orange);
+  @include make-variable("red", $color-red);
+  @include make-variable("pink", $color-pink);
+  @include make-variable("purple", $color-purple);
 }
 
 .theme-dark {
-  @include make-variable("fg", $color-light, true);
-  @include make-variable("bg", $color-dark, false);
-  @include make-variable("gray", $color-gray-dark, true);
+  @include make-variable("fg", $color-light);
+  @include make-variable("bg", $color-dark);
   --brightness-light: 1.4;
   --brightness-normal: 1.8;
   --brightness-deep: 2.2;
 }
 
 .theme-light {
-  @include make-variable("fg", $color-dark, false);
-  @include make-variable("bg", $color-light, true);
-  @include make-variable("gray", $color-gray-light, true);
+  @include make-variable("fg", $color-dark);
+  @include make-variable("bg", $color-light);
   --brightness-light: 0.9;
   --brightness-normal: 0.8;
   --brightness-deep: 0.6;
 }
 
-@mixin make-color($name, $fg, $bg) {
+@mixin make-color($name, $fg, $bg, $alpha) {
   .color-#{$name} {
     color: var(--color-#{$fg});
     @if $bg != null {
-      background-color: var(--color-#{$bg});
-      border-color: var(--color-border-#{$bg});
+      background-color: var(if($alpha, --color-#{$bg}-alpha, --color-#{$bg}));
+      border-color: var(--color-#{$bg});
     }
   }
 }
 
-@mixin make-color-all($name, $fg, $bg) {
-  @include make-color($name, $fg, $bg);
-  @include make-color("#{$name}-fg", $bg, null);
-  @include make-color("#{$name}-fg-light", $bg, "fg");
-  @include make-color("#{$name}-fg-dark", $bg, "bg");
+@mixin make-color-all($name, $fg, $bg, $alpha) {
+  @include make-color($name, $fg, $bg, $alpha);
+  @include make-color("#{$name}-fg", $bg, null, false);
 }
 
-@include make-color-all("inverse", "bg", "fg");
-@include make-color-all("default", "fg", "bg");
-@include make-color-all("gray", "bg", "gray");
-@include make-color-all("blue", "fg", "blue");
-@include make-color-all("lightblue", "bg", "lightblue");
-@include make-color-all("green", "bg", "green");
-@include make-color-all("yellow", "bg", "yellow");
-@include make-color-all("orange", "bg", "orange");
-@include make-color-all("red", "bg", "red");
-@include make-color-all("pink", "bg", "pink");
-@include make-color-all("purple", "bg", "purple");
+@include make-color-all("default", "fg", "bg", false);
+@include make-color-all("inverse", "bg", "fg", true);
+@include make-color-all("gray", "fg", "gray", true);
+@include make-color-all("blue", "fg", "blue", true);
+@include make-color-all("lightblue", "fg", "lightblue", true);
+@include make-color-all("green", "fg", "green", true);
+@include make-color-all("yellow", "fg", "yellow", true);
+@include make-color-all("orange", "fg", "orange", true);
+@include make-color-all("red", "fg", "red", true);
+@include make-color-all("pink", "fg", "pink", true);
+@include make-color-all("purple", "fg", "purple", true);
 
 .clickable, .active {
   transition-property: filter;
