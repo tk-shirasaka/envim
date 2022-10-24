@@ -12,7 +12,7 @@ $color-purple: #723eac;
 
 @mixin make-variable($name, $color) {
   --color-#{$name}: #{$color};
-  --color-#{$name}-alpha: #{rgba($color, 40%)};
+  --color-#{$name}-alpha: #{rgba($color, 20%)};
 }
 
 :root {
@@ -60,15 +60,15 @@ $color-purple: #723eac;
 
 @include make-color-all("default", "fg", "bg", false);
 @include make-color-all("inverse", "bg", "fg", true);
-@include make-color-all("gray", "fg", "gray", true);
-@include make-color-all("blue", "fg", "blue", true);
-@include make-color-all("lightblue", "fg", "lightblue", true);
-@include make-color-all("green", "fg", "green", true);
-@include make-color-all("yellow", "fg", "yellow", true);
-@include make-color-all("orange", "fg", "orange", true);
-@include make-color-all("red", "fg", "red", true);
-@include make-color-all("pink", "fg", "pink", true);
-@include make-color-all("purple", "fg", "purple", true);
+@include make-color-all("gray", "gray", "gray", true);
+@include make-color-all("blue", "blue", "blue", true);
+@include make-color-all("lightblue", "lightblue", "lightblue", true);
+@include make-color-all("green", "green", "green", true);
+@include make-color-all("yellow", "yellow", "yellow", true);
+@include make-color-all("orange", "orange", "orange", true);
+@include make-color-all("red", "red", "red", true);
+@include make-color-all("pink", "pink", "pink", true);
+@include make-color-all("purple", "purple", "purple", true);
 
 .clickable, .active {
   transition-property: filter;
