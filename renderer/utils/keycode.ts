@@ -14,7 +14,7 @@ export const keycode = (e: KeyboardEvent) => {
 
   switch (key) {
     case "¥": return "\\";
-    case "<": return getKey("LT", e, true);
+    case "<": return "<LT>";
     case "Escape": return getKey("Esc", e, true);
     case "Backspace": return getKey("BS", e, true);
     case "Insert": return getKey("Insert", e, true);
