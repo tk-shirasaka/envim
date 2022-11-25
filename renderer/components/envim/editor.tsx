@@ -1,6 +1,6 @@
 import React, { createRef, RefObject, MouseEvent, WheelEvent } from "react";
 
-import { ICell, IScroll, ITab, IBuffer } from "common/interface";
+import { ICell, IScroll, ITab, IBuffer, IMode } from "common/interface";
 
 import { Emit } from "../../utils/emit";
 import { Setting } from "../../utils/setting";
@@ -62,12 +62,14 @@ export class EditorComponent extends React.Component<Props, States> {
   constructor(props: Props) {
     super(props);
 
+    this.busy = Cache.get<boolean>(TYPE, "busy");
     this.state = { bufs: Cache.get<IBuffer[]>(TYPE, "bufs") || [], nomouse: Cache.get<boolean>(TYPE, "nomouse"), scrolling: 0, scroll: { height: "0", transform: "" } };
     Emit.on(`clear:${this.props.grid}`, this.onClear);
     Emit.on(`flush:${this.props.grid}`, this.onFlush);
     Emit.on(`viewport:${this.props.grid}`, this.onViewport);
     Emit.on("envim:drag", this.onDrag);
     Emit.on("grid:busy", this.onBusy);
+    Emit.on("mode:change", this.changeMode);
     Emit.on("tabline:update", this.onTabline);
   }
 
@@ -99,6 +101,7 @@ export class EditorComponent extends React.Component<Props, States> {
     Emit.off(`viewport:${this.props.grid}`, this.onViewport);
     Emit.off("envim:drag", this.onDrag);
     Emit.off("grid:busy", this.onBusy);
+    Emit.off("mode:change", this.changeMode);
     Emit.off("tabline:update", this.onTabline);
   }
 
@@ -210,6 +213,12 @@ export class EditorComponent extends React.Component<Props, States> {
 
   private onBusy = (busy: boolean) => {
     this.busy = busy
+    Cache.set<boolean>(TYPE, "busy", this.busy);
+  }
+
+  private changeMode = (mode: IMode) => {
+    this.busy = mode.short_name === 'i';
+    Cache.set<boolean>(TYPE, "busy", this.busy);
   }
 
   private onTabline = (_: ITab[], bufs: IBuffer[]) => {
