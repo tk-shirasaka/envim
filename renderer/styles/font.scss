@@ -18,12 +18,17 @@
   src: url(fonts/EDITOR-Bold);
 }
 
+@font-face {
+  font-family: "Icon";
+  src: url(fonts/ICON-Regular);
+}
+
 body {
-  font-family: "Regular";
+  font-family: "Regular","Icon";
 }
 
 .bold {
-  font-family: "Bold" !important;
+  font-family: "Bold","Icon" !important;
 }
 
 .italic {
@@ -31,11 +36,11 @@ body {
 }
 
 .editor {
-  font-family: "Editor Regular" !important;
+  font-family: "Editor Regular","Icon" !important;
 }
 
 .editor-bold {
-  font-family: "Editor Bold" !important;
+  font-family: "Editor Bold","Icon" !important;
 }
 
 .small {

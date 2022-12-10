@@ -62,7 +62,12 @@ class Highlight {
   }
 
   fontFamily(editor: boolean) {
-    return (editor ? "Editor " : "") + { normal: "Regular", bold: "Bold", italic:"Regular" }[this.type];
+    const prefix = editor ? "Editor " : "";
+    return {
+      normal: `"${prefix}Regular","Icon"`,
+      bold: `"${prefix}Bold","Icon"`,
+      italic: `"${prefix}Regular","Icon"`
+    }[this.type];
   }
 
   fontStyle() {
