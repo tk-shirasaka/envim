@@ -22,6 +22,7 @@ export class AppComponent extends React.Component<Props, States> {
     window.addEventListener("resize", this.onResize);
     (document as any).fonts.load("10px Editor Regular").then();
     (document as any).fonts.load("10px Editor Bold").then();
+    (document as any).fonts.load("10px Icon").then();
     Emit.on("app:switch", this.onSwitch);
     Emit.on("app:theme", this.onTheme);
   }
