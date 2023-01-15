@@ -117,7 +117,7 @@ export class SettingComponent extends React.Component<Props, States> {
     Setting.opacity = opacity;
     Setting.options = options;
     Setting.bookmarks = bookmarks;
-    Setting.saveCache();
+    Setting.clearCache();
 
     Emit.initialize();
     Emit.send("envim:connect", type, path, bookmarks.find(({ selected }) => selected)?.path);

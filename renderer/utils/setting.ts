@@ -49,8 +49,16 @@ export class Setting {
     return Setting.get();
   }
 
+  static clearCache() {
+    const item = Setting.get();
+    const key = `setting:[${item.type}]:${item.path}`;
+    const ls: Localstorage<ISetting> = new Localstorage<ISetting>(key, item);
+
+    ls.clear();
+  }
+
   static saveCache() {
-    const item = JSON.parse(JSON.stringify(Setting.get()));
+    const item = Setting.get();
     const key = `setting:[${item.type}]:${item.path}`;
     const ls: Localstorage<ISetting> = new Localstorage<ISetting>(key, item);
 

@@ -5,6 +5,7 @@ export class Localstorage<T> {
   constructor(key: string, init: T) {
     const item = localStorage.getItem(key);
 
+    init = JSON.parse(JSON.stringify(init));
     this.key = key;
     this.item = this.deepcopy(init, item ? JSON.parse(item) : {});
   }
@@ -30,5 +31,9 @@ export class Localstorage<T> {
   set(item: T) {
     this.item = this.deepcopy(this.item, item);
     localStorage.setItem(this.key, JSON.stringify(this.item));
+  }
+
+  clear() {
+    localStorage.removeItem(this.key);
   }
 }

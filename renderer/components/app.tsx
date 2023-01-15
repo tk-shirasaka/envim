@@ -1,6 +1,7 @@
 import React from "react";
 
 import { Emit } from "../utils/emit";
+import { Setting } from "../utils/setting";
 
 import { SettingComponent } from "./setting";
 import { EnvimComponent } from "./envim";
@@ -32,6 +33,7 @@ export class AppComponent extends React.Component<Props, States> {
   }
 
   private onSwitch = (init: boolean) => {
+    this.state.init === init || Setting.saveCache();
     this.setState({ init });
   }
 
