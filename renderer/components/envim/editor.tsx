@@ -32,6 +32,7 @@ interface States {
   nomouse: boolean;
   scrolling: number;
   scroll: {
+    total: number;
     height: string;
     transform: string;
   };
@@ -63,7 +64,7 @@ export class EditorComponent extends React.Component<Props, States> {
     super(props);
 
     this.busy = Cache.get<boolean>(TYPE, "busy");
-    this.state = { bufs: Cache.get<IBuffer[]>(TYPE, "bufs") || [], nomouse: Cache.get<boolean>(TYPE, "nomouse"), scrolling: 0, scroll: { height: "0", transform: "" } };
+    this.state = { bufs: Cache.get<IBuffer[]>(TYPE, "bufs") || [], nomouse: Cache.get<boolean>(TYPE, "nomouse"), scrolling: 0, scroll: { total: 0, height: "0", transform: "" } };
     Emit.on(`clear:${this.props.grid}`, this.onClear);
     Emit.on(`flush:${this.props.grid}`, this.onFlush);
     Emit.on(`viewport:${this.props.grid}`, this.onViewport);
@@ -182,6 +183,13 @@ export class EditorComponent extends React.Component<Props, States> {
     }
   }
 
+  private onScroll = (e: MouseEvent) => {
+    const per = e.nativeEvent.offsetY / e.currentTarget.clientHeight;
+    const line = Math.ceil(this.state.scroll.total * per);
+
+    this.runCommand(e, `${line}`);
+  }
+
   private onClear = () => {
     Canvas.clear(this.props.grid, x2Col(this.props.style.width), y2Row(this.props.style.height));
   }
@@ -195,9 +203,10 @@ export class EditorComponent extends React.Component<Props, States> {
       const height = Math.min(Math.floor((bottom - top) / total * 100), 100);
       const scrolling = height === 100 ? 0 : +setTimeout(() => {
         this.state.scrolling === scrolling && this.setState({ scrolling: 0 });
-      }, 1000);
+      }, 100);
 
       this.setState({ scrolling, scroll: {
+        total,
         height: height ? `${height}%` : "1px",
         transform: `translateY(${Math.floor(top / total * (this.props.style.height - row2Y(1)))}px)`,
       }});
@@ -253,8 +262,8 @@ export class EditorComponent extends React.Component<Props, States> {
         </FlexComponent>
         { this.props.grid === 1 || !this.props.focusable ? null : (
           <FlexComponent color="default-fg" direction="column-reverse" vertical="end" position="absolute" overflow="visible" border={[1]} inset={[0]} hover={this.state.scrolling === 0}>
-            <FlexComponent color="default" grow={1} shadow>
-              <FlexComponent animate="fade-in" color="blue" padding={[0, 2]} rounded={[2]} style={this.state.scroll} shadow></FlexComponent>
+            <FlexComponent color="default" grow={1} shadow onMouseDown={this.onScroll}>
+              <FlexComponent animate="fade-in" color="blue" border={[0, 2]} rounded={[2]} style={this.state.scroll} shadow></FlexComponent>
             </FlexComponent>
             <FlexComponent color="default" overflow="visible" margin={[-1, -1, 0, 0]} padding={[0, 4]} rounded={[0, 0, 0, 4]} shadow
               onMouseDown={e => this.runCommand(e, "")}
