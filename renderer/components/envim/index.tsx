@@ -95,7 +95,7 @@ export class EnvimComponent extends React.Component<Props, States> {
       padding: titlebar.left ? `0 0 0 ${titlebar.left}px` : `0`,
     };
     this.editor = {
-      width: col2X(x2Col(this.props.width)),
+      width: col2X(x2Col(this.props.width) - 2),
       height: row2Y(y2Row(this.props.height - this.header.height - font.height - 4)),
     };
     this.footer = { width: this.props.width, height: this.props.height - this.header.height - this.editor.height };
@@ -154,6 +154,7 @@ export class EnvimComponent extends React.Component<Props, States> {
       <div style={this.main} onMouseUp={this.onMouseUp}>
         <TablineComponent {...this.header} />
         <FlexComponent>
+          <FlexComponent color="default" grow={1} shrink={1} shadow />
           <FlexComponent style={this.editor}>
             { Object.values(this.state.grids).sort((a, b) => a.order - b.order).map(grid => (
               <EditorComponent key={grid.grid} editor={this.editor} { ...grid } />
