@@ -47,7 +47,8 @@ export class Envim {
       this.nvim.attach({ reader, writer });
       this.nvim.setClientInfo("Envim", { major: 0, minor: 0, patch: 1, prerelease: "dev" }, "ui", {}, {})
       this.nvim.on("disconnect", this.onDisconnect);
-      new App(this.nvim, await this.nvim.channelId);
+      await this.nvim.setVar('envim_id', await this.nvim.channelId);
+      new App(this.nvim);
       Emit.send("app:switch", true);
 
       this.handleTheme();

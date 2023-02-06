@@ -7,19 +7,19 @@ export class Clipboard {
   private static lines: string[];
   private static type: "v" | "V" | "b";
 
-  static setup(channel: number) {
+  static setup() {
     Emit.share("envim:command", [
-      `let g:clipboard = {`,
-      `  "name": "envim",`,
-      `  "copy": {`,
-      `     "+": {lines, regtype -> rpcnotify(${channel}, "envim_clipboard", lines, regtype)},`,
-      `     "*": {lines, regtype -> rpcnotify(${channel}, "envim_clipboard", lines, regtype)},`,
-      `   },`,
-      `  "paste": {`,
-      `     "+": {-> rpcrequest(${channel}, "envim_clipboard")},`,
-      `     "*": {-> rpcrequest(${channel}, "envim_clipboard")},`,
-      `  },`,
-      `}`,
+      "let g:clipboard = {",
+      "  'name': 'envim',",
+      "  'copy': {",
+      "     '+': {lines, regtype -> EnvimConnect(0, 'envim_clipboard', lines, regtype)},",
+      "     '*': {lines, regtype -> EnvimConnect(0, 'envim_clipboard', lines, regtype)},",
+      "   },",
+      "  'paste': {",
+      "     '+': {-> EnvimConnect(1, 'envim_clipboard')},",
+      "     '*': {-> EnvimConnect(1, 'envim_clipboard')},",
+      "  },",
+      "}",
     ].join(""));
     Emit.share("envim:command", "unlet! g:loaded_clipboard_provider");
     Emit.share("envim:command", "runtime autoload/provider/clipboard.vim");

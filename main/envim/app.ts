@@ -5,6 +5,7 @@ import { Tabpage, Buffer, Window } from "neovim/lib/api";
 import { ITab, IBuffer, IMode, IMenu } from "common/interface";
 
 import { Emit } from "../emit";
+import { Function } from "./function";
 import { Autocmd } from "./autocmd";
 import { Clipboard } from "./clipboard";
 import { Grids } from "./grid";
@@ -13,12 +14,13 @@ import { Highlights } from "./highlight";
 export class App {
   private modes: IMode[] = [];
 
-  constructor(private nvim: NeovimClient, channel: number) {
+  constructor(private nvim: NeovimClient) {
     Emit.init();
     Highlights.init();
     Grids.init();
-    Autocmd.setup(channel);
-    Clipboard.setup(channel);
+    Function.setup();
+    Autocmd.setup();
+    Clipboard.setup();
     nvim.on("request", this.onRequest);
     nvim.on("notification", this.onNotification);
     this.menu();
@@ -37,6 +39,7 @@ export class App {
       case "envim_clipboard": return Clipboard.copy(args[0], args[1]);
       case "envim_dirchanged": return Autocmd.dirchanged(args[0]);
       case "envim_setbackground": return args[0] && Emit.share("envim:theme", args[0]);
+      case "envim_openurl": return Emit.share("browser:open", -1, args[0]);
     }
   }
 
