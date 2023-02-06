@@ -263,7 +263,7 @@ export class EditorComponent extends React.Component<Props, States> {
         { this.props.grid === 1 || !this.props.focusable ? null : (
           <FlexComponent color="default-fg" direction="column-reverse" vertical="end" position="absolute" overflow="visible" border={[1]} inset={[0]} hover={this.state.scrolling === 0}>
             <FlexComponent color="default" grow={1} shadow onMouseDown={this.onScroll}>
-              <FlexComponent animate="fade-in" color="blue" border={[0, 2]} rounded={[2]} style={this.state.scroll} shadow></FlexComponent>
+              <FlexComponent animate="fade-in" color="blue" border={[0, 2]} rounded={[2]} style={this.state.scroll} shadow nomouse></FlexComponent>
             </FlexComponent>
             <FlexComponent color="default" overflow="visible" margin={[-1, -1, 0, 0]} padding={[0, 4]} rounded={[0, 0, 0, 4]} shadow
               onMouseDown={e => this.runCommand(e, "")}
