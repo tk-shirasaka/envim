@@ -1,4 +1,4 @@
-import { dialog, clipboard } from "electron";
+import { clipboard } from "electron";
 import { Response } from "neovim/lib/host";
 
 import { Emit } from "../emit";
@@ -29,11 +29,6 @@ export class Clipboard {
     Clipboard.lines = lines;
     Clipboard.type = type
     clipboard.writeText(lines.join("\n"));
-
-    const options = { message: "Open a url?", buttons: ["Yes", "no"], defaultId: 0 };
-    if (lines[0].search(/^https?:\/\/\w+/) === 0 && dialog.showMessageBoxSync(options) === 0) {
-      Emit.share("browser:open", -1, lines[0])
-    }
   }
 
   static paste(res: Response) {

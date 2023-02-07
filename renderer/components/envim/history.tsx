@@ -108,14 +108,15 @@ export class HistoryComponent extends React.Component<Props, States> {
     clearInterval(this.timer);
   }
 
-  private openBrowser = async (browser?: { id: number, title: string, url: string, active: boolean }) => {
+  private openBrowser = (browser?: { id: number, title: string, url: string, active: boolean }) => {
     if (browser && !browser.active) {
       Emit.send("browser:open", browser.id);
     } else {
-      const args = ["input", ["Browser: ", browser?.url || ""]]
-      const url = await Emit.send<string>("envim:api", "nvim_call_function", args);
-
-      url && Emit.send("browser:open", browser?.id || -1, url);
+      const args = {
+        default: browser?.url ? `'${browser.url}'` : "@\"",
+        id: browser?.id || -1,
+      };
+      Emit.send("envim:command", `call EnvimConnect(0, 'envim_openurl', input('Browser: ', ${args.default}), ${args.id})`)
     }
   }
 
