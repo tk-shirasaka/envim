@@ -97,8 +97,9 @@ export class Browser {
       input.key === "y" && win.webContents.redo();
       input.key === "h" && win.webContents.goBack();
       input.key === "l" && win.webContents.goForward();
-      input.key === "j" && this.rotateWindows(win, 1);
-      input.key === "k" && this.rotateWindows(win, -1);
+      input.key === "j" && win.webContents.sendInputEvent({ type: "mouseWheel", x: 0, y: 0, deltaY: -100 });
+      input.key === "k" && win.webContents.sendInputEvent({ type: "mouseWheel", x: 0, y: 0, deltaY: 100 });
+      input.key === "Tab" && this.rotateWindows(win, input.shift ? -1 : 1);
       input.key === "r" && win.webContents.reloadIgnoringCache();
       input.key === "i" && win.webContents.toggleDevTools();
       input.key === "w" && this.rotateWindows(win, -1) && win.close();
@@ -122,6 +123,8 @@ export class Browser {
       }
     });
     win.webContents.on("did-finish-load", () => this.browserUpdate());
+    win.webContents.on("did-navigate", () => this.browserUpdate());
+    win.webContents.on("did-navigate-in-page", () => this.browserUpdate());
     win.webContents.on("devtools-opened", () => win.focus());
   }
 
