@@ -78,7 +78,7 @@ export class App {
           r.forEach(r => this.winPos(r[0], r[1], r[2], r[3], r[4], r[5], true, 3, false));
         break;
         case "win_float_pos":
-          r.forEach(r => this.winFloatPos(r[0], r[1], r[2], r[3], r[4], r[5], r[6]));
+          r.forEach(r => this.winFloatPos(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7]));
         break;
         case "msg_set_pos":
           r.forEach(r => this.msgSetPos(r[0], r[1]));
@@ -249,14 +249,14 @@ export class App {
     }
   }
 
-  private winFloatPos(grid: number, win: Window, anchor: string, pgrid: number, row: number, col: number, focusable: boolean) {
+  private winFloatPos(grid: number, win: Window, anchor: string, pgrid: number, row: number, col: number, focusable: boolean, zIndex: number) {
     const current = Grids.get(grid).getInfo();
-    const { x, y, zIndex } = Grids.get(pgrid).getInfo();
+    const parent = Grids.get(pgrid).getInfo();
 
-    row = y + (anchor[0] === "N" ? row : row - current.height);
-    col = x + (anchor[1] === "W" ? col : col - current.width);
+    row = parent.y + (anchor[0] === "N" ? row : row - current.height);
+    col = parent.x + (anchor[1] === "W" ? col : col - current.width);
 
-    this.winPos(grid, win, row, col, current.width, current.height, focusable, zIndex + 4, true);
+    this.winPos(grid, win, row, col, current.width, current.height, focusable, Math.max(zIndex, parent.zIndex + 4), true);
   }
 
   private msgSetPos(grid: number, row: number) {
@@ -331,9 +331,10 @@ export class App {
 
   private popupmenuShow(items: string[][], selected: number, row: number, col: number, grid: number) {
     const parent = Grids.get().getInfo();
-    const current = grid === -1 ? { y: 1, x: parent.width * 0.1 + 3 } : Grids.get(grid).getInfo();
+    const current = grid === -1 ? { y: 1, x: parent.width * 0.1 + 3, zIndex: 20 } : Grids.get(grid).getInfo();
     const [ x, y ] = [ col + current.x, row + current.y ];
     const height = Math.min(Math.max(y, parent.height - y - 1), items.length);
+    const zIndex = current.zIndex + 1;
 
     row = y + height >= parent.height ? y - height : y + 1;
     col = Math.min(x, parent.width - 10);
@@ -345,6 +346,7 @@ export class App {
       row,
       col,
       height,
+      zIndex,
     });
   }
 

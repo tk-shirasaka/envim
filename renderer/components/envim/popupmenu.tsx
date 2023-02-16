@@ -16,13 +16,8 @@ interface States {
   row: number;
   col: number;
   height: number;
+  zIndex: number;
 }
-
-const styles = {
-  scope: {
-    zIndex: 20,
-  },
-};
 
 export class PopupmenuComponent extends React.Component<Props, States> {
   private width: number = 0;
@@ -31,7 +26,7 @@ export class PopupmenuComponent extends React.Component<Props, States> {
   constructor(props: Props) {
     super(props);
 
-    this.state = { items: [], selected: -1, row: 0, col: 0, height: 0 };
+    this.state = { items: [], selected: -1, row: 0, col: 0, height: 0, zIndex: 0 };
     Emit.on("popupmenu:show", this.onPopupmenu);
     Emit.on("popupmenu:select", this.onSelect);
     Emit.on("popupmenu:hide", this.offPopupmenu);
@@ -80,9 +75,9 @@ export class PopupmenuComponent extends React.Component<Props, States> {
 
   private getScopeStyle() {
     return {
-      ...styles.scope,
       transform: `translate(${col2X(this.state.col)}px, ${row2Y(this.state.row)}px)`,
       height: row2Y(this.state.height),
+      zIndex: this.state.zIndex,
     };
   }
 
