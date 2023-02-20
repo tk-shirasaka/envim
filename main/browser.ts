@@ -49,28 +49,33 @@ export class Browser {
   }
 
   private openUrl = (id: number, url?: string) => {
-    if (!Browser.main) return;
-    const { x, y, width, height } = Browser.main.getBounds()
-    const  win = this.getBrowserWindows().find(win => win.id === id) || new BrowserWindow({
-      x: x + width / 2,
-      y: y,
-      width: width / 2,
-      height: height,
+    const exists = this.getBrowserWindows().find(win => win.id === id);
+    const win = exists || new BrowserWindow({
+      show: false,
       webPreferences: { partition: "browser" },
     });
-    win.id === id || this.openBrowser(win);
+    exists ? win.show() : (Browser.main && this.openBrowser(win, Browser.main));
 
     if (url && url.search(/^https?:\/\/\w+/) < 0) {
       url = `https://google.com/search?q=${encodeURI(url)}`;
     }
 
     url && win.loadURL(url);
-    win.show();
   }
 
-  private openBrowser(win: BrowserWindow) {
-    let search: string = "";
+  private openBrowser(win: BrowserWindow, parent: BrowserWindow) {
+    let ctx: { search: string; mode: "vim" | "browser" } = { search: "", mode: "vim" };
+    const cmdline = async (prompt: string, value: string = "") => {
+      const args = ["input", [prompt, value]]
 
+      Browser.main?.focus();
+      value = await Emit.share("envim:api", "nvim_call_function", args) || "";
+      win.focus();
+
+      return value;
+    };
+
+    win.setBounds(parent.getBounds());
     win.on("show", () => {
       const isOpenDevTools = this.getBrowserWindows().filter(w => {
         if (w.id === win.id) return false;
@@ -86,33 +91,36 @@ export class Browser {
     });
     win.on("close", () => this.getBrowserWindows().length > 1 || win.webContents.session.clearStorageData());
     win.on("closed", () => this.browserUpdate());
-    win.webContents.on("did-create-window", (win: BrowserWindow) => this.openBrowser(win));
+    win.webContents.on("did-create-window", (next: BrowserWindow) => this.openBrowser(next, win));
     win.webContents.on("before-input-event", (e: Event, input: Input) => {
-      if (input.type === "keyUp" || (!input.control && !input.meta)) return;
-      input.key === "a" && win.webContents.selectAll();
-      input.key === "c" && win.webContents.copy();
-      input.key === "v" && win.webContents.paste();
-      input.key === "x" && win.webContents.cut();
-      input.key === "z" && win.webContents.undo();
-      input.key === "y" && win.webContents.redo();
-      input.key === "h" && win.webContents.goBack();
-      input.key === "l" && win.webContents.goForward();
-      input.key === "j" && win.webContents.sendInputEvent({ type: "mouseWheel", x: 0, y: 0, deltaY: -100 });
-      input.key === "k" && win.webContents.sendInputEvent({ type: "mouseWheel", x: 0, y: 0, deltaY: 100 });
-      input.key === "Tab" && this.rotateWindows(win, input.shift ? -1 : 1);
-      input.key === "r" && win.webContents.reloadIgnoringCache();
-      input.key === "i" && win.webContents.toggleDevTools();
-      input.key === "w" && this.rotateWindows(win, -1) && win.close();
-      input.key === "n" && search && win.webContents.findInPage(search, { forward: true });
-      input.key === "N" && search && win.webContents.findInPage(search, { forward: false });
-      input.key === "f" && (async () => {
-        Browser.main?.focus();
+      if (ctx.mode === "browser" && !input.control && input.key !== "Escape") return;
+      ctx.mode === "browser" && input.key === "Escape" && (ctx.mode = "vim");
+      ctx.mode === "browser" && input.key === "a" && win.webContents.selectAll();
+      ctx.mode === "browser" && input.key === "c" && win.webContents.copy();
+      ctx.mode === "browser" && input.key === "v" && win.webContents.paste();
+      ctx.mode === "browser" && input.key === "x" && win.webContents.cut();
+      ctx.mode === "browser" && input.key === "z" && win.webContents.undo();
+      ctx.mode === "browser" && input.key === "y" && win.webContents.redo();
+      ctx.mode === "browser" && input.key === "r" && win.webContents.reloadIgnoringCache();
+      ctx.mode === "browser" && input.key === "i" && win.webContents.toggleDevTools();
+      ctx.mode === "browser" && input.key === "l" && (async () =>
+        this.openUrl(win.id, await cmdline("Browser: ", win.webContents.getURL()))
+      )();
 
-        const args = ["input", ["Search: ", search]]
-        search = await Emit.share("envim:api", "nvim_call_function", args) || "";
-        search ? win.webContents.findInPage(search) : win.webContents.stopFindInPage("clearSelection");
-
-        win.focus();
+      ctx.mode === "vim" && input.key === "y" && win.webContents.copy();
+      ctx.mode === "vim" && input.key === "p" && win.webContents.paste();
+      ctx.mode === "vim" && input.key === "i" && (ctx.mode = "browser");
+      ctx.mode === "vim" && input.key === "h" && win.webContents.goBack();
+      ctx.mode === "vim" && input.key === "l" && win.webContents.goForward();
+      ctx.mode === "vim" && input.key === "j" && win.webContents.sendInputEvent({ type: "mouseWheel", x: 0, y: 0, deltaY: -100 });
+      ctx.mode === "vim" && input.key === "k" && win.webContents.sendInputEvent({ type: "mouseWheel", x: 0, y: 0, deltaY: 100 });
+      ctx.mode === "vim" && input.key === "Tab" && this.rotateWindows(win, input.shift ? -1 : 1);
+      ctx.mode === "vim" && input.key === "q" && this.rotateWindows(win, -1) && win.close();
+      ctx.mode === "vim" && input.key === "n" && ctx.search && win.webContents.findInPage(ctx.search, { forward: true });
+      ctx.mode === "vim" && input.key === "N" && ctx.search && win.webContents.findInPage(ctx.search, { forward: false });
+      ctx.mode === "vim" && input.key === "/" && (async () => {
+        ctx.search = await cmdline("Search: ", ctx.search);
+        ctx.search ? win.webContents.findInPage(ctx.search) : win.webContents.stopFindInPage("clearSelection");
       })();
       e.preventDefault();
     });
@@ -126,6 +134,7 @@ export class Browser {
     win.webContents.on("did-navigate", () => this.browserUpdate());
     win.webContents.on("did-navigate-in-page", () => this.browserUpdate());
     win.webContents.on("devtools-opened", () => win.focus());
+    win.show();
   }
 
   private closeUrl = (id: number = -1) => {
