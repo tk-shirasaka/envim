@@ -14,7 +14,7 @@ interface States {
   font: { width: number; height: number; size: number; lspace: number; scale: number; };
   opacity: number;
   options: { [k: string]: boolean; };
-  bookmarks: { name: string; group: string; path: string; selected: boolean; }[];
+  bookmarks: { name: string; path: string; selected: boolean; }[];
 }
 
 const flexDirection: "column" = "column";
@@ -177,7 +177,7 @@ export class SettingComponent extends React.Component<Props, States> {
           </div>
           { this.state.bookmarks.map((bookmark, i) => (
             <div key={i}>
-              <label><input type="radio" checked={bookmark.selected} onChange={() => this.onSelectBookmark(i)} />{ bookmark.name }</label>
+              <label><input type="radio" checked={bookmark.selected} onChange={() => this.onSelectBookmark(i)} />{ bookmark.name.replace(/\//g, "  ") }</label>
             </div>
           ))}
         </div>

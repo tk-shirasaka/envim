@@ -20,7 +20,7 @@ interface States {
   cwd: string;
   tabs: ITab[];
   menus: IMenu[];
-  bookmarks: { name: string; group: string; path: string; selected: boolean; }[];
+  bookmarks: { name: string; path: string; selected: boolean; }[];
   mode?: IMode;
 }
 
@@ -68,17 +68,15 @@ export class TablineComponent extends React.Component<Props, States> {
     this.setState({ cwd, bookmarks: Setting.bookmarks });
   }
 
-  private async saveBookmark(bookmark: { name: string, group: string, path: string, selected: boolean }) {
+  private async saveBookmark(bookmark: { name: string, path: string, selected: boolean }) {
     const bookmarks = this.state.bookmarks
       .map(bookmark => ({ ...bookmark, selected: false }))
       .filter(({ path }) => bookmark.path !== path);
-    const args1 = ["input", ["Bookmark: ", bookmark.name]]
-    const args2 = ["input", ["Group: ", bookmark.group || ""]]
-    const name = await Emit.send<string>("envim:api", "nvim_call_function", args1);
+    const args = ["input", ["Bookmark: ", bookmark.name]]
+    const name = await Emit.send<string>("envim:api", "nvim_call_function", args);
 
     if (name) {
-      bookmark.name = name;
-      bookmark.group = await Emit.send<string>("envim:api", "nvim_call_function", args2);
+      bookmark.name = name.replace(/^\//, "").replace(/\/+/, "/").replace(/\/$/, "");
       bookmark.selected = bookmark.path === this.state.cwd;
       bookmarks.push(bookmark);
       Setting.bookmarks = bookmarks.sort((a, b) => a.name > b.name ? 1 : -1);
@@ -150,33 +148,38 @@ export class TablineComponent extends React.Component<Props, States> {
     const index = this.state.bookmarks.findIndex(({ path }) => path === cwd);
     const bookmark = index >= 0 ? this.state.bookmarks[index] : { name: cwd, group: "", path: cwd, selected: false };
     const icon = index >= 0 ? { color: "blue-fg", label: "" } : { color: "gray-fg", label: "" };
-    const groups = this.state.bookmarks.map(({ group }) => group).sort().filter((group, i, self) => group && self.indexOf(group) === i);
-    const selected = this.state.bookmarks.find(({ selected }) => selected)?.name;
+    const selected = bookmark.selected && bookmark.name.split("/").pop();
 
     return (
       <MenuComponent { ...icon } style={styles.space} onClick={() => this.saveBookmark(bookmark)}>
         { selected && <FlexComponent color="blue" margin={[-4, -4, 4]} padding={[4]} border={[0, 0, 2]}>{ selected }</FlexComponent> }
         { this.renderBookmarkMenu() }
-        { groups.map(group =>
-          <MenuComponent key={group} color="lightblue-fg" style={{}} label={` ${group}`} side>
-            { this.renderBookmarkMenu(group) }
-          </MenuComponent>
-        ) }
       </MenuComponent>
     )
   }
 
-  private renderBookmarkMenu(base?: string) {
-    const bookmarks = this.state.bookmarks.filter(({ group }) => base ? group === base : !group)
+  private renderBookmarkMenu(base: string = "") {
+    const regexp = new RegExp(`^${base}`);
+    const bookmarks = this.state.bookmarks.filter(({ name }) => name.match(regexp)).map(({ name, ...other }) => ({ ...other, name: name.replace(regexp, "") }));
+    const groups = bookmarks.map(({ name }) => name.split("/")).reduce((all, curr) => curr.length === 1 || all.indexOf(curr[0]) >= 0 ? all : [...all, curr[0]], []);
 
-    return bookmarks.map(({ name, path, selected }, i) =>
-      <FlexComponent animate="hover" color="default" active={selected} key={`${base}-${i}`} onClick={e => this.runCommand(e, `cd ${path}`)}>
-        <FlexComponent grow={1} direction="column" padding={[0, 8, 0, 0]}>
-          { name }
-          <div className="color-gray-fg small">{ path }</div>
-        </FlexComponent>
-        <IconComponent color="gray-fg" font="" onClick={e => this.deleteBookmark(e, path)} hover />
-      </FlexComponent>
+    return (
+      <>
+        { groups.map(group =>
+          <MenuComponent key={`${base}${group}`} color="lightblue-fg" style={{}} label={` ${group}`} side>
+            { this.renderBookmarkMenu(`${base}${group}/`) }
+          </MenuComponent>
+        ) }
+        { bookmarks.filter(({ name }) => name.split("/").length === 1).map(({ name, path, selected }, i) =>
+          <FlexComponent animate="hover" color="default" active={selected} key={`${base}-${i}`} onClick={e => this.runCommand(e, `cd ${path}`)}>
+            <FlexComponent grow={1} direction="column" padding={[0, 8, 0, 0]}>
+              { name }
+              <div className="color-gray-fg small">{ path }</div>
+            </FlexComponent>
+            <IconComponent color="gray-fg" font="" onClick={e => this.deleteBookmark(e, path)} hover />
+          </FlexComponent>
+        ) }
+      </>
     );
   }
 

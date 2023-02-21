@@ -25,6 +25,10 @@ const styles = {
     minWidth: "100%",
     whiteSpace,
   },
+  sidemenu: {
+    zIndex: 20,
+    whiteSpace,
+  },
 };
 
 export class MenuComponent extends React.Component<PropsWithChildren<Props>, States> {
@@ -76,7 +80,8 @@ export class MenuComponent extends React.Component<PropsWithChildren<Props>, Sta
   private renderMenu() {
     if (this.state.haschild === false) return null;
 
-    const style = { ...styles.menu, ...{ inset: this.inset.join(" ") } };
+    const base = this.props.side ? styles.sidemenu : styles.menu;
+    const style = { ...base, ...{ inset: this.inset.join(" ") } };
 
     return (
       <FlexComponent color="default" direction="column" position="absolute" overflow="visible" padding={[4]} rounded={[2]} style={style} shadow hover>
