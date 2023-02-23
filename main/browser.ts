@@ -1,162 +1,188 @@
-import { app, dialog, BrowserWindow, Menu, Input } from "electron";
-import { join } from "path";
+import { dialog, BrowserWindow, Input } from "electron";
 
+import { Bootstrap } from "./bootstrap";
 import { Emit } from "./emit";
 
-export class Browser {
-  static main?: BrowserWindow;
+class Browser {
+  private search: string = "";
+  private mode: "vim" | "browser" = "vim";
+  private info: { id: number; title: string; url: string; active: boolean } = { id: 0, title: "", url: "", active: false };
 
-  constructor() {
-    app.commandLine.appendSwitch('remote-debugging-port', '8315');
-    app.on("ready", this.onReady);
-    app.on("activate", this.onActivate);
-    app.on("window-all-closed", this.onQuit);
-    Emit.on("browser:open", this.openUrl);
-    Emit.on("browser:close", this.closeUrl);
-  }
+  constructor(private win: BrowserWindow, parent?: BrowserWindow) {
+    parent = parent || Bootstrap.win;
 
-  private onReady = () => {
-    this.create();
-  }
-
-  private onActivate = () => {
-    this.create();
-  }
-
-  private onQuit = () => {
-    app.quit();
-  }
-
-  private create() {
-    if (Browser.main) return;
-
-    Menu.setApplicationMenu(Menu.buildFromTemplate([]));
-    Browser.main = new BrowserWindow({
-      transparent: true,
-      resizable: true,
-      hasShadow: false,
-      titleBarStyle: "hidden",
-      titleBarOverlay: true,
-      webPreferences: {
-        preload: join(__dirname, "preload.js"),
-      },
-    });
-
-    Browser.main.maximize();
-    Browser.main.loadFile(join(__dirname, "index.html"));
-    Browser.main.on("closed", () => delete(Browser.main) && this.closeUrl());
-    Browser.main.once("ready-to-show", () => Emit.share("envim:theme", "system"));
-  }
-
-  private openUrl = (id: number, url?: string) => {
-    const exists = this.getBrowserWindows().find(win => win.id === id);
-    const win = exists || new BrowserWindow({
-      show: false,
-      webPreferences: { partition: "browser" },
-    });
-    exists ? win.show() : (Browser.main && this.openBrowser(win, Browser.main));
-
-    if (url && url.search(/^https?:\/\/\w+/) < 0) {
-      url = `https://google.com/search?q=${encodeURI(url)}`;
-    }
-
-    url && win.loadURL(url);
-  }
-
-  private openBrowser(win: BrowserWindow, parent: BrowserWindow) {
-    let ctx: { search: string; mode: "vim" | "browser" } = { search: "", mode: "vim" };
-    const cmdline = async (prompt: string, value: string = "") => {
-      const args = ["input", [prompt, value]]
-
-      Browser.main?.focus();
-      value = await Emit.share("envim:api", "nvim_call_function", args) || "";
-      win.focus();
-
-      return value;
-    };
+    if (!parent) return;
 
     win.setBounds(parent.getBounds());
-    win.on("show", () => {
-      const isOpenDevTools = this.getBrowserWindows().filter(w => {
-        if (w.id === win.id) return false;
-
-        const result = w.webContents.isDevToolsOpened();
-        result && w.webContents.closeDevTools();
-        w.hide();
-
-        return result;
-      }).length > 0;
-      this.browserUpdate();
-      isOpenDevTools && win.webContents.openDevTools();
-    });
-    win.on("close", () => this.getBrowserWindows().length > 1 || win.webContents.session.clearStorageData());
-    win.on("closed", () => this.browserUpdate());
-    win.webContents.on("did-create-window", (next: BrowserWindow) => this.openBrowser(next, win));
-    win.webContents.on("before-input-event", (e: Event, input: Input) => {
-      if (ctx.mode === "browser" && !input.control && input.key !== "Escape") return;
-      ctx.mode === "browser" && input.key === "Escape" && (ctx.mode = "vim");
-      ctx.mode === "browser" && input.key === "a" && win.webContents.selectAll();
-      ctx.mode === "browser" && input.key === "c" && win.webContents.copy();
-      ctx.mode === "browser" && input.key === "v" && win.webContents.paste();
-      ctx.mode === "browser" && input.key === "x" && win.webContents.cut();
-      ctx.mode === "browser" && input.key === "z" && win.webContents.undo();
-      ctx.mode === "browser" && input.key === "y" && win.webContents.redo();
-      ctx.mode === "browser" && input.key === "r" && win.webContents.reloadIgnoringCache();
-      ctx.mode === "browser" && input.key === "i" && win.webContents.toggleDevTools();
-      ctx.mode === "browser" && input.key === "l" && (async () =>
-        this.openUrl(win.id, await cmdline("Browser: ", win.webContents.getURL()))
-      )();
-
-      ctx.mode === "vim" && input.key === "y" && win.webContents.copy();
-      ctx.mode === "vim" && input.key === "p" && win.webContents.paste();
-      ctx.mode === "vim" && input.key === "i" && (ctx.mode = "browser");
-      ctx.mode === "vim" && input.key === "h" && win.webContents.goBack();
-      ctx.mode === "vim" && input.key === "l" && win.webContents.goForward();
-      ctx.mode === "vim" && input.key === "j" && win.webContents.sendInputEvent({ type: "mouseWheel", x: 0, y: 0, deltaY: -100 });
-      ctx.mode === "vim" && input.key === "k" && win.webContents.sendInputEvent({ type: "mouseWheel", x: 0, y: 0, deltaY: 100 });
-      ctx.mode === "vim" && input.key === "Tab" && this.rotateWindows(win, input.shift ? -1 : 1);
-      ctx.mode === "vim" && input.key === "q" && this.rotateWindows(win, -1) && win.close();
-      ctx.mode === "vim" && input.key === "n" && ctx.search && win.webContents.findInPage(ctx.search, { forward: true });
-      ctx.mode === "vim" && input.key === "N" && ctx.search && win.webContents.findInPage(ctx.search, { forward: false });
-      ctx.mode === "vim" && input.key === "/" && (async () => {
-        ctx.search = await cmdline("Search: ", ctx.search);
-        ctx.search ? win.webContents.findInPage(ctx.search) : win.webContents.stopFindInPage("clearSelection");
-      })();
-      e.preventDefault();
-    });
-    win.webContents.on("will-prevent-unload", (e: Event) => {
-      const options = { message: "Leave this page?", buttons: ["Yes", "no"], defaultId: 0 };
-      if (dialog.showMessageBoxSync(options) === 0) {
-        e.preventDefault();
-      }
-    });
-    win.webContents.on("did-finish-load", () => this.browserUpdate());
-    win.webContents.on("did-navigate", () => this.browserUpdate());
-    win.webContents.on("did-navigate-in-page", () => this.browserUpdate());
-    win.webContents.on("devtools-opened", () => win.focus());
+    win.on("show", this.updateInfo);
+    win.on("hide", this.updateInfo);
+    win.on("closed", this.onClosed);
+    win.webContents.on("did-finish-load", this.onUpdate);
+    win.webContents.on("did-navigate", this.onUpdate);
+    win.webContents.on("did-navigate-in-page", this.onUpdate);
+    win.webContents.on("did-create-window", this.onCreate);
+    win.webContents.on("before-input-event", this.onInput);
+    win.webContents.on("will-prevent-unload", this.onUnload);
     win.show();
   }
 
-  private closeUrl = (id: number = -1) => {
-    this.getBrowserWindows().forEach(win => [win.id, -1].indexOf(id) < 0 || win.close())
+  getBrowser() {
+    return { info: this.info, win: this.win };
   }
 
-  private browserUpdate() {
-    Emit.send("browser:update", this.getBrowserWindows().map(win => (
-      { id: win.id, title: win.getTitle(), url: win.webContents.getURL(), active: win.isVisible() }
-    )));
+  private updateInfo = () => {
+    this.info = { id: this.win.id, title: this.win.getTitle(), url: this.win.webContents.getURL(), active: this.win.isVisible() };
   }
 
-  private rotateWindows(win: BrowserWindow, direction: 1 | -1) {
-    const windows = this.getBrowserWindows();
-    const index = (windows.length + windows.indexOf(win) + direction) % windows.length;
-    const result = windows.length > 0;
-
-    result && windows[index].show();
-    return result;
+  private onClosed = () => {
+    Emit.share("browser:closed", this.info.id);
   }
 
-  private getBrowserWindows() {
-    return BrowserWindow.getAllWindows().filter(win => win.id !== Browser.main?.id);
+  private onUpdate = () => {
+    this.updateInfo();
+    Emit.share("browser:update");
+  }
+
+  private onCreate = (win: BrowserWindow) => {
+    Emit.share("browser:show", win, this.win);
+  }
+
+  private onInput = (e: Event, input: Input) => {
+    if (this.mode === "browser" && !input.control && input.key !== "Escape") return;
+
+    this.mode === "vim" && this.onInputVim(input);
+    this.mode === "browser" && this.onInputBrowser(input);
+
+    e.preventDefault();
+  }
+
+  private getInput = async (prompt: string, value: string = "") => {
+    const args = ["input", [prompt, value]]
+
+    Bootstrap.win?.focus();
+    value = await Emit.share("envim:api", "nvim_call_function", args) || "";
+    this.win.focus();
+
+    return value;
+  }
+
+  private onInputVim = (input: Input) => {
+    input.key === "i" && (this.mode = "browser");
+    input.key === "y" && this.win.webContents.copy();
+    input.key === "p" && this.win.webContents.paste();
+    input.key === "h" && this.win.webContents.goBack();
+    input.key === "l" && this.win.webContents.goForward();
+    input.key === "j" && this.win.webContents.sendInputEvent({ type: "mouseWheel", x: 0, y: 0, deltaY: -100 });
+    input.key === "k" && this.win.webContents.sendInputEvent({ type: "mouseWheel", x: 0, y: 0, deltaY: 100 });
+    input.key === "Tab" && Emit.share("browser:rotate", this.win, input.shift ? -1 : 1);
+    input.key === "q" && Emit.share("browser:close", this.info.id, false);
+    input.key === "n" && this.search && this.win.webContents.findInPage(this.search, { forward: true });
+    input.key === "N" && this.search && this.win.webContents.findInPage(this.search, { forward: false });
+    input.key === "/" && (async () => {
+      this.search = await this.getInput("Search: ", this.search);
+      this.search ? this.win.webContents.findInPage(this.search) : this.win.webContents.stopFindInPage("clearSelection");
+    })();
+  }
+
+  private onInputBrowser = (input: Input) => {
+    input.key === "Escape" && (this.mode = "vim");
+    input.key === "a" && this.win.webContents.selectAll();
+    input.key === "c" && this.win.webContents.copy();
+    input.key === "v" && this.win.webContents.paste();
+    input.key === "x" && this.win.webContents.cut();
+    input.key === "z" && this.win.webContents.undo();
+    input.key === "y" && this.win.webContents.redo();
+    input.key === "r" && this.win.webContents.reloadIgnoringCache();
+    input.key === "i" && this.win.webContents.toggleDevTools();
+    input.key === "l" && (async () =>
+      Emit.share("browser:open", this.info.id, await this.getInput("Browser: ", this.win.webContents.getURL()))
+    )();
+  }
+
+  private onUnload = (e: Event) => {
+    const options = { message: "Leave this page?", buttons: ["Yes", "no"], defaultId: 0 };
+    if (dialog.showMessageBoxSync(options) === 0) {
+      e.preventDefault();
+    }
+  }
+}
+
+export class Browsers {
+  private browsers: Browser[] = [];
+
+  constructor() {
+    Emit.on("browser:open", this.onOpen);
+    Emit.on("browser:show", this.onShow);
+    Emit.on("browser:hide", this.onHide);
+    Emit.on("browser:update", this.onUpdate);
+    Emit.on("browser:rotate", this.onRotate);
+    Emit.on("browser:close", this.onClose);
+    Emit.on("browser:closed", this.onClosed);
+  }
+
+  private onOpen = (id: number, url?: string) => {
+    const exists = this.getBrowser().find(({ win }) => win.id === id);
+    const win = exists?.win || new BrowserWindow({
+      show: false,
+      webPreferences: { partition: "browser" },
+    });
+
+    if (url) {
+      url = url.search(/^https?:\/\/\w+/) < 0 ? `https://google.com/search?q=${encodeURI(url)}` : url;
+      win.loadURL(url);
+    }
+
+    Bootstrap.win && this.onShow(win);
+  }
+
+  private onShow = (win: BrowserWindow, parent?: BrowserWindow) => {
+    const exists = this.getBrowser().filter(browser => {
+      const result = browser.win.id === win.id;
+
+      result ? browser.win.show() : browser.win.hide();
+      return result;
+    }).length > 0;
+
+    exists || this.browsers.push(new Browser(win, parent));
+    this.onUpdate();
+  }
+
+  private onClose = (id: number, close = true) => {
+    this.getBrowser().forEach(({ win }) => {
+      if (win.id === id) {
+        win.close();
+        close || this.onRotate(win, -1);
+      }
+    });
+  }
+
+  private onHide = () => {
+    this.getBrowser().forEach(({ win }) => win.hide());
+    this.onUpdate();
+    Bootstrap.win?.focus();
+  }
+
+  private onClosed = (id: number) => {
+    this.browsers = this.browsers.filter(browser => {
+      const { info } = browser.getBrowser();
+
+      return info.id !== id;
+    });
+    this.onUpdate();
+  }
+
+  private onUpdate = () => {
+    Emit.send("browser:update", this.getBrowser().map(({ info }) => info));
+  }
+
+  private onRotate = (win: BrowserWindow, direction: 1 | -1) => {
+    const windows = this.getBrowser().map(({ win }) => win);
+    const index = windows.indexOf(win) + direction;
+
+    0 <= index && index < windows.length ? this.onShow(windows[index]) : this.onHide();
+  }
+
+  private getBrowser = () => {
+    return this.browsers.map(browser => browser.getBrowser());
   }
 }

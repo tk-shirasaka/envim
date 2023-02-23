@@ -39,7 +39,7 @@ export class App {
       case "envim_clipboard": return Clipboard.copy(args[0], args[1]);
       case "envim_dirchanged": return Autocmd.dirchanged(args[0]);
       case "envim_setbackground": return args[0] && Emit.share("envim:theme", args[0]);
-      case "envim_openurl": return args[0] && Emit.share("browser:open", args[1] || -1, args[0]);
+      case "envim_openurl": return args[0] && Emit.share("browser:open", -1, args[0]);
     }
   }
 

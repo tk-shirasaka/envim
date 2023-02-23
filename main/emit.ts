@@ -1,7 +1,7 @@
 import { ipcMain, IpcMainInvokeEvent } from "electron";
 import { EventEmitter } from "events";
 
-import { Browser } from "./browser";
+import { Bootstrap } from "./bootstrap";
 
 export class Emit {
   private static emit = new EventEmitter;
@@ -29,7 +29,7 @@ export class Emit {
   }
 
   static send(event: string, ...args: any[]) {
-    Browser.main?.webContents.send(event, ...args);
+    Bootstrap.win?.webContents.send(event, ...args);
   }
 
   static update(event: string, async: boolean, ...args: any[]) {

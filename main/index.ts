@@ -1,5 +1,7 @@
-import { Browser } from "./browser";
+import { Bootstrap } from "./bootstrap";
+import { Browsers } from "./browser";
 import { Envim } from "./envim";
 
-new Browser;
+new Bootstrap;
+new Browsers;
 new Envim;

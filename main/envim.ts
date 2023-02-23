@@ -50,6 +50,7 @@ export class Envim {
       await this.nvim.setVar('envim_id', await this.nvim.channelId);
       new App(this.nvim);
       Emit.send("app:switch", true);
+      Emit.share("browser:update");
 
       this.handleTheme();
       path && this.onCommand(`cd ${path}`);
@@ -89,6 +90,7 @@ export class Envim {
 
   private onDisconnect = () => {
     Emit.send("app:switch", false);
+    Emit.share("browser:hide");
   }
 
   private onError = (e: Error | any) => {
