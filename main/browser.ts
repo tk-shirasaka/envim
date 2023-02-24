@@ -6,6 +6,7 @@ import { Emit } from "./emit";
 class Browser {
   private search: string = "";
   private mode: "vim" | "browser" = "vim";
+  private devtool: boolean = false;
   private info: { id: number; title: string; url: string; active: boolean } = { id: 0, title: "", url: "", active: false };
 
   constructor(private win: BrowserWindow, parent?: BrowserWindow) {
@@ -17,6 +18,7 @@ class Browser {
     win.on("show", this.updateInfo);
     win.on("hide", this.updateInfo);
     win.on("closed", this.onClosed);
+    win.webContents.on("page-title-updated", this.onUpdate);
     win.webContents.on("did-finish-load", this.onUpdate);
     win.webContents.on("did-navigate", this.onUpdate);
     win.webContents.on("did-navigate-in-page", this.onUpdate);
@@ -30,7 +32,23 @@ class Browser {
     return { info: this.info, win: this.win };
   }
 
+  show() {
+    if (this.info.active) return;
+
+    this.devtool && this.win.webContents.openDevTools();
+    this.win.show();
+  }
+
+  hide() {
+    if (!this.info.active) return;
+
+    this.devtool = this.win.webContents.isDevToolsOpened();
+    this.devtool && this.win.webContents.closeDevTools();
+    this.win.hide();
+  }
+
   private updateInfo = () => {
+    this.win.setTitle(`[${this.mode.toUpperCase()}] : ${this.win.webContents.getTitle()}`)
     this.info = { id: this.win.id, title: this.win.getTitle(), url: this.win.webContents.getURL(), active: this.win.isVisible() };
   }
 
@@ -48,12 +66,14 @@ class Browser {
   }
 
   private onInput = (e: Event, input: Input) => {
-    if (this.mode === "browser" && !input.control && input.key !== "Escape") return;
+    const mode = this.mode;
+    if (mode === "browser" && !input.control && input.key !== "Escape") return;
 
-    this.mode === "vim" && this.onInputVim(input);
-    this.mode === "browser" && this.onInputBrowser(input);
+    mode === "vim" && this.onInputVim(input);
+    mode === "browser" && this.onInputBrowser(input);
 
     e.preventDefault();
+    this.mode === mode || this.onUpdate();
   }
 
   private getInput = async (prompt: string, value: string = "") => {
@@ -75,7 +95,7 @@ class Browser {
     input.key === "j" && this.win.webContents.sendInputEvent({ type: "mouseWheel", x: 0, y: 0, deltaY: -100 });
     input.key === "k" && this.win.webContents.sendInputEvent({ type: "mouseWheel", x: 0, y: 0, deltaY: 100 });
     input.key === "Tab" && Emit.share("browser:rotate", this.win, input.shift ? -1 : 1);
-    input.key === "q" && Emit.share("browser:close", this.info.id, false);
+    input.key === "q" && Emit.share("browser:close", this.info.id);
     input.key === "n" && this.search && this.win.webContents.findInPage(this.search, { forward: true });
     input.key === "N" && this.search && this.win.webContents.findInPage(this.search, { forward: false });
     input.key === "/" && (async () => {
@@ -136,10 +156,11 @@ export class Browsers {
   }
 
   private onShow = (win: BrowserWindow, parent?: BrowserWindow) => {
-    const exists = this.getBrowser().filter(browser => {
-      const result = browser.win.id === win.id;
+    const exists = this.browsers.filter(browser => {
+      const { info } = browser.getBrowser();
+      const result = info.id === win.id;
 
-      result ? browser.win.show() : browser.win.hide();
+      result ? browser.show() : browser.hide();
       return result;
     }).length > 0;
 
@@ -147,17 +168,14 @@ export class Browsers {
     this.onUpdate();
   }
 
-  private onClose = (id: number, close = true) => {
+  private onClose = (id: number) => {
     this.getBrowser().forEach(({ win }) => {
-      if (win.id === id) {
-        win.close();
-        close || this.onRotate(win, -1);
-      }
+      win.id === id && win.close();
     });
   }
 
   private onHide = () => {
-    this.getBrowser().forEach(({ win }) => win.hide());
+    this.browsers.forEach(browser => browser.hide());
     this.onUpdate();
     Bootstrap.win?.focus();
   }
@@ -169,10 +187,11 @@ export class Browsers {
       return info.id !== id;
     });
     this.onUpdate();
+    Bootstrap.win?.focus();
   }
 
   private onUpdate = () => {
-    Emit.send("browser:update", this.getBrowser().map(({ info }) => info));
+    Emit.update("browser:update", true, this.getBrowser().reverse().map(({ info }) => info));
   }
 
   private onRotate = (win: BrowserWindow, direction: 1 | -1) => {
