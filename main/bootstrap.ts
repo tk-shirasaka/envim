@@ -7,6 +7,7 @@ export class Bootstrap {
   static win?: BrowserWindow;
 
   constructor() {
+    Menu.setApplicationMenu(null);
     app.commandLine.appendSwitch('remote-debugging-port', '8315');
     app.on("ready", this.onReady);
     app.on("activate", this.onActivate);
@@ -29,7 +30,6 @@ export class Bootstrap {
   private create() {
     if (Bootstrap.win) return;
 
-    Menu.setApplicationMenu(Menu.buildFromTemplate([]));
     Bootstrap.win = new BrowserWindow({
       transparent: true,
       resizable: true,
