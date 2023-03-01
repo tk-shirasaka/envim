@@ -108,16 +108,8 @@ export class HistoryComponent extends React.Component<Props, States> {
     clearInterval(this.timer);
   }
 
-  private openBrowser = (browser?: { id: number, title: string, url: string, active: boolean }) => {
-    if (browser && !browser.active) {
-      Emit.send("browser:open", browser.id);
-    } else {
-      const args = {
-        default: browser?.url ? `'${browser.url}'` : "@\"",
-        id: browser?.id || -1,
-      };
-      Emit.send("envim:command", `call EnvimConnect(0, 'envim_openurl', input('Browser: ', ${args.default}), ${args.id})`)
-    }
+  private openBrowser = (id: number) => {
+    Emit.send("browser:open", id);
   }
 
   private closeBrowser = (e: MouseEvent, id: number) => {
@@ -152,7 +144,7 @@ export class HistoryComponent extends React.Component<Props, States> {
     const icon = browser.url.search(/^https/) < 0 ? { color: "gray-fg", font: "" } : { color: "green-fg", font: "" };
 
     return (
-      <FlexComponent animate="hover" color="default" key={browser.id} active={browser.active} onClick={() => this.openBrowser(browser)}>
+      <FlexComponent animate="hover" color="default" key={browser.id} active={browser.active} onClick={() => this.openBrowser(browser.id)}>
         <FlexComponent grow={1} direction="column" padding={[0, 8, 0, 0]}>
           { browser.title }
           <div className="small">{ <IconComponent { ...icon } text={browser.url.replace(/^https?:\/\/([^\/]+)\/.*$/, "$1")} /> }</div>
@@ -170,7 +162,7 @@ export class HistoryComponent extends React.Component<Props, States> {
           { this.state.command && <FlexComponent animate="fade-in" margin={["auto", 4]} rounded={[4]} shadow><MessageComponent message={this.state.command} open /></FlexComponent> }
           { this.state.ruler && <FlexComponent animate="fade-in" margin={["auto", 4]} rounded={[4]} shadow><MessageComponent message={this.state.ruler} open /></FlexComponent> }
           <div className="space" />
-          <MenuComponent color="blue-fg" style={{}} label="爵" onClick={() => this.openBrowser()}>{ this.state.browser.map(this.renderBrowser) }</MenuComponent>
+          <MenuComponent color="blue-fg" style={{}} label="爵" onClick={() => this.openBrowser(-1)}>{ this.state.browser.map(this.renderBrowser) }</MenuComponent>
           <IconComponent color="green-fg" active={this.state.debug.length > 0} font="" onClick={this.toggleDebug} />
           <IconComponent color="red-fg" font="" onClick={this.onClear} />
         </FlexComponent>

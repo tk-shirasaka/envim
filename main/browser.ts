@@ -1,3 +1,4 @@
+import { clipboard } from "electron";
 import { dialog, BrowserWindow, Input } from "electron";
 
 import { Bootstrap } from "./bootstrap";
@@ -9,11 +10,7 @@ class Browser {
   private devtool: boolean = false;
   private info: { id: number; title: string; url: string; active: boolean } = { id: 0, title: "", url: "", active: false };
 
-  constructor(private win: BrowserWindow, parent?: BrowserWindow) {
-    parent = parent || Bootstrap.win;
-
-    if (!parent) return;
-
+  constructor(private win: BrowserWindow, parent: BrowserWindow, url?: string) {
     win.setBounds(parent.getBounds());
     win.on("show", this.updateInfo);
     win.on("hide", this.updateInfo);
@@ -25,7 +22,7 @@ class Browser {
     win.webContents.on("did-create-window", this.onCreate);
     win.webContents.on("before-input-event", this.onInput);
     win.webContents.on("will-prevent-unload", this.onUnload);
-    win.show();
+    parent === Bootstrap.win && this.onOpen(url);
   }
 
   getBrowser() {
@@ -33,10 +30,11 @@ class Browser {
   }
 
   show() {
-    if (this.info.active) return;
-
-    this.devtool && this.win.webContents.openDevTools();
-    this.win.show();
+    if (!this.info.active) {
+      this.devtool && this.win.webContents.openDevTools();
+      this.win.show();
+    }
+    this.win.focus();
   }
 
   hide() {
@@ -86,22 +84,36 @@ class Browser {
     return value;
   }
 
+  private onSearch = async () => {
+    this.search = await this.getInput("Search: ", this.search);
+    this.search ? this.win.webContents.findInPage(this.search) : this.win.webContents.stopFindInPage("clearSelection");
+  }
+
+  private onOpen = async (input: string = "") => {
+    input = input && !this.info.url ? input : await this.getInput("Browser: ", input || clipboard.readText().slice(0, 500));
+
+    if (input) {
+      input = input.search(/^https?:\/\/\w+/) < 0 ? `https://google.com/search?q=${encodeURI(input)}` : input;
+      this.win.loadURL(input);
+      this.show();
+    } else if (!this.info.url) {
+      this.win.close();
+    }
+  }
+
   private onInputVim = (input: Input) => {
     input.key === "i" && (this.mode = "browser");
     input.key === "y" && this.win.webContents.copy();
     input.key === "p" && this.win.webContents.paste();
     input.key === "h" && this.win.webContents.goBack();
     input.key === "l" && this.win.webContents.goForward();
-    input.key === "j" && this.win.webContents.sendInputEvent({ type: "mouseWheel", x: 0, y: 0, deltaY: -100 });
-    input.key === "k" && this.win.webContents.sendInputEvent({ type: "mouseWheel", x: 0, y: 0, deltaY: 100 });
+    input.key === "j" && this.win.webContents.sendInputEvent({ type: "mouseWheel", x: 0, y: 0, deltaY: input.isAutoRepeat ? -300 : -100 });
+    input.key === "k" && this.win.webContents.sendInputEvent({ type: "mouseWheel", x: 0, y: 0, deltaY: input.isAutoRepeat ? 300 : 100 });
     input.key === "Tab" && Emit.share("browser:rotate", this.win, input.shift ? -1 : 1);
     input.key === "q" && Emit.share("browser:close", this.info.id);
     input.key === "n" && this.search && this.win.webContents.findInPage(this.search, { forward: true });
     input.key === "N" && this.search && this.win.webContents.findInPage(this.search, { forward: false });
-    input.key === "/" && (async () => {
-      this.search = await this.getInput("Search: ", this.search);
-      this.search ? this.win.webContents.findInPage(this.search) : this.win.webContents.stopFindInPage("clearSelection");
-    })();
+    input.key === "/" && this.onSearch();
   }
 
   private onInputBrowser = (input: Input) => {
@@ -114,9 +126,7 @@ class Browser {
     input.key === "y" && this.win.webContents.redo();
     input.key === "r" && this.win.webContents.reloadIgnoringCache();
     input.key === "i" && this.win.webContents.toggleDevTools();
-    input.key === "l" && (async () =>
-      Emit.share("browser:open", this.info.id, await this.getInput("Browser: ", this.win.webContents.getURL()))
-    )();
+    input.key === "l" && this.onOpen(this.info.url);
   }
 
   private onUnload = (e: Event) => {
@@ -147,15 +157,10 @@ export class Browsers {
       webPreferences: { partition: "browser" },
     });
 
-    if (url) {
-      url = url.search(/^https?:\/\/\w+/) < 0 ? `https://google.com/search?q=${encodeURI(url)}` : url;
-      win.loadURL(url);
-    }
-
-    Bootstrap.win && this.onShow(win);
+    Bootstrap.win && this.onShow(win, Bootstrap.win, url);
   }
 
-  private onShow = (win: BrowserWindow, parent?: BrowserWindow) => {
+  private onShow = (win: BrowserWindow, parent: BrowserWindow, url?: string) => {
     const exists = this.browsers.filter(browser => {
       const { info } = browser.getBrowser();
       const result = info.id === win.id;
@@ -164,8 +169,7 @@ export class Browsers {
       return result;
     }).length > 0;
 
-    exists || this.browsers.push(new Browser(win, parent));
-    this.onUpdate();
+    exists ? this.onUpdate() : this.browsers.push(new Browser(win, parent, url));
   }
 
   private onClose = (id: number) => {
@@ -198,7 +202,7 @@ export class Browsers {
     const windows = this.getBrowser().map(({ win }) => win);
     const index = windows.indexOf(win) + direction;
 
-    0 <= index && index < windows.length ? this.onShow(windows[index]) : this.onHide();
+    Bootstrap.win && 0 <= index && index < windows.length ? this.onShow(windows[index], Bootstrap.win) : this.onHide();
   }
 
   private getBrowser = () => {
