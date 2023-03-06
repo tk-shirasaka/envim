@@ -186,7 +186,7 @@ export class Grids {
       active && active.id !== grid &&  Grids.setStatus(active.id, active.status, active.status === "show");
       Grids.active = grid;
       Grids.setStatus(grid, "show", true);
-      Emit.update("grid:cursor", true, cursor);
+      Emit.update("grid:cursor", false, cursor);
     }
   }
 

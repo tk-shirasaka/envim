@@ -53,7 +53,7 @@ const TYPE = "editor";
 
 export class EditorComponent extends React.Component<Props, States> {
   private canvas: RefObject<HTMLCanvasElement> = createRef<HTMLCanvasElement>();
-  private timer: { click: number; move: number } = { click: 0, move: 0 };
+  private timer: number = 0;
   private drag: boolean = false;
   private busy: boolean = false;
   private pointer: { row: number; col: number } = { row: 0, col: 0 };
@@ -94,8 +94,8 @@ export class EditorComponent extends React.Component<Props, States> {
 
   componentWillUnmount = () => {
     const grid = this.props.grid;
-    clearInterval(this.timer.click);
-    clearInterval(this.timer.move);
+
+    clearInterval(this.timer);
     Canvas.delete(grid);
     Emit.off(`clear:${this.props.grid}`, this.onClear);
     Emit.off(`flush:${this.props.grid}`, this.onFlush);
@@ -128,42 +128,41 @@ export class EditorComponent extends React.Component<Props, States> {
     const [col, row] = [ x2Col(e.nativeEvent.offsetX), y2Row(e.nativeEvent.offsetY) ];
     const modiffier = [];
     const skip = (button === "move" || action === "drag") && row === this.pointer.row && col === this.pointer.col;
+    const grid = this.props.grid === 1 ? 0 : this.props.grid;
 
     e.shiftKey && modiffier.push("S");
     e.ctrlKey && modiffier.push("C");
     e.altKey && modiffier.push("A");
 
     this.pointer = { row, col };
-    skip || Emit.send("envim:mouse", this.props.grid, button, action, modiffier.join("-"), row, col);
+    skip || Emit.send("envim:mouse", grid, button, action, modiffier.join("-"), row, col);
   }
 
   private onMouseDown = (e: MouseEvent) => {
-    clearTimeout(this.timer.click);
-    this.timer.click = +setTimeout(() => {
+    clearTimeout(this.timer);
+
+    this.timer = +setTimeout(() => {
       this.drag = true;
-      Emit.share("envim:drag", this.props.grid)
-    }, 200);
+      Emit.share("envim:drag", this.props.grid);
+    });
 
     this.onMouseEvent(e, "press");
   }
 
   private onMouseMove = (e: MouseEvent) => {
-    clearTimeout(this.timer.move);
-    this.timer.move = +setTimeout(() => {
-      if (!this.drag && this.busy) return;
+    if (!this.drag && this.busy) return;
 
-      this.onMouseEvent(e, "drag", this.drag ? "" : "move");
-    });
+    this.onMouseEvent(e, "drag", this.drag ? "" : "move");
   }
 
   private onMouseUp = (e: MouseEvent) => {
-    clearTimeout(this.timer.click);
+    clearTimeout(this.timer);
 
     if (this.drag) {
       this.drag = false;
-      this.onMouseEvent(e, "release");
       Emit.share("envim:drag", -1);
     }
+    this.onMouseEvent(e, "release");
   }
 
   private onWheel = (e: WheelEvent) => {
@@ -195,7 +194,7 @@ export class EditorComponent extends React.Component<Props, States> {
   }
 
   private onFlush = (flush: { cells: ICell[], scroll?: IScroll }[]) => {
-    flush.forEach(({ cells, scroll }) => Canvas.update(this.props.grid, cells, scroll))
+    flush.forEach(({ cells, scroll }) => Canvas.update(this.props.grid, cells, scroll));
   }
 
   private onViewport = (top: number, bottom: number, total: number) => {
@@ -231,7 +230,7 @@ export class EditorComponent extends React.Component<Props, States> {
   }
 
   private onTabline = (_: ITab[], bufs: IBuffer[]) => {
-    Cache.set<IBuffer[]>(TYPE, "bufs", bufs)
+    Cache.set<IBuffer[]>(TYPE, "bufs", bufs);
     this.setState({ bufs });
   }
 
