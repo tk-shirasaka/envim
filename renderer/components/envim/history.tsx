@@ -26,7 +26,6 @@ interface States {
 
 const styles = {
   scope: {
-    zIndex: 20,
     bottom: 0,
   },
   history: {

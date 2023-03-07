@@ -129,7 +129,7 @@ export class InputComponent extends React.Component<Props, States> {
     const opacity = this.state.composit ? 1 : 0.7;
 
     return (
-      <FlexComponent animate="fade-in" style={{ opacity, ...this.state.style}} nomouse>
+      <FlexComponent animate="fade-in" style={{ opacity, ...this.state.style}} shadow={!this.state.busy} nomouse>
         <input type="text" style={styles.input} ref={this.input} autoFocus
           onKeyDown={this.onKeyDown}
           onKeyUp={this.onKeyUp}

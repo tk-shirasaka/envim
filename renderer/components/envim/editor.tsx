@@ -220,7 +220,7 @@ export class EditorComponent extends React.Component<Props, States> {
   }
 
   private onBusy = (busy: boolean) => {
-    this.busy = busy
+    this.busy = busy;
     Cache.set<boolean>(TYPE, "busy", this.busy);
   }
 

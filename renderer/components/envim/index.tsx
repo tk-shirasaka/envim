@@ -51,7 +51,7 @@ const styles = {
 export class EnvimComponent extends React.Component<Props, States> {
   private refresh: boolean = false;
   private main: { fontSize: number; lineHeight: string; } = { fontSize: 0, lineHeight: "" };
-  private editor: { width: number; height: number; } = { width: 0, height: 0 };
+  private editor: { width: number; height: number; zIndex: number } = { width: 0, height: 0, zIndex: 0 };
   private header: { width: number; height: number; padding: string } = { width: 0, height: 0, padding: "" };
   private footer: { width: number; height: number; } = { width: 0, height: 0 };
 
@@ -96,6 +96,7 @@ export class EnvimComponent extends React.Component<Props, States> {
     this.editor = {
       width: col2X(x2Col(this.props.width) - 2),
       height: row2Y(y2Row(this.props.height - this.header.height - font.height - 4)),
+      zIndex: 0,
     };
     this.footer = { width: this.props.width, height: this.props.height - this.header.height - this.editor.height };
   }
