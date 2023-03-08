@@ -221,7 +221,7 @@ export class Grids {
       const { id } = grid.getInfo();
       const { flush, viewport } = grid.getFlush();
       flush && flush.length && Emit.send(`flush:${id}`, flush);
-      viewport && Emit.update(`viewport:${id}`, true, viewport.top, viewport.bottom, viewport.total);
+      viewport && Emit.update(`viewport:${id}`, false, viewport.top, viewport.bottom, viewport.total);
     });
   }
 }
