@@ -65,12 +65,10 @@ class Browser {
 
   private onInput = (e: Event, input: Input) => {
     const mode = this.mode;
-    if (mode === "browser" && !input.control && input.key !== "Escape") return;
 
-    mode === "vim" && this.onInputVim(input);
-    mode === "browser" && this.onInputBrowser(input);
-
-    e.preventDefault();
+    if (this.onInputBrowser(input) !== "not match" || this.onInputVim(input) !== "not match") {
+      e.preventDefault();
+    }
     this.mode === mode || this.onUpdate();
   }
 
@@ -102,31 +100,41 @@ class Browser {
   }
 
   private onInputVim = (input: Input) => {
-    input.key === "i" && (this.mode = "browser");
-    input.key === "y" && this.win.webContents.copy();
-    input.key === "p" && this.win.webContents.paste();
-    input.key === "h" && this.win.webContents.goBack();
-    input.key === "l" && this.win.webContents.goForward();
-    input.key === "j" && this.win.webContents.sendInputEvent({ type: "mouseWheel", x: 0, y: 0, deltaY: input.isAutoRepeat ? -300 : -100 });
-    input.key === "k" && this.win.webContents.sendInputEvent({ type: "mouseWheel", x: 0, y: 0, deltaY: input.isAutoRepeat ? 300 : 100 });
-    input.key === "Tab" && Emit.share("browser:rotate", this.win, input.shift ? -1 : 1);
-    input.key === "q" && Emit.share("browser:close", this.info.id);
-    input.key === "n" && this.search && this.win.webContents.findInPage(this.search, { forward: true });
-    input.key === "N" && this.search && this.win.webContents.findInPage(this.search, { forward: false });
-    input.key === "/" && this.onSearch();
+    if (this.mode !== "vim") return "not match";
+
+    switch (input.key) {
+      case "i": return this.mode = "browser";
+      case "y": return this.win.webContents.copy();
+      case "p": return this.win.webContents.paste();
+      case "x": return this.win.webContents.cut();
+      case "h": return this.win.webContents.goBack();
+      case "l": return this.win.webContents.goForward();
+      case "j": return this.win.webContents.sendInputEvent({ type: "mouseWheel", x: 0, y: 0, deltaY: input.isAutoRepeat ? -300 : -100 });
+      case "k": return this.win.webContents.sendInputEvent({ type: "mouseWheel", x: 0, y: 0, deltaY: input.isAutoRepeat ? 300 : 100 });
+      case "Tab": return Emit.share("browser:rotate", this.win, input.shift ? -1 : 1);
+      case "q": return Emit.share("browser:close", this.info.id);
+      case "n": return this.search && this.win.webContents.findInPage(this.search, { forward: true });
+      case "N": return this.search && this.win.webContents.findInPage(this.search, { forward: false });
+      case "/": return this.onSearch();
+    }
   }
 
   private onInputBrowser = (input: Input) => {
-    input.key === "Escape" && (this.mode = "vim");
-    input.key === "a" && this.win.webContents.selectAll();
-    input.key === "c" && this.win.webContents.copy();
-    input.key === "v" && this.win.webContents.paste();
-    input.key === "x" && this.win.webContents.cut();
-    input.key === "z" && this.win.webContents.undo();
-    input.key === "y" && this.win.webContents.redo();
-    input.key === "r" && this.win.webContents.reloadIgnoringCache();
-    input.key === "i" && this.win.webContents.toggleDevTools();
-    input.key === "l" && this.onOpen(this.info.url);
+    if (input.key === "Escape") return this.mode = "vim";
+    if (!input.control && !input.meta) return "not match";
+
+    switch (input.key) {
+      case "a": return this.win.webContents.selectAll();
+      case "c": return this.win.webContents.copy();
+      case "v": return this.win.webContents.paste();
+      case "x": return this.win.webContents.cut();
+      case "z": return this.win.webContents.undo();
+      case "y": return this.win.webContents.redo();
+      case "r": return this.win.webContents.reloadIgnoringCache();
+      case "i": return this.win.webContents.toggleDevTools();
+      case "l": return this.onOpen(this.info.url);
+      default: return "not match";
+    }
   }
 
   private onUnload = (e: Event) => {
