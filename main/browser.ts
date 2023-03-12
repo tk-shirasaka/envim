@@ -124,6 +124,9 @@ class Browser {
     if (!input.control && !input.meta) return "not match";
 
     switch (input.key) {
+      case "+": return this.win.webContents.setZoomLevel(Math.min(this.win.webContents.zoomLevel + 0.2, 5));
+      case "-": return this.win.webContents.setZoomLevel(Math.max(this.win.webContents.zoomLevel - 0.2, -5));
+      case "=": return this.win.webContents.setZoomLevel(0);
       case "a": return this.win.webContents.selectAll();
       case "c": return this.win.webContents.copy();
       case "v": return this.win.webContents.paste();
