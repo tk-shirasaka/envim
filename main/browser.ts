@@ -66,6 +66,7 @@ class Browser {
   private onInput = (e: Event, input: Input) => {
     const mode = this.mode;
 
+    if (input.type === "keyUp") return;
     if (this.onInputBrowser(input) !== "not match" || this.onInputVim(input) !== "not match") {
       e.preventDefault();
     }
