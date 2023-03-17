@@ -65,7 +65,7 @@ export class Envim {
   }
 
   private onResize = (grid: number, width: number, height: number) => {
-    this.nvim.uiTryResizeGrid(grid, width, height)
+    grid ? this.nvim.uiTryResizeGrid(grid, width, height) : this.nvim.uiTryResize(width, height);
   }
 
   private onApi = async (fname: string, args: any[]) => {
