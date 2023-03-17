@@ -38,6 +38,7 @@ export class Envim {
       case "address":
         const [port, host] = value.split(":").reverse();
         this.connect.socket = createConnection({ port: +port, host: host });
+        this.connect.socket.setNoDelay();
         [reader, writer] = [this.connect.socket, this.connect.socket];
       break;
     }
