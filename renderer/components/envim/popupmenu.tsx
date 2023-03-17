@@ -13,6 +13,7 @@ interface Props {
 interface States {
   items: { word: string, kind: string, menu: string }[];
   selected: number;
+  clicked: boolean;
   row: number;
   col: number;
   height: number;
@@ -26,7 +27,7 @@ export class PopupmenuComponent extends React.Component<Props, States> {
   constructor(props: Props) {
     super(props);
 
-    this.state = { items: [], selected: -1, row: 0, col: 0, height: 0, zIndex: 0 };
+    this.state = { items: [], selected: -1, clicked: false, row: 0, col: 0, height: 0, zIndex: 0 };
     Emit.on("popupmenu:show", this.onPopupmenu);
     Emit.on("popupmenu:select", this.onSelect);
     Emit.on("popupmenu:hide", this.offPopupmenu);
@@ -60,8 +61,8 @@ export class PopupmenuComponent extends React.Component<Props, States> {
   private onSelect = (selected: number) => {
     const top = row2Y(Math.max(0, Math.min(selected, this.state.items.length - this.state.height)));
 
-    this.setState({ selected });
-    setTimeout(() => this.scope.current?.parentElement?.scrollTo({ top, behavior: "smooth" }));
+    this.state.clicked || setTimeout(() => this.scope.current?.parentElement?.scrollTo({ top, behavior: "smooth" }));
+    this.setState({ selected, clicked: false });
   }
 
   private offPopupmenu = () => {
@@ -70,6 +71,7 @@ export class PopupmenuComponent extends React.Component<Props, States> {
   }
 
   private onItem(i: number) {
+    this.setState({ clicked: true });
     Emit.send("envim:api", "nvim_select_popupmenu_item", [i, true, false, {}]);
   }
 
