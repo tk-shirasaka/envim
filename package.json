@@ -29,7 +29,7 @@
     "ansi-regex": ">=5.0.1",
     "css-loader": "^6.7.3",
     "electron": "^23.1.4",
-    "electron-builder": "^23.6.0",
+    "electron-builder": "^24.0.0",
     "mini-css-extract-plugin": "^2.7.5",
     "sass": "^1.59.3",
     "sass-loader": "^13.2.0",
