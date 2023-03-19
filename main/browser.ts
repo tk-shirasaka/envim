@@ -15,6 +15,7 @@ class Browser {
     win.on("show", this.updateInfo);
     win.on("hide", this.updateInfo);
     win.on("closed", this.onClosed);
+    win.webContents.on("login", this.onBasicAuth);
     win.webContents.on("page-title-updated", this.onUpdate);
     win.webContents.on("did-finish-load", this.onUpdate);
     win.webContents.on("did-navigate", this.onUpdate);
@@ -52,6 +53,15 @@ class Browser {
 
   private onClosed = () => {
     Emit.share("browser:closed", this.info.id);
+  }
+
+  private onBasicAuth = async (e: Event, _: Object, __: Object, callback: Function) => {
+    e.preventDefault();
+
+    const user = await this.getInput("User: ");
+    const password = user && await this.getInput("Password: ");
+
+    user && callback(user, password);
   }
 
   private onUpdate = () => {
