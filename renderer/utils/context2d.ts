@@ -19,6 +19,7 @@ export class Context2D {
     const { size, width, height, scale } = Setting.font;
     this.font = { size: size * scale, width: width * scale, height: height * scale };
     bgctx.lineWidth = scale;
+    bgctx.textBaseline = "top";
   }
 
   private style(hl: string, type: "foreground" | "background" | "special") {
@@ -26,7 +27,6 @@ export class Context2D {
     const field = type === "special" ? "strokeStyle" : "fillStyle";
 
     this.bgctx[field] === color || (this.bgctx[field] = color);
-    this.bgctx.textBaseline === "top" || (this.bgctx.textBaseline = "top");
 
     if (type === "foreground") {
       const font = Highlights.font(hl, this.font.size);
