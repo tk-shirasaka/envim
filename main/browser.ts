@@ -67,7 +67,10 @@ class Browser {
     const mode = this.mode;
 
     if (input.type === "keyUp") return;
-    if (this.onInputBrowser(input) !== "not match" || this.onInputVim(input) !== "not match") {
+    if (
+      this.onInputCommon(input) === "not match" && (
+        this.onInputBrowser(input) !== "not match" || this.onInputVim(input) !== "not match"
+      )) {
       e.preventDefault();
     }
     this.mode === mode || this.onUpdate();
@@ -100,6 +103,14 @@ class Browser {
     }
   }
 
+  private onInputCommon = (input: Input) => {
+    switch (input.key) {
+      case "Escape": return this.mode = "vim";
+      case "Enter": return;
+      default: return "not match";
+    }
+  }
+
   private onInputVim = (input: Input) => {
     if (this.mode !== "vim") return "not match";
 
@@ -121,7 +132,6 @@ class Browser {
   }
 
   private onInputBrowser = (input: Input) => {
-    if (input.key === "Escape") return this.mode = "vim";
     if (!input.control && !input.meta) return "not match";
 
     switch (input.key) {
@@ -137,6 +147,7 @@ class Browser {
       case "r": return this.win.webContents.reloadIgnoringCache();
       case "i": return this.win.webContents.toggleDevTools();
       case "l": return this.onOpen(this.info.url);
+      case "n": return Emit.share("browser:open", -1);
       default: return "not match";
     }
   }
