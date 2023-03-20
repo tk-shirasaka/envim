@@ -16,6 +16,7 @@ class Browser {
     win.on("hide", this.updateInfo);
     win.on("closed", this.onClosed);
     win.webContents.on("login", this.onBasicAuth);
+    win.webContents.on("certificate-error", this.onCertError);
     win.webContents.on("page-title-updated", this.onUpdate);
     win.webContents.on("did-finish-load", this.onUpdate);
     win.webContents.on("did-navigate", this.onUpdate);
@@ -64,6 +65,13 @@ class Browser {
     user && callback(user, password);
   }
 
+  private onCertError = async (e: Event, _: string, __: string, ___: Object, callback: Function) => {
+    if (this.confirm("Certication Error\nContinue it?")) {
+      e.preventDefault();
+      callback(true);
+    }
+  }
+
   private onUpdate = () => {
     this.updateInfo();
     Emit.share("browser:update");
@@ -94,6 +102,10 @@ class Browser {
     this.win.focus();
 
     return value;
+  }
+
+  private confirm = (message: string) => {
+    return dialog.showMessageBoxSync({ message, buttons: ["Yes", "No"], defaultId: 0 }) === 0;
   }
 
   private onSearch = async () => {
@@ -163,10 +175,7 @@ class Browser {
   }
 
   private onUnload = (e: Event) => {
-    const options = { message: "Leave this page?", buttons: ["Yes", "no"], defaultId: 0 };
-    if (dialog.showMessageBoxSync(options) === 0) {
-      e.preventDefault();
-    }
+    this.confirm("Leave this page?") && e.preventDefault();
   }
 }
 
