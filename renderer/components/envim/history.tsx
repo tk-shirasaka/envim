@@ -33,6 +33,12 @@ const styles = {
     width: "100%",
     bottom: 0,
   },
+  browser: {
+    width: 300,
+    maxWidth: "80vh",
+    overflow: "hidden",
+    textOverflow: "ellipsis"
+  },
 };
 
 export class HistoryComponent extends React.Component<Props, States> {
@@ -144,10 +150,10 @@ export class HistoryComponent extends React.Component<Props, States> {
 
     return (
       <FlexComponent animate="hover" color="default" key={browser.id} active={browser.active} onClick={() => this.openBrowser(browser.id)}>
-        <FlexComponent grow={1} direction="column" padding={[0, 8, 0, 0]}>
+        <div style={styles.browser}>
           { browser.title }
           <div className="small">{ <IconComponent { ...icon } text={browser.url.replace(/^https?:\/\/([^\/]+)\/.*$/, "$1")} /> }</div>
-        </FlexComponent>
+        </div>
         <IconComponent color="gray-fg" font="" onClick={(e) => this.closeBrowser(e, browser.id)} hover />
       </FlexComponent>
     );
