@@ -170,6 +170,7 @@ class Browser {
       case "i": return this.win.webContents.toggleDevTools();
       case "l": return this.onOpen(this.info.url);
       case "n": return Emit.share("browser:open", -1);
+      case "w": return Emit.share("browser:rotate", this.win, -1, true);
       default: return "not match";
     }
   }
@@ -207,11 +208,16 @@ export class Browsers {
       const { info } = browser.getBrowser();
       const result = info.id === win.id;
 
-      result ? browser.show() : browser.hide();
+      result || browser.hide();
       return result;
-    }).length > 0;
+    });
 
-    exists ? this.onUpdate() : this.browsers.push(new Browser(win, parent, url));
+    if (exists.length > 0) {
+      exists.pop()?.show();
+      this.onUpdate();
+    } else {
+      this.browsers.push(new Browser(win, parent, url));
+    }
   }
 
   private onClose = (id: number) => {
@@ -233,17 +239,18 @@ export class Browsers {
       return info.id !== id;
     });
     this.onUpdate();
-    Bootstrap.win?.focus();
+    this.getBrowser().some(({ info }) => info.active) || Bootstrap.win?.focus();
   }
 
   private onUpdate = () => {
     Emit.update("browser:update", true, this.getBrowser().reverse().map(({ info }) => info));
   }
 
-  private onRotate = (win: BrowserWindow, direction: 1 | -1) => {
+  private onRotate = (win: BrowserWindow, direction: 1 | -1, close: boolean) => {
     const windows = this.getBrowser().map(({ win }) => win);
     const index = windows.indexOf(win) + direction;
 
+    close && win.close();
     Bootstrap.win && 0 <= index && index < windows.length ? this.onShow(windows[index], Bootstrap.win) : this.onHide();
   }
 
