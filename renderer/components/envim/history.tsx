@@ -20,6 +20,7 @@ interface States {
   mode?: IMessage;
   command?: IMessage;
   ruler?: IMessage;
+  options: { [k:string]: boolean; };
   debug: string;
   browser: { id: number; title: string; url: string; active: boolean; }[];
 }
@@ -48,11 +49,12 @@ export class HistoryComponent extends React.Component<Props, States> {
   constructor(props: Props) {
     super(props);
 
-    this.state = { messages: [], debug: "", browser: [] };
+    this.state = { messages: [], options: Setting.options, debug: "", browser: [] };
     Emit.on("messages:mode", this.onMode);
     Emit.on("messages:command", this.onCommand);
     Emit.on("messages:ruler", this.onRuler);
     Emit.on("messages:history", this.onHistory);
+    Emit.on("option:set", this.onOption);
     Emit.on("browser:update", this.browserUpdate);
   }
 
@@ -62,6 +64,7 @@ export class HistoryComponent extends React.Component<Props, States> {
     Emit.off("messages:command", this.onCommand);
     Emit.off("messages:ruler", this.onRuler);
     Emit.off("messages:history", this.onHistory);
+    Emit.off("option:set", this.onOption);
     Emit.off("browser:update", this.browserUpdate);
     Emit.off("debug", this.onDebug);
   }
@@ -84,6 +87,10 @@ export class HistoryComponent extends React.Component<Props, States> {
     setTimeout(() => this.bottom.current?.scrollIntoView({ behavior: "smooth" }));
   }
 
+  private onOption = (options: { [k: string]: boolean }) => {
+    this.setState({ options: { ...this.state.options, ...options } });
+  }
+
   private browserUpdate = (browser: { id: number, title: string, url: string, active: boolean }[]) => {
     this.setState({ browser });
   }
@@ -102,7 +109,7 @@ export class HistoryComponent extends React.Component<Props, States> {
   }
 
   private onMouseEnter = () => {
-    if (Setting.options.ext_messages && this.state.debug === "") {
+    if (this.state.options.ext_messages && this.state.debug === "") {
       Emit.send("envim:command", "messages");
       clearInterval(this.timer);
       this.timer = +setInterval(() => Emit.send("envim:command", "messages"), 500);
@@ -167,6 +174,13 @@ export class HistoryComponent extends React.Component<Props, States> {
           { this.state.command && <FlexComponent animate="fade-in" margin={["auto", 4]} rounded={[4]} shadow><MessageComponent message={this.state.command} open /></FlexComponent> }
           { this.state.ruler && <FlexComponent animate="fade-in" margin={["auto", 4]} rounded={[4]} shadow><MessageComponent message={this.state.ruler} open /></FlexComponent> }
           <div className="space" />
+          <MenuComponent color="gray-fg" style={{paddingRight: 4}} label="">
+            { ["ext_tabline", "ext_cmdline", "ext_messages", "ext_popupmenu", "ext_termcolors"].map(ext => (
+              <FlexComponent animate="hover" color="default" key={ext} onClick={() => Emit.send("envim:option", ext, !this.state.options[ext])}>
+                <input type="checkbox" value="command" checked={this.state.options[ext]} />{ ext }
+              </FlexComponent>
+            )) }
+          </MenuComponent>
           <MenuComponent color="blue-fg" style={{}} label="爵" onClick={() => this.openBrowser(-1)}>{ this.state.browser.map(this.renderBrowser) }</MenuComponent>
           <IconComponent color="green-fg" active={this.state.debug.length > 0} font="" onClick={this.toggleDebug} />
           <IconComponent color="red-fg" font="" onClick={this.onClear} />

@@ -12,6 +12,7 @@ interface Props {
 
 interface States {
   messages: IMessage[];
+  enabled: boolean;
 }
 
 const styles = {
@@ -29,13 +30,15 @@ const styles = {
 export class NotificateComponent extends React.Component<Props, States> {
   constructor(props: Props) {
     super(props);
+    this.state = { messages: [], enabled: false };
 
-    this.state = { messages: [] };
     Emit.on("messages:show", this.onShow);
+    Emit.on("option:set", this.onOption);
   }
 
   componentWillUnmount = () => {
     Emit.off("messages:show", this.onShow);
+    Emit.off("option:set", this.onOption);
   }
 
   private onShow = (messages: IMessage[], replace: boolean) => {
@@ -44,8 +47,12 @@ export class NotificateComponent extends React.Component<Props, States> {
     this.setState({ messages: [ ...this.state.messages, ...messages ] });
   }
 
+  private onOption = (options: { ext_tabline: boolean }) => {
+    this.setState({ enabled: options.ext_tabline });
+  }
+
   render() {
-    return this.state.messages.length === 0 ? null : (
+    return this.state.enabled && this.state.messages.length > 0 && (
       <FlexComponent direction="column" padding={[0, 4]} inset={["auto", 0, 0, "auto"]} position="absolute" style={styles.scope}>
         {this.state.messages.map((message, i) =>
           <FlexComponent animate="slide-right" margin={[4, 0]} rounded={[4]} style={styles.messages} key={i} shadow><MessageComponent message={message} open /></FlexComponent>

@@ -15,6 +15,7 @@ interface States {
   pos: number;
   prompt: string;
   indent: number;
+  enabled: boolean;
 }
 
 const styles = {
@@ -29,12 +30,13 @@ export class CmdlineComponent extends React.Component<Props, States> {
   constructor(props: Props) {
     super(props);
 
-    this.state = { cmdline: [], contents: [], pos: 0, prompt: "", indent: 0 };
+    this.state = { cmdline: [], contents: [], pos: 0, prompt: "", indent: 0, enabled: Setting.options.ext_cmdline };
     Emit.on("cmdline:show", this.onCmdline);
     Emit.on("cmdline:cursor", this.onCursor);
     Emit.on("cmdline:special", this.onSpecial);
     Emit.on("cmdline:blockshow", this.onBlock);
     Emit.on("cmdline:blockhide", this.offBlock);
+    Emit.on("option:set", this.onOption);
   }
 
   componentWillUnmount = () => {
@@ -43,6 +45,7 @@ export class CmdlineComponent extends React.Component<Props, States> {
     Emit.off("cmdline:special", this.onSpecial);
     Emit.off("cmdline:blockshow", this.onBlock);
     Emit.off("cmdline:blockhide", this.offBlock);
+    Emit.off("option:set", this.onOption);
   }
 
   private getPos(cmdline: States["cmdline"], pos: number) {
@@ -108,6 +111,10 @@ export class CmdlineComponent extends React.Component<Props, States> {
     this.setState({ contents: [], cmdline: [] });
   }
 
+  private onOption = (options: { ext_cmdline?: boolean }) => {
+    options.ext_cmdline === undefined || this.setState({ enabled: options.ext_cmdline });
+  }
+
   private getScopeStyle() {
     const { height } = Setting.font;
     return { padding: height, ...Highlights.style("0"), ...styles.scope };
@@ -122,7 +129,7 @@ export class CmdlineComponent extends React.Component<Props, States> {
   }
 
   render() {
-    return this.state.cmdline.length > 0 && (
+    return this.state.enabled && this.state.cmdline.length > 0 && (
       <FlexComponent animate="slide-down" position="absolute" whiteSpace="pre-wrap" rounded={[0, 0, 4, 4]} style={this.getScopeStyle()} shadow nomouse>
         <FlexComponent whiteSpace="pre-wrap" shrink={0}><div className="bold">{ this.state.prompt }</div></FlexComponent>
         <div>

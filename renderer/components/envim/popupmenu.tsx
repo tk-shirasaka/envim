@@ -18,6 +18,7 @@ interface States {
   col: number;
   height: number;
   zIndex: number;
+  enabled: boolean;
 }
 
 export class PopupmenuComponent extends React.Component<Props, States> {
@@ -27,10 +28,12 @@ export class PopupmenuComponent extends React.Component<Props, States> {
   constructor(props: Props) {
     super(props);
 
-    this.state = { items: [], selected: -1, clicked: false, row: 0, col: 0, height: 0, zIndex: 0 };
+    this.state = { items: [], selected: -1, clicked: false, row: 0, col: 0, height: 0, zIndex: 0, enabled:Setting.options.ext_popupmenu  };
+
     Emit.on("popupmenu:show", this.onPopupmenu);
     Emit.on("popupmenu:select", this.onSelect);
     Emit.on("popupmenu:hide", this.offPopupmenu);
+    Emit.on("option:set", this.onOption);
   }
 
   componentDidUpdate(_: Props, state: States) {
@@ -49,6 +52,7 @@ export class PopupmenuComponent extends React.Component<Props, States> {
     Emit.off("popupmenu:show", this.onPopupmenu);
     Emit.off("popupmenu:select", this.onSelect);
     Emit.off("popupmenu:hide", this.offPopupmenu);
+    Emit.off("option:set", this.onOption);
   }
 
   private onPopupmenu = (state: States) => {
@@ -68,6 +72,10 @@ export class PopupmenuComponent extends React.Component<Props, States> {
   private offPopupmenu = () => {
     this.setState({ items: [] });
     Emit.share("envim:drag", -1);
+  }
+
+  private onOption = (options: { ext_popupmenu: boolean }) => {
+    options.ext_popupmenu === undefined || this.setState({ enabled: options.ext_popupmenu });
   }
 
   private onItem(i: number) {
@@ -96,7 +104,7 @@ export class PopupmenuComponent extends React.Component<Props, States> {
   }
 
   render() {
-    return this.state.items.length === 0 ? null : (
+    return this.state.enabled && this.state.items.length > 0 && (
       <FlexComponent animate="fade-in" color="default" direction="column" position="absolute" overflow="auto" whiteSpace="pre-wrap" style={this.getScopeStyle()} shadow>
         <div ref={this.scope}></div>
         {this.state.items.map(({ word, kind, menu }, i) => (

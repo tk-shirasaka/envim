@@ -22,6 +22,7 @@ interface States {
   menus: IMenu[];
   bookmarks: { name: string; path: string; selected: boolean; }[];
   mode?: IMode;
+  enabled: boolean;
 }
 
 const styles = {
@@ -46,12 +47,13 @@ const styles = {
 export class TablineComponent extends React.Component<Props, States> {
   constructor(props: Props) {
     super(props);
-    this.state = { cwd: "", tabs: [], menus: [], bookmarks: Setting.bookmarks };
+    this.state = { cwd: "", tabs: [], menus: [], bookmarks: Setting.bookmarks, enabled : Setting.options.ext_tabline };
 
     Emit.on("envim:cwd", this.onCwd);
     Emit.on("tabline:update", this.onTabline);
     Emit.on("menu:update", this.onMenu);
     Emit.on("mode:change", this.changeMode);
+    Emit.on("option:set", this.onOption);
   }
 
   componentWillUnmount = () => {
@@ -59,6 +61,7 @@ export class TablineComponent extends React.Component<Props, States> {
     Emit.off("tabline:update", this.onTabline);
     Emit.off("menu:update", this.onMenu);
     Emit.off("mode:change", this.changeMode);
+    Emit.off("option:set", this.onOption);
   }
 
   private onCwd = (cwd: string) => {
@@ -112,6 +115,10 @@ export class TablineComponent extends React.Component<Props, States> {
 
   private changeMode = (mode: IMode) => {
     this.setState({ mode });
+  }
+
+  private onOption = (options: { ext_tabline: boolean }) => {
+    options.ext_tabline=== undefined || this.setState({ enabled: options.ext_tabline });
   }
 
   private renderTab(i: number, tab: ITab) {
@@ -186,7 +193,7 @@ export class TablineComponent extends React.Component<Props, States> {
   render() {
     return (
       <FlexComponent color="default" overflow="visible" style={this.props} shadow>
-        {this.state.tabs.map((tab, i) => this.renderTab(i, tab))}
+        {this.state.enabled && this.state.tabs.map((tab, i) => this.renderTab(i, tab))}
         <IconComponent color="green-fg" font="" style={styles.space} onClick={e => this.runCommand(e, "$tabnew")} />
         { this.renderBookmark() }
         <div className="space dragable" />
