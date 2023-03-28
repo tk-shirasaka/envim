@@ -3,6 +3,7 @@ import React from "react";
 import { IMessage } from "../../../common/interface";
 
 import { Emit } from "../../utils/emit";
+import { Setting } from "../../utils/setting";
 
 import { FlexComponent } from "../flex";
 import { MessageComponent } from "./message";
@@ -30,7 +31,7 @@ const styles = {
 export class NotificateComponent extends React.Component<Props, States> {
   constructor(props: Props) {
     super(props);
-    this.state = { messages: [], enabled: false };
+    this.state = { messages: [], enabled: Setting.options.ext_messages };
 
     Emit.on("messages:show", this.onShow);
     Emit.on("option:set", this.onOption);
@@ -47,8 +48,8 @@ export class NotificateComponent extends React.Component<Props, States> {
     this.setState({ messages: [ ...this.state.messages, ...messages ] });
   }
 
-  private onOption = (options: { ext_tabline: boolean }) => {
-    this.setState({ enabled: options.ext_tabline });
+  private onOption = (options: { ext_messages: boolean }) => {
+    options.ext_messages === undefined || this.setState({ enabled: options.ext_messages });
   }
 
   render() {

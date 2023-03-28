@@ -118,7 +118,7 @@ export class TablineComponent extends React.Component<Props, States> {
   }
 
   private onOption = (options: { ext_tabline: boolean }) => {
-    options.ext_tabline=== undefined || this.setState({ enabled: options.ext_tabline });
+    options.ext_tabline === undefined || this.setState({ enabled: options.ext_tabline });
   }
 
   private renderTab(i: number, tab: ITab) {

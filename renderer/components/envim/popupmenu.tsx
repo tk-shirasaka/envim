@@ -28,7 +28,7 @@ export class PopupmenuComponent extends React.Component<Props, States> {
   constructor(props: Props) {
     super(props);
 
-    this.state = { items: [], selected: -1, clicked: false, row: 0, col: 0, height: 0, zIndex: 0, enabled:Setting.options.ext_popupmenu  };
+    this.state = { items: [], selected: -1, clicked: false, row: 0, col: 0, height: 0, zIndex: 0, enabled: Setting.options.ext_popupmenu  };
 
     Emit.on("popupmenu:show", this.onPopupmenu);
     Emit.on("popupmenu:select", this.onSelect);
