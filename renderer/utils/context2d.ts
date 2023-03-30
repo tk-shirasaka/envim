@@ -20,6 +20,7 @@ export class Context2D {
     this.font = { size: size * scale, width: width * scale, height: height * scale };
     bgctx.lineWidth = scale;
     bgctx.textBaseline = "top";
+    bgctx.textAlign = "left";
   }
 
   private style(hl: string, type: "foreground" | "background" | "special") {

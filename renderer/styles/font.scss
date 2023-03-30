@@ -9,26 +9,16 @@
 }
 
 @font-face {
-  font-family: "Editor Regular";
-  src: url(fonts/EDITOR-Regular);
-}
-
-@font-face {
-  font-family: "Editor Bold";
-  src: url(fonts/EDITOR-Bold);
-}
-
-@font-face {
   font-family: "Icon";
   src: url(fonts/ICON-Regular);
 }
 
 body {
-  font-family: "Regular","Icon";
+  font-family: "Icon","Regular";
 }
 
 .bold {
-  font-family: "Bold","Icon" !important;
+  font-family: "Icon","Bold" !important;
 }
 
 .italic {
@@ -46,9 +36,14 @@ body {
 .small {
   font-size: 80%;
 }
+
+i {
+  font-style: normal;
+  min-width: 1em;
+}
+
 * {
   font-family: inherit;
-  font-style: normal;
   font-size: inherit;
   line-height: inherit;
   box-sizing: border-box;

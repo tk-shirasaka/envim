@@ -32,7 +32,7 @@ const styles = {
   },
   name: {
     maxWidth: 300,
-    padding: "0",
+    padding: 0,
   },
   menu: {
     padding: "2px 8px",
@@ -127,7 +127,7 @@ export class TablineComponent extends React.Component<Props, States> {
     return !icon ? null : (
       <FlexComponent key={i} animate="fade-in hover" color={icon.color} active={tab.active} title={tab.name} shrink={1} margin={[4, 4, 0, 0]} padding={[0, 0, 0, 8]} rounded={[4, 4, 0, 0]} shadow={tab.active} style={styles.tab} onClick={e => this.runCommand(e, `tabnext ${i + 1}`,)}>
         <IconComponent style={styles.name} font={icon.font} text={tab.name.replace(/.*\//, "…/")} />
-        <IconComponent color="gray-fg" style={styles.space} font="" onClick={e => this.runCommand(e, this.state.tabs.length > 1 ? `confirm tabclose ${i + 1}` : "confirm quitall")} hover />
+        <IconComponent color="gray-fg" font="" onClick={e => this.runCommand(e, this.state.tabs.length > 1 ? `confirm tabclose ${i + 1}` : "confirm quitall")} hover />
       </FlexComponent>
     );
   }
@@ -194,7 +194,7 @@ export class TablineComponent extends React.Component<Props, States> {
     return (
       <FlexComponent color="default" overflow="visible" style={this.props} shadow>
         {this.state.enabled && this.state.tabs.map((tab, i) => this.renderTab(i, tab))}
-        <IconComponent color="green-fg" font="" style={styles.space} onClick={e => this.runCommand(e, "$tabnew")} />
+        <IconComponent color="green-fg" font="" onClick={e => this.runCommand(e, "$tabnew")} />
         { this.renderBookmark() }
         <div className="space dragable" />
         { this.renderSubmenu(this.state.menus, []) }

@@ -58,15 +58,14 @@ class Highlight {
   }
 
   font(size: number) {
-    return `${this.fontStyle()} ${size}px ${this.fontFamily(true)}`;
+    return `${this.fontStyle()} ${size}px ${this.fontFamily()}`;
   }
 
-  fontFamily(editor: boolean) {
-    const prefix = editor ? "Editor " : "";
+  fontFamily() {
     return {
-      normal: `"${prefix}Regular","Icon"`,
-      bold: `"${prefix}Bold","Icon"`,
-      italic: `"${prefix}Regular","Icon"`
+      normal: `"Regular","Icon"`,
+      bold: `"Bold","Icon"`,
+      italic: `"Regular","Icon"`
     }[this.type];
   }
 
@@ -130,7 +129,7 @@ export class Highlights {
   }
 
   static fontFamily(id: string) {
-    return Cache.get<Highlight>(TYPE, id)?.fontFamily(false) || "";
+    return Cache.get<Highlight>(TYPE, id)?.fontFamily() || "";
   }
 
   static fontStyle(id: string) {
