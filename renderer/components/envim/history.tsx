@@ -37,7 +37,6 @@ const styles = {
   browser: {
     width: 300,
     maxWidth: "80vh",
-    overflow: "hidden",
     textOverflow: "ellipsis"
   },
 };
@@ -156,12 +155,10 @@ export class HistoryComponent extends React.Component<Props, States> {
     const icon = browser.url.search(/^https/) < 0 ? { color: "gray-fg", font: "" } : { color: "green-fg", font: "" };
 
     return (
-      <FlexComponent animate="hover" color="default" key={browser.id} active={browser.active} onClick={() => this.openBrowser(browser.id)}>
-        <div style={styles.browser}>
-          { browser.title }
-          <div className="small">{ <IconComponent { ...icon } text={browser.url.replace(/^https?:\/\/([^\/]+)\/.*$/, "$1")} /> }</div>
-        </div>
-        <IconComponent color="gray-fg" font="" onClick={(e) => this.closeBrowser(e, browser.id)} hover />
+      <FlexComponent key={browser.id} animate="hover" color="default" direction="column" active={browser.active} style={styles.browser} onClick={() => this.openBrowser(browser.id)}>
+        { browser.title }
+        <div className="small">{ <IconComponent { ...icon } text={browser.url.replace(/^https?:\/\/([^\/]+)\/.*$/, "$1")} /> }</div>
+        <IconComponent color="gray" font="" float="right" onClick={(e) => this.closeBrowser(e, browser.id)} hover />
       </FlexComponent>
     );
   }

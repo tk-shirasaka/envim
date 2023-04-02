@@ -27,12 +27,9 @@ interface States {
 
 const styles = {
   tab: {
-    minWidth: 0,
+    width: 150,
+    minWidth: "2rem",
     cursor: "pointer",
-  },
-  name: {
-    maxWidth: 300,
-    padding: 0,
   },
   menu: {
     padding: "2px 8px",
@@ -125,9 +122,9 @@ export class TablineComponent extends React.Component<Props, States> {
     const icon = icons.filter(icon => tab.filetype.search(icon.type) >= 0 || tab.buftype.search(icon.type) >= 0).shift();
 
     return !icon ? null : (
-      <FlexComponent key={i} animate="fade-in hover" color={icon.color} active={tab.active} title={tab.name} shrink={1} margin={[4, 4, 0, 0]} padding={[0, 0, 0, 8]} rounded={[4, 4, 0, 0]} shadow={tab.active} style={styles.tab} onClick={e => this.runCommand(e, `tabnext ${i + 1}`,)}>
-        <IconComponent style={styles.name} font={icon.font} text={tab.name.replace(/.*\//, "…/")} />
-        <IconComponent color="gray-fg" font="" onClick={e => this.runCommand(e, this.state.tabs.length > 1 ? `confirm tabclose ${i + 1}` : "confirm quitall")} hover />
+      <FlexComponent key={i} animate="fade-in hover" color={icon.color} active={tab.active} title={tab.name} shrink={1} margin={[4, 4, 0, 0]} padding={[0, 8]} rounded={[4, 4, 0, 0]} shadow={tab.active} style={styles.tab} onClick={e => this.runCommand(e, `tabnext ${i + 1}`,)}>
+        <IconComponent font={icon.font} text={tab.name.replace(/.*\//, "…/")} />
+        <IconComponent color="gray" font="" float="right" onClick={e => this.runCommand(e, this.state.tabs.length > 1 ? `confirm tabclose ${i + 1}` : "confirm quitall")} hover />
       </FlexComponent>
     );
   }
@@ -178,12 +175,10 @@ export class TablineComponent extends React.Component<Props, States> {
           </MenuComponent>
         ) }
         { bookmarks.filter(({ name }) => name.split("/").length === 1).map(({ name, path, selected }, i) =>
-          <FlexComponent animate="hover" color="default" active={selected} key={`${base}-${i}`} onClick={e => this.runCommand(e, `cd ${path}`)}>
-            <FlexComponent grow={1} direction="column" padding={[0, 8, 0, 0]}>
-              { name }
-              <div className="color-gray-fg small">{ path }</div>
-            </FlexComponent>
-            <IconComponent color="gray-fg" font="" onClick={e => this.deleteBookmark(e, path)} hover />
+          <FlexComponent animate="hover" color="default" direction="column" active={selected} key={`${base}-${i}`} onClick={e => this.runCommand(e, `cd ${path}`)}>
+            { name }
+            <div className="color-gray-fg small">{ path }</div>
+            <IconComponent color="gray" font="" float="right" onClick={e => this.deleteBookmark(e, path)} hover />
           </FlexComponent>
         ) }
       </>
