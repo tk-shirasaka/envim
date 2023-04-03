@@ -43,6 +43,10 @@ const styles = {
   icon: {
     margin: "0 6px",
   },
+  setting: {
+    height: "100%",
+    overflow: "auto",
+  },
   button: {
     marginTop: "1em",
     padding: ".5em 1em",
@@ -149,7 +153,7 @@ export class SettingComponent extends React.Component<Props, States> {
           <i className="color-lightblue-fg" style={styles.logo}></i>
         </div>
 
-        <div>
+        <div style={styles.setting}>
           <h3 className="bold">Neovim path</h3>
           <div>
             <label><input type="radio" value="command" checked={this.state.type === "command"} onChange={this.onToggleType} />Command</label>
