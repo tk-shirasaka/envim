@@ -44,6 +44,7 @@ const styles = {
     margin: "0 6px",
   },
   setting: {
+    padding: "1rem",
     height: "100%",
     overflow: "auto",
   },

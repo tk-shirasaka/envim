@@ -166,6 +166,7 @@ class Browser {
       case "x": return this.win.webContents.cut();
       case "z": return this.win.webContents.undo();
       case "y": return this.win.webContents.redo();
+      case "p": return this.win.webContents.print();
       case "r": return this.win.webContents.reloadIgnoringCache();
       case "i": return this.win.webContents.toggleDevTools();
       case "l": return this.onOpen(this.info.url);
