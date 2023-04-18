@@ -53,13 +53,16 @@ export class App {
       const preview: string[] = [];
 
       if (blob && ext) {
-        await Emit.share("envim:command", "setlocal modifiable modified");
-        await Emit.share("envim:api", "nvim_buf_set_lines", [0, 0, -1, true, [""]]);
-        await Emit.share("envim:command", "setlocal nomodifiable nomodified");
+        if (ext === "svg") {
+          ext = `${ext}+xml`;
+        } else {
+          await Emit.share("envim:command", "setlocal modifiable modified");
+          await Emit.share("envim:api", "nvim_buf_set_lines", [0, 0, -1, true, [""]]);
+          await Emit.share("envim:command", "setlocal nomodifiable nomodified");
+        }
 
         const base64 = Buf.from(blob.map(c => String.fromCharCode(c)).join(""), "ascii").toString("base64");
 
-        ext = ext === "svg" ? `${ext}+xml` : ext;
         preview.push(`data:image/${ext};base64,${base64}`)
       }
       Emit.send(`preview:${id}`, preview.join(""));
