@@ -1,3 +1,4 @@
+import { Buffer as Buf } from "node:buffer";
 import { NeovimClient } from "neovim";
 import { Response } from "neovim/lib/host";
 import { Tabpage, Buffer, Window } from "neovim/lib/api";
@@ -40,6 +41,28 @@ export class App {
       case "envim_dirchanged": return Autocmd.dirchanged(args[0]);
       case "envim_setbackground": return args[0] && Emit.share("envim:theme", args[0]);
       case "envim_openurl": return args[0] && Emit.share("browser:open", -1, args[0]);
+      case "envim_preview": return this.preview(args[0], args[1], args[2]);
+    }
+  }
+
+  private preview = async (winid: number, blob?: number[], ext?: string) => {
+    const grid = Grids.getByWinId(winid);
+
+    if (grid) {
+      const { id } = grid.getInfo();
+      const preview: string[] = [];
+
+      if (blob && ext) {
+        await Emit.share("envim:command", "setlocal modifiable modified");
+        await Emit.share("envim:api", "nvim_buf_set_lines", [0, 0, -1, true, [""]]);
+        await Emit.share("envim:command", "setlocal nomodifiable nomodified");
+
+        const base64 = Buf.from(blob.map(c => String.fromCharCode(c)).join(""), "ascii").toString("base64");
+
+        ext = ext === "svg" ? `${ext}+xml` : ext;
+        preview.push(`data:image/${ext};base64,${base64}`)
+      }
+      Emit.send(`preview:${id}`, preview.join(""));
     }
   }
 

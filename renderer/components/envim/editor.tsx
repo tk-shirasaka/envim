@@ -31,6 +31,7 @@ interface States {
   bufs: IBuffer[];
   nomouse: boolean;
   scrolling: number;
+  preview: string;
   scroll: {
     total: number;
     height: string;
@@ -64,9 +65,10 @@ export class EditorComponent extends React.Component<Props, States> {
     super(props);
 
     this.busy = Cache.get<boolean>(TYPE, "busy");
-    this.state = { bufs: Cache.get<IBuffer[]>(TYPE, "bufs") || [], nomouse: Cache.get<boolean>(TYPE, "nomouse"), scrolling: 0, scroll: { total: 0, height: "100%", transform: "" } };
+    this.state = { bufs: Cache.get<IBuffer[]>(TYPE, "bufs") || [], nomouse: Cache.get<boolean>(TYPE, "nomouse"), scrolling: 0, preview: "", scroll: { total: 0, height: "100%", transform: "" } };
     Emit.on(`clear:${this.props.grid}`, this.onClear);
     Emit.on(`flush:${this.props.grid}`, this.onFlush);
+    Emit.on(`preview:${this.props.grid}`, this.onPreview);
     Emit.on(`viewport:${this.props.grid}`, this.onViewport);
     Emit.on("envim:drag", this.onDrag);
     Emit.on("grid:busy", this.onBusy);
@@ -99,6 +101,7 @@ export class EditorComponent extends React.Component<Props, States> {
     Canvas.delete(grid);
     Emit.off(`clear:${this.props.grid}`, this.onClear);
     Emit.off(`flush:${this.props.grid}`, this.onFlush);
+    Emit.off(`preview:${this.props.grid}`, this.onPreview);
     Emit.off(`viewport:${this.props.grid}`, this.onViewport);
     Emit.off("envim:drag", this.onDrag);
     Emit.off("grid:busy", this.onBusy);
@@ -125,7 +128,7 @@ export class EditorComponent extends React.Component<Props, States> {
   private onMouseEvent(e: MouseEvent, action: string, button: string = "") {
     button = button || ["left", "middle", "right"][e.button] || "left";
 
-    const [col, row] = [ x2Col(e.nativeEvent.offsetX), y2Row(e.nativeEvent.offsetY) ];
+    const [col, row] = [ x2Col(e.nativeEvent.offsetX), y2Row(e.nativeEvent.offsetY - Setting.font.lspace) ];
     const modiffier = [];
     const skip = (button === "move" || action === "drag") && row === this.pointer.row && col === this.pointer.col;
     const grid = this.props.grid === 1 ? 0 : this.props.grid;
@@ -197,6 +200,10 @@ export class EditorComponent extends React.Component<Props, States> {
     flush.forEach(({ cells, scroll }) => Canvas.update(this.props.grid, cells, scroll));
   }
 
+  private onPreview = (preview: string) => {
+    this.setState({ preview })
+  }
+
   private onViewport = (top: number, bottom: number, total: number) => {
     const limit = this.props.style.height - row2Y(1);
     const height = Math.min(Math.floor((bottom - top) / total * 100), 100);
@@ -258,6 +265,7 @@ export class EditorComponent extends React.Component<Props, States> {
         <FlexComponent grow={1} nomouse>
           <canvas style={{ ...styles.canvas, transform: `scale(${1 / scale})` }} width={this.props.editor.width * scale} height={this.props.editor.height * scale} ref={this.canvas} />
         </FlexComponent>
+        { this.props.grid === 1 || !this.state.preview ? null : <img src={this.state.preview} /> }
         { this.props.grid === 1 || !this.props.focusable ? null : (
           <FlexComponent color="default-fg" direction="column" vertical="end" position="absolute" overflow="visible" border={[1]} inset={[0]} hover={this.state.scrolling === 0}>
             <FlexComponent color="default" overflow="visible" margin={[-1, -1, 0, 0]} padding={[0, 4]} rounded={[0, 0, 0, 4]} shadow

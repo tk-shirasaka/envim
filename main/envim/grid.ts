@@ -178,6 +178,10 @@ export class Grids {
     return Grids.grids[grid];
   }
 
+  static getByWinId(winid: number) {
+    return Object.values(Grids.grids).find(grid => grid.getInfo().winid === winid);
+  }
+
   static cursor(grid: number, row: number, col: number) {
     const cursor = Grids.get(grid).getCursorPos(row, col);
     const active = Grids.exist(Grids.active) ? Grids.get(Grids.active).getInfo() : null;
