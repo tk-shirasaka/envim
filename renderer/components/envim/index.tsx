@@ -159,11 +159,11 @@ export class EnvimComponent extends React.Component<Props, States> {
             { Object.values(this.state.grids).sort((a, b) => a.order - b.order).map(grid => (
               <EditorComponent key={grid.grid} editor={this.editor} { ...grid } />
             )) }
-            <CmdlineComponent />
             <PopupmenuComponent />
-            <NotificateComponent />
             <InputComponent />
           </FlexComponent>
+          <CmdlineComponent />
+          <NotificateComponent />
           <FlexComponent color="default" grow={1} shrink={1} shadow />
         </FlexComponent>
         <HistoryComponent {...this.footer} />

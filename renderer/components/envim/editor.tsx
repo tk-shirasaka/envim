@@ -133,6 +133,8 @@ export class EditorComponent extends React.Component<Props, States> {
     const skip = (button === "move" || action === "drag") && row === this.pointer.row && col === this.pointer.col;
     const grid = this.props.grid === 1 ? 0 : this.props.grid;
 
+    button === "wheel" || e.stopPropagation();
+    button === "wheel" || e.preventDefault();
     e.shiftKey && modiffier.push("S");
     e.ctrlKey && modiffier.push("C");
     e.altKey && modiffier.push("A");
