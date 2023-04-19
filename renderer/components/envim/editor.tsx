@@ -141,6 +141,7 @@ export class EditorComponent extends React.Component<Props, States> {
 
     this.pointer = { row, col };
     skip || Emit.send("envim:mouse", grid, button, action, modiffier.join("-"), row, col);
+    Emit.share("envim:focus");
   }
 
   private onMouseDown = (e: MouseEvent) => {
@@ -267,15 +268,15 @@ export class EditorComponent extends React.Component<Props, States> {
         <FlexComponent grow={1} nomouse>
           <canvas style={{ ...styles.canvas, transform: `scale(${1 / scale})` }} width={this.props.editor.width * scale} height={this.props.editor.height * scale} ref={this.canvas} />
         </FlexComponent>
-        { this.props.grid === 1 || !this.state.preview ? null : <img src={this.state.preview} /> }
+        { this.props.grid === 1 || !this.state.preview ? null : <object data={this.state.preview} /> }
         { this.props.grid === 1 || !this.props.focusable ? null : (
           <FlexComponent color="default-fg" direction="column" vertical="end" position="absolute" overflow="visible" border={[1]} inset={[0]} hover={this.state.scrolling === 0}>
             <FlexComponent color="default" overflow="visible" margin={[-1, -1, 0, 0]} padding={[0, 4]} rounded={[0, 0, 0, 4]} shadow
               onMouseDown={e => this.runCommand(e, "")}
             >
               { this.renderMenu("", { main: "edit", sub: "buffer "}) }
-              { this.renderMenu("", { main: "vnew", sub: "vsplit #"}) }
-              { this.renderMenu("", { main: "new", sub: "split #"}) }
+              { this.renderMenu("", { main: "vnew", sub: "vsplit #"}) }
+              { this.renderMenu("", { main: "new", sub: "split #"}) }
               <IconComponent color="gray-fg" font="" onClick={e => this.runCommand(e, "write")} />
               { this.renderMenu("", { main: "confirm quit", sub: "confirm bdelete "}) }
             </FlexComponent>

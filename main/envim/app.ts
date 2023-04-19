@@ -50,22 +50,30 @@ export class App {
 
     if (grid) {
       const { id } = grid.getInfo();
-      const preview: string[] = [];
+      const data: string[] = [];
+      const type: string[] = ["image", ""];
 
       if (blob && ext) {
-        if (ext === "svg") {
-          ext = `${ext}+xml`;
-        } else {
-          await Emit.share("envim:command", "setlocal modifiable modified");
-          await Emit.share("envim:api", "nvim_buf_set_lines", [0, 0, -1, true, [""]]);
-          await Emit.share("envim:command", "setlocal nomodifiable nomodified");
+        type[1] = ext;
+
+        switch (ext) {
+          case "svg":
+            type[1] = `${ext}+xml`;
+            break;
+          case "pdf":
+            type[0] = "application";
+          default:
+            await Emit.share("envim:command", "setlocal modifiable modified");
+            await Emit.share("envim:api", "nvim_buf_set_lines", [0, 0, -1, true, [""]]);
+            await Emit.share("envim:command", "setlocal nomodifiable nomodified");
+            break;
         }
 
         const base64 = Buf.from(blob.map(c => String.fromCharCode(c)).join(""), "ascii").toString("base64");
 
-        preview.push(`data:image/${ext};base64,${base64}`)
+        data.push(`data:${type.join("/")};base64,${base64}`)
       }
-      Emit.send(`preview:${id}`, preview.join(""));
+      Emit.send(`preview:${id}`, data.join(""));
     }
   }
 
