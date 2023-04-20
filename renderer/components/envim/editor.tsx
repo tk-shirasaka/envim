@@ -31,7 +31,7 @@ interface States {
   bufs: IBuffer[];
   nomouse: boolean;
   scrolling: number;
-  preview: string;
+  preview: { media: string; src: string; };
   scroll: {
     total: number;
     height: string;
@@ -65,7 +65,7 @@ export class EditorComponent extends React.Component<Props, States> {
     super(props);
 
     this.busy = Cache.get<boolean>(TYPE, "busy");
-    this.state = { bufs: Cache.get<IBuffer[]>(TYPE, "bufs") || [], nomouse: Cache.get<boolean>(TYPE, "nomouse"), scrolling: 0, preview: "", scroll: { total: 0, height: "100%", transform: "" } };
+    this.state = { bufs: Cache.get<IBuffer[]>(TYPE, "bufs") || [], nomouse: Cache.get<boolean>(TYPE, "nomouse"), scrolling: 0, preview: { media: "", src: "" }, scroll: { total: 0, height: "100%", transform: "" } };
     Emit.on(`clear:${this.props.grid}`, this.onClear);
     Emit.on(`flush:${this.props.grid}`, this.onFlush);
     Emit.on(`preview:${this.props.grid}`, this.onPreview);
@@ -203,8 +203,8 @@ export class EditorComponent extends React.Component<Props, States> {
     flush.forEach(({ cells, scroll }) => Canvas.update(this.props.grid, cells, scroll));
   }
 
-  private onPreview = (preview: string) => {
-    this.setState({ preview })
+  private onPreview = (media: string, src: string) => {
+    this.setState({ preview: { media, src } })
   }
 
   private onViewport = (top: number, bottom: number, total: number) => {
@@ -255,6 +255,15 @@ export class EditorComponent extends React.Component<Props, States> {
     );
   }
 
+  private renderPreview() {
+    switch (this.state.preview.media) {
+      case "image": return <img src={this.state.preview.src} />;
+      case "video": return <video src={this.state.preview.src} controls />;
+      case "application": return <object data={this.state.preview.src} />;
+      default: return null;
+    }
+  }
+
   render() {
     const { scale } = Setting.font;
 
@@ -268,7 +277,7 @@ export class EditorComponent extends React.Component<Props, States> {
         <FlexComponent grow={1} nomouse>
           <canvas style={{ ...styles.canvas, transform: `scale(${1 / scale})` }} width={this.props.editor.width * scale} height={this.props.editor.height * scale} ref={this.canvas} />
         </FlexComponent>
-        { this.props.grid === 1 || !this.state.preview ? null : <object data={this.state.preview} /> }
+        { this.props.grid === 1 || this.renderPreview() }
         { this.props.grid === 1 || !this.props.focusable ? null : (
           <FlexComponent color="default-fg" direction="column" vertical="end" position="absolute" overflow="visible" border={[1]} inset={[0]} hover={this.state.scrolling === 0}>
             <FlexComponent color="default" overflow="visible" margin={[-1, -1, 0, 0]} padding={[0, 4]} rounded={[0, 0, 0, 4]} shadow

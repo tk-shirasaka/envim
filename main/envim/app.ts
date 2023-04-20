@@ -41,39 +41,34 @@ export class App {
       case "envim_dirchanged": return Autocmd.dirchanged(args[0]);
       case "envim_setbackground": return args[0] && Emit.share("envim:theme", args[0]);
       case "envim_openurl": return args[0] && Emit.share("browser:open", -1, args[0]);
-      case "envim_preview": return this.preview(args[0], args[1], args[2]);
+      case "envim_preview": return this.preview(args[0], args[1], args[2], args[3]);
     }
   }
 
-  private preview = async (winid: number, blob?: number[], ext?: string) => {
+  private preview = async (winid: number, media?: string, blob?: number[], ext?: string) => {
     const grid = Grids.getByWinId(winid);
 
     if (grid) {
       const { id } = grid.getInfo();
-      const data: string[] = [];
-      const type: string[] = ["image", ""];
+      const src: string[] = [];
 
       if (blob && ext) {
-        type[1] = ext;
+        if (["mov"].indexOf(ext) >= 0) ext = "quicktime"
+        if (["wmv"].indexOf(ext) >= 0) ext = "x-ms-asf"
+        if (["avi"].indexOf(ext) >= 0) ext = "x-msvideo"
+        if (["svg"].indexOf(ext) >= 0) ext = "svg+xml"
 
-        switch (ext) {
-          case "svg":
-            type[1] = `${ext}+xml`;
-            break;
-          case "pdf":
-            type[0] = "application";
-          default:
-            await Emit.share("envim:command", "setlocal modifiable modified");
-            await Emit.share("envim:api", "nvim_buf_set_lines", [0, 0, -1, true, [""]]);
-            await Emit.share("envim:command", "setlocal nomodifiable nomodified");
-            break;
+        if (ext !== "svg") {
+          await Emit.share("envim:command", "setlocal modifiable modified");
+          await Emit.share("envim:api", "nvim_buf_set_lines", [0, 0, -1, true, [""]]);
+          await Emit.share("envim:command", "setlocal nomodifiable nomodified");
         }
 
         const base64 = Buf.from(blob.map(c => String.fromCharCode(c)).join(""), "ascii").toString("base64");
 
-        data.push(`data:${type.join("/")};base64,${base64}`)
+        src.push(`data:${media}/${ext};base64,${base64}`)
       }
-      Emit.send(`preview:${id}`, data.join(""));
+      Emit.send(`preview:${id}`, media, src.join(""));
     }
   }
 
