@@ -53,10 +53,7 @@ export class App {
       const src: string[] = [];
 
       if (blob && ext) {
-        if (["mov"].indexOf(ext) >= 0) ext = "quicktime"
-        if (["wmv"].indexOf(ext) >= 0) ext = "x-ms-asf"
-        if (["avi"].indexOf(ext) >= 0) ext = "x-msvideo"
-        if (["svg"].indexOf(ext) >= 0) ext = "svg+xml"
+        if ("svg" === ext) ext = "svg+xml"
 
         if (ext !== "svg") {
           await Emit.share("envim:command", "setlocal modifiable modified");
