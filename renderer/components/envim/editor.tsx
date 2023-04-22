@@ -6,7 +6,7 @@ import { Emit } from "../../utils/emit";
 import { Setting } from "../../utils/setting";
 import { Canvas } from "../../utils/canvas";
 import { Cache } from "../../utils/cache";
-import { y2Row, x2Col, row2Y } from "../../utils/size";
+import { y2Row, x2Col } from "../../utils/size";
 
 import { FlexComponent } from "../flex";
 import { IconComponent } from "../icon";
@@ -31,7 +31,7 @@ interface States {
   bufs: IBuffer[];
   nomouse: boolean;
   scrolling: number;
-  preview: { media: string; src: string; };
+  preview: { media: string; src: string; active: boolean; };
   scroll: {
     total: number;
     height: string;
@@ -65,7 +65,7 @@ export class EditorComponent extends React.Component<Props, States> {
     super(props);
 
     this.busy = Cache.get<boolean>(TYPE, "busy");
-    this.state = { bufs: Cache.get<IBuffer[]>(TYPE, "bufs") || [], nomouse: Cache.get<boolean>(TYPE, "nomouse"), scrolling: 0, preview: { media: "", src: "" }, scroll: { total: 0, height: "100%", transform: "" } };
+    this.state = { bufs: Cache.get<IBuffer[]>(TYPE, "bufs") || [], nomouse: Cache.get<boolean>(TYPE, "nomouse"), scrolling: 0, preview: { media: "", src: "", active: false }, scroll: { total: 0, height: "100%", transform: "" } };
     Emit.on(`clear:${this.props.grid}`, this.onClear);
     Emit.on(`flush:${this.props.grid}`, this.onFlush);
     Emit.on(`preview:${this.props.grid}`, this.onPreview);
@@ -204,11 +204,16 @@ export class EditorComponent extends React.Component<Props, States> {
   }
 
   private onPreview = (media: string, src: string) => {
-    this.setState({ preview: { media, src } })
+    this.setState({ preview: { media, src, active: src.length > 0 } });
+  }
+
+  private togglePreview = () => {
+    const preview = this.state.preview;
+    this.setState({ preview: { ...preview, active: !preview.active } });
   }
 
   private onViewport = (top: number, bottom: number, total: number) => {
-    const limit = this.props.style.height - row2Y(1);
+    const limit = this.props.style.height;
     const height = Math.min(Math.floor((bottom - top) / total * 100), 100);
     const scrolling = height === 100 ? this.state.scrolling: +setTimeout(() => {
       this.state.scrolling === scrolling && this.setState({ scrolling: 0 });
@@ -256,10 +261,10 @@ export class EditorComponent extends React.Component<Props, States> {
   }
 
   private renderPreview() {
-    switch (this.state.preview.media) {
-      case "image": return <img src={this.state.preview.src} />;
-      case "video": return <video src={this.state.preview.src} controls />;
-      case "application": return <object data={this.state.preview.src} />;
+    switch (this.state.preview.active && this.state.preview.media) {
+      case "image": return <img src={this.state.preview.src} onMouseDown={e => this.runCommand(e, "")}/>;
+      case "video": return <video src={this.state.preview.src} onMouseDown={e => this.runCommand(e, "")} controls />;
+      case "application": return <object data={this.state.preview.src} onMouseDown={e => this.runCommand(e, "")} />;
       default: return null;
     }
   }
@@ -279,22 +284,23 @@ export class EditorComponent extends React.Component<Props, States> {
         </FlexComponent>
         { this.props.grid === 1 || this.renderPreview() }
         { this.props.grid === 1 || !this.props.focusable ? null : (
-          <FlexComponent color="default-fg" direction="column" vertical="end" position="absolute" overflow="visible" border={[1]} inset={[0]} hover={this.state.scrolling === 0}>
-            <FlexComponent color="default" overflow="visible" margin={[-1, -1, 0, 0]} padding={[0, 4]} rounded={[0, 0, 0, 4]} shadow
+          <>
+            { this.state.scroll.height === "100%" && this.state.scrolling === 0 ? null : (
+              <FlexComponent color="default" grow={1} position="absolute" inset={[0, 0, 0, "auto"]} onMouseDown={this.onScroll} hover={this.state.scrolling === 0}>
+                <FlexComponent animate="fade-in" color="blue" border={[0, 2]} rounded={[2]} style={this.state.scroll} shadow nomouse></FlexComponent>
+              </FlexComponent>
+            )}
+            <FlexComponent color="default" position="absolute" overflow="visible" inset={["auto", 0, "auto", "auto"]} margin={[-1, -1, 0, 0]} padding={[0, 4]} rounded={[0, 0, 0, 4]} hover shadow
               onMouseDown={e => this.runCommand(e, "")}
             >
+              { this.state.preview.src && <IconComponent color="gray-fg" font="" onClick={this.togglePreview} /> }
               { this.renderMenu("", { main: "edit", sub: "buffer "}) }
               { this.renderMenu("", { main: "vnew", sub: "vsplit #"}) }
               { this.renderMenu("", { main: "new", sub: "split #"}) }
               <IconComponent color="gray-fg" font="" onClick={e => this.runCommand(e, "write")} />
               { this.renderMenu("", { main: "confirm quit", sub: "confirm bdelete "}) }
             </FlexComponent>
-            { this.state.scroll.height === "100%" && this.state.scrolling === 0 ? null : (
-              <FlexComponent color="default" grow={1} onMouseDown={this.onScroll}>
-                <FlexComponent animate="fade-in" color="blue" border={[0, 2]} rounded={[2]} style={this.state.scroll} shadow nomouse></FlexComponent>
-              </FlexComponent>
-            )}
-          </FlexComponent>
+          </>
         )}
       </FlexComponent>
     );

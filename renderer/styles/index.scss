@@ -25,11 +25,6 @@ img, video, object {
   &[src^="data:video"], &[data^="data:application"] {
     width: 100%;
     height: 100%;
-    z-index: 1;
-  }
-  &[src^="data:image"] {
-    padding: 4px;
-    pointer-events: none;
   }
 }
 

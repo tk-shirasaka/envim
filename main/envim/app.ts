@@ -41,31 +41,34 @@ export class App {
       case "envim_dirchanged": return Autocmd.dirchanged(args[0]);
       case "envim_setbackground": return args[0] && Emit.share("envim:theme", args[0]);
       case "envim_openurl": return args[0] && Emit.share("browser:open", -1, args[0]);
-      case "envim_preview": return this.preview(args[0], args[1], args[2], args[3]);
+      case "envim_preview": return this.preview(args[0], args[1]);
     }
   }
 
-  private preview = async (winid: number, media?: string, blob?: number[], ext?: string) => {
+  private preview = async (winid: number, base64?: string) => {
     const grid = Grids.getByWinId(winid);
 
     if (grid) {
       const { id } = grid.getInfo();
-      const src: string[] = [];
 
-      if (blob && ext) {
-        if ("svg" === ext) ext = "svg+xml"
+      if (base64 === undefined) {
+        const extmap: { [k: string]: string } = {svg: "svg+xml"}
+        const mediamap: { [k: string]: string } = {image: "(ico)|(png)|(jpg)|(jpeg)|(gif)|(svg)", video: "(mp4)|(webm)", application: "(pdf)"};
+        const ext = (await Emit.share("envim:api", "nvim_call_function", ["win_execute", [winid, "echo expand('%:e')"]]) || "").replace("\n", "");
+        const blob = await Emit.share("envim:api", "nvim_call_function", ["win_execute", [winid, "echo blob2list(readblob(expand('%')))"]]) || "[]";
+        const media = Object.keys(mediamap).find(key => ext.search(mediamap[key]) >= 0);
 
-        if (ext !== "svg") {
-          await Emit.share("envim:command", "setlocal modifiable modified");
-          await Emit.share("envim:api", "nvim_buf_set_lines", [0, 0, -1, true, [""]]);
-          await Emit.share("envim:command", "setlocal nomodifiable nomodified");
-        }
-
-        const base64 = Buf.from(blob.map(c => String.fromCharCode(c)).join(""), "ascii").toString("base64");
-
-        src.push(`data:${media}/${ext};base64,${base64}`)
+        base64 = Buf.from(JSON.parse(blob).map((c: string) => String.fromCharCode(+c)).join(""), "ascii").toString("base64");
+        base64 = `data:${media}/${extmap[ext] || ext};base64,${base64}`;
       }
-      Emit.send(`preview:${id}`, media, src.join(""));
+
+      const media = (base64 || "").match(/^data:([^\/]*)\//);
+
+      if (media) {
+        Emit.send(`preview:${id}`, media[1], base64);
+      } else {
+        Emit.send(`preview:${id}`, "", "");
+      }
     }
   }
 
