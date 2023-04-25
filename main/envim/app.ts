@@ -57,11 +57,14 @@ export class App {
         const extmap: { [k: string]: string } = {svg: "svg+xml"}
         const mediamap: { [k: string]: string } = {image: "(ico)|(png)|(jpg)|(jpeg)|(gif)|(svg)", video: "(mp4)|(webm)", application: "(pdf)"};
         const ext = (await Emit.share("envim:api", "nvim_call_function", ["win_execute", [winid, "echo expand('%:e')"]]) || "").replace("\n", "");
-        const blob = await Emit.share("envim:api", "nvim_call_function", ["win_execute", [winid, "echo blob2list(readblob(expand('%')))"]]) || "[]";
-        const media = Object.keys(mediamap).find(key => ext.search(mediamap[key]) >= 0);
 
-        base64 = Buf.from(JSON.parse(blob).map((c: string) => String.fromCharCode(+c)).join(""), "ascii").toString("base64");
-        base64 = `data:${media}/${extmap[ext] || ext};base64,${base64}`;
+        if (ext) {
+          const blob = await Emit.share("envim:api", "nvim_call_function", ["win_execute", [winid, "echo blob2list(readblob(expand('%')))"]]) || "[]";
+          const media = Object.keys(mediamap).find(key => ext.search(mediamap[key]) >= 0);
+
+          base64 = Buf.from(JSON.parse(blob).map((c: string) => String.fromCharCode(+c)).join(""), "ascii").toString("base64");
+          base64 = `data:${media}/${extmap[ext] || ext};base64,${base64}`;
+        }
       }
 
       const media = (base64 || "").match(/^data:([^\/]*)\//);
