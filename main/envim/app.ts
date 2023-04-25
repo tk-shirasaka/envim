@@ -45,7 +45,9 @@ export class App {
     }
   }
 
-  private preview = async (winid: number, base64?: string) => {
+  private preview = async (base64?: string, winid?: number) => {
+    winid = winid || await Emit.share("envim:api", "nvim_call_function", ["win_getid", []]) || -1;
+
     const grid = Grids.getByWinId(winid);
 
     if (grid) {
@@ -64,11 +66,7 @@ export class App {
 
       const media = (base64 || "").match(/^data:([^\/]*)\//);
 
-      if (media) {
-        Emit.send(`preview:${id}`, media[1], base64);
-      } else {
-        Emit.send(`preview:${id}`, "", "");
-      }
+      Emit.update(`preview:${id}`, false, media ? media[1] : "", base64 || "");
     }
   }
 
