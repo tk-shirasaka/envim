@@ -192,7 +192,7 @@ export class EditorComponent extends React.Component<Props, States> {
     const per = e.nativeEvent.offsetY / e.currentTarget.clientHeight;
     const line = Math.ceil(this.state.scroll.total * per);
 
-    this.runCommand(e, `${line}`);
+    this.runCommand(e, `${line} | redraw`);
   }
 
   private onClear = () => {
