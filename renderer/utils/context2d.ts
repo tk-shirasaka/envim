@@ -110,6 +110,7 @@ export class Context2D {
     const height = dheight * this.font.height || capture.height;
     this.bgctx.clearRect(dx * this.font.width, dy * this.font.height, width, height);
     this.bgctx.drawImage(capture, x * this.font.width, y * this.font.height, width, height, dx * this.font.width, dy * this.font.height, width, height);
+    this.queues.length || this.queues.push({});
   }
 
   private scroll(limit: number, scroll: IScroll) {
