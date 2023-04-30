@@ -105,10 +105,13 @@ export class App {
 
         /** ext_multigrid **/
         case "win_pos":
-          r.forEach(r => this.winPos(r[0], r[1], r[2], r[3], r[4], r[5], true, 3, false));
+          r.forEach(r => this.winPos(r[0], r[1], r[2], r[3], r[4], r[5], true, 3, "normal"));
         break;
         case "win_float_pos":
           r.forEach(r => this.winFloatPos(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7]));
+        break;
+        case "win_external_pos":
+          r.forEach(r => this.winExternalPos(r[0], r[1]));
         break;
         case "msg_set_pos":
           r.forEach(r => this.msgSetPos(r[0], r[1]));
@@ -260,7 +263,7 @@ export class App {
     Grids.get(grid).setScroll(top, bottom, left, right, rows, cols)
   }
 
-  private winPos(grid: number, win: Window | null, row: number, col: number, width: number, height: number, focusable: boolean, zIndex: number, floating: boolean) {
+  private winPos(grid: number, win: Window | null, row: number, col: number, width: number, height: number, focusable: boolean, zIndex: number, type: "normal" | "floating" | "external") {
     const winsize = Grids.get().getInfo();
     const current = Grids.get(grid);
     const winid = win ? win.id : 0;
@@ -271,7 +274,7 @@ export class App {
     row = Math.min(winsize.height - 1, Math.max(0, row - overheight));
     zIndex = grid === 1 ? 1 : zIndex;
 
-    const update = current.setInfo({ winid, x: col, y: row, width, height, zIndex, focusable, floating });
+    const update = current.setInfo({ winid, x: col, y: row, width, height, zIndex, focusable, type });
     Grids.setStatus(grid, "show", update);
 
     if (winsize.width < width || winsize.height < height) {
@@ -286,7 +289,16 @@ export class App {
     row = parent.y + (anchor[0] === "N" ? row : row - current.height);
     col = parent.x + (anchor[1] === "W" ? col : col - current.width);
 
-    this.winPos(grid, win, row, col, current.width, current.height, focusable, Math.max(zIndex, parent.zIndex + 4), true);
+    this.winPos(grid, win, row, col, current.width, current.height, focusable, Math.max(zIndex, parent.zIndex + 4), "floating");
+  }
+
+  private async winExternalPos(grid: number, win: Window) {
+    if (!await win.valid) return;
+
+    const width = await win.width;
+    const height = await win.height;
+
+    this.winPos(grid, win, 0, 0, width, height, true, 10000, "external");
   }
 
   private msgSetPos(grid: number, row: number) {
@@ -294,7 +306,7 @@ export class App {
     const width = winsize.width;
     const height = winsize.height - row;
 
-    this.winPos(grid, null, row, 0, width, height, false, 50, true);
+    this.winPos(grid, null, row, 0, width, height, false, 50, "floating");
   }
 
   private winHide(grid: number) {

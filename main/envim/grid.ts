@@ -12,7 +12,7 @@ class Grid {
   private ready: boolean = false;
 
   constructor(id: number, width :number, height: number) {
-    this.info = { id, winid: 0, x: 0, y: 0, width: 0, height: 0, zIndex: 1, focusable: true, floating: false, status: "show" };
+    this.info = { id, winid: 0, x: 0, y: 0, width: 0, height: 0, zIndex: 1, focusable: true, type: "normal", status: "show" };
     this.resize(width, height);
   }
 

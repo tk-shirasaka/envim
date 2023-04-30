@@ -7,7 +7,7 @@ export interface IWindow {
   height: number;
   zIndex: number;
   focusable: boolean;
-  floating: boolean;
+  type: "normal" | "floating" | "external";
   status: "show" | "hide" | "delete";
 }
 

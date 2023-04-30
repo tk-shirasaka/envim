@@ -29,7 +29,7 @@ interface States {
     winid: number;
     order: number;
     focusable: boolean;
-    lighten: boolean;
+    type: "normal" | "floating" | "external";
     style: {
       zIndex: number;
       width: number;
@@ -111,7 +111,7 @@ export class EnvimComponent extends React.Component<Props, States> {
     const grids = this.state.grids;
     const nextOrder = Object.values(grids).reduce((order, grid) => Math.max(order, grid.order), 1);
 
-    wins.reverse().forEach(({ id, winid, x, y, width, height, zIndex, focusable, floating, status }, i) => {
+    wins.reverse().forEach(({ id, winid, x, y, width, height, zIndex, focusable, type, status }, i) => {
       const curr = grids[id]?.style || {};
       const order = grids[id]?.order || i + nextOrder;
       const next = {
@@ -127,7 +127,7 @@ export class EnvimComponent extends React.Component<Props, States> {
         delete(grids[id]);
       } else if (JSON.stringify(curr) !== JSON.stringify(next)) {
         this.refresh = this.refresh || (zIndex < 5 && (curr.width !== next.width || curr.height !== next.height));
-        grids[id] = { grid: id, winid, order, focusable, lighten: !floating, style: next };
+        grids[id] = { grid: id, winid, order, focusable, type, style: next };
       }
     });
 

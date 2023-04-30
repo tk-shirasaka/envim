@@ -16,7 +16,7 @@ interface Props {
   grid: number;
   winid: number;
   focusable: boolean;
-  lighten: boolean
+  type: "normal" | "floating" | "external";
   editor: { width: number; height: number; };
   style: {
     zIndex: number;
@@ -80,7 +80,7 @@ export class EditorComponent extends React.Component<Props, States> {
     const ctx = this.canvas.current?.getContext("2d");
 
     if (this.canvas.current && ctx) {
-      Canvas.set(this.props.grid, this.canvas.current, ctx, this.props.lighten);
+      Canvas.set(this.props.grid, this.canvas.current, ctx, this.props.type === "normal");
       Canvas.clear(this.props.grid, x2Col(this.props.style.width), y2Row(this.props.style.height));
       Emit.send("envim:ready", this.props.grid);
     }
@@ -212,6 +212,20 @@ export class EditorComponent extends React.Component<Props, States> {
     this.setState({ preview: { ...preview, active: !preview.active } });
   }
 
+  private openExtWindow = (e: MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+
+    const minimize = this.props.type === "external" && y2Row(this.props.style.height) > 1;
+    const args = {
+      external: true,
+      width: minimize ? 9 : x2Col(this.props.editor.width),
+      height: minimize ? 1 : y2Row(this.props.editor.height),
+    };
+
+    Emit.send("envim:api", "nvim_win_set_config", [this.props.winid, args]);
+  }
+
   private onViewport = (top: number, bottom: number, total: number) => {
     const limit = this.props.style.height;
     const height = Math.min(Math.floor((bottom - top) / total * 100), 100);
@@ -294,11 +308,14 @@ export class EditorComponent extends React.Component<Props, States> {
               onMouseDown={e => this.runCommand(e, "")}
             >
               { this.state.preview.src && <IconComponent color="gray-fg" font="" onClick={this.togglePreview} /> }
-              { this.renderMenu("", { main: "edit", sub: "buffer "}) }
-              { this.renderMenu("", { main: "vnew", sub: "vsplit #"}) }
-              { this.renderMenu("", { main: "new", sub: "split #"}) }
-              <IconComponent color="gray-fg" font="" onClick={e => this.runCommand(e, "write")} />
-              { this.renderMenu("", { main: "confirm quit", sub: "confirm bdelete "}) }
+              { this.props.type === "normal" && this.renderMenu("", { main: "edit", sub: "buffer "}) }
+              { this.props.type === "normal" && this.renderMenu("", { main: "vnew", sub: "vsplit #"}) }
+              { this.props.type === "normal" && this.renderMenu("", { main: "new", sub: "split #"}) }
+              { this.props.type === "normal" && <IconComponent color="gray-fg" font="󰶭" onClick={this.openExtWindow} /> }
+              { this.props.type === "external" && <IconComponent color="gray-fg" font="󰶮" onClick={e => this.runCommand(e, "wincmd H")} /> }
+              { this.props.type === "external" && <IconComponent color="gray-fg" font={y2Row(this.props.style.height) === 1 ? "󰖯" : "󰖰"} onClick={this.openExtWindow} /> }
+              { this.props.type === "normal" && <IconComponent color="gray-fg" font="" onClick={e => this.runCommand(e, "write")} /> }
+              { this.props.type === "normal" ? this.renderMenu("", { main: "confirm quit", sub: "confirm bdelete "}) : <IconComponent color="gray-fg" font="" onClick={e => this.runCommand(e, "confirm quit")} /> }
             </FlexComponent>
           </>
         )}
