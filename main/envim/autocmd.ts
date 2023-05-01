@@ -8,6 +8,7 @@ export class Autocmd {
     Emit.share("envim:command", "  autocmd BufHidden,BufDelete *.ico,*.png,*.jpg,*.jpeg,*.gif,*.svg,*.mp4*,.webm,*.pdf call EnvimConnect(0, 'envim_preview', '')");
     Emit.share("envim:command", "  autocmd DirChanged * call EnvimConnect(0, 'envim_dirchanged', getcwd())");
     Emit.share("envim:command", "  autocmd OptionSet background call EnvimConnect(0, 'envim_setbackground', &background)");
+    Emit.share("envim:command", "  autocmd TabLeave * silent echo nvim_win_get_config(0).external && execute('wincmd j')");
     Emit.share("envim:command", "augroup END");
   }
 
