@@ -14,8 +14,9 @@ interface Props {
   onMouseUp?: (e: MouseEvent) => void;
   onMouseEnter?: (e: MouseEvent) => void;
   onMouseLeave?: (e: MouseEvent) => void;
+  onDragStart?: (e: MouseEvent) => void;
+  onDragEnd?: (e: MouseEvent) => void;
   onWheel?: (e: WheelEvent) => void;
-  onTransitionEnd?: () => void;
 
   direction?: "row" | "column" | "row-reverse" | "column-reverse";
   shadow?: boolean;
@@ -93,9 +94,11 @@ export class FlexComponent extends React.Component<PropsWithChildren<Props>, Sta
         onMouseUp={this.props.onMouseUp}
         onMouseEnter={this.props.onMouseEnter}
         onMouseLeave={this.props.onMouseLeave}
+        onDragStart={this.props.onDragStart}
+        onDragEnd={this.props.onDragEnd}
         onWheel={this.props.onWheel}
-        onTransitionEnd={this.props.onTransitionEnd}
         style={this.getStyle()}
+        draggable={!!(this.props.onDragStart && this.props.onDragEnd)}
       >
         { this.props.children }
       </div>

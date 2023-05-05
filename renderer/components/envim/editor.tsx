@@ -30,6 +30,7 @@ interface Props {
 interface States {
   bufs: IBuffer[];
   nomouse: boolean;
+  dragging: boolean;
   scrolling: number;
   preview: { media: string; src: string; active: boolean; };
   scroll: {
@@ -58,6 +59,7 @@ export class EditorComponent extends React.Component<Props, States> {
   private drag: boolean = false;
   private busy: boolean = false;
   private pointer: { row: number; col: number } = { row: 0, col: 0 };
+  private dragging: { x: number; y: number } = { x: 0, y: 0 };
   private delta: { x: number; y: number } = { x: 0, y: 0 };
   private capture?: HTMLCanvasElement;
 
@@ -65,7 +67,7 @@ export class EditorComponent extends React.Component<Props, States> {
     super(props);
 
     this.busy = Cache.get<boolean>(TYPE, "busy");
-    this.state = { bufs: Cache.get<IBuffer[]>(TYPE, "bufs") || [], nomouse: Cache.get<boolean>(TYPE, "nomouse"), scrolling: 0, preview: { media: "", src: "", active: false }, scroll: { total: 0, height: "100%", transform: "" } };
+    this.state = { bufs: Cache.get<IBuffer[]>(TYPE, "bufs") || [], nomouse: Cache.get<boolean>(TYPE, "nomouse"), dragging: false, scrolling: 0, preview: { media: "", src: "", active: false }, scroll: { total: 0, height: "100%", transform: "" } };
     Emit.on(`clear:${this.props.grid}`, this.onClear);
     Emit.on(`flush:${this.props.grid}`, this.onFlush);
     Emit.on(`preview:${this.props.grid}`, this.onPreview);
@@ -171,6 +173,28 @@ export class EditorComponent extends React.Component<Props, States> {
     this.onMouseEvent(e, "release");
   }
 
+  private onDragStart = (e: MouseEvent) => {
+    this.dragging = { x: e.clientX, y: e.clientY };
+  }
+
+  private onDragEnd = (e: MouseEvent) => {
+    const match = this.props.style.transform.match(/^translate\((\d+)px, (\d+)px\)$/);
+
+    if (match) {
+      const offset = { x: +match[1] + e.clientX - this.dragging.x, y: +match[2] + e.clientY - this.dragging.y };
+      const resize = {
+        width: Math.min(this.props.editor.width - offset.x, this.props.style.width + Math.min(0, offset.x)),
+        height: Math.min(this.props.editor.height - offset.y, this.props.style.height + Math.min(0, offset.y)),
+      };
+
+      this.dragging = { x: 0, y: 0 };
+      this.setState({ dragging: false });
+
+      Emit.send("envim:position", this.props.grid, x2Col(Math.max(0, offset.x)), y2Row(Math.max(0, offset.y)));
+      Emit.send("envim:resize", this.props.grid, x2Col(resize.width), y2Row(resize.height));
+    }
+  }
+
   private onWheel = (e: WheelEvent) => {
     this.delta.x = this.delta.x * e.deltaX >= 0 ? this.delta.x + e.deltaX : 0;
     this.delta.y = this.delta.y * e.deltaY >= 0 ? this.delta.y + e.deltaY : 0;
@@ -224,6 +248,13 @@ export class EditorComponent extends React.Component<Props, States> {
     };
 
     Emit.send("envim:api", "nvim_win_set_config", [this.props.winid, args]);
+  }
+
+  private dragExtWIndow = (e: MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+
+    this.setState({ dragging: !this.state.dragging });
   }
 
   private onViewport = (top: number, bottom: number, total: number) => {
@@ -288,10 +319,12 @@ export class EditorComponent extends React.Component<Props, States> {
 
     return (
       <FlexComponent animate="fade-in hover" position="absolute" overflow="visible" nomouse={this.state.nomouse} style={this.props.style} shadow
-        onMouseDown={this.onMouseDown}
-        onMouseMove={this.onMouseMove}
-        onMouseUp={this.onMouseUp}
-        onWheel={this.onWheel}
+        onMouseDown={this.state.dragging ? undefined : this.onMouseDown}
+        onMouseMove={this.state.dragging ? undefined : this.onMouseMove}
+        onMouseUp={this.state.dragging ? undefined : this.onMouseUp}
+        onWheel={this.state.dragging ? undefined : this.onWheel}
+        onDragStart={this.state.dragging ? this.onDragStart : undefined}
+        onDragEnd={this.state.dragging ? this.onDragEnd : undefined}
       >
         <FlexComponent grow={1} nomouse>
           <canvas style={{ ...styles.canvas, transform: `scale(${1 / scale})` }} width={this.props.editor.width * scale} height={this.props.editor.height * scale} ref={this.canvas} />
@@ -312,6 +345,7 @@ export class EditorComponent extends React.Component<Props, States> {
               { this.props.type === "normal" && this.renderMenu("", { main: "vnew", sub: "vsplit #"}) }
               { this.props.type === "normal" && this.renderMenu("", { main: "new", sub: "split #"}) }
               { this.props.type === "normal" && <IconComponent color="gray-fg" font="󰶭" onClick={this.openExtWindow} /> }
+              { this.props.type === "external" && <IconComponent color="gray-fg" font="󰮐" active={this.state.dragging} onClick={this.dragExtWIndow} /> }
               { this.props.type === "external" && <IconComponent color="gray-fg" font="󰶮" onClick={e => this.runCommand(e, "wincmd H")} /> }
               { this.props.type === "external" && <IconComponent color="gray-fg" font={y2Row(this.props.style.height) === 1 ? "󰖯" : "󰖰"} onClick={this.openExtWindow} /> }
               { this.props.type === "normal" && <IconComponent color="gray-fg" font="" onClick={e => this.runCommand(e, "write")} /> }

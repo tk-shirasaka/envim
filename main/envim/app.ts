@@ -295,10 +295,11 @@ export class App {
   private async winExternalPos(grid: number, win: Window) {
     if (!await win.valid) return;
 
+    const { x, y } = Grids.get(grid).getInfo();
     const width = await win.width;
     const height = await win.height;
 
-    this.winPos(grid, win, 0, 0, width, height, true, 10000, "external");
+    this.winPos(grid, win, y, x, width, height, true, 10000, "external");
   }
 
   private msgSetPos(grid: number, row: number) {

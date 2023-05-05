@@ -16,6 +16,7 @@ export class Envim {
     Emit.on("envim:connect", this.onConnect);
     Emit.on("envim:attach", this.onAttach);
     Emit.on("envim:resize", this.onResize);
+    Emit.on("envim:position", this.onPosition);
     Emit.on("envim:option", this.onOption);
     Emit.on("envim:api", this.onApi);
     Emit.on("envim:mouse", this.onMouse);
@@ -67,6 +68,12 @@ export class Envim {
 
   private onResize = (grid: number, width: number, height: number) => {
     grid ? this.nvim.uiTryResizeGrid(grid, width, height) : this.nvim.uiTryResize(width, height);
+  }
+
+  private onPosition = (grid: number, x: number, y: number) => {
+    Grids.get(grid).setInfo({ x, y });
+    Grids.setStatus(grid, "show", true);
+    Grids.flush();
   }
 
   private onOption = async (name: string, value: boolean) => {
