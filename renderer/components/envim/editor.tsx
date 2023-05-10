@@ -18,6 +18,7 @@ interface Props {
   focusable: boolean;
   type: "normal" | "floating" | "external";
   editor: { width: number; height: number; };
+  mousemoveevent: boolean;
   style: {
     zIndex: number;
     width: number;
@@ -158,7 +159,7 @@ export class EditorComponent extends React.Component<Props, States> {
   }
 
   private onMouseMove = (e: MouseEvent) => {
-    if (!this.drag && this.busy) return;
+    if (!(this.drag || this.props.mousemoveevent) || this.busy) return;
 
     this.onMouseEvent(e, "drag", this.drag ? "" : "move");
   }
@@ -190,6 +191,7 @@ export class EditorComponent extends React.Component<Props, States> {
       this.dragging = { x: 0, y: 0 };
       this.setState({ dragging: false });
 
+      Emit.share("envim:drag", -1);
       Emit.send("envim:position", this.props.grid, x2Col(Math.max(0, offset.x)), y2Row(Math.max(0, offset.y)));
       Emit.send("envim:resize", this.props.grid, x2Col(resize.width), y2Row(resize.height));
     }
@@ -254,7 +256,8 @@ export class EditorComponent extends React.Component<Props, States> {
     e.stopPropagation();
     e.preventDefault();
 
-    this.setState({ dragging: !this.state.dragging });
+    this.setState({ dragging: true });
+    Emit.share("envim:drag", this.props.grid);
   }
 
   private onViewport = (top: number, bottom: number, total: number) => {
@@ -275,6 +278,7 @@ export class EditorComponent extends React.Component<Props, States> {
     const nomouse = [-1, this.props.grid].indexOf(grid) < 0;
 
     this.setState({ nomouse });
+    grid === -1 && this.setState({ dragging: false });
     Cache.set<boolean>(TYPE, "nomouse", grid >= 0);
   }
 

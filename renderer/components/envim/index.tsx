@@ -24,6 +24,7 @@ interface Props {
 
 interface States {
   pause: boolean;
+  mousemoveevent: boolean;
   grids: { [k: string]: {
     grid: number;
     winid: number;
@@ -59,7 +60,7 @@ export class EnvimComponent extends React.Component<Props, States> {
     super(props);
 
     this.setSize();
-    this.state = { pause: false, grids: {} };
+    this.state = { pause: false, mousemoveevent: false, grids: {} };
     Emit.on("highlight:set", this.onHighlight);
     Emit.on("win:pos", this.onWin);
     Emit.on("option:set", this.onOption);
@@ -138,6 +139,7 @@ export class EnvimComponent extends React.Component<Props, States> {
 
   private onOption = (options: { [k: string]: boolean }) => {
     Setting.options = options;
+    "mousemoveevent" in options && this.setState({ mousemoveevent: options.mousemoveevent });
   }
 
   private onPause = (pause: boolean) => {
@@ -157,7 +159,7 @@ export class EnvimComponent extends React.Component<Props, States> {
           <FlexComponent color="default" grow={1} shrink={1} shadow />
           <FlexComponent style={this.editor}>
             { Object.values(this.state.grids).sort((a, b) => a.order - b.order).map(grid => (
-              <EditorComponent key={grid.grid} editor={this.editor} { ...grid } />
+              <EditorComponent key={grid.grid} editor={this.editor} mousemoveevent={this.state.mousemoveevent} { ...grid } />
             )) }
             <PopupmenuComponent />
             <InputComponent />
