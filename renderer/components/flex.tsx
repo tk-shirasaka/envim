@@ -35,6 +35,7 @@ interface Props {
   wordBreak?: "break-all";
   whiteSpace?: "nowrap" | "pre-wrap";
   nomouse?: boolean;
+  zIndex?: number;
   style?: Object;
 }
 
@@ -79,6 +80,7 @@ export class FlexComponent extends React.Component<PropsWithChildren<Props>, Sta
       wordBreak: this.props.wordBreak || "break-all",
       whiteSpace: this.props.whiteSpace || "nowrap",
       ...( props.nomouse ? { pointerEvents: "none" as "none" } : {} ),
+      ...( props.zIndex !== undefined ? { zIndex: props.zIndex } : {} ),
       ...( props.style || {} )
     };
   }

@@ -43,7 +43,6 @@ interface States {
 
 const styles = {
   backdrop: {
-    zIndex: 100,
     opacity: 0.2,
     cursor: "wait",
   }
@@ -52,7 +51,7 @@ const styles = {
 export class EnvimComponent extends React.Component<Props, States> {
   private refresh: boolean = false;
   private main: { fontSize: number; lineHeight: string; } = { fontSize: 0, lineHeight: "" };
-  private editor: { width: number; height: number; zIndex: number } = { width: 0, height: 0, zIndex: 0 };
+  private editor: { width: number; height: number } = { width: 0, height: 0 };
   private header: { width: number; height: number; padding: string } = { width: 0, height: 0, padding: "" };
   private footer: { width: number; height: number; } = { width: 0, height: 0 };
 
@@ -96,10 +95,9 @@ export class EnvimComponent extends React.Component<Props, States> {
     };
     this.editor = {
       width: col2X(x2Col(this.props.width) - 2),
-      height: row2Y(y2Row(this.props.height - this.header.height - font.height - 4)),
-      zIndex: 0,
+      height: row2Y(y2Row(this.props.height - this.header.height - font.height - 4) - 1),
     };
-    this.footer = { width: this.props.width, height: this.props.height - this.header.height - this.editor.height };
+    this.footer = { width: this.props.width, height: this.props.height - this.header.height - this.editor.height - font.height };
   }
 
   private onHighlight = (highlights: {id: string, ui: boolean, hl: IHighlight}[]) => {
@@ -155,22 +153,25 @@ export class EnvimComponent extends React.Component<Props, States> {
     return (
       <div style={this.main} onMouseUp={this.onMouseUp}>
         <TablineComponent {...this.header} />
-        <FlexComponent>
-          <FlexComponent color="default" grow={1} shrink={1} shadow />
-          <FlexComponent style={this.editor}>
-            { Object.values(this.state.grids).sort((a, b) => a.order - b.order).map(grid => (
-              <EditorComponent key={grid.grid} editor={this.editor} mousemoveevent={this.state.mousemoveevent} { ...grid } />
-            )) }
-            <PopupmenuComponent />
-            <InputComponent />
+        <FlexComponent zIndex={0}>
+          <FlexComponent color="default" zIndex={-1} grow={1} shrink={1} />
+          <FlexComponent zIndex={0} direction="column" overflow="visible">
+            <div className="color-default" style={{height: Setting.font.height}} />
+            <FlexComponent overflow="visible" style={this.editor}>
+              { Object.values(this.state.grids).sort((a, b) => a.order - b.order).map(grid => (
+                <EditorComponent key={grid.grid} editor={this.editor} mousemoveevent={this.state.mousemoveevent} { ...grid } />
+              )) }
+              <PopupmenuComponent />
+              <InputComponent />
+            </FlexComponent>
           </FlexComponent>
           <CmdlineComponent />
           <NotificateComponent />
-          <FlexComponent color="default" grow={1} shrink={1} shadow />
+          <FlexComponent color="default" zIndex={-1} grow={1} shrink={1} />
         </FlexComponent>
         <HistoryComponent {...this.footer} />
         { this.state.pause && (
-          <FlexComponent direction="column" horizontal="center" vertical="center" color="default" position="absolute" inset={[0]} style={styles.backdrop}>
+          <FlexComponent direction="column" horizontal="center" vertical="center" color="default" position="absolute" zIndex={100} inset={[0]} style={styles.backdrop}>
             <div className="animate loading" />
           </FlexComponent>
         ) }

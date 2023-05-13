@@ -193,7 +193,7 @@ export class EditorComponent extends React.Component<Props, States> {
 
       Emit.share("envim:drag", -1);
       Emit.send("envim:position", this.props.grid, x2Col(Math.max(0, offset.x)), y2Row(Math.max(0, offset.y)));
-      Emit.send("envim:resize", this.props.grid, x2Col(resize.width), y2Row(resize.height));
+      Emit.send("envim:resize", this.props.grid, Math.max(x2Col(resize.width), 18), y2Row(resize.height));
     }
   }
 
@@ -245,7 +245,7 @@ export class EditorComponent extends React.Component<Props, States> {
     const minimize = this.props.type === "external" && y2Row(this.props.style.height) > 1;
     const args = {
       external: true,
-      width: minimize ? 9 : x2Col(this.props.editor.width),
+      width: minimize ? 18 : x2Col(this.props.editor.width),
       height: minimize ? 1 : y2Row(this.props.editor.height),
     };
 
@@ -263,13 +263,13 @@ export class EditorComponent extends React.Component<Props, States> {
   private onViewport = (top: number, bottom: number, total: number) => {
     const limit = this.props.style.height;
     const height = Math.min(Math.floor((bottom - top) / total * 100), 100);
-    const scrolling = height === 100 ? this.state.scrolling: +setTimeout(() => {
+    const scrolling = height === 100 ? this.state.scrolling : +setTimeout(() => {
       this.state.scrolling === scrolling && this.setState({ scrolling: 0 });
     }, 500);
 
     this.setState({ scrolling, scroll: {
       total,
-      height: height ? `${height}%` : "4px",
+      height: height ? `${height === 100 ? 0 : height}%` : "4px",
       transform: `translateY(${Math.min(Math.floor(top / total * limit), limit - 4)}px)`,
     }});
   }
@@ -319,7 +319,7 @@ export class EditorComponent extends React.Component<Props, States> {
   }
 
   render() {
-    const { scale } = Setting.font;
+    const { height, scale } = Setting.font;
 
     return (
       <FlexComponent animate="fade-in hover" position="absolute" overflow="visible" nomouse={this.state.nomouse} style={this.props.style} shadow
@@ -336,12 +336,10 @@ export class EditorComponent extends React.Component<Props, States> {
         { this.props.grid === 1 || this.renderPreview() }
         { this.props.grid === 1 || !this.props.focusable ? null : (
           <>
-            { this.state.scroll.height === "100%" && this.state.scrolling === 0 ? null : (
-              <FlexComponent color="default" grow={1} position="absolute" inset={[0, 0, 0, "auto"]} onMouseDown={this.onScroll} hover={this.state.scrolling === 0}>
-                <FlexComponent animate="fade-in" color="blue" border={[0, 2]} rounded={[2]} style={this.state.scroll} shadow nomouse></FlexComponent>
-              </FlexComponent>
-            )}
-            <FlexComponent color="default" position="absolute" overflow="visible" inset={["auto", 0, "auto", "auto"]} margin={[-1, -1, 0, 0]} padding={[0, 4]} rounded={[0, 0, 0, 4]} hover shadow
+            <FlexComponent color="default" grow={1} position="absolute" inset={[0, -4, 0, "auto"]} onMouseDown={this.onScroll} hover={this.state.scrolling === 0}>
+              <FlexComponent animate="fade-in" color="blue" border={[0, 2]} rounded={[2]} style={this.state.scroll} shadow nomouse></FlexComponent>
+            </FlexComponent>
+            <FlexComponent color="default" position="absolute" overflow="visible" inset={[-height, -4, "auto", "auto"]} padding={[0, 4]} rounded={[4, 4, 0, 0]} hover
               onMouseDown={e => this.runCommand(e, "")}
             >
               { this.state.preview.src && <IconComponent color="gray-fg" font="" onClick={this.togglePreview} /> }

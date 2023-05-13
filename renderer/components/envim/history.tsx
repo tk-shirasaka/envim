@@ -43,7 +43,6 @@ const styles = {
 
 export class HistoryComponent extends React.Component<Props, States> {
   private bottom: RefObject<HTMLDivElement> = createRef<HTMLDivElement>();
-  private timer: number = 0;
 
   constructor(props: Props) {
     super(props);
@@ -58,7 +57,6 @@ export class HistoryComponent extends React.Component<Props, States> {
   }
 
   componentWillUnmount = () => {
-    clearInterval(this.timer);
     Emit.off("messages:mode", this.onMode);
     Emit.off("messages:command", this.onCommand);
     Emit.off("messages:ruler", this.onRuler);
@@ -107,16 +105,8 @@ export class HistoryComponent extends React.Component<Props, States> {
     this.setState({ messages: [] });
   }
 
-  private onMouseEnter = () => {
-    if (this.state.options.ext_messages && this.state.debug === "") {
-      Emit.send("envim:command", "messages");
-      clearInterval(this.timer);
-      this.timer = +setInterval(() => Emit.send("envim:command", "messages"), 500);
-    }
-  }
-
-  private onMouseLeave = () => {
-    clearInterval(this.timer);
+  private loadMessages = () => {
+    Emit.send("envim:command", "messages");
   }
 
   private openBrowser = (id: number) => {
@@ -137,10 +127,8 @@ export class HistoryComponent extends React.Component<Props, States> {
     try {
       "".search(debug);
 
-      this.onMouseLeave();
       this.state.debug === "" && debug && Emit.on("debug", this.onDebug);
       debug === "" && Emit.off("debug", this.onDebug);
-      setTimeout(() => this.onMouseEnter());
 
       this.setState({ debug });
     } catch (e: any) {
@@ -165,7 +153,7 @@ export class HistoryComponent extends React.Component<Props, States> {
 
   render() {
     return (
-      <FlexComponent animate="hover" direction="column-reverse" position="absolute" overflow="visible" style={styles.scope} onMouseEnter={this.onMouseEnter} onMouseLeave={this.onMouseLeave}>
+      <FlexComponent animate="hover" direction="column-reverse" position="absolute" overflow="visible" style={styles.scope} onMouseEnter={this.loadMessages}>
         <FlexComponent color="default" overflow="visible" style={this.props}>
           { this.state.mode && <FlexComponent animate="fade-in" margin={["auto", 4]} rounded={[4]} shadow><MessageComponent message={this.state.mode} open /></FlexComponent> }
           { this.state.command && <FlexComponent animate="fade-in" margin={["auto", 4]} rounded={[4]} shadow><MessageComponent message={this.state.command} open /></FlexComponent> }
@@ -184,7 +172,14 @@ export class HistoryComponent extends React.Component<Props, States> {
         </FlexComponent>
         <FlexComponent overflow="visible" hover>
           <FlexComponent direction="column" position="absolute" rounded={[4, 4, 0, 0]} overflow="auto" style={styles.history} shadow>
-            {this.state.messages.map((message, i) => <div key={i}><MessageComponent message={message} open={message.kind !== "debug"} /></div>)}
+            { this.state.messages.map((message, i) => <div key={i}><MessageComponent message={message} open={message.kind !== "debug"} /></div>) }
+            { this.state.options.ext_messages && (
+              <FlexComponent color="default" onClick={this.loadMessages}>
+                <FlexComponent color="lightblue" grow={1} />
+                <IconComponent color="lightblue" font="󰑓" text="Load more..." />
+                <FlexComponent color="lightblue" grow={1} />
+              </FlexComponent>
+            ) }
             <div ref={this.bottom} />
           </FlexComponent>
         </FlexComponent>

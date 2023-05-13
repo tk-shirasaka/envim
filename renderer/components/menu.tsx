@@ -21,12 +21,10 @@ const styles = {
     position,
   },
   menu: {
-    zIndex: 20,
     minWidth: "100%",
     whiteSpace,
   },
   sidemenu: {
-    zIndex: 20,
     whiteSpace,
   },
 };
@@ -84,7 +82,7 @@ export class MenuComponent extends React.Component<PropsWithChildren<Props>, Sta
     const style = { ...base, ...{ inset: this.inset.join(" ") } };
 
     return (
-      <FlexComponent color="default" direction="column" position="absolute" overflow="visible" padding={[4]} rounded={[2]} style={style} shadow hover>
+      <FlexComponent color="default" direction="column" position="absolute" overflow="visible" zIndex={20} padding={[4]} rounded={[2]} style={style} shadow hover>
         { this.props.children }
       </FlexComponent>
     );
