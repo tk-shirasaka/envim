@@ -109,7 +109,7 @@ class Browser {
   }
 
   private onSearch = async () => {
-    this.search = await this.getInput("Search: ", this.search);
+    this.search = await this.getInput("Search: ");
     this.search ? this.win.webContents.findInPage(this.search) : this.win.webContents.stopFindInPage("clearSelection");
   }
 
@@ -183,6 +183,7 @@ class Browser {
 
 export class Browsers {
   private browsers: Browser[] = [];
+  private next?: BrowserWindow;
 
   constructor() {
     Emit.on("browser:open", this.onOpen);
@@ -213,12 +214,15 @@ export class Browsers {
       return result;
     });
 
-    if (exists.length > 0) {
+    if (win === Bootstrap.win) {
+      Bootstrap.win.focus();
+    } else if (exists.length > 0) {
       exists.pop()?.show();
       this.onUpdate();
     } else {
       this.browsers.push(new Browser(win, parent, url));
     }
+    delete(this.next);
   }
 
   private onClose = (id: number) => {
@@ -228,19 +232,23 @@ export class Browsers {
   }
 
   private onHide = () => {
+    const win = this.next || Bootstrap.win;
+
     this.browsers.forEach(browser => browser.hide());
     this.onUpdate();
-    Bootstrap.win?.focus();
+    win && this.onShow(win, win);
   }
 
   private onClosed = (id: number) => {
+    const win = this.next || Bootstrap.win;
+
     this.browsers = this.browsers.filter(browser => {
       const { info } = browser.getBrowser();
 
       return info.id !== id;
     });
     this.onUpdate();
-    this.getBrowser().some(({ info }) => info.active) || Bootstrap.win?.focus();
+    !this.getBrowser().some(({ info }) => info.active) && win && this.onShow(win, win);
   }
 
   private onUpdate = () => {
@@ -251,8 +259,8 @@ export class Browsers {
     const windows = this.getBrowser().map(({ win }) => win);
     const index = windows.indexOf(win) + direction;
 
-    close && win.close();
-    Bootstrap.win && 0 <= index && index < windows.length ? this.onShow(windows[index], Bootstrap.win) : this.onHide();
+    this.next = windows[index] || Bootstrap.win;
+    close ? win.close() : this.onHide();
   }
 
   private getBrowser = () => {
