@@ -166,7 +166,16 @@ export class HistoryComponent extends React.Component<Props, States> {
               </FlexComponent>
             )) }
           </MenuComponent>
-          <MenuComponent color="blue-fg" style={{}} label="爵" onClick={() => this.openBrowser(-1)}>{ this.state.browser.map(this.renderBrowser) }</MenuComponent>
+          <MenuComponent color="blue-fg" label="爵" style={{}}>
+            <FlexComponent overflow="visible">
+              { this.state.browser.length === 0 ? null : (
+                <MenuComponent color="blue-fg" label="󰋚" style={{}} side>
+                  { this.state.browser.map(this.renderBrowser) }
+                </MenuComponent>
+              )}
+              <IconComponent color="green-fg" font="" onClick={() => this.openBrowser(-1)} />
+            </FlexComponent>
+          </MenuComponent>
           <IconComponent color="green-fg" active={this.state.debug.length > 0} font="" onClick={this.toggleDebug} />
           <IconComponent color="red-fg" font="" onClick={this.onClear} />
         </FlexComponent>

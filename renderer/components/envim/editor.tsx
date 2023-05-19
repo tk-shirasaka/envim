@@ -297,11 +297,11 @@ export class EditorComponent extends React.Component<Props, States> {
     this.setState({ bufs });
   }
 
-  private renderMenu(label: string, command: { main: string; sub: string; }) {
+  private renderMenu(label: string, command: string) {
     return (
-      <MenuComponent color="gray-fg" style={styles.icon} onClick={e => this.runCommand(e, command.main)} label={label}>
+      <MenuComponent color="gray-fg" style={styles.icon} label={label}>
         { this.state.bufs.map(({ name, buffer, active }, i) => (
-          <FlexComponent color="default" active={active} title={name} padding={[0, 4]} onClick={e => this.runCommand(e, `${command.sub}${buffer}`)} key={i}>
+          <FlexComponent color="default" active={active} title={name} padding={[0, 4]} onClick={e => this.runCommand(e, `${command}${buffer}`)} key={i}>
             { name.replace(/.*\//, "…/") }
           </FlexComponent>
         )) }
@@ -343,15 +343,23 @@ export class EditorComponent extends React.Component<Props, States> {
               onMouseDown={e => this.runCommand(e, "")}
             >
               { this.state.preview.src && <IconComponent color="gray-fg" font="" onClick={this.togglePreview} /> }
-              { this.props.type === "normal" && this.renderMenu("", { main: "edit", sub: "buffer "}) }
-              { this.props.type === "normal" && this.renderMenu("", { main: "vnew", sub: "vsplit #"}) }
-              { this.props.type === "normal" && this.renderMenu("", { main: "new", sub: "split #"}) }
-              { this.props.type === "normal" && <IconComponent color="gray-fg" font="󰶭" onClick={this.openExtWindow} /> }
-              { this.props.type === "external" && <IconComponent color="gray-fg" font="󰮐" active={this.state.dragging} onClick={this.dragExtWIndow} /> }
-              { this.props.type === "external" && <IconComponent color="gray-fg" font="󰶮" onClick={e => this.runCommand(e, "wincmd H")} /> }
-              { this.props.type === "external" && <IconComponent color="gray-fg" font={y2Row(this.props.style.height) === 1 ? "󰖯" : "󰖰"} onClick={this.openExtWindow} /> }
-              { this.props.type === "normal" && <IconComponent color="gray-fg" font="" onClick={e => this.runCommand(e, "write")} /> }
-              { this.props.type === "normal" ? this.renderMenu("", { main: "confirm quit", sub: "confirm bdelete "}) : <IconComponent color="gray-fg" font="" onClick={e => this.runCommand(e, "confirm quit")} /> }
+              { this.props.type === "normal" && (
+                <>
+                  { this.renderMenu("", "buffer ") }
+                  <IconComponent color="gray-fg" font="" onClick={e => this.runCommand(e, "vsplit")} />
+                  <IconComponent color="gray-fg" font="" onClick={e => this.runCommand(e, "split")} />
+                  <IconComponent color="gray-fg" font="󰶭" onClick={this.openExtWindow} />
+                  <IconComponent color="gray-fg" font="" onClick={e => this.runCommand(e, "write")} />
+                </>
+              )}
+              { this.props.type === "external" && (
+                <>
+                  <IconComponent color="gray-fg" font="󰮐" active={this.state.dragging} onClick={this.dragExtWIndow} />
+                  <IconComponent color="gray-fg" font="󰶮" onClick={e => this.runCommand(e, "wincmd H")} />
+                  <IconComponent color="gray-fg" font={y2Row(this.props.style.height) === 1 ? "󰖯" : "󰖰"} onClick={this.openExtWindow} />
+                </>
+              )}
+              <IconComponent color="gray-fg" font="" onClick={e => this.runCommand(e, "confirm quit")} />
             </FlexComponent>
           </>
         )}

@@ -151,18 +151,13 @@ export class TablineComponent extends React.Component<Props, States> {
     const cwd = this.state.cwd
     const index = this.state.bookmarks.findIndex(({ path }) => path === cwd);
     const bookmark = index >= 0 ? this.state.bookmarks[index] : { name: cwd, group: "", path: cwd, selected: false };
-    const icon = index >= 0 ? { color: "blue-fg", label: "" } : { color: "gray-fg", label: "" };
-    const selected = bookmark.selected && bookmark.name.split("/").pop();
+    const text = bookmark.selected && bookmark.name.split("/").pop() || "";
+    const icon = index >= 0 ? { color: "blue-fg", font: "", text } : { color: "gray-fg", font: "", text };
 
-    return (
-      <MenuComponent { ...icon } style={styles.space} onClick={() => this.saveBookmark(bookmark)}>
-        { selected && <FlexComponent color="blue" margin={[-4, -4, 4]} padding={[4]} border={[0, 0, 2]}>{ selected }</FlexComponent> }
-        { this.renderBookmarkMenu() }
-      </MenuComponent>
-    )
+    return <IconComponent { ...icon } onClick={() => this.saveBookmark(bookmark)} />;
   }
 
-  private renderBookmarkMenu(base: string = "") {
+  private renderBookmarkMenu(base: string) {
     const regexp = new RegExp(`^${base}`);
     const bookmarks = this.state.bookmarks.filter(({ name }) => name.match(regexp)).map(({ name, ...other }) => ({ ...other, name: name.replace(regexp, "") }));
     const groups = bookmarks.map(({ name }) => name.split("/")).reduce((all, curr) => curr.length === 1 || all.indexOf(curr[0]) >= 0 ? all : [...all, curr[0]], []);
@@ -190,6 +185,9 @@ export class TablineComponent extends React.Component<Props, States> {
       <FlexComponent color="default" overflow="visible" zIndex={1} style={this.props} shadow>
         {this.state.enabled && this.state.tabs.map((tab, i) => this.renderTab(i, tab))}
         <IconComponent color="green-fg" font="" onClick={e => this.runCommand(e, "$tabnew")} />
+        <MenuComponent color="lightblue-fg" label="" style={styles.space}>
+          { this.renderBookmarkMenu("") }
+        </MenuComponent>
         { this.renderBookmark() }
         <div className="space dragable" />
         { this.renderSubmenu(this.state.menus, []) }

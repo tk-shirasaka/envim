@@ -7,7 +7,6 @@ interface Props {
   label: string;
   color: string;
   style: Object;
-  onClick?: (...args: any[]) => void;
 }
 
 interface States {
@@ -46,8 +45,7 @@ export class MenuComponent extends React.Component<PropsWithChildren<Props>, Sta
     this.updateProperty();
   }
 
-  private onClick() {
-  }
+  private onClick() { }
 
   private updateProperty() {
     const haschild = !(Array.isArray(this.props.children) && this.props.children.length === 0);
@@ -92,7 +90,7 @@ export class MenuComponent extends React.Component<PropsWithChildren<Props>, Sta
     return (
       <FlexComponent vertical="center" overflow="visible">
         <div className="animate hover space" style={styles.wrap} ref={this.div}>
-          <FlexComponent color={this.props.color} style={this.props.style} onClick={this.props.onClick || this.onClick}>{ this.props.label }</FlexComponent>
+          <FlexComponent color={this.props.color} style={this.props.style} onClick={this.onClick}>{ this.props.label }</FlexComponent>
           { this.renderMenu() }
         </div>
       </FlexComponent>
