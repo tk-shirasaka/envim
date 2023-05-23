@@ -15,6 +15,7 @@ class Browser {
     win.on("show", this.updateInfo);
     win.on("hide", this.updateInfo);
     win.on("closed", this.onClosed);
+    win.webContents.setWindowOpenHandler(this.createHandler);
     win.webContents.on("login", this.onBasicAuth);
     win.webContents.on("certificate-error", this.onCertError);
     win.webContents.on("page-title-updated", this.onUpdate);
@@ -54,6 +55,11 @@ class Browser {
 
   private onClosed = () => {
     Emit.share("browser:closed", this.info.id);
+  }
+
+  private createHandler = () => {
+    const action: "allow" = "allow";
+    return { action, outlivesOpener: true };
   }
 
   private onBasicAuth = async (e: Event, _: Object, __: Object, callback: Function) => {
@@ -206,6 +212,7 @@ export class Browsers {
   }
 
   private onShow = (win: BrowserWindow, parent: BrowserWindow, url?: string) => {
+    const current = this.getBrowser().findIndex(({ info }) => info.active);
     const exists = this.browsers.filter(browser => {
       const { info } = browser.getBrowser();
       const result = info.id === win.id;
@@ -220,7 +227,7 @@ export class Browsers {
       exists.pop()?.show();
       this.onUpdate();
     } else {
-      this.browsers.push(new Browser(win, parent, url));
+      this.browsers.splice(current < 0 ? this.browsers.length : current + 1, 0, new Browser(win, parent, url));
     }
     delete(this.next);
   }
@@ -257,7 +264,7 @@ export class Browsers {
 
   private onRotate = (win: BrowserWindow, direction: 1 | -1, close: boolean) => {
     const windows = this.getBrowser().map(({ win }) => win);
-    const index = windows.indexOf(win) + direction;
+    const index = (windows.length + windows.indexOf(win) + direction) % windows.length;
 
     this.next = windows[index] || Bootstrap.win;
     close ? win.close() : this.onHide();
