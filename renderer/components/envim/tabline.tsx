@@ -165,7 +165,7 @@ export class TablineComponent extends React.Component<Props, States> {
     return (
       <>
         { groups.map(group =>
-          <MenuComponent key={`${base}${group}`} color="lightblue-fg" style={{}} label={` ${group}`} side>
+          <MenuComponent key={`${base}${group}`} color="lightblue-fg" style={{}} label={`󰉋 ${group}`} side>
             { this.renderBookmarkMenu(`${base}${group}/`) }
           </MenuComponent>
         ) }
@@ -185,7 +185,7 @@ export class TablineComponent extends React.Component<Props, States> {
       <FlexComponent color="default" overflow="visible" zIndex={1} style={this.props} shadow>
         {this.state.enabled && this.state.tabs.map((tab, i) => this.renderTab(i, tab))}
         <IconComponent color="green-fg" font="" onClick={e => this.runCommand(e, "$tabnew")} />
-        <MenuComponent color="lightblue-fg" label="" style={styles.space}>
+        <MenuComponent color="lightblue-fg" label="󰉋" style={styles.space}>
           { this.renderBookmarkMenu("") }
         </MenuComponent>
         { this.renderBookmark() }

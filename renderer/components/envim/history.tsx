@@ -166,7 +166,7 @@ export class HistoryComponent extends React.Component<Props, States> {
               </FlexComponent>
             )) }
           </MenuComponent>
-          <MenuComponent color="blue-fg" label="爵" style={{}}>
+          <MenuComponent color="blue-fg" label="󰖟" style={{}}>
             <FlexComponent overflow="visible">
               { this.state.browser.length === 0 ? null : (
                 <MenuComponent color="blue-fg" label="󰋚" style={{}} side>
@@ -176,8 +176,8 @@ export class HistoryComponent extends React.Component<Props, States> {
               <IconComponent color="green-fg" font="" onClick={() => this.openBrowser(-1)} />
             </FlexComponent>
           </MenuComponent>
-          <IconComponent color="green-fg" active={this.state.debug.length > 0} font="" onClick={this.toggleDebug} />
-          <IconComponent color="red-fg" font="" onClick={this.onClear} />
+          <IconComponent color="green-fg" active={this.state.debug.length > 0} font="" onClick={this.toggleDebug} />
+          <IconComponent color="red-fg" font="󰂭" onClick={this.onClear} />
         </FlexComponent>
         <FlexComponent overflow="visible" hover>
           <FlexComponent direction="column" position="absolute" rounded={[4, 4, 0, 0]} overflow="auto" style={styles.history} shadow>

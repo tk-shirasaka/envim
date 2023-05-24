@@ -33,12 +33,12 @@ input {
       display: inline-block;
       margin: -.5em 0 0 -.5em;
       cursor: pointer;
-      content: "祿";
+      content: "󰝦";
       color: var(--color-fg);
     }
 
     &:checked:before {
-      content: "綠";
+      content: "󰝥";
       color: var(--color-blue);
     }
 
@@ -56,12 +56,12 @@ input {
       display: inline-block;
       margin: -.5em 0 0 -.5em;
       cursor: pointer;
-      content: "";
+      content: "󰄱";
       color: var(--color-fg);
     }
 
     &:checked:before {
-      content: "";
+      content: "󰄲";
       color: var(--color-blue);
     }
 

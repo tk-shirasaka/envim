@@ -349,7 +349,7 @@ export class EditorComponent extends React.Component<Props, States> {
                   <IconComponent color="gray-fg" font="" onClick={e => this.runCommand(e, "vsplit")} />
                   <IconComponent color="gray-fg" font="" onClick={e => this.runCommand(e, "split")} />
                   <IconComponent color="gray-fg" font="󰶭" onClick={this.openExtWindow} />
-                  <IconComponent color="gray-fg" font="" onClick={e => this.runCommand(e, "write")} />
+                  <IconComponent color="gray-fg" font="" onClick={e => this.runCommand(e, "write")} />
                 </>
               )}
               { this.props.type === "external" && (

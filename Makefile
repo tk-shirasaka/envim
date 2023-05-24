@@ -2,10 +2,10 @@ NORMAL_FONT_DOWNLOAD_URL	=
 NORMAL_FONT_DOWNLOAD_FILE	=
 NORMAL_REGULAR_FONT_FILE_NAME	=
 NORMAL_BOLD_FONT_FILE_NAME	=
-ICON_FONT_DOWNLOAD_URL		= https://github.com/ryanoasis/nerd-fonts/releases/download/v2.3.3/NerdFontsSymbolsOnly.zip
-ICON_FONT_DOWNLOAD_FILE		= NerdFontsSymbolsOnly_v2.3.3
-ICON_REGULAR_FONT_FILE_NAME	= Symbols-1000-em\ Nerd\ Font\ Complete\ Mono\ Windows\ Compatible.ttf
-ICON_BOLD_FONT_FILE_NAME	= Symbols-2048-em\ Nerd\ Font\ Complete\ Mono\ Windows\ Compatible.ttf
+ICON_FONT_DOWNLOAD_URL		= https://github.com/ryanoasis/nerd-fonts/releases/download/v3.0.1/NerdFontsSymbolsOnly.zip
+ICON_FONT_DOWNLOAD_FILE		= NerdFontsSymbolsOnly_v3.0.1
+ICON_REGULAR_FONT_FILE_NAME	= SymbolsNerdFontMono-Regular.ttf
+ICON_BOLD_FONT_FILE_NAME	= SymbolsNerdFontMono-Regular.ttf
 
 DOWNLOAD_CMD			= curl -L
 UNZIP_CMD			= unzip -o
@@ -21,8 +21,8 @@ install:
 fonts/%.zip:
 	$(DOWNLOAD_CMD) $($(*D)_FONT_DOWNLOAD_URL) -o $($(*D)_FONT_DOWNLOAD_FILE).zip
 	$(UNZIP_CMD) -d $(*F) $(*F)
-	mv $(*F)/$($(*D)_REGULAR_FONT_FILE_NAME) fonts/$(*D)-Regular
-	mv $(*F)/$($(*D)_BOLD_FONT_FILE_NAME) fonts/$(*D)-Bold
+	cp $(*F)/$($(*D)_REGULAR_FONT_FILE_NAME) fonts/$(*D)-Regular
+	cp $(*F)/$($(*D)_BOLD_FONT_FILE_NAME) fonts/$(*D)-Bold
 	rm -rf $(@D)
 	mkdir -p $(@D)
 	touch $@

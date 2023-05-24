@@ -150,7 +150,7 @@ export class SettingComponent extends React.Component<Props, States> {
         <h1 className="bold">Welcome To Envim!</h1>
         <div>
           <i className="color-green-fg" style={styles.logo}></i>
-          <i className="color-inverse-fg" style={styles.icon}></i>
+          <i className="color-inverse-fg" style={styles.icon}>󰅖</i>
           <i className="color-lightblue-fg" style={styles.logo}></i>
         </div>
 
