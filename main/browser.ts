@@ -266,7 +266,7 @@ export class Browsers {
     const windows = this.getBrowser().map(({ win }) => win);
     const index = (windows.length + windows.indexOf(win) + direction) % windows.length;
 
-    this.next = windows[index] || Bootstrap.win;
+    this.next = windows[index] && win !== windows[index] ? windows[index] : Bootstrap.win;
     close ? win.close() : this.onHide();
   }
 
