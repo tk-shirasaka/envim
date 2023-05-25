@@ -239,11 +239,7 @@ export class Browsers {
   }
 
   private onHide = () => {
-    const win = this.next || Bootstrap.win;
-
-    this.browsers.forEach(browser => browser.hide());
-    this.onUpdate();
-    win && this.onShow(win, win);
+    Bootstrap.win && this.onShow(Bootstrap.win, Bootstrap.win);
   }
 
   private onClosed = (id: number) => {
@@ -267,7 +263,7 @@ export class Browsers {
     const index = (windows.length + windows.indexOf(win) + direction) % windows.length;
 
     this.next = windows[index] && win !== windows[index] ? windows[index] : Bootstrap.win;
-    close ? win.close() : this.onHide();
+    close ? win.close() : this.onShow(windows[index], windows[index]);
   }
 
   private getBrowser = () => {
