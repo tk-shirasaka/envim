@@ -12,7 +12,7 @@ class Grid {
   private ready: boolean = false;
 
   constructor(id: number, width :number, height: number) {
-    this.info = { id, winid: 0, x: 0, y: 0, width: 0, height: 0, zIndex: 1, focusable: true, type: "normal", status: "show" };
+    this.info = { id, winid: 0, x: 0, y: 0, width: 0, height: 0, zIndex: 1, focusable: true, type: "normal", status: "hide" };
     this.resize(width, height);
   }
 
@@ -157,25 +157,23 @@ class Grid {
 export class Grids {
   private static grids: { [k: number]: Grid } = {};
   private static default: 1 = 1;
-  private static active: number = 0;
+  private static active: { grid: number; row: number; col: number; } = { grid: 0, row: 0, col: 0 };
   private static changes: { [k: number]: number } = {};
 
   static init() {
     Grids.grids = {};
-    Grids.active = 0;
+    Grids.active = { grid: 0, row: 0, col: 0 };
     Grids.changes = {};
   }
 
-  static exist(grid: number) {
-    return !!Grids.grids[grid];
-  }
+  static get(grid: number = Grids.default, add: boolean = true) {
+    const curr = Grids.grids[grid] || new Grid(grid, 0, 0);
 
-  static get(grid: number = Grids.default) {
-    if (!Grids.exist(grid)) {
-      Grids.grids[grid] = new Grid(grid, 0, 0);
+    if (!Grids.grids[grid] && add) {
+      Grids.grids[grid] = curr;
     }
 
-    return Grids.grids[grid];
+    return curr;
   }
 
   static getByWinId(winid: number) {
@@ -183,19 +181,17 @@ export class Grids {
   }
 
   static cursor(grid: number, row: number, col: number) {
-    const cursor = Grids.get(grid).getCursorPos(row, col);
-    const active = Grids.exist(Grids.active) ? Grids.get(Grids.active).getInfo() : null;
+    if (Object.keys(Grids.grids).length <= 1 || grid !== Grids.default) {
+      const active = Grids.get(Grids.active.grid, false).getInfo();
 
-    if (cursor.x >= 0 && cursor.y >= 0 && (Object.keys(Grids.grids).length <= 1 || grid !== Grids.default)) {
-      active && active.id !== grid &&  Grids.setStatus(active.id, active.status, active.status === "show");
-      Grids.active = grid;
+      active.id !== grid &&  Grids.setStatus(active.id, active.status, active.status === "show");
+      Grids.active = { grid, row, col };
       Grids.setStatus(grid, "show", true);
-      Emit.update("grid:cursor", false, cursor);
     }
   }
 
   static setStatus(grid: number, status: "show" | "hide" | "delete", update: boolean) {
-    if (Grids.get(grid).setInfo({ status }) || update) {
+    if (Grids.get(grid, false).setInfo({ status }) || update) {
       Grids.changes[grid] = grid;
     }
   }
@@ -205,10 +201,16 @@ export class Grids {
   }
 
   static flush() {
+    const cursor = Grids.get(Grids.active.grid, false).getCursorPos(Grids.active.row, Grids.active.col);
+
+    if (cursor && cursor.x >= 0 && cursor.y >= 0) {
+      Emit.update("grid:cursor", false, cursor);
+    }
+
     const wins: IWindow[] = Object.values(Grids.changes).map(grid => {
       const info = { ...Grids.get(grid).getInfo() };
 
-      info.zIndex = info.id === Grids.active ? info.zIndex + 1 : info.zIndex;
+      info.zIndex = info.id === Grids.active.grid ? info.zIndex + 1 : info.zIndex;
       info.status = info.width && info.height ? info.status : "delete";
 
       if (info.status === "delete") {
