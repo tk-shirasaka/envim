@@ -96,7 +96,7 @@ export class HistoryComponent extends React.Component<Props, States> {
     if (`${direction} ${event}`.search(this.state.debug) < 0) return;
 
     this.onHistory([{ contents: [
-      direction === "send" ? { hl: "yellow", content: `[ 祝${event} ]\n` } : { hl: "blue", content: `[  ${event} ]\n` },
+      direction === "send" ? { hl: "yellow", content: `[ 󰕒${event} ]\n` } : { hl: "blue", content: `[ 󰇚 ${event} ]\n` },
       { hl: "0", content: JSON.stringify(args, null, 2) }], kind: "debug" }
     ]);
   }
