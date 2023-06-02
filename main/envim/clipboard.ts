@@ -8,21 +8,7 @@ export class Clipboard {
   private static type: "v" | "V" | "b";
 
   static setup() {
-    Emit.share("envim:command", [
-      "let g:clipboard = {",
-      "  'name': 'envim',",
-      "  'copy': {",
-      "     '+': {lines, regtype -> EnvimConnect(0, 'envim_clipboard', lines, regtype)},",
-      "     '*': {lines, regtype -> EnvimConnect(0, 'envim_clipboard', lines, regtype)},",
-      "   },",
-      "  'paste': {",
-      "     '+': {-> EnvimConnect(1, 'envim_clipboard')},",
-      "     '*': {-> EnvimConnect(1, 'envim_clipboard')},",
-      "  },",
-      "}",
-    ].join(""));
-    Emit.share("envim:command", "unlet! g:loaded_clipboard_provider");
-    Emit.share("envim:command", "runtime autoload/provider/clipboard.vim");
+    Emit.share("envim:luafile", "clipboard.lua");
   }
 
   static copy(lines: string[], type: "v" | "V" | "b") {

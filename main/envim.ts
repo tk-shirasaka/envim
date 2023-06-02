@@ -1,5 +1,7 @@
 import { dialog, nativeTheme } from "electron";
 import { createConnection, Socket } from "net";
+import { join } from "path"
+import { readFile } from "fs/promises";
 import { spawn, ChildProcess } from "child_process";
 import { NeovimClient } from "neovim";
 import { UiAttachOptions } from "neovim/lib/api/Neovim"
@@ -22,6 +24,7 @@ export class Envim {
     Emit.on("envim:mouse", this.onMouse);
     Emit.on("envim:input", this.onInput);
     Emit.on("envim:command", this.onCommand);
+    Emit.on("envim:luafile", this.onLuafile);
     Emit.on("envim:ready", this.onReady);
     Emit.on("envim:theme", this.onTheme);
     process.on("uncaughtException", this.onError);
@@ -94,6 +97,12 @@ export class Envim {
 
   private onCommand = async (command: string) => {
     return await this.nvim.command(command);
+  }
+
+  private onLuafile = (path: string) => {
+    readFile(join(__dirname, "lua", path), { encoding: "utf8" }).then((file) => {
+      this.nvim.lua(file);
+    });
   }
 
   private onReady = (grid: number) => {
