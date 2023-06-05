@@ -135,6 +135,14 @@ class Browser {
     switch (input.key) {
       case "Escape": return this.mode = "vim";
       case "Enter": return;
+      case "Home": return;
+      case "End": return;
+      case "PageUp": return;
+      case "PageDown": return;
+      case "ArrowUp": return;
+      case "ArrowDown": return;
+      case "ArrowRight": return;
+      case "ArrowLeft": return;
       default: return "not match";
     }
   }
@@ -149,8 +157,12 @@ class Browser {
       case "x": return this.win.webContents.cut();
       case "h": return this.win.webContents.goBack();
       case "l": return this.win.webContents.goForward();
-      case "j": return this.win.webContents.sendInputEvent({ type: "mouseWheel", x: 0, y: 0, deltaY: input.isAutoRepeat ? -300 : -100 });
-      case "k": return this.win.webContents.sendInputEvent({ type: "mouseWheel", x: 0, y: 0, deltaY: input.isAutoRepeat ? 300 : 100 });
+      case "g": return this.win.webContents.sendInputEvent({ type: "keyDown", keyCode: "Home" });
+      case "G": return this.win.webContents.sendInputEvent({ type: "keyDown", keyCode: "End" });
+      case "u": return input.control && this.win.webContents.sendInputEvent({ type: "keyDown", keyCode: "PageUp" });
+      case "d": return input.control && this.win.webContents.sendInputEvent({ type: "keyDown", keyCode: "PageDown" });
+      case "k": return this.win.webContents.sendInputEvent({ type: "keyDown", keyCode: "Up" });
+      case "j": return this.win.webContents.sendInputEvent({ type: "keyDown", keyCode: "Down" });
       case "Tab": return Emit.share("browser:rotate", this.win, input.shift ? -1 : 1);
       case "q": return Emit.share("browser:close", this.info.id);
       case "n": return this.search && this.win.webContents.findInPage(this.search, { forward: true });

@@ -131,7 +131,7 @@ export class EditorComponent extends React.Component<Props, States> {
   private onMouseEvent(e: MouseEvent, action: string, button: string = "") {
     button = button || ["left", "middle", "right"][e.button] || "left";
 
-    const [col, row] = [ x2Col(e.nativeEvent.offsetX), y2Row(e.nativeEvent.offsetY - Setting.font.lspace) ];
+    const [col, row] = [ x2Col(e.nativeEvent.offsetX), y2Row(e.nativeEvent.offsetY) ];
     const modiffier = [];
     const skip = (button === "move" || action === "drag") && row === this.pointer.row && col === this.pointer.col;
     const grid = this.props.grid === 1 ? 0 : this.props.grid;
