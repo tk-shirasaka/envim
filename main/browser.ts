@@ -1,6 +1,8 @@
 import { clipboard } from "electron";
 import { dialog, BrowserWindow, Input } from "electron";
 
+import { IBrowser } from "../common/interface";
+
 import { Bootstrap } from "./bootstrap";
 import { Emit } from "./emit";
 
@@ -8,7 +10,7 @@ class Browser {
   private search: string = "";
   private mode: "vim" | "browser" = "vim";
   private devtool: boolean = false;
-  private info: { id: number; title: string; url: string; active: boolean } = { id: 0, title: "", url: "", active: false };
+  private info: IBrowser= { id: 0, title: "", origin: "", protocol: "", active: false };
 
   constructor(private win: BrowserWindow, parent: BrowserWindow, url?: string) {
     win.setBounds(parent.getBounds());
@@ -49,8 +51,11 @@ class Browser {
   }
 
   private updateInfo = () => {
-    this.win.setTitle(`[${this.mode.toUpperCase()}] : ${this.win.webContents.getTitle()}`)
-    this.info = { id: this.win.id, title: this.win.getTitle(), url: this.win.webContents.getURL(), active: this.win.isVisible() };
+    const url = this.win.webContents.getURL();
+    const { origin, protocol } = url ? (new URL(url)) : { origin: "", protocol: "" }
+
+    this.win.setTitle(`[${this.mode.toUpperCase()} ${origin}] : ${this.win.webContents.getTitle()}`)
+    this.info = { id: this.win.id, title: this.win.webContents.getTitle(), origin, protocol, active: this.win.isVisible() };
   }
 
   private onClosed = () => {
@@ -120,13 +125,13 @@ class Browser {
   }
 
   private onOpen = async (input: string = "") => {
-    input = input && !this.info.url ? input : await this.getInput("Browser: ", input || clipboard.readText().slice(0, 500));
+    input = input && !this.info.origin ? input : await this.getInput("Browser: ", input || clipboard.readText().slice(0, 500));
 
     if (input) {
       input = input.search(/^https?:\/\/\w+/) < 0 ? `https://google.com/search?q=${encodeURI(input)}` : input;
       this.win.loadURL(input);
       this.show();
-    } else if (!this.info.url) {
+    } else if (!this.info.origin) {
       this.win.close();
     }
   }
@@ -187,7 +192,7 @@ class Browser {
       case "p": return this.win.webContents.print();
       case "r": return this.win.webContents.reloadIgnoringCache();
       case "i": return this.win.webContents.toggleDevTools();
-      case "l": return this.onOpen(this.info.url);
+      case "l": return this.onOpen(this.win.webContents.getURL());
       case "n": return Emit.share("browser:open", -1);
       case "w": return Emit.share("browser:rotate", this.win, -1, true);
       default: return "not match";

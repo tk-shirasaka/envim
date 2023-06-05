@@ -1,6 +1,6 @@
 import React, { createRef, RefObject } from "react";
 
-import { IMessage } from "../../../common/interface";
+import { IMessage, IBrowser } from "../../../common/interface";
 
 import { Emit } from "../../utils/emit";
 import { Setting } from "../../utils/setting";
@@ -22,7 +22,7 @@ interface States {
   ruler?: IMessage;
   options: { [k:string]: boolean; };
   debug: string;
-  browser: { id: number; title: string; url: string; active: boolean; }[];
+  browser: IBrowser[];
 }
 
 const styles = {
@@ -88,7 +88,7 @@ export class HistoryComponent extends React.Component<Props, States> {
     this.setState({ options: { ...this.state.options, ...options } });
   }
 
-  private browserUpdate = (browser: { id: number, title: string, url: string, active: boolean }[]) => {
+  private browserUpdate = (browser: IBrowser[]) => {
     this.setState({ browser });
   }
 
@@ -139,13 +139,13 @@ export class HistoryComponent extends React.Component<Props, States> {
     }
   }
 
-  private renderBrowser = (browser: { id: number; title: string; url: string; active: boolean; }) => {
-    const icon = browser.url.search(/^https/) < 0 ? { color: "gray-fg", font: "" } : { color: "green-fg", font: "" };
+  private renderBrowser = (browser: IBrowser) => {
+    const icon = browser.protocol === "http:" ? { color: "gray-fg", font: "" } : { color: "green-fg", font: "" };
 
     return (
       <FlexComponent key={browser.id} animate="hover" color="default" direction="column" active={browser.active} onClick={() => this.openBrowser(browser.id)}>
         <div style={styles.browser}>{ browser.title }</div>
-        <div className="small">{ <IconComponent { ...icon } text={browser.url.replace(/^https?:\/\/([^\/]+)\/.*$/, "$1")} /> }</div>
+        <div className="small">{ <IconComponent { ...icon } text={browser.origin} /> }</div>
         <IconComponent color="gray" font="" float="right" onClick={(e) => this.closeBrowser(e, browser.id)} hover />
       </FlexComponent>
     );

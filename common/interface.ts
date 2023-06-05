@@ -77,3 +77,11 @@ export interface IMenu {
   mappings: { [k: string]: { enabled: boolean; rhs: string; } };
   submenus?: IMenu[];
 }
+
+export interface IBrowser {
+  id: number;
+  title: string;
+  origin: string;
+  protocol: string;
+  active: boolean;
+}
