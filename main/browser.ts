@@ -138,7 +138,7 @@ class Browser {
 
   private onInputCommon = (input: Input) => {
     switch (input.key) {
-      case "Escape": return this.mode = "vim";
+      case "Escape": return this.mode === "browser" && (this.mode = "vim") ? "not match" : "";
       case "Enter": return;
       case "Home": return;
       case "End": return;
@@ -148,6 +148,25 @@ class Browser {
       case "ArrowDown": return;
       case "ArrowRight": return;
       case "ArrowLeft": return;
+    }
+
+    if (!input.control && !input.meta) return "not match";
+
+    switch (input.key) {
+      case "+": return this.win.webContents.setZoomLevel(Math.min(this.win.webContents.zoomLevel + 0.2, 5));
+      case "-": return this.win.webContents.setZoomLevel(Math.max(this.win.webContents.zoomLevel - 0.2, -5));
+      case "=": return this.win.webContents.setZoomLevel(0);
+      case "a": return;
+      case "c": return;
+      case "v": return;
+      case "x": return;
+      case "z": return;
+      case "y": return;
+      case "p": return this.win.webContents.print();
+      case "r": return this.win.webContents.reloadIgnoringCache();
+      case "l": return this.onOpen(this.win.webContents.getURL());
+      case "n": return Emit.share("browser:open", -1);
+      case "w": return Emit.share("browser:rotate", this.win, -1, true);
       default: return "not match";
     }
   }
@@ -155,48 +174,35 @@ class Browser {
   private onInputVim = (input: Input) => {
     if (this.mode !== "vim") return "not match";
 
-    switch (input.key) {
-      case "i": return this.mode = "browser";
+    switch (input.key.toLocaleLowerCase()) {
+      case "a": return this.mode = "browser";
       case "y": return this.win.webContents.copy();
       case "p": return this.win.webContents.paste();
       case "x": return this.win.webContents.cut();
-      case "h": return this.win.webContents.goBack();
-      case "l": return this.win.webContents.goForward();
-      case "g": return this.win.webContents.sendInputEvent({ type: "keyDown", keyCode: "Home" });
-      case "G": return this.win.webContents.sendInputEvent({ type: "keyDown", keyCode: "End" });
+      case "o": return input.control ? this.win.webContents.goBack() : (this.mode = "browser");
+      case "i": return input.control ? this.win.webContents.goForward() : (this.mode = "browser");
+      case "g": return this.win.webContents.sendInputEvent({ type: "keyDown", keyCode: input.shift ? "End" : "Home" });
       case "u": return input.control && this.win.webContents.sendInputEvent({ type: "keyDown", keyCode: "PageUp" });
       case "d": return input.control && this.win.webContents.sendInputEvent({ type: "keyDown", keyCode: "PageDown" });
-      case "k": return this.win.webContents.sendInputEvent({ type: "keyDown", keyCode: "Up" });
-      case "j": return this.win.webContents.sendInputEvent({ type: "keyDown", keyCode: "Down" });
-      case "Tab": return Emit.share("browser:rotate", this.win, input.shift ? -1 : 1);
+      case "k": return this.win.webContents.sendInputEvent({ type: "keyDown", keyCode: "Up", modifiers: input.shift ? ["shift"] : [] });
+      case "j": return this.win.webContents.sendInputEvent({ type: "keyDown", keyCode: "Down", modifiers: input.shift ? ["shift"] : [] });
+      case "h": return this.win.webContents.sendInputEvent({ type: "keyDown", keyCode: "Left", modifiers: input.shift ? ["shift"] : [] });
+      case "l": return this.win.webContents.sendInputEvent({ type: "keyDown", keyCode: "Right", modifiers: input.shift ? ["shift"] : [] });
+      case "tab": return Emit.share("browser:rotate", this.win, input.shift ? -1 : 1);
       case "q": return Emit.share("browser:close", this.info.id);
-      case "n": return this.search && this.win.webContents.findInPage(this.search, { forward: true });
-      case "N": return this.search && this.win.webContents.findInPage(this.search, { forward: false });
+      case "n": return this.search && this.win.webContents.findInPage(this.search, { forward: !input.shift });
       case "/": return this.onSearch();
     }
   }
 
   private onInputBrowser = (input: Input) => {
-    if (!input.control && !input.meta) return "not match";
+    if ((!input.control && !input.meta) || this.mode !== "browser") return "not match";
 
     switch (input.key) {
-      case "+": return this.win.webContents.setZoomLevel(Math.min(this.win.webContents.zoomLevel + 0.2, 5));
-      case "-": return this.win.webContents.setZoomLevel(Math.max(this.win.webContents.zoomLevel - 0.2, -5));
-      case "=": return this.win.webContents.setZoomLevel(0);
-      case "a": return this.win.webContents.selectAll();
-      case "c": return this.win.webContents.copy();
-      case "v": return this.win.webContents.paste();
-      case "x": return this.win.webContents.cut();
-      case "z": return this.win.webContents.undo();
-      case "y": return this.win.webContents.redo();
-      case "p": return this.win.webContents.print();
-      case "r": return this.win.webContents.reloadIgnoringCache();
       case "i": return this.win.webContents.toggleDevTools();
-      case "l": return this.onOpen(this.win.webContents.getURL());
-      case "n": return Emit.share("browser:open", -1);
-      case "w": return Emit.share("browser:rotate", this.win, -1, true);
       default: return "not match";
     }
+
   }
 
   private onUnload = (e: Event) => {
