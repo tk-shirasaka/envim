@@ -1,9 +1,9 @@
 local function copy(lines, regtype)
-  return envim(0, { "envim_clipboard", lines, regtype })
+  return envim_connect(0, { "envim_clipboard", lines, regtype })
 end
 
 local function paste()
-  return envim(1, { "envim_clipboard" })
+  return envim_connect(1, { "envim_clipboard" })
 end
 
 vim.g.loaded_clipboard_provider = nil

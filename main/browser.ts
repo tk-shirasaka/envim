@@ -11,6 +11,7 @@ class Browser {
   private mode: "vim" | "browser" = "vim";
   private devtool: boolean = false;
   private info: IBrowser= { id: 0, title: "", origin: "", protocol: "", active: false };
+  private completion: { [k: string]: string[] } = {};
 
   constructor(private win: BrowserWindow, parent: BrowserWindow, url?: string) {
     win.setBounds(parent.getBounds());
@@ -70,8 +71,8 @@ class Browser {
   private onBasicAuth = async (e: Event, _: Object, __: Object, callback: Function) => {
     e.preventDefault();
 
-    const user = await this.getInput("User: ");
-    const password = user && await this.getInput("Password: ");
+    const user = await this.getInput("User");
+    const password = user && await this.getInput("Password");
 
     user && callback(user, password);
   }
@@ -106,11 +107,13 @@ class Browser {
   }
 
   private getInput = async (prompt: string, value: string = "") => {
-    const args = ["input", [prompt, value]]
+    const completion  = this.completion[prompt] || [];
+    const args = ["EnvimInput", [prompt, value || "", completion]]
 
     Bootstrap.win?.focus();
     value = await Emit.share("envim:api", "nvim_call_function", args) || "";
     this.win.focus();
+    this.completion[prompt] = [ ...completion, value ].filter(h => h);
 
     return value;
   }
@@ -120,12 +123,12 @@ class Browser {
   }
 
   private onSearch = async () => {
-    this.search = await this.getInput("Search: ");
+    this.search = await this.getInput("Search");
     this.search ? this.win.webContents.findInPage(this.search) : this.win.webContents.stopFindInPage("clearSelection");
   }
 
   private onOpen = async (input: string = "") => {
-    input = input && !this.info.origin ? input : await this.getInput("Browser: ", input || clipboard.readText().slice(0, 500));
+    input = input && !this.info.origin ? input : await this.getInput("Browser", input || clipboard.readText().slice(0, 500));
 
     if (input) {
       input = input.search(/^https?:\/\/\w+/) < 0 ? `https://google.com/search?q=${encodeURI(input)}` : input;

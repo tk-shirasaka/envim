@@ -72,7 +72,7 @@ export class TablineComponent extends React.Component<Props, States> {
     const bookmarks = this.state.bookmarks
       .map(bookmark => ({ ...bookmark, selected: false }))
       .filter(({ path }) => bookmark.path !== path);
-    const args = ["input", ["Bookmark: ", bookmark.name]]
+    const args = ["EnvimInput", ["Bookmark", bookmark.name]]
     const name = await Emit.send<string>("envim:api", "nvim_call_function", args);
 
     if (name) {
