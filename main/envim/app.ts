@@ -276,10 +276,6 @@ export class App {
 
     const update = current.setInfo({ winid, x: col, y: row, width, height, zIndex, focusable, type });
     Grids.setStatus(grid, "show", update);
-
-    if (winsize.width < width || winsize.height < height) {
-      Emit.share("envim:resize", grid, Math.min(winsize.width - 2, width), Math.min(winsize.height - 2, height));
-    }
   }
 
   private winFloatPos(grid: number, win: Window, anchor: string, pgrid: number, row: number, col: number, focusable: boolean, zIndex: number) {

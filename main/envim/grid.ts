@@ -201,6 +201,7 @@ export class Grids {
   }
 
   static flush() {
+    const winsize = Grids.get().getInfo();
     const cursor = Grids.get(Grids.active.grid, false).getCursorPos(Grids.active.row, Grids.active.col);
 
     if (cursor && cursor.x >= 0 && cursor.y >= 0) {
@@ -215,6 +216,10 @@ export class Grids {
 
       if (info.status === "delete") {
         delete(Grids.grids[info.id]);
+      }
+
+      if (info.status === "show" && winsize.width < info.width || winsize.height < info.height) {
+        Emit.share("envim:resize", grid, Math.min(winsize.width - 2, info.width), Math.min(winsize.height - 2, info.height));
       }
 
       return info;
