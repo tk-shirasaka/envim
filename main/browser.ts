@@ -131,7 +131,7 @@ class Browser {
     input = input && !this.info.origin ? input : await this.getInput("Browser", input || clipboard.readText().slice(0, 500));
 
     if (input) {
-      input = input.search(/^https?:\/\/\w+/) < 0 ? `https://google.com/search?q=${encodeURI(input)}` : input;
+      input = input.search(/^https?:\/\/\w+/) < 0 ? `https://google.com/search?q=${encodeURIComponent(input)}` : input;
       this.win.loadURL(input);
       this.show();
     } else if (!this.info.origin) {

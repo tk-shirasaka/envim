@@ -24,6 +24,7 @@ _G.envim_input = (function ()
     local input = vim.fn.input(string.format("%s: ", prompt), default or "", "customlist,v:lua.envim_completion")
 
     if input then
+      input = vim.fn.trim(input)
       table.insert(history, input)
     end
 
