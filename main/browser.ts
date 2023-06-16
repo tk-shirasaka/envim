@@ -1,5 +1,4 @@
-import { clipboard } from "electron";
-import { dialog, BrowserWindow, Input } from "electron";
+import { clipboard, dialog, BrowserWindow, Input, Event } from "electron";
 
 import { IBrowser } from "../common/interface";
 
