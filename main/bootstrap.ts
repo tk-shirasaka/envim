@@ -2,6 +2,7 @@ import { app, BrowserWindow, Menu } from "electron";
 import { join } from "path";
 
 import { Emit } from "./emit";
+import { Setting } from "./setting";
 
 export class Bootstrap {
   static win?: BrowserWindow;
@@ -44,6 +45,11 @@ export class Bootstrap {
     Bootstrap.win.maximize();
     Bootstrap.win.loadFile(join(__dirname, "index.html"));
     Bootstrap.win.on("closed", this.onQuit);
-    Bootstrap.win.once("ready-to-show", () => Emit.share("envim:theme", "system"));
+    Bootstrap.win.once("ready-to-show", () => {
+      const setting = Setting.get();
+
+      setting && Emit.send("envim:setting", setting);
+      Emit.share("envim:theme", "system");
+    });
   }
 }

@@ -1,6 +1,6 @@
 import React, { createRef, RefObject } from "react";
 
-import { IMessage, IBrowser } from "../../../common/interface";
+import { ISetting, IMessage, IBrowser } from "../../../common/interface";
 
 import { Emit } from "../../utils/emit";
 import { Setting } from "../../utils/setting";
@@ -20,7 +20,7 @@ interface States {
   mode?: IMessage;
   command?: IMessage;
   ruler?: IMessage;
-  options: { [k:string]: boolean; };
+  options: ISetting["options"];
   debug: string;
   browser: IBrowser[];
 }

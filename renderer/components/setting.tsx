@@ -1,5 +1,7 @@
 import React, { FormEvent, ChangeEvent } from "react";
 
+import { ISetting } from "common/interface";
+
 import { Emit } from "../utils/emit";
 import { Setting } from "../utils/setting";
 
@@ -8,13 +10,7 @@ interface Props {
   height: number;
 }
 
-interface States {
-  type: "command" | "address";
-  path: string;
-  font: { width: number; height: number; size: number; lspace: number; scale: number; };
-  opacity: number;
-  options: { [k: string]: boolean; };
-  bookmarks: { name: string; path: string; selected: boolean; }[];
+interface States extends ISetting {
 }
 
 const flexDirection: "column" = "column";
@@ -60,6 +56,16 @@ export class SettingComponent extends React.Component<Props, States> {
   constructor(props: Props) {
     super(props);
     this.state = { ...Setting.get() };
+
+    Emit.on("envim:setting", this.onSetting);
+  }
+
+  componentWillUnmount = () => {
+    Emit.off("envim:setting", this.onSetting);
+  }
+
+  private onSetting = (state: ISetting) => {
+    this.setState( state );
   }
 
   private onToggleType = (e: ChangeEvent) => {

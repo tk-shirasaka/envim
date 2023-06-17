@@ -1,6 +1,6 @@
 import React, { MouseEvent } from "react";
 
-import { ITab, IBuffer, IMode, IMenu } from "../../../common/interface";
+import { ISetting, ITab, IBuffer, IMode, IMenu } from "../../../common/interface";
 
 import { Emit } from "../../utils/emit";
 import { Setting } from "../../utils/setting";
@@ -20,7 +20,7 @@ interface States {
   cwd: string;
   tabs: ITab[];
   menus: IMenu[];
-  bookmarks: { name: string; path: string; selected: boolean; }[];
+  bookmarks: ISetting["bookmarks"];
   mode?: IMode;
   enabled: boolean;
 }

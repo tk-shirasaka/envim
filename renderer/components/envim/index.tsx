@@ -1,6 +1,6 @@
 import React from "react";
 
-import { IWindow, IHighlight } from "common/interface";
+import { ISetting, IWindow, IHighlight } from "common/interface";
 
 import { Emit } from "../../utils/emit";
 import { Highlights } from "../../utils/highlight";
@@ -135,7 +135,7 @@ export class EnvimComponent extends React.Component<Props, States> {
     this.refresh = false;
   }
 
-  private onOption = (options: { [k: string]: boolean }) => {
+  private onOption = (options: ISetting["options"]) => {
     Setting.options = options;
     "mousemoveevent" in options && this.setState({ mousemoveevent: options.mousemoveevent });
   }

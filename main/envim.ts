@@ -6,7 +6,10 @@ import { spawn, ChildProcess } from "child_process";
 import { NeovimClient } from "neovim";
 import { UiAttachOptions } from "neovim/lib/api/Neovim"
 
+import { ISetting } from "common/interface";
+
 import { Emit } from "./emit";
+import { Setting } from "./setting";
 import { App } from "./envim/app";
 import { Grids } from "./envim/grid";
 
@@ -16,6 +19,7 @@ export class Envim {
 
   constructor() {
     Emit.on("envim:connect", this.onConnect);
+    Emit.on("envim:setting", this.onSetting);
     Emit.on("envim:attach", this.onAttach);
     Emit.on("envim:resize", this.onResize);
     Emit.on("envim:position", this.onPosition);
@@ -61,6 +65,10 @@ export class Envim {
       this.handleTheme();
       path && this.onCommand(`cd ${path}`);
     }
+  }
+
+  private onSetting = (setting: ISetting) => {
+    Setting.set(setting);
   }
 
   private onAttach = async (width: number, height: number, options: UiAttachOptions) => {

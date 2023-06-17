@@ -1,13 +1,6 @@
-import { Localstorage } from "./localstorage";
+import { ISetting } from "common/interface";
 
-interface ISetting {
-  type: "command" | "address";
-  path: string;
-  font: { size: number; width: number; height: number; lspace: number; scale: number; };
-  opacity: number;
-  options: { [k: string]: boolean; };
-  bookmarks: { name: string, path: string; selected: boolean }[];
-}
+import { Localstorage } from "./localstorage";
 
 const defaultSetting: ISetting = {
   type: "command",
