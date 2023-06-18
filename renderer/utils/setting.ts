@@ -17,6 +17,9 @@ const defaultSetting: ISetting = {
     ext_termcolors: true,
   },
   bookmarks: [],
+  searchengines: [
+    { name: "Google", uri: "https://google.com/search?q=${query}", selected: true },
+  ],
 };
 
 const ls: Localstorage<ISetting> = new Localstorage<ISetting>("setting", defaultSetting);
@@ -104,5 +107,13 @@ export class Setting {
 
   static set bookmarks(bookmarks: ISetting["bookmarks"]) {
     Setting.set({ ...Setting.item, bookmarks });
+  }
+
+  static get searchengines() {
+    return Setting.item.searchengines;
+  }
+
+  static set searchengines(searchengins: ISetting["searchengines"]) {
+    Setting.set({ ...Setting.item, searchengines: searchengins });
   }
 }

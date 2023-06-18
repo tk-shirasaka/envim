@@ -4,7 +4,8 @@ export interface ISetting {
   font: { size: number; width: number; height: number; lspace: number; scale: number; };
   opacity: number;
   options: { [k: string]: boolean; };
-  bookmarks: { name: string, path: string; selected: boolean }[];
+  bookmarks: { name: string, path: string; selected: boolean; }[];
+  searchengines: { name: string, uri: string; selected: boolean; }[];
 }
 
 export interface IWindow {

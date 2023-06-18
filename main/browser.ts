@@ -3,6 +3,7 @@ import { clipboard, dialog, BrowserWindow, Input, Event } from "electron";
 import { IBrowser } from "../common/interface";
 
 import { Bootstrap } from "./bootstrap";
+import { Setting } from "./setting";
 import { Emit } from "./emit";
 
 class Browser {
@@ -117,6 +118,17 @@ class Browser {
     return value;
   }
 
+  private getSelect = async <T>(prompt: string, list: string[], values: T[], index: number): Promise<T | void> => {
+    const args = ["EnvimSelect", [prompt, list, values, index]];
+
+    Bootstrap.win?.focus();
+
+    const value = await Emit.share("envim:api", "nvim_call_function", args);
+    this.win.focus();
+
+    return value;
+  }
+
   private confirm = (message: string) => {
     return dialog.showMessageBoxSync({ message, buttons: ["Yes", "No"], defaultId: 0 }) === 0;
   }
@@ -126,11 +138,40 @@ class Browser {
     this.search ? this.win.webContents.findInPage(this.search) : this.win.webContents.stopFindInPage("clearSelection");
   }
 
+  private onSearchEngine = async (input: string) => {
+    const setting = Setting.get();
+    const list = setting.searchengines.map(({ name }) => name);
+    const index = setting.searchengines.findIndex(({ selected }) => selected);
+
+    const engine = await this.getSelect<{ name: string; uri: string; selected: boolean; }>("Select Search Engine", list, setting.searchengines, index) || { name: "", uri: "", selected: true };
+
+    if (!engine.uri) {
+      engine.name = await this.getInput("Search Engine - Name");
+      engine.uri = engine.name && await this.getInput("Search Engine - URI");
+    }
+
+    if (engine.name) {
+      engine.selected = engine.uri.length > 0;
+      const searchengines = setting.searchengines
+        .filter(({ name }, i) => (!name || engine.name !== name) && i < 10)
+        .map(searchengine => ({ ...searchengine, selected: engine.selected ? false : searchengine.selected }));
+
+      engine.selected && searchengines.push(engine);
+      setting.searchengines = searchengines.sort((a, b) => a.name > b.name ? 1 : -1);
+
+      Setting.set(setting);
+
+      return engine.uri.replace("${query}", encodeURIComponent(input));
+    }
+
+    return "";
+  }
+
   private onOpen = async (input: string = "") => {
     input = input && !this.info.origin ? input : await this.getInput("Browser", input || clipboard.readText().slice(0, 500));
+    input = input && input.search(/^https?:\/\/\w+/) < 0 ? await this.onSearchEngine(input) : input;
 
-    if (input) {
-      input = input.search(/^https?:\/\/\w+/) < 0 ? `https://google.com/search?q=${encodeURIComponent(input)}` : input;
+    if (input.search(/^https?:\/\/\w+/) >= 0) {
       this.win.loadURL(input);
       this.show();
     } else if (!this.info.origin) {
