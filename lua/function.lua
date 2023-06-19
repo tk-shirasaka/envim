@@ -9,10 +9,10 @@ end
 _G.envim_input = (function ()
   local cache = {}
 
-  return function (prompt, default, history)
+  return function (prompt, default)
     local old = {}
+    local history = cache[prompt] or {}
 
-    history = history or cache[prompt] or {}
     _G.envim_completion = function () return history end
 
     for pos = 1, vim.fn.histnr("input") do
@@ -23,9 +23,16 @@ _G.envim_input = (function ()
 
     local input = vim.fn.input(string.format("%s: ", prompt), default or "", "customlist,v:lua.envim_completion")
 
+    input = vim.fn.trim(input or "")
     if input then
-      input = vim.fn.trim(input)
-      table.insert(history, input)
+      local tmp = {}
+
+      for _, val in ipairs(history) do
+        if val ~= input then table.insert(tmp, val) end
+      end
+      table.insert(tmp, 1, input)
+
+      history = tmp
     end
 
     vim.fn.histdel("input")
@@ -43,14 +50,16 @@ end)()
 _G.envim_select = function (prompt, list, values, default)
   local args = { prompt }
 
-  default = default + 1
+  values = values or list
+  default = (default or 0) + 1
+
   for i, val in ipairs(list) do
     table.insert(args, string.format("%d%s	: %s", i, i == default and "*" or "", val))
   end
 
-  local select = vim.fn.inputlist(args)
+  local select = #list == 1 and 1 or vim.fn.inputlist(args)
 
-  return values[select == 0 and default or select]
+  return values[select == 0 and default or select] or values[default]
 end
 
 vim.cmd([[
@@ -59,10 +68,10 @@ vim.cmd([[
   endfunction
 
   function! EnvimInput(prompt, ...)
-    return v:lua.envim_input(a:prompt, get(a:, 1, v:false), get(a:, 2, v:false))
+    return v:lua.envim_input(a:prompt, get(a:, 1, v:false))
   endfunction
 
   function! EnvimSelect(prompt, list, ...)
-    return v:lua.envim_select(a:prompt, a:list, get(a:, 1, a:list), get(a:, 2, 0))
+    return v:lua.envim_select(a:prompt, a:list, get(a:, 1, v:false), get(a:, 2, 0))
   endfunction
 ]])

@@ -11,7 +11,6 @@ class Browser {
   private mode: "vim" | "browser" = "vim";
   private devtool: boolean = false;
   private info: IBrowser= { id: 0, title: "", origin: "", protocol: "", active: false };
-  private completion: { [k: string]: string[] } = {};
 
   constructor(private win: BrowserWindow, parent: BrowserWindow, url?: string) {
     win.setBounds(parent.getBounds());
@@ -107,13 +106,11 @@ class Browser {
   }
 
   private getInput = async (prompt: string, value: string = "") => {
-    const completion  = this.completion[prompt] || [];
-    const args = ["EnvimInput", [prompt, value || "", completion]]
+    const args = ["EnvimInput", [prompt, value || ""]]
 
     Bootstrap.win?.focus();
     value = await Emit.share("envim:api", "nvim_call_function", args) || "";
     this.win.focus();
-    this.completion[prompt] = [ ...completion, value ].filter(h => h);
 
     return value;
   }
@@ -140,20 +137,21 @@ class Browser {
 
   private onSearchEngine = async (input: string) => {
     const setting = Setting.get();
-    const list = setting.searchengines.map(({ name }) => name);
+    const values = [ ...setting.searchengines, { name: "- Add Search Engine -", uri: "", selected: true } ];
+    const list = values.map(({ name }) => name);
     const index = setting.searchengines.findIndex(({ selected }) => selected);
 
-    const engine = await this.getSelect<{ name: string; uri: string; selected: boolean; }>("Select Search Engine", list, setting.searchengines, index) || { name: "", uri: "", selected: true };
+    const engine = await this.getSelect<{ name: string; uri: string; selected: boolean; }>("Select Search Engine", list, values, index);
 
-    if (!engine.uri) {
+    if (engine && !engine.uri) {
       engine.name = await this.getInput("Search Engine - Name");
       engine.uri = engine.name && await this.getInput("Search Engine - URI", this.win.webContents.getURL());
     }
 
-    if (engine.name) {
+    if (engine?.name) {
       engine.selected = engine.uri.length > 0;
       const searchengines = setting.searchengines
-        .filter(({ name }, i) => (!name || engine.name !== name) && i < 10)
+        .filter(({ name }, i) => name && engine.name !== name && i < 10)
         .map(searchengine => ({ ...searchengine, selected: engine.selected ? false : searchengine.selected }));
 
       engine.selected && searchengines.push(engine);
