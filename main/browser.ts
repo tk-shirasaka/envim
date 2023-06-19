@@ -147,7 +147,7 @@ class Browser {
 
     if (!engine.uri) {
       engine.name = await this.getInput("Search Engine - Name");
-      engine.uri = engine.name && await this.getInput("Search Engine - URI");
+      engine.uri = engine.name && await this.getInput("Search Engine - URI", this.win.webContents.getURL());
     }
 
     if (engine.name) {
@@ -160,6 +160,7 @@ class Browser {
       setting.searchengines = searchengines.sort((a, b) => a.name > b.name ? 1 : -1);
 
       Setting.set(setting);
+      Emit.send("envim:setting", setting);
 
       return engine.uri.replace("${query}", encodeURIComponent(input));
     }

@@ -63,6 +63,7 @@ export class EnvimComponent extends React.Component<Props, States> {
     Emit.on("highlight:set", this.onHighlight);
     Emit.on("win:pos", this.onWin);
     Emit.on("option:set", this.onOption);
+    Emit.on("envim:setting", this.onSetting);
     Emit.on("envim:pause", this.onPause);
     Emit.send("envim:attach", x2Col(this.editor.width), y2Row(this.editor.height), Setting.options);
   }
@@ -138,6 +139,10 @@ export class EnvimComponent extends React.Component<Props, States> {
   private onOption = (options: ISetting["options"]) => {
     Setting.options = options;
     "mousemoveevent" in options && this.setState({ mousemoveevent: options.mousemoveevent });
+  }
+
+  private onSetting = (setting: ISetting) => {
+    Setting.searchengines = setting.searchengines;
   }
 
   private onPause = (pause: boolean) => {
