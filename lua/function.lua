@@ -24,7 +24,7 @@ _G.envim_input = (function ()
     local input = vim.fn.input(string.format("%s: ", prompt), default or "", "customlist,v:lua.envim_completion")
 
     input = vim.fn.trim(input or "")
-    if input then
+    if input ~= "" then
       local tmp = {}
 
       for _, val in ipairs(history) do
