@@ -204,7 +204,7 @@ class Browser {
       case "x": return;
       case "z": return;
       case "y": return;
-      case "p": return this.win.webContents.print();
+      case "p": return this.win.webContents.print({});
       case "r": return this.win.webContents.reloadIgnoringCache();
       case "l": return this.onOpen(this.win.webContents.getURL());
       case "n": return Emit.share("browser:open", -1);
