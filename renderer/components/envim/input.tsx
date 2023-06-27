@@ -13,7 +13,7 @@ interface Props {
 }
 
 interface States {
-  style: { pointerEvent: "none"; transform: string; minWidth: number, height: number, zIndex: number; color: string; background: string; };
+  style: { pointerEvent: "none"; transform: string; height: number; zIndex: number; color: string; background: string; };
   composit: boolean;
   value: string;
   busy: boolean;
@@ -40,7 +40,7 @@ export class InputComponent extends React.Component<Props, States> {
   constructor(props: Props) {
     super(props);
 
-    this.state = { style: { pointerEvent: "none", transform: "", minWidth: col2X(1), height: row2Y(1), zIndex: 0, color: "", background: "" }, composit: false, value: "", busy: false };
+    this.state = { style: { pointerEvent: "none", transform: "", height: row2Y(1), zIndex: 0, color: "", background: "" }, composit: false, value: "", busy: false };
     Emit.on("envim:focus", this.onFocus);
     Emit.on("grid:cursor", this.onCursor);
     Emit.on("grid:busy", this.onBusy);
@@ -84,7 +84,6 @@ export class InputComponent extends React.Component<Props, States> {
     return {
       pointerEvent,
       height: row2Y(1),
-      minWidth: this.getWidth(this.cursor.width, this.cursor.shape),
       transform: `translate(${col2X(this.cursor.x)}px, ${row2Y(this.cursor.y)}px)`,
       zIndex: this.cursor.zIndex,
       color: Highlights.color(this.cursor.hl, "foreground", { reverse: true, normal: true }),
@@ -92,9 +91,9 @@ export class InputComponent extends React.Component<Props, States> {
     };
   }
 
-  private getWidth(width: number, shape: "block" | "vertical" | "horizontal") {
+  private getWidth() {
     if (this.state.busy) return 0;
-    return shape === "block" ? col2X(width) : 2;
+    return this.cursor.shape === "block" ? col2X(this.cursor.width) : 2;
   }
 
   private onKeyDown = (e: KeyboardEvent) => {
@@ -127,9 +126,10 @@ export class InputComponent extends React.Component<Props, States> {
 
   render() {
     const opacity = this.state.composit ? 1 : 0.7;
+    const minWidth = this.getWidth();
 
     return (
-      <FlexComponent animate="fade-in" style={{ opacity, ...this.state.style}} shadow={!this.state.busy} nomouse>
+      <FlexComponent animate="fade-in" style={{ opacity, minWidth, ...this.state.style}} shadow={!this.state.busy} nomouse>
         <input type="text" style={styles.input} ref={this.input} autoFocus
           onKeyDown={this.onKeyDown}
           onKeyUp={this.onKeyUp}
