@@ -45,6 +45,7 @@ export class Bootstrap {
     Bootstrap.win.maximize();
     Bootstrap.win.loadFile(join(__dirname, "index.html"));
     Bootstrap.win.on("closed", this.onQuit);
+    Bootstrap.win.on("focus", () => Emit.send("envim:focus"));
     Bootstrap.win.once("ready-to-show", () => {
       const setting = Setting.get();
 

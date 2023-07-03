@@ -1,4 +1,4 @@
-import { clipboard, dialog, BrowserWindow, Input, Event } from "electron";
+import { clipboard, dialog, BrowserWindow, Input, Event, OnHeadersReceivedListenerDetails } from "electron";
 
 import { IBrowser } from "../common/interface";
 
@@ -27,6 +27,7 @@ class Browser {
     win.webContents.on("did-create-window", this.onCreate);
     win.webContents.on("before-input-event", this.onInput);
     win.webContents.on("will-prevent-unload", this.onUnload);
+    win.webContents.session.webRequest.onHeadersReceived({ urls: [], types: ["mainFrame"] }, this.onHeadersReceived)
     parent === Bootstrap.win && this.onOpen(url);
   }
 
@@ -249,6 +250,20 @@ class Browser {
 
   private onUnload = (e: Event) => {
     this.confirm("Leave this page?") && e.preventDefault();
+  }
+
+  private onHeadersReceived = (details: OnHeadersReceivedListenerDetails, callback: Function) => {
+    const { responseHeaders } = details;
+    const contentType = responseHeaders && responseHeaders["content-type"]?.pop();
+
+    if (contentType === "application/pdf") {
+      const args = ["EnvimConnect", [0, "envim_preview", details.url]];
+
+      Emit.share("envim:api", "nvim_call_function", args);
+      Bootstrap.win?.focus();
+    } else {
+      callback({});
+    }
   }
 }
 
