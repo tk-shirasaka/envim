@@ -45,31 +45,30 @@ export class App {
     }
   }
 
-  private preview = async (base64?: string, winid?: number) => {
+  private preview = async (src?: string, winid?: number) => {
     winid = winid || await Emit.share("envim:api", "nvim_call_function", ["win_getid", []]) || -1;
 
     const grid = Grids.getByWinId(winid);
 
     if (grid) {
+      const extmap: { [k: string]: string } = {svg: "svg+xml"}
+      const mediamap: { [k: string]: string } = {image: "(ico)|(png)|(jpg)|(jpeg)|(gif)|(svg)", video: "(mp4)|(webm)", application: "(pdf)"};
+      const name = src || await Emit.share("envim:api", "nvim_buf_get_name", [0]) || "";
+      const ext = name.match(/^data:.*\/(.*);base64/)?.pop() || name.replace(/^.*\./, "");
+      const media = Object.keys(mediamap).find(key => ext.search(mediamap[key]) >= 0);
       const { id } = grid.getInfo();
 
-      if (base64 === undefined) {
-        const extmap: { [k: string]: string } = {svg: "svg+xml"}
-        const mediamap: { [k: string]: string } = {image: "(ico)|(png)|(jpg)|(jpeg)|(gif)|(svg)", video: "(mp4)|(webm)", application: "(pdf)"};
-        const ext = (await Emit.share("envim:api", "nvim_call_function", ["win_execute", [winid, "echo expand('%:e')"]]) || "").replace("\n", "");
-
-        if (ext) {
-          const blob = await Emit.share("envim:api", "nvim_call_function", ["win_execute", [winid, "echo blob2list(readblob(expand('%')))"]]) || "[]";
-          const media = Object.keys(mediamap).find(key => ext.search(mediamap[key]) >= 0);
-
-          base64 = Buf.from(JSON.parse(blob).map((c: string) => String.fromCharCode(+c)).join(""), "ascii").toString("base64");
-          base64 = `data:${media}/${extmap[ext] || ext};base64,${base64}`;
+      if (src === undefined && name && ext && media) {
+        if (name.match(/^https?:\/\//)) {
+          src = name;
+        } else {
+          const blob = await Emit.share("envim:api", "nvim_call_function", ["win_execute", [winid, `echo blob2list(readblob("${name}"))`]]) || "[]";
+          src = Buf.from(JSON.parse(blob).map((c: string) => String.fromCharCode(+c)).join(""), "ascii").toString("base64");
+          src = `data:${media}/${extmap[ext] || ext};base64,${src}`;
         }
       }
 
-      const media = (base64 || "").match(/^data:([^\/]*)\//);
-
-      Emit.update(`preview:${id}`, false, media ? media[1] : "", base64 || "");
+      Emit.update(`preview:${id}`, false, media || "", src || "");
     }
   }
 
