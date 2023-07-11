@@ -3,4 +3,5 @@ styles.css
 main.js
 preload.js
 renderer.js
+*.node
 dist/*

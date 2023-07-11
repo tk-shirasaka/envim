@@ -69,7 +69,7 @@ export class SettingComponent extends React.Component<Props, States> {
   }
 
   private onToggleType = (e: ChangeEvent) => {
-    const type = (e.target as HTMLInputElement).value === "command" ? "command" : "address";
+    const type = (e.target as HTMLInputElement).value as ISetting["type"];
 
     if (type === this.state.type) {
       this.setState({ type });
@@ -164,7 +164,9 @@ export class SettingComponent extends React.Component<Props, States> {
           <h3 className="bold">Neovim path</h3>
           <div>
             <label><input type="radio" value="command" checked={this.state.type === "command"} onChange={this.onToggleType} />Command</label>
-            <label><input type="radio" value="address" checked={this.state.type === "address"} onChange={this.onToggleType} />Port</label>
+            <label><input type="radio" value="address" checked={this.state.type === "address"} onChange={this.onToggleType} />Server</label>
+            <label><input type="radio" value="docker" checked={this.state.type === "docker"} onChange={this.onToggleType} />Docker</label>
+            <label><input type="radio" value="ssh" checked={this.state.type === "ssh"} onChange={this.onToggleType} />SSH</label>
           </div>
           <label>Enter neovim path<input type="text" value={this.state.path} onChange={this.onChangePath} autoFocus /></label>
           <div className="color-gray divider" />

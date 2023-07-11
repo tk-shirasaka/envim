@@ -1,21 +1,19 @@
 import { dialog, nativeTheme } from "electron";
-import { createConnection, Socket } from "net";
 import { join } from "path"
 import { readFile } from "fs/promises";
-import { spawn, ChildProcess } from "child_process";
 import { NeovimClient } from "neovim";
 import { UiAttachOptions } from "neovim/lib/api/Neovim"
 
 import { ISetting } from "common/interface";
 
 import { Emit } from "./emit";
+import { Connect } from "./connect";
 import { Setting } from "./setting";
 import { App } from "./envim/app";
 import { Grids } from "./envim/grid";
 
 export class Envim {
   private nvim = new NeovimClient;
-  private connect: { process?: ChildProcess; socket?: Socket; } = {}
 
   constructor() {
     Emit.on("envim:connect", this.onConnect);
@@ -37,24 +35,8 @@ export class Envim {
   }
 
   private onConnect = async (type: string, value: string, path: string ) => {
-    let reader, writer;
-
-    switch (type) {
-      case "command":
-        this.connect.process = spawn(value, ["--embed"]);
-        [reader, writer] = [this.connect.process.stdout, this.connect.process.stdin];
-      break;
-      case "address":
-        const [port, host] = value.split(":").reverse();
-        this.connect.socket = createConnection({ port: +port, host: host });
-        this.connect.socket.setNoDelay();
-        [reader, writer] = [this.connect.socket, this.connect.socket];
-      break;
-    }
-
-    if (reader && writer) {
-      this.nvim = new NeovimClient;
-      this.nvim.attach({ reader, writer });
+    const attach = async(nvim: NeovimClient) => {
+      this.nvim = nvim;
       this.nvim.setClientInfo("Envim", { major: 0, minor: 0, patch: 1, prerelease: "dev" }, "ui", {}, {})
       this.nvim.on("disconnect", this.onDisconnect);
       await this.nvim.setVar('envim_id', await this.nvim.channelId);
@@ -64,6 +46,13 @@ export class Envim {
 
       this.handleTheme();
       path && this.onCommand(`cd ${path}`);
+    }
+
+    switch (type) {
+      case "command": return Connect.command(value, attach);
+      case "address": return Connect.network(value, attach);
+      case "docker": return Connect.docker(value, attach);
+      case "ssh": return Connect.ssh(value, attach);
     }
   }
 

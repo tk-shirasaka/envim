@@ -1,5 +1,5 @@
 export interface ISetting {
-  type: "command" | "address";
+  type: "command" | "address" | "docker" | "ssh";
   path: string;
   font: { size: number; width: number; height: number; lspace: number; scale: number; };
   opacity: number;
