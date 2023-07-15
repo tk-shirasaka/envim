@@ -35,7 +35,6 @@ export class AppComponent extends React.Component<Props, States> {
   private onSwitch = (init: boolean) => {
     if (this.state.init === init) return;
 
-    Setting.saveCache();
     Emit.send("envim:setting", Setting.get());
     this.setState({ init });
   }

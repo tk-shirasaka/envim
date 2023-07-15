@@ -58,6 +58,7 @@ export class SettingComponent extends React.Component<Props, States> {
     this.state = { ...Setting.get() };
 
     Emit.on("envim:setting", this.onSetting);
+    Emit.send("envim:init");
   }
 
   componentWillUnmount = () => {
@@ -65,26 +66,28 @@ export class SettingComponent extends React.Component<Props, States> {
   }
 
   private onSetting = (state: ISetting) => {
-    this.setState( state );
+    this.setState(state);
   }
 
   private onToggleType = (e: ChangeEvent) => {
     const type = (e.target as HTMLInputElement).value as ISetting["type"];
+    const path = this.state.path;
 
     if (type === this.state.type) {
       this.setState({ type });
     } else {
-      this.setState({ ...Setting.loadCache(type, this.state.path) });
+      this.setState({ ...this.state, ...(this.state.presets[`[${type}]:${path}`] || { type, path }) });
     }
   }
 
   private onChangePath = (e: ChangeEvent) => {
     const path = (e.target as HTMLInputElement).value;
+    const type = this.state.type;
 
     if (path === this.state.path) {
       this.setState({ path });
     } else {
-      this.setState({ ...Setting.loadCache(this.state.type, path) });
+      this.setState({ ...this.state, ...(this.state.presets[`[${type}]:${path}`] || { type, path }) });
     }
   }
 
@@ -128,7 +131,6 @@ export class SettingComponent extends React.Component<Props, States> {
     Setting.opacity = opacity;
     Setting.options = options;
     Setting.bookmarks = bookmarks;
-    Setting.clearCache();
 
     Emit.initialize();
     Emit.send("envim:connect", type, path, bookmarks.find(({ selected }) => selected)?.path);

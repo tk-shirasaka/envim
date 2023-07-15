@@ -20,6 +20,7 @@ const defaultSetting: ISetting = {
   searchengines: [
     { name: "Google", uri: "https://google.com/search?q=${query}", selected: true },
   ],
+  presets: {},
 };
 
 const ls: Localstorage<ISetting> = new Localstorage<ISetting>("setting", defaultSetting);
@@ -34,31 +35,6 @@ export class Setting {
   private static set(item: ISetting) {
     ls.set(item);
     Setting.item = ls.get();
-  }
-
-  static loadCache(type: ISetting["type"], path: string) {
-    const key = `setting:[${type}]:${path}`;
-    const ls: Localstorage<ISetting> = new Localstorage<ISetting>(key, Setting.get());
-
-    Setting.item = { ...ls.get(), type, path };
-
-    return Setting.get();
-  }
-
-  static clearCache() {
-    const item = Setting.get();
-    const key = `setting:[${item.type}]:${item.path}`;
-    const ls: Localstorage<ISetting> = new Localstorage<ISetting>(key, item);
-
-    ls.clear();
-  }
-
-  static saveCache() {
-    const item = Setting.get();
-    const key = `setting:[${item.type}]:${item.path}`;
-    const ls: Localstorage<ISetting> = new Localstorage<ISetting>(key, item);
-
-    ls.set(item);
   }
 
   static get type() {

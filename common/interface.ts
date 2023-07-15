@@ -6,6 +6,7 @@ export interface ISetting {
   options: { [k: string]: boolean; };
   bookmarks: { name: string, path: string; selected: boolean; }[];
   searchengines: { name: string, uri: string; selected: boolean; }[];
+  presets: { [k: string]: ISetting };
 }
 
 export interface IWindow {

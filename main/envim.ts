@@ -16,6 +16,7 @@ export class Envim {
   private nvim = new NeovimClient;
 
   constructor() {
+    Emit.on("envim:init", this.onInit);
     Emit.on("envim:connect", this.onConnect);
     Emit.on("envim:setting", this.onSetting);
     Emit.on("envim:attach", this.onAttach);
@@ -32,6 +33,12 @@ export class Envim {
     process.on("uncaughtException", this.onError);
     process.on("unhandledRejection", this.onError);
     nativeTheme.on("updated", this.handleTheme);
+  }
+
+  private onInit = () => {
+    const setting = Setting.get();
+
+    setting && Emit.send("envim:setting", setting);
   }
 
   private onConnect = async (type: string, value: string, path: string ) => {

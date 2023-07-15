@@ -10,11 +10,16 @@ export class Setting {
   private static path: string = join(app.getPath("appData"), "envim.json");
 
   static set(item: ISetting) {
-    Setting.init = true;
-    Setting.item = item
+    const presets = Setting.item.presets || {};
 
-    writeFileSync(Setting.path, JSON.stringify(item), { encoding: "utf8" });
+    Setting.init = true;
+    Setting.item = { ...item, presets };
+    Setting.item.presets[`[${item.type}]:${item.path}`] = JSON.parse(JSON.stringify(item));
+    Setting.item.presets[`[${item.type}]:${item.path}`].presets = {};
+
+    writeFileSync(Setting.path, JSON.stringify(Setting.item), { encoding: "utf8" });
   }
+
   static get() {
     if (Setting.init === false && existsSync(Setting.path)) {
       const item = readFileSync(Setting.path, { encoding: "utf8" });
