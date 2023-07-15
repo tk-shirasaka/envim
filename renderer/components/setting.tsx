@@ -76,7 +76,8 @@ export class SettingComponent extends React.Component<Props, States> {
     if (type === this.state.type) {
       this.setState({ type });
     } else {
-      this.setState({ ...this.state, ...(this.state.presets[`[${type}]:${path}`] || { type, path }) });
+      const { presets, ...state } = this.state.presets[`[${type}]:${path}`] || { type, path };
+      this.setState({ ...this.state, ...state });
     }
   }
 
@@ -87,7 +88,8 @@ export class SettingComponent extends React.Component<Props, States> {
     if (path === this.state.path) {
       this.setState({ path });
     } else {
-      this.setState({ ...this.state, ...(this.state.presets[`[${type}]:${path}`] || { type, path }) });
+      const { presets, ...state } = this.state.presets[`[${type}]:${path}`] || { type, path };
+      this.setState({ ...this.state, ...state });
     }
   }
 
@@ -117,6 +119,12 @@ export class SettingComponent extends React.Component<Props, States> {
     const bookmarks = this.state.bookmarks.map((bookmark, i) => ({ ...bookmark, selected: i === index }));
 
     this.setState({ bookmarks });
+  }
+
+  private onSelectPreset(key: string) {
+    const presets = this.state.presets;
+
+    this.setState({ ...this.state.presets[key], presets });
   }
 
   private onSubmit = (e: FormEvent) => {
@@ -193,6 +201,13 @@ export class SettingComponent extends React.Component<Props, States> {
           { this.state.bookmarks.map((bookmark, i) => (
             <div key={i}>
               <label><input type="radio" checked={bookmark.selected} onChange={() => this.onSelectBookmark(i)} />{ bookmark.name.replace(/\//g, "  ") }</label>
+            </div>
+          ))}
+
+          <h3 className="bold">Presets</h3>
+          { Object.keys(this.state.presets).map(key => (
+            <div key={key}>
+              <label><input type="radio" checked={`[${this.state.type}]:${this.state.path}` === key} onChange={() => this.onSelectPreset(key)} />{ key }</label>
             </div>
           ))}
         </div>
