@@ -4,9 +4,10 @@ import { FlexComponent } from "./flex";
 
 interface Props {
   side?: boolean;
+  horizontal?: boolean;
   label: string;
   color: string;
-  style: Object;
+  style?: Object;
 }
 
 interface States {
@@ -78,9 +79,10 @@ export class MenuComponent extends React.Component<PropsWithChildren<Props>, Sta
 
     const base = this.props.side ? styles.sidemenu : styles.menu;
     const style = { ...base, ...{ inset: this.inset.join(" ") } };
+    const direction = this.props.horizontal ? "row" : "column";
 
     return (
-      <FlexComponent color="default" direction="column" position="absolute" overflow="visible" zIndex={20} padding={[4]} rounded={[2]} style={style} shadow hover>
+      <FlexComponent color="default" direction={direction} position="absolute" overflow="visible" zIndex={20} padding={[4]} rounded={[2]} style={style} shadow hover>
         { this.props.children }
       </FlexComponent>
     );

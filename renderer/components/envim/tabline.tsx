@@ -165,7 +165,7 @@ export class TablineComponent extends React.Component<Props, States> {
     return (
       <>
         { groups.map(group =>
-          <MenuComponent key={`${base}${group}`} color="lightblue-fg" style={{}} label={`󰉋 ${group}`} side>
+          <MenuComponent key={`${base}${group}`} color="lightblue-fg" label={`󰉋 ${group}`} side>
             { this.renderBookmarkMenu(`${base}${group}/`) }
           </MenuComponent>
         ) }
