@@ -43,6 +43,7 @@ const styles = {
 
 export class HistoryComponent extends React.Component<Props, States> {
   private bottom: RefObject<HTMLDivElement> = createRef<HTMLDivElement>();
+  private timer: number = 0;
 
   constructor(props: Props) {
     super(props);
@@ -106,7 +107,12 @@ export class HistoryComponent extends React.Component<Props, States> {
   }
 
   private loadMessages = () => {
-    Emit.send("envim:command", "messages");
+    clearInterval(this.timer);
+    this.timer = +setInterval(() => Emit.send("envim:command", "messages"), 500);
+  }
+
+  private unloadMessages = () => {
+    clearInterval(this.timer);
   }
 
   private openBrowser = (id: number) => {
@@ -153,7 +159,7 @@ export class HistoryComponent extends React.Component<Props, States> {
 
   render() {
     return (
-      <FlexComponent animate="hover" direction="column-reverse" position="absolute" overflow="visible" style={styles.scope} onMouseEnter={this.loadMessages}>
+      <FlexComponent animate="hover" direction="column-reverse" position="absolute" overflow="visible" style={styles.scope}>
         <FlexComponent color="default" overflow="visible" style={this.props}>
           { this.state.mode && <FlexComponent animate="fade-in" margin={["auto", 4]} rounded={[4]} shadow><MessageComponent message={this.state.mode} open /></FlexComponent> }
           { this.state.command && <FlexComponent animate="fade-in" margin={["auto", 4]} rounded={[4]} shadow><MessageComponent message={this.state.command} open /></FlexComponent> }
@@ -175,16 +181,16 @@ export class HistoryComponent extends React.Component<Props, States> {
             <IconComponent color="green-fg" font="" onClick={() => this.openBrowser(-1)} />
           </MenuComponent>
           <IconComponent color="green-fg" active={this.state.debug.length > 0} font="" onClick={this.toggleDebug} />
-          <IconComponent color="red-fg" font="󰂭" onClick={this.onClear} />
         </FlexComponent>
         <FlexComponent overflow="visible" hover>
           <FlexComponent direction="column" position="absolute" rounded={[4, 4, 0, 0]} overflow="auto" style={styles.history} shadow>
             { this.state.messages.map((message, i) => <div key={i}><MessageComponent message={message} open={message.kind !== "debug"} /></div>) }
             { this.state.options.ext_messages && (
-              <FlexComponent color="default" onClick={this.loadMessages}>
-                <FlexComponent color="lightblue" grow={1} />
-                <IconComponent color="lightblue" font="󰑓" text="Load more..." />
-                <FlexComponent color="lightblue" grow={1} />
+              <FlexComponent color="default" onMouseEnter={this.loadMessages} onMouseLeave={this.unloadMessages}>
+                <FlexComponent grow={1} />
+                <IconComponent color="lightblue-fg" font="󰑓" text="Load more..." />
+                <FlexComponent grow={1} />
+                { this.state.messages.length === 0 ? null : <IconComponent color="red-fg" font="󰂭" onClick={this.onClear} /> }
               </FlexComponent>
             ) }
             <div ref={this.bottom} />
