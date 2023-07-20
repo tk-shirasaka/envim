@@ -128,11 +128,12 @@ export class Envim {
     this.onDisconnect();
   }
 
-  private onTheme = (theme: "dark" | "light" | "system") => {
-    if (theme === "system") {
+  private onTheme = (theme?: "dark" | "light" | "system") => {
+    if (!theme || theme === "system") {
       theme = nativeTheme.shouldUseDarkColors ? "dark" : "light"
     }
 
+    nativeTheme.themeSource = theme;
     Emit.update("app:theme", false, theme);
 
     return theme;

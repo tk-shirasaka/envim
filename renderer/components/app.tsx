@@ -2,6 +2,7 @@ import React from "react";
 
 import { Emit } from "../utils/emit";
 import { Setting } from "../utils/setting";
+import { Cache } from "../utils/cache";
 
 import { SettingComponent } from "./setting";
 import { EnvimComponent } from "./envim";
@@ -41,6 +42,7 @@ export class AppComponent extends React.Component<Props, States> {
 
   private onTheme = (theme: "dark" | "light") => {
     this.setState({ theme });
+    Cache.set<"dark" | "light">("common", "theme", theme);
   }
 
   render() {

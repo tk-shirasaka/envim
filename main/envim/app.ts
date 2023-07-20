@@ -40,7 +40,7 @@ export class App {
       case "redraw" :return this.redraw(args);
       case "envim_clipboard": return Clipboard.copy(args[0], args[1]);
       case "envim_dirchanged": return Autocmd.dirchanged(args[0]);
-      case "envim_setbackground": return args[0] && Emit.share("envim:theme", args[0]);
+      case "envim_setbackground": return Emit.share("envim:theme", args[0]);
       case "envim_openurl": return args[0] && Emit.share("browser:open", -1, args[0]);
       case "envim_preview": return this.preview(args[0], args[1]);
     }

@@ -77,11 +77,11 @@ $color-purple: #723eac;
 }
 
 .clickable:hover {
-  filter: brightness(var(--brightness-normal));
+  filter: brightness(var(--brightness-light));
 }
 
 .active {
-  filter: brightness(var(--brightness-light));
+  filter: brightness(var(--brightness-normal));
 
   &:hover {
     filter: brightness(var(--brightness-deep));

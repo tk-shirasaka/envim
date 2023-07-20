@@ -4,6 +4,7 @@ import { ISetting, IMessage, IBrowser } from "../../../common/interface";
 
 import { Emit } from "../../utils/emit";
 import { Setting } from "../../utils/setting";
+import { Cache } from "../../utils/cache";
 
 import { FlexComponent } from "../flex";
 import { MenuComponent } from "../menu";
@@ -17,6 +18,7 @@ interface Props {
 
 interface States {
   messages: IMessage[];
+  theme: "dark" | "light";
   mode?: IMessage;
   command?: IMessage;
   ruler?: IMessage;
@@ -48,7 +50,7 @@ export class HistoryComponent extends React.Component<Props, States> {
   constructor(props: Props) {
     super(props);
 
-    this.state = { messages: [], options: Setting.options, debug: "", browser: [] };
+    this.state = { messages: [], theme: Cache.get<"dark" | "light">("common", "theme"), options: Setting.options, debug: "", browser: [] };
     Emit.on("messages:mode", this.onMode);
     Emit.on("messages:command", this.onCommand);
     Emit.on("messages:ruler", this.onRuler);
@@ -126,6 +128,13 @@ export class HistoryComponent extends React.Component<Props, States> {
     Emit.send("browser:close", id);
   }
 
+  private toggleTheme = () => {
+    const theme = this.state.theme === "dark" ? "light" : "dark";
+
+    this.setState({ theme });
+    Emit.send("envim:command", `set background=${theme}`);
+  }
+
   private toggleDebug = async () => {
     const args = ["EnvimInput", ["Event name"]]
     const debug = await Emit.send<string>("envim:api", "nvim_call_function", args);
@@ -171,6 +180,11 @@ export class HistoryComponent extends React.Component<Props, States> {
                 <input type="checkbox" value="command" checked={this.state.options[ext]} />{ ext }
               </FlexComponent>
             )) }
+            <FlexComponent animate="hover" color="default" horizontal="center" onClick={this.toggleTheme}>
+              <IconComponent color="orange-fg" active={this.state.theme === "light"} font="" />
+              /
+              <IconComponent color="yellow-fg" active={this.state.theme === "dark"} font="" />
+            </FlexComponent>
           </MenuComponent>
           <MenuComponent color="blue-fg" label="󰖟" horizontal>
             { this.state.browser.length === 0 ? null : (
