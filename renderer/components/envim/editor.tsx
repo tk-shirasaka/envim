@@ -269,7 +269,7 @@ export class EditorComponent extends React.Component<Props, States> {
 
     this.setState({ scrolling, scroll: {
       total,
-      height: height ? `${height === 100 ? 0 : height}%` : "4px",
+      height: height ? `${height}%` : "4px",
       transform: `translateY(${Math.min(Math.floor(top / total * limit), limit - 4)}px)`,
     }});
   }

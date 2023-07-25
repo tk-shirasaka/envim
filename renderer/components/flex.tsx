@@ -69,7 +69,7 @@ export class FlexComponent extends React.Component<PropsWithChildren<Props>, Sta
       flexBasis: props.basis || "auto",
       alignItems: props.vertical || "stretch",
       justifyContent: props.horizontal || "stretch",
-      boxShadow: props.shadow ? "rgba(0, 0, 0, 0.5) 0 0 4px 2px" : "none",
+      boxShadow: props.shadow ? "rgba(0, 0, 0, 0.2) 0 0 2px 2px" : "none",
       padding: props.padding && props.padding.map(px => `${px}px`).join(" ") || 0,
       inset: props.inset && props.inset.map(px => px === "auto" ? "auto" : `${px}px`).join(" ") || "auto",
       margin: props.margin && props.margin.map(px => px === "auto" ? "auto" : `${px}px`).join(" ") || 0,
