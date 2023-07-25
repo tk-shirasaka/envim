@@ -402,13 +402,15 @@ export class App {
 
   private msgShow(messages: [string, [string, string][], boolean][]) {
     const replace = messages.some(message => message[2]);
-    const entries = messages.map(message => this.convertMessage(message[0], message[1]));
+    const entries = messages
+      .map(message => this.convertMessage(message[0], message[1]))
+      .filter(({ contents }) => contents.length);
 
-    Emit.update("messages:show", false, entries, replace);
+    Emit.update("messages:show", true, entries, replace);
   }
 
   private msgClear() {
-    Emit.update("messages:show", false, [], true);
+    Emit.update("messages:show", true, [], true);
   }
 
   private msgShowmode(contents: [string, string][]) {

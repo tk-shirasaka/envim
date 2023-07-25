@@ -43,8 +43,6 @@ export class MessageComponent extends React.Component<Props, States> {
   }
 
   render() {
-    if (this.props.message.contents.length === 0) return null;
-
     const icon = notificates.filter(icon => icon.kinds.indexOf(this.props.message.kind) >= 0)[0];
     const defaultHl = this.props.message.contents[0].hl;
     const defaultStyle = Highlights.style(defaultHl);
