@@ -65,6 +65,10 @@ export class TablineComponent extends React.Component<Props, States> {
     Setting.bookmarks = this.state.bookmarks
       .map(bookmark => ({ ...bookmark, selected: bookmark.path === cwd }));
 
+    if (this.state.bookmarks.some(({ path, selected }) => !selected && path === cwd)) {
+      Emit.send("envim:connect", Setting.type, Setting.path, cwd);
+    }
+
     this.setState({ cwd, bookmarks: Setting.bookmarks });
   }
 

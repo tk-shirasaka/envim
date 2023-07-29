@@ -60,6 +60,7 @@ export class EnvimComponent extends React.Component<Props, States> {
 
     this.setSize();
     this.state = { pause: false, mousemoveevent: false, grids: {} };
+    Emit.on("app:switch", this.onSwitch);
     Emit.on("highlight:set", this.onHighlight);
     Emit.on("win:pos", this.onWin);
     Emit.on("option:set", this.onOption);
@@ -76,6 +77,7 @@ export class EnvimComponent extends React.Component<Props, States> {
   }
 
   componentWillUnmount = () => {
+    Emit.off("app:switch", this.onSwitch);
     Emit.off("highlight:set", this.onHighlight);
     Emit.off("win:pos", this.onWin);
     Emit.off("option:set", this.onOption);
@@ -100,6 +102,11 @@ export class EnvimComponent extends React.Component<Props, States> {
       height: row2Y(y2Row(this.props.height - this.header.height - font.height - 4) - 1),
     };
     this.footer = { width: this.props.width, height: this.props.height - this.header.height - this.editor.height - font.height };
+  }
+
+  private onSwitch = () => {
+    this.setState( { grids: {} } );
+    Emit.send("envim:attach", x2Col(this.editor.width), y2Row(this.editor.height), Setting.options);
   }
 
   private onHighlight = (highlights: {id: string, ui: boolean, hl: IHighlight}[]) => {

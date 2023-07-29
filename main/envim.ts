@@ -7,7 +7,7 @@ import { UiAttachOptions } from "neovim/lib/api/Neovim"
 import { ISetting } from "common/interface";
 
 import { Emit } from "./emit";
-import { Connect } from "./connect";
+import { Connection } from "./connection";
 import { Setting } from "./setting";
 import { App } from "./envim/app";
 import { Grids } from "./envim/grid";
@@ -41,26 +41,22 @@ export class Envim {
     setting && Emit.send("envim:setting", setting);
   }
 
-  private onConnect = async (type: string, value: string, path: string ) => {
-    const attach = async(nvim: NeovimClient) => {
+  private onConnect = (type: string, path: string, bookmark: string ) => {
+    Connection.connect(type, path, bookmark, async (nvim: NeovimClient, init: boolean, workspace: string) => {
       this.nvim = nvim;
-      this.nvim.setClientInfo("Envim", { major: 0, minor: 0, patch: 1, prerelease: "dev" }, "ui", {}, {})
-      this.nvim.on("disconnect", this.onDisconnect);
-      await this.nvim.setVar('envim_id', await this.nvim.channelId);
-      new App(this.nvim);
+      new App(this.nvim, init, workspace);
       Emit.send("app:switch", true);
       Emit.share("browser:update");
 
       this.handleTheme();
-      path && this.onCommand(`cd ${path}`);
-    }
+      bookmark && this.onCommand(`cd ${bookmark}`);
 
-    switch (type) {
-      case "command": return Connect.command(value, attach);
-      case "address": return Connect.network(value, attach);
-      case "docker": return Connect.docker(value, attach);
-      case "ssh": return Connect.ssh(value, attach);
-    }
+      if (init) {
+        this.nvim.setClientInfo("Envim", { major: 0, minor: 0, patch: 1, prerelease: "dev" }, "ui", {}, {})
+        this.nvim.on("disconnect", () => this.onDisconnect(workspace));
+        await this.nvim.setVar('envim_id', await this.nvim.channelId);
+      }
+    });
   }
 
   private onSetting = (setting: ISetting) => {
@@ -114,9 +110,17 @@ export class Envim {
     Grids.flush();
   }
 
-  private onDisconnect = () => {
-    Emit.send("app:switch", false);
-    Emit.share("browser:hide");
+  private onDisconnect = (workspace: string) => {
+    Connection.disconnect(workspace, (workspace?: { nvim: NeovimClient, bookmark: string }) => {
+      const { type, path } = Setting.get();
+
+      if (workspace) {
+        this.onConnect(type, path, workspace.bookmark);
+      } else {
+        Emit.send("app:switch", false);
+        Emit.share("browser:hide");
+      }
+    });
   }
 
   private onError = (e: Error | any) => {
@@ -125,7 +129,7 @@ export class Envim {
     } else if (e instanceof String) {
       dialog.showErrorBox('Error', e.toString());
     }
-    this.onDisconnect();
+    this.onDisconnect("");
   }
 
   private onTheme = (theme?: "dark" | "light" | "system") => {

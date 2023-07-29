@@ -72,7 +72,7 @@ class Grid {
 
   refresh() {
     this.lines.forEach(line => line.forEach(({ cell }) => {
-      this.setCell(cell.row, cell.col, cell.text, cell.hl);
+      this.dirty[`${cell.row},${cell.col}`] = cell;
     }));
   }
 
@@ -149,8 +149,8 @@ class Grid {
     return { flush, viewport };
   }
 
-  onReady() {
-    this.ready = true;
+  onReady(ready: boolean = true) {
+    this.ready = ready;
   }
 }
 
@@ -159,11 +159,29 @@ export class Grids {
   private static default: 1 = 1;
   private static active: { grid: number; row: number; col: number; } = { grid: 0, row: 0, col: 0 };
   private static changes: { [k: number]: number } = {};
+  private static workspace: { current: string; caches: { [k: string]: Grid[] } } = { current: "", caches: {} };
 
-  static init() {
+  static init(init: boolean, workspace: string) {
+    if (Grids.workspace.current) {
+      Grids.workspace.caches[Grids.workspace.current] = Object.values(Grids.grids);
+    }
+    if (init) {
+      Grids.workspace.caches[workspace] = [];
+    }
+
     Grids.grids = {};
     Grids.active = { grid: 0, row: 0, col: 0 };
     Grids.changes = {};
+    Grids.workspace.current = workspace;
+
+    Grids.workspace.caches[workspace].forEach(grid => {
+      const { id, status } = grid.getInfo();
+
+      grid.refresh();
+      grid.onReady(false);
+      Grids.grids[id] = grid;
+      Grids.setStatus(id, status, true);
+    });
   }
 
   static get(grid: number = Grids.default, add: boolean = true) {

@@ -16,10 +16,10 @@ import { Highlights } from "./highlight";
 export class App {
   private modes: IMode[] = [];
 
-  constructor(private nvim: NeovimClient) {
+  constructor(private nvim: NeovimClient, init: boolean, workspace: string) {
     Emit.init();
     Highlights.init();
-    Grids.init();
+    Grids.init(init, workspace);
     Function.setup();
     Autocmd.setup();
     Clipboard.setup();
