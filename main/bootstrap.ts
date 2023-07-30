@@ -45,6 +45,6 @@ export class Bootstrap {
     Bootstrap.win.loadFile(join(__dirname, "index.html"));
     Bootstrap.win.on("closed", this.onQuit);
     Bootstrap.win.on("focus", () => Emit.send("envim:focus"));
-    Bootstrap.win.once("ready-to-show", () => Emit.share("envim:theme", "system"));
+    Bootstrap.win.once("ready-to-show", () => Emit.share("envim:theme"));
   }
 }

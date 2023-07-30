@@ -132,8 +132,8 @@ export class Envim {
     this.onDisconnect("");
   }
 
-  private onTheme = (theme?: "dark" | "light" | "system") => {
-    if (!theme || theme === "system") {
+  private onTheme = (theme?: "dark" | "light") => {
+    if (!theme) {
       theme = nativeTheme.shouldUseDarkColors ? "dark" : "light"
     }
 
@@ -144,7 +144,10 @@ export class Envim {
   }
 
   private handleTheme = () => {
-    const theme = this.onTheme("system");
-    this.nvim.isApiReady && this.onCommand(`set background=${theme}`)
+    const theme = this.onTheme();
+
+    setTimeout(() => {
+      this.nvim.isApiReady && this.onCommand(`set background=${theme}`);
+    }, 200);
   }
 }
