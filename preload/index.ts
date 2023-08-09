@@ -7,6 +7,7 @@ const counter: number[] = [];
 const initialize = () => {
   counter.forEach(timer => clearTimeout(timer));
   counter.splice(0);
+  share("envim:pause", false);
 }
 
 const on = (event: string, callback: (...args: any[]) => void) => {
