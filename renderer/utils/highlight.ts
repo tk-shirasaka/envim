@@ -16,7 +16,7 @@ class Highlight {
   public special: { normal: string; alpha: string; lighten: string; };
   public reverse?: boolean;
   private type: "normal" | "bold" | "italic";
-  private decorate: "none" | "strikethrough" | "underline" | "underdouble" | "undercurl" | "underdotted" | "underdashed";
+  private decorate: ("strikethrough" | "underline" | "underdouble" | "undercurl" | "underdotted" | "underdashed")[];
 
   constructor(highlight: IHighlight, alpha: number, lighten: number) {
     alpha = highlight.blend === undefined ? alpha : highlight.blend;
@@ -32,13 +32,13 @@ class Highlight {
     if (highlight.bold) this.type = "bold";
     if (highlight.italic) this.type = "italic";
 
-    this.decorate = "none";
-    if (highlight.strikethrough) this.decorate = "strikethrough";
-    if (highlight.underline) this.decorate = "underline";
-    if (highlight.underdouble) this.decorate = "underdouble";
-    if (highlight.undercurl) this.decorate = "undercurl";
-    if (highlight.underdotted) this.decorate = "underdotted";
-    if (highlight.underdashed) this.decorate = "underdashed";
+    this.decorate = [];
+    if (highlight.strikethrough) this.decorate.push("strikethrough");
+    if (highlight.underline) this.decorate.push("underline");
+    if (highlight.underdouble) this.decorate.push("underdouble");
+    if (highlight.undercurl) this.decorate.push("undercurl");
+    if (highlight.underdotted) this.decorate.push("underdotted");
+    if (highlight.underdashed) this.decorate.push("underdashed");
   }
 
   private intToColor(color: number | undefined, a1: number, a2: number) {
@@ -110,16 +110,19 @@ export class Highlights {
     const special = Highlights.color(id, "special");
     const fontFamily = Highlights.fontFamily(id);
     const fontStyle = Highlights.fontStyle(id);
-    const textDecoration = {
-      none: "",
-      strikethrough: `line-through ${special}`,
-      underline: `underline solid ${special}`,
-      underdouble: `underline double ${special}`,
-      undercurl: `underline wavy ${special}`,
-      underdotted: `underline dotted ${special}`,
-      underdashed: `underline dashed ${special}`,
-
-    }[Highlights.decoration(id)];
+    const textDecoration = Highlights.decoration(id)
+      .map(type => ({
+        strikethrough: ["line-through", special],
+        underline: ["underline", "solid", special],
+        underdouble: ["underline", "double", special],
+        undercurl: ["underline", "wavy", special],
+        underdotted: ["underline", "dotted", special],
+        underdashed: ["underline", "dashed", special],
+      }[type]))
+      .reduce((prev, type) => [ ...prev, ...type ], [])
+      .filter((val, i, arr) => i === arr.indexOf(val))
+      .sort(val => val === special ? -1 : 0)
+      .join(" ");
 
     return { background, color: foreground, borderColor: foreground, fontFamily, fontStyle, textDecoration };
   }
@@ -137,6 +140,6 @@ export class Highlights {
   }
 
   static decoration(id: string) {
-    return Cache.get<Highlight>(TYPE, id)?.decoration() || "none";
+    return Cache.get<Highlight>(TYPE, id)?.decoration() || [];
   }
 }

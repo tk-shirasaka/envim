@@ -37,11 +37,10 @@ export class Context2D {
   }
 
   private decoration(x: number, y: number, width: number, hl: string) {
-    const type = Highlights.decoration(hl);
     const font = this.font
     const lineWidth = this.bgctx.lineWidth;
 
-    if (type !== "none") {
+    Highlights.decoration(hl).forEach(type => {
       this.style(hl, "special");
       this.bgctx.beginPath();
       this.bgctx.setLineDash([]);
@@ -80,7 +79,7 @@ export class Context2D {
       }
 
       this.bgctx.stroke()
-    }
+    });
   }
 
   private rect(x: number, y: number, width: number, height: number, hl: string) {
