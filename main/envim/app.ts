@@ -240,7 +240,7 @@ export class App {
   private gridLine(grid: number, row: number, col: number, cells: string[][]) {
     let i = 0;
     cells.forEach(cell => {
-      const repeat = +cell[2] || 1;
+      const repeat = cell.length >= 3 ? +cell[2] : 1;
       for (let j = 0; j < repeat; j++) {
         Grids.get(grid).setCell(row, col + i++, cell[0], cell.length > 1 ? cell[1] : "-1");
       }
