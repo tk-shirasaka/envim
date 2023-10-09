@@ -66,7 +66,7 @@ export class Connection {
           stream.on("exit", ssh.end);
         });
       })
-      .on("error", ssh.end)
+      .on("error", e => { throw e; })
       .connect({
         host: hostname,
         port: +(port || 22),
@@ -74,6 +74,7 @@ export class Connection {
         password,
         privateKey: searchParams.has("key") ? readFileSync(searchParams.get("key") || "") : "",
         passphrase: searchParams.get("pass") || "",
+        readyTimeout: 5000,
       });
   }
 

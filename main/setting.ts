@@ -20,6 +20,12 @@ export class Setting {
     writeFileSync(Setting.path, JSON.stringify(Setting.item), { encoding: "utf8" });
   }
 
+  static remove(type: string, path: string) {
+    delete(Setting.item.presets[`[${type}]:${path}`])
+
+    writeFileSync(Setting.path, JSON.stringify(Setting.item), { encoding: "utf8" });
+  }
+
   static get() {
     if (Setting.init === false && existsSync(Setting.path)) {
       const item = readFileSync(Setting.path, { encoding: "utf8" });
