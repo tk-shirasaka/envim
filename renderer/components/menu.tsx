@@ -7,6 +7,7 @@ interface Props {
   horizontal?: boolean;
   label: string;
   color: string;
+  active?: boolean;
   style?: Object;
 }
 
@@ -92,7 +93,7 @@ export class MenuComponent extends React.Component<PropsWithChildren<Props>, Sta
     return (
       <FlexComponent vertical="center" overflow="visible">
         <div className="animate hover space" style={styles.wrap} ref={this.div}>
-          <FlexComponent color={this.props.color} style={this.props.style} onClick={this.onClick}>{ this.props.label }</FlexComponent>
+          <FlexComponent color={this.props.color} style={this.props.style} onClick={this.onClick} active={this.props.active}>{ this.props.label }</FlexComponent>
           { this.renderMenu() }
         </div>
       </FlexComponent>

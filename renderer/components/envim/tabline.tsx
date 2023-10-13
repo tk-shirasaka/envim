@@ -165,11 +165,12 @@ export class TablineComponent extends React.Component<Props, States> {
     const regexp = new RegExp(`^${base}`);
     const bookmarks = this.state.bookmarks.filter(({ name }) => name.match(regexp)).map(({ name, ...other }) => ({ ...other, name: name.replace(regexp, "") }));
     const groups = bookmarks.map(({ name }) => name.split("/")).reduce((all, curr) => curr.length === 1 || all.indexOf(curr[0]) >= 0 ? all : [...all, curr[0]], []);
+    const selected = this.state.bookmarks.find(({ selected }) => selected)?.name || "";
 
     return (
       <>
         { groups.map(group =>
-          <MenuComponent key={`${base}${group}`} color="lightblue-fg" label={`󰉋 ${group}`} side>
+          <MenuComponent key={`${base}${group}`} color="lightblue-fg" label={`󰉋 ${group}`} active={selected.indexOf(`${base}${group}/`) === 0} side>
             { this.renderBookmarkMenu(`${base}${group}/`) }
           </MenuComponent>
         ) }
