@@ -345,7 +345,8 @@ export class EditorComponent extends React.Component<Props, States> {
               { this.state.preview.src && <IconComponent color="gray-fg" font="" onClick={this.togglePreview} /> }
               { this.props.type === "normal" && (
                 <>
-                  { this.renderMenu("", "buffer ") }
+                  { this.renderMenu("", "buffer ") }
+                  <IconComponent color="gray-fg" font="" onClick={e => this.runCommand(e, "enew")} />
                   <IconComponent color="gray-fg" font="" onClick={e => this.runCommand(e, "vsplit")} />
                   <IconComponent color="gray-fg" font="" onClick={e => this.runCommand(e, "split")} />
                   <IconComponent color="gray-fg" font="󰶭" onClick={this.openExtWindow} />
