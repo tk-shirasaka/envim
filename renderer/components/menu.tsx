@@ -6,9 +6,8 @@ interface Props {
   side?: boolean;
   horizontal?: boolean;
   label: string;
-  color: string;
+  color?: string;
   active?: boolean;
-  style?: Object;
 }
 
 interface States {
@@ -20,12 +19,17 @@ const whiteSpace: "nowrap" = "nowrap";
 const styles = {
   wrap: {
     position,
+    display: "flex",
+    width: "100%",
+    height: "100%",
   },
   menu: {
     minWidth: "100%",
+    lineHeight: 1.5,
     whiteSpace,
   },
   sidemenu: {
+    lineHeight: 1.5,
     whiteSpace,
   },
 };
@@ -83,7 +87,7 @@ export class MenuComponent extends React.Component<PropsWithChildren<Props>, Sta
     const direction = this.props.horizontal ? "row" : "column";
 
     return (
-      <FlexComponent color="default" direction={direction} position="absolute" overflow="visible" zIndex={20} padding={[4]} rounded={[2]} style={style} shadow hover>
+      <FlexComponent color="default" direction={direction} position="absolute" overflow="visible" zIndex={20} rounded={[2]} style={style} shadow hover>
         { this.props.children }
       </FlexComponent>
     );
@@ -93,7 +97,7 @@ export class MenuComponent extends React.Component<PropsWithChildren<Props>, Sta
     return (
       <FlexComponent vertical="center" overflow="visible">
         <div className="animate hover space" style={styles.wrap} ref={this.div}>
-          <FlexComponent color={this.props.color} style={this.props.style} onClick={this.onClick} active={this.props.active}>{ this.props.label }</FlexComponent>
+          <FlexComponent grow={1} vertical="center" color={this.props.color} onClick={this.onClick} active={this.props.active} spacing>{ this.props.label }</FlexComponent>
           { this.renderMenu() }
         </div>
       </FlexComponent>

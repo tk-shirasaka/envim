@@ -30,17 +30,17 @@ $color-purple: #723eac;
 .theme-dark {
   @include make-variable("fg", $color-light);
   @include make-variable("bg", $color-dark);
-  --brightness-light: 1.4;
-  --brightness-normal: 1.8;
-  --brightness-deep: 2.2;
+  --brightness-light: 1.1;
+  --brightness-normal: 1.2;
+  --brightness-deep: 1.4;
 }
 
 .theme-light {
   @include make-variable("fg", $color-dark);
   @include make-variable("bg", $color-light);
-  --brightness-light: 0.9;
-  --brightness-normal: 0.8;
-  --brightness-deep: 0.6;
+  --brightness-light: 0.97;
+  --brightness-normal: 0.95;
+  --brightness-deep: 0.93;
 }
 
 @mixin make-color($name, $fg, $bg, $alpha) {
@@ -71,19 +71,22 @@ $color-purple: #723eac;
 @include make-color-all("purple", "purple", "purple", true);
 
 .clickable, .active {
-  transition-property: filter;
+  transition-property: filter, backdrop-filter;
   transition-duration: 100ms;
   cursor: pointer;
 }
 
 .clickable:hover {
   filter: brightness(var(--brightness-light));
+  backdrop-filter: brightness(var(--brightness-light));
 }
 
 .active {
   filter: brightness(var(--brightness-normal));
+  backdrop-filter: brightness(var(--brightness-normal));
 
-  &:hover {
+  &.clickable:hover {
     filter: brightness(var(--brightness-deep));
+    backdrop-filter: brightness(var(--brightness-deep));
   }
 }

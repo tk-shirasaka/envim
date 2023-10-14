@@ -40,7 +40,7 @@ export class IconComponent extends React.Component<Props, States> {
     }
 
     return (
-      <FlexComponent vertical="center" position={float && "absolute"} rounded={float && [4]} padding={float ? [4] : [0, 4]} shrink={1} style={style} { ...this.props }>
+      <FlexComponent vertical="center" position={float && "absolute"} rounded={float && [4]} padding={[4]} spacing={!float} shrink={1} style={style} { ...this.props }>
         <i>{ this.props.font }</i>
         { this.props.text && <div style={styles.text}>{ this.props.text }</div> }
       </FlexComponent>

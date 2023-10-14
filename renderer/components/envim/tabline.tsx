@@ -31,14 +31,6 @@ const styles = {
     minWidth: "2rem",
     cursor: "pointer",
   },
-  menu: {
-    padding: "2px 8px",
-    minWidth: 0,
-    cursor: "pointer",
-  },
-  space: {
-    padding: "0 0 0 4px",
-  },
 };
 
 export class TablineComponent extends React.Component<Props, States> {
@@ -140,13 +132,13 @@ export class TablineComponent extends React.Component<Props, States> {
       const command = [ ...base, menu.name.replace(/([\. ])/g, "\\$1") ];
 
       return menu.submenus?.length ? (
-        <MenuComponent key={i} side={base.length > 0} color="default" style={base.length ? {} : styles.menu} label={menu.name}>
+        <MenuComponent key={i} side={base.length > 0} label={menu.name}>
           { this.renderSubmenu(menu.submenus, command)}
         </MenuComponent>
       ) : (
         menu.mappings[sname]?.enabled && menu.mappings[sname]?.rhs
-          ? <FlexComponent key={i} color="default" onClick={e => this.runCommand(e, `emenu ${command.join(".")}`)}>{ menu.name }</FlexComponent>
-          : <FlexComponent key={i} color="gray-fg">{ menu.name }</FlexComponent>
+          ? <FlexComponent key={i} onClick={e => this.runCommand(e, `emenu ${command.join(".")}`)} spacing>{ menu.name }</FlexComponent>
+          : <FlexComponent key={i} color="gray-fg" spacing>{ menu.name }</FlexComponent>
       );
     });
   }
@@ -175,7 +167,7 @@ export class TablineComponent extends React.Component<Props, States> {
           </MenuComponent>
         ) }
         { bookmarks.filter(({ name }) => name.split("/").length === 1).map(({ name, path, selected }, i) =>
-          <FlexComponent animate="hover" color="default" direction="column" active={selected} key={`${base}-${i}`} onClick={e => this.runCommand(e, `cd ${path}`)}>
+          <FlexComponent animate="hover" direction="column" active={selected} key={`${base}-${i}`} onClick={e => this.runCommand(e, `cd ${path}`)} spacing>
             { name }
             <div className="color-gray-fg small">{ path }</div>
             <IconComponent color="gray" font="" float="right" onClick={e => this.deleteBookmark(e, path)} hover />
@@ -190,7 +182,7 @@ export class TablineComponent extends React.Component<Props, States> {
       <FlexComponent color="default" overflow="visible" zIndex={1} style={this.props} shadow>
         {this.state.enabled && this.state.tabs.map((tab, i) => this.renderTab(i, tab))}
         <IconComponent color="green-fg" font="" onClick={e => this.runCommand(e, "$tabnew")} />
-        <MenuComponent color="lightblue-fg" label="󰉋" style={styles.space}>
+        <MenuComponent color="lightblue-fg" label="󰉋">
           { this.renderBookmarkMenu("") }
         </MenuComponent>
         { this.renderBookmark() }

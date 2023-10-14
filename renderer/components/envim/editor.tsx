@@ -43,9 +43,6 @@ interface States {
 
 const position: "absolute" = "absolute";
 const styles = {
-  icon: {
-    paddingLeft: 4,
-  },
   canvas: {
     position,
     transformOrigin: "0 0",
@@ -299,9 +296,9 @@ export class EditorComponent extends React.Component<Props, States> {
 
   private renderMenu(label: string, command: string) {
     return (
-      <MenuComponent color="gray-fg" style={styles.icon} label={label}>
+      <MenuComponent color="gray-fg" label={label}>
         { this.state.bufs.map(({ name, buffer, active }, i) => (
-          <FlexComponent color="default" active={active} title={name} padding={[0, 4]} onClick={e => this.runCommand(e, `${command}${buffer}`)} key={i}>
+          <FlexComponent active={active} title={name} onClick={e => this.runCommand(e, `${command}${buffer}`)} key={i} spacing>
             { name.replace(/.*\//, "…/") }
           </FlexComponent>
         )) }
@@ -339,7 +336,7 @@ export class EditorComponent extends React.Component<Props, States> {
             <FlexComponent color="default" grow={1} position="absolute" inset={[0, -4, 0, "auto"]} onMouseDown={this.onScroll} hover={this.state.scrolling === 0}>
               <FlexComponent animate="fade-in" color="blue" border={[0, 2]} rounded={[2]} style={this.state.scroll} shadow nomouse></FlexComponent>
             </FlexComponent>
-            <FlexComponent color="default" position="absolute" overflow="visible" inset={[-height, -4, "auto", "auto"]} padding={[0, 4]} rounded={[4, 4, 0, 0]} hover
+            <FlexComponent color="default" position="absolute" overflow="visible" inset={[-height, -4, "auto", "auto"]} rounded={[4, 4, 0, 0]} spacing hover
               onMouseDown={e => this.runCommand(e, "")}
             >
               { this.state.preview.src && <IconComponent color="gray-fg" font="" onClick={this.togglePreview} /> }

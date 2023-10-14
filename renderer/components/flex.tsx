@@ -25,6 +25,7 @@ interface Props {
   basis?: "auto" | "0";
   vertical?: "stretch" | "start" | "center" | "end";
   horizontal?: "stretch" | "start" | "center" | "end";
+  spacing?: boolean;
   inset?: (number | "auto")[];
   margin?: (number | "auto")[];
   padding?: number[];
@@ -70,11 +71,11 @@ export class FlexComponent extends React.Component<PropsWithChildren<Props>, Sta
       alignItems: props.vertical || "stretch",
       justifyContent: props.horizontal || "stretch",
       boxShadow: props.shadow ? "rgba(0, 0, 0, 0.2) 0 0 2px 2px" : "none",
-      padding: props.padding && props.padding.map(px => `${px}px`).join(" ") || 0,
-      inset: props.inset && props.inset.map(px => px === "auto" ? "auto" : `${px}px`).join(" ") || "auto",
-      margin: props.margin && props.margin.map(px => px === "auto" ? "auto" : `${px}px`).join(" ") || 0,
-      borderWidth: props.border && props.border.map(px => `${px}px`).join(" ") || 0,
-      borderRadius: props.rounded && props.rounded.map(px => `${px}px`).join(" ") || 0,
+      padding: (props.spacing ? [0, 4] : props.padding || [0]).map(px => `${px}px`).join(" "),
+      inset: (props.inset || ["auto"]).map(px => px === "auto" ? "auto" : `${px}px`).join(" "),
+      margin: (props.margin || [0]).map(px => px === "auto" ? "auto" : `${px}px`).join(" "),
+      borderWidth: (props.border || [0]).map(px => `${px}px`).join(" "),
+      borderRadius: (props.rounded || [0]).map(px => `${px}px`).join(" "),
       position: props.position || "relative",
       overflow: props.overflow || "hidden",
       wordBreak: this.props.wordBreak || "break-all",

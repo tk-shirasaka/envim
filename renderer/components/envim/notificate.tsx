@@ -53,7 +53,7 @@ export class NotificateComponent extends React.Component<Props, States> {
 
   render() {
     return this.state.enabled && this.state.messages.length > 0 && (
-      <FlexComponent direction="column" padding={[0, 4]} inset={["auto", 0, 0, "auto"]} position="absolute" style={styles.scope}>
+      <FlexComponent direction="column" inset={["auto", 0, 0, "auto"]} position="absolute" style={styles.scope} spacing>
         {this.state.messages.map((message, i) =>
           <FlexComponent animate="slide-right" margin={[4, 0]} rounded={[4]} style={styles.messages} key={i} shadow><MessageComponent message={message} open /></FlexComponent>
         )}

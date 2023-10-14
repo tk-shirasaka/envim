@@ -158,7 +158,7 @@ export class HistoryComponent extends React.Component<Props, States> {
     const icon = browser.protocol === "http:" ? { color: "gray-fg", font: "" } : { color: "green-fg", font: "" };
 
     return (
-      <FlexComponent key={browser.id} animate="hover" color="default" direction="column" active={browser.active} onClick={() => this.openBrowser(browser.id)}>
+      <FlexComponent key={browser.id} animate="hover" direction="column" active={browser.active} onClick={() => this.openBrowser(browser.id)} spacing>
         <div style={styles.browser}>{ browser.title }</div>
         <div className="small">{ <IconComponent { ...icon } text={browser.origin} /> }</div>
         <IconComponent color="gray" font="" float="right" onClick={(e) => this.closeBrowser(e, browser.id)} hover />
@@ -174,9 +174,9 @@ export class HistoryComponent extends React.Component<Props, States> {
           { this.state.command && <FlexComponent animate="fade-in" margin={["auto", 4]} rounded={[4]} shadow><MessageComponent message={this.state.command} open /></FlexComponent> }
           { this.state.ruler && <FlexComponent animate="fade-in" margin={["auto", 4]} rounded={[4]} shadow><MessageComponent message={this.state.ruler} open /></FlexComponent> }
           <div className="space" />
-          <MenuComponent color="gray-fg" style={{paddingRight: 4}} label="">
+          <MenuComponent color="gray-fg" label="">
             { ["ext_tabline", "ext_cmdline", "ext_messages", "ext_popupmenu", "ext_termcolors"].map(ext => (
-              <FlexComponent animate="hover" color="default" key={ext} onClick={() => Emit.send("envim:option", ext, !this.state.options[ext])}>
+              <FlexComponent key={ext} onClick={() => Emit.send("envim:option", ext, !this.state.options[ext])} spacing>
                 <input type="checkbox" value="command" checked={this.state.options[ext]} />{ ext }
               </FlexComponent>
             )) }
