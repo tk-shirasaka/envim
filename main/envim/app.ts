@@ -76,7 +76,7 @@ export class App {
     }
   }
 
-  redraw(redraw: any[][]) {
+  private redraw(redraw: any[][]) {
     redraw.forEach(r => {
       const name = r.shift();
       switch (name) {
