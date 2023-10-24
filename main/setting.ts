@@ -10,7 +10,7 @@ export class Setting {
   private static path: string = join(app.getPath("appData"), "envim.json");
 
   static set(item: ISetting) {
-    const presets = Setting.item.presets || {};
+    const { presets } = Setting.item || { presets: {} };
 
     Setting.init = true;
     Setting.item = { ...item, presets };
