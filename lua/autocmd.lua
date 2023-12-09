@@ -21,7 +21,10 @@ vim.api.nvim_create_autocmd({ "DirChanged" }, {
 vim.api.nvim_create_autocmd({ "OptionSet" }, {
   group = group,
   pattern = { "background" },
-  callback = function() envim_connect(0, { "envim_setbackground", vim.o.background }) end,
+  callback = function()
+    vim.cmd([[ mode ]])
+    envim_connect(0, { "envim_setbackground", vim.o.background })
+  end,
 })
 
 vim.api.nvim_create_autocmd({ "TabLeave" }, {

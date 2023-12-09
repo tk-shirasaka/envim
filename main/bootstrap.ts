@@ -8,7 +8,7 @@ export class Bootstrap {
 
   constructor() {
     Menu.setApplicationMenu(null);
-    app.commandLine.appendSwitch('remote-debugging-port', '8315');
+    app.commandLine.appendSwitch("remote-debugging-port", "8315");
     app.on("ready", this.onReady);
     app.on("activate", this.onActivate);
     app.on("window-all-closed", this.onQuit);
@@ -37,6 +37,7 @@ export class Bootstrap {
       titleBarStyle: "hidden",
       titleBarOverlay: true,
       webPreferences: {
+        webviewTag: true,
         preload: join(__dirname, "preload.js"),
       },
     });

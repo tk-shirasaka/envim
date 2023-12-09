@@ -11,6 +11,7 @@ import { y2Row, x2Col } from "../../utils/size";
 import { FlexComponent } from "../flex";
 import { IconComponent } from "../icon";
 import { MenuComponent } from "../menu";
+import { WebviewComponent } from "../webview";
 
 interface Props {
   grid: number;
@@ -307,12 +308,7 @@ export class EditorComponent extends React.Component<Props, States> {
   }
 
   private renderPreview() {
-    switch (this.state.preview.active && this.state.preview.media) {
-      case "image": return <img src={this.state.preview.src} onMouseDown={e => this.runCommand(e, "")}/>;
-      case "video": return <video src={this.state.preview.src} onMouseDown={e => this.runCommand(e, "")} controls />;
-      case "application": return <object data={this.state.preview.src} onMouseDown={e => this.runCommand(e, "")} />;
-      default: return null;
-    }
+    return <WebviewComponent src={this.state.preview.src} style={this.state.preview.active ? {} : { display: "none" }} />;
   }
 
   render() {
@@ -339,7 +335,7 @@ export class EditorComponent extends React.Component<Props, States> {
             <FlexComponent color="default" position="absolute" overflow="visible" inset={[-height, -4, "auto", "auto"]} rounded={[4, 4, 0, 0]} spacing hover
               onMouseDown={e => this.runCommand(e, "")}
             >
-              { this.state.preview.src && <IconComponent color="gray-fg" font="" onClick={this.togglePreview} /> }
+              <IconComponent color="gray-fg" font="" onClick={this.togglePreview} />
               { this.props.type === "normal" && (
                 <>
                   { this.renderMenu("", "buffer ") }

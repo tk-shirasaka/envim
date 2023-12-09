@@ -2,6 +2,7 @@ import React from "react";
 
 import { Emit } from "../utils/emit";
 import { Setting } from "../utils/setting";
+import { Highlights } from "../utils/highlight";
 import { Cache } from "../utils/cache";
 
 import { SettingComponent } from "./setting";
@@ -27,6 +28,7 @@ export class AppComponent extends React.Component<Props, States> {
     (document as any).fonts.load("10px Icon").then();
     Emit.on("app:switch", this.onSwitch);
     Emit.on("app:theme", this.onTheme);
+    Highlights.setHighlight("0", true, {  })
   }
 
   private onResize = () => {
