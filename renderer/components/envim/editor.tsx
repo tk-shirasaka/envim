@@ -34,7 +34,7 @@ interface States {
   nomouse: boolean;
   dragging: boolean;
   scrolling: number;
-  preview: { media: string; src: string; active: boolean; };
+  preview: { src: string; active: boolean; };
   scroll: {
     total: number;
     height: string;
@@ -66,7 +66,7 @@ export class EditorComponent extends React.Component<Props, States> {
     super(props);
 
     this.busy = Cache.get<boolean>(TYPE, "busy");
-    this.state = { bufs: Cache.get<IBuffer[]>(TYPE, "bufs") || [], nomouse: Cache.get<boolean>(TYPE, "nomouse"), dragging: false, scrolling: 0, preview: { media: "", src: "", active: false }, scroll: { total: 0, height: "100%", transform: "" } };
+    this.state = { bufs: Cache.get<IBuffer[]>(TYPE, "bufs") || [], nomouse: Cache.get<boolean>(TYPE, "nomouse"), dragging: false, scrolling: 0, preview: { src: "", active: false }, scroll: { total: 0, height: "100%", transform: "" } };
     Emit.on(`clear:${this.props.grid}`, this.onClear);
     Emit.on(`flush:${this.props.grid}`, this.onFlush);
     Emit.on(`preview:${this.props.grid}`, this.onPreview);
@@ -227,8 +227,8 @@ export class EditorComponent extends React.Component<Props, States> {
     flush.forEach(({ cells, scroll }) => Canvas.update(this.props.grid, cells, scroll));
   }
 
-  private onPreview = (media: string, src: string) => {
-    this.setState({ preview: { media, src, active: src.length > 0 } });
+  private onPreview = (src: string) => {
+    this.setState({ preview: { src, active: src.length > 0 } });
   }
 
   private togglePreview = () => {

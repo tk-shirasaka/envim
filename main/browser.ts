@@ -258,7 +258,7 @@ class Browser {
     const contentType = header && responseHeaders && responseHeaders[header].find(val => val === "application/pdf");
 
     if (contentType === "application/pdf") {
-      const args = ["EnvimConnect", [0, "envim_preview", details.url, { contentType }]];
+      const args = ["EnvimConnect", [0, "envim_preview", details.url]];
 
       Emit.share("envim:api", "nvim_call_function", args);
       Bootstrap.win?.focus();

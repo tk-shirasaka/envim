@@ -43,21 +43,17 @@ export class WebviewComponent extends React.Component<Props, States> {
     Emit.on("webview:searchengines", this.onSearchengines);
   }
 
-  componentDidUpdate(props: Props, state: States) {
+  componentDidMount() {
     const webview = this.webview.current;
 
     if (webview) {
-      if (this.state.src && !state.src) {
-        webview.addEventListener("did-finish-load", this.onLoad);
-        webview.addEventListener("did-navigate", this.onLoad);
-        webview.addEventListener("did-navigate-in-page", this.onLoad);
-      } else if (!this.state.src && state.src) {
-        webview.removeEventListener("did-finish-load", this.onLoad);
-        webview.removeEventListener("did-navigate", this.onLoad);
-        webview.removeEventListener("did-navigate-in-page", this.onLoad);
-      }
+      webview.addEventListener("did-finish-load", this.onLoad);
+      webview.addEventListener("did-navigate", this.onLoad);
+      webview.addEventListener("did-navigate-in-page", this.onLoad);
     }
+  }
 
+  componentDidUpdate(props: Props) {
     if (this.props.src !== props.src) {
       const { src, input } = this.getInitialState(this.props);
 
@@ -66,6 +62,14 @@ export class WebviewComponent extends React.Component<Props, States> {
   }
 
   componentWillUnmount = () => {
+    const webview = this.webview.current;
+
+    if (webview) {
+      webview.removeEventListener("did-finish-load", this.onLoad);
+      webview.removeEventListener("did-navigate", this.onLoad);
+      webview.removeEventListener("did-navigate-in-page", this.onLoad);
+    }
+
     Emit.off("webview:searchengines", this.onSearchengines);
   }
 
@@ -86,6 +90,10 @@ export class WebviewComponent extends React.Component<Props, States> {
     e.stopPropagation();
   }
 
+  private onFocus = (e: ChangeEvent<HTMLInputElement>) => {
+    e.target.select();
+  }
+
   private onChangeSrc = (e: ChangeEvent<HTMLInputElement>) => {
     this.setState({ input: e.target.value });
   }
@@ -104,6 +112,8 @@ export class WebviewComponent extends React.Component<Props, States> {
     } else {
       this.setState({ input: this.state.src });
     }
+
+    Emit.share("envim:focus");
   }
 
   private onChangeSearch = (e: ChangeEvent<HTMLInputElement>) => {
@@ -132,7 +142,9 @@ export class WebviewComponent extends React.Component<Props, States> {
     const webview = this.webview.current;
 
     if (webview) {
-      this.setState({ input: webview.getURL() });
+      const url = webview.getURL();
+
+      url === "about:blank" || this.setState({ input: url });
     }
   }
 
@@ -197,12 +209,12 @@ export class WebviewComponent extends React.Component<Props, States> {
           { this.renderEngine() }
           <FlexComponent grow={1} padding={[0, 8, 0, 0]}>
             <form style={styles.form} onSubmit={this.onSubmitSrc}>
-              <input style={styles.input} type="text" value={this.state.input} disabled={!this.state.src.search(/^data:.*\/(.*);base64/)} onChange={this.onChangeSrc} />
+              <input style={styles.input} type="text" value={this.state.input} disabled={!this.state.src.search(/^data:.*\/(.*);base64/)} onChange={this.onChangeSrc} onFocus={this.onFocus} />
             </form>
           </FlexComponent>
           <IconComponent font="" />
           <form onSubmit={this.onSubmitSearch}>
-            <input type="text" value={this.state.search} onChange={this.onChangeSearch} />
+            <input type="text" value={this.state.search} onChange={this.onChangeSearch} onFocus={this.onFocus} />
           </form>
           <IconComponent font="" onClick={() => this.setZoom(this.state.zoom - 10)} />
           { this.state.zoom }%
@@ -210,7 +222,7 @@ export class WebviewComponent extends React.Component<Props, States> {
           <IconComponent font="󱁤" onClick={() => this.runAction("devtool")} />
         </FlexComponent>
         <FlexComponent vertical="center" horizontal="center" color="default" grow={1}>
-          { this.state.src && <webview ref={this.webview} src={this.state.src} /> }
+          <webview ref={this.webview} src={this.state.src || "about:blank"} />
         </FlexComponent>
       </FlexComponent>
     )

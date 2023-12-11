@@ -2,13 +2,13 @@ local group = vim.api.nvim_create_augroup("envim", { clear = true })
 
 vim.api.nvim_create_autocmd({ "BufRead", "BufEnter", "BufWritePost" }, {
   group = group,
-  pattern = { "*.ico", "*.png", "*.jpg", "*.jpeg", "*.gif", "*.svg", "*.mp4", "*.webm", "*.pdf" },
+  pattern = { "http://*", "https://*", "*.ico", "*.png", "*.jpg", "*.jpeg", "*.gif", "*.svg", "*.mp4", "*.webm", "*.pdf" },
   callback = function() envim_connect(0, { "envim_preview" }) end,
 })
 
 vim.api.nvim_create_autocmd({ "BufHidden", "BufDelete" }, {
   group = group,
-  pattern = { "*.ico", "*.png", "*.jpg", "*.jpeg", "*.gif", "*.svg", "*.mp4", "*.webm", "*.pdf" },
+  pattern = { "http://*", "https://*", "*.ico", "*.png", "*.jpg", "*.jpeg", "*.gif", "*.svg", "*.mp4", "*.webm", "*.pdf" },
   callback = function() envim_connect(0, { "envim_preview", "" }) end,
 })
 

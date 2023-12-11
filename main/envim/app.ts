@@ -1,5 +1,4 @@
 import { Buffer as Buf } from "node:buffer";
-import { net } from "electron";
 import { NeovimClient } from "neovim";
 import { Response } from "neovim/lib/host";
 import { Tabpage, Buffer, Window } from "neovim/lib/api";
@@ -46,7 +45,7 @@ export class App {
     }
   }
 
-  private preview = async (src?: string, options: { winid?: number, contentType?: string } = {}) => {
+  private preview = async (src?: string, options: { winid?: number } = {}) => {
     const winid = options.winid || await Emit.share("envim:api", "nvim_call_function", ["win_getid", []]) || -1;
 
     const grid = Grids.getByWinId(winid);
@@ -55,24 +54,19 @@ export class App {
       const extmap: { [k: string]: string } = {svg: "svg+xml"}
       const mediamap: { [k: string]: string } = {image: "(ico)|(png)|(jpg)|(jpeg)|(gif)|(svg)", video: "(mp4)|(webm)", application: "(pdf)"};
       const name = src || await Emit.share("envim:api", "nvim_buf_get_name", [0]) || "";
-      const ext = options.contentType?.replace(/^.*\//, "") || name.match(/^data:.*\/(.*);base64/)?.pop() || name.replace(/^.*\./, "");
+      const ext = name.match(/^data:.*\/(.*);base64/)?.pop() || name.replace(/^.*\./, "");
       const media = Object.keys(mediamap).find(key => ext.search(mediamap[key]) >= 0);
       const { id } = grid.getInfo();
 
       if (name.match(/^https?:\/\//)) {
         src = name;
-
-        media || net.request({ url: src, method: "head" }).on("response", res => {
-          const contentType = res.headers["content-type"];
-          this.preview(src, { winid, contentType: typeof contentType === "string" ? contentType : contentType.pop() });
-        }).end();
       } else if (src === undefined && name && ext && media) {
         const blob = await Emit.share("envim:api", "nvim_call_function", ["win_execute", [winid, `echo blob2list(readblob("${name}"))`]]) || "[]";
         src = Buf.from(JSON.parse(blob).map((c: string) => String.fromCharCode(+c)).join(""), "ascii").toString("base64");
         src = `data:${media}/${extmap[ext] || ext};base64,${src}`;
       }
 
-      Emit.update(`preview:${id}`, false, media || "", src || "");
+      Emit.update(`preview:${id}`, false, src || "");
     }
   }
 
