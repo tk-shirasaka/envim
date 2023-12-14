@@ -16,7 +16,6 @@ interface Props {
 }
 
 interface States {
-  src: string;
   input: string;
   search: string;
   engine: number;
@@ -34,56 +33,54 @@ const styles = {
 };
 
 export class WebviewComponent extends React.Component<Props, States> {
-  private webview: RefObject<WebviewTag> = createRef<WebviewTag>();
+  private container: RefObject<HTMLDivElement> = createRef<HTMLDivElement>();
+  private webview: WebviewTag | null = null;
 
   constructor(props: Props) {
     super(props);
 
-    this.state = this.getInitialState(props);
+    this.state = { input: props.src, search: "", engine: Setting.searchengines.findIndex(({ selected }) => selected), searchengines: Setting.searchengines, zoom: 100 };
     Emit.on("webview:searchengines", this.onSearchengines);
   }
 
   componentDidMount() {
-    const webview = this.webview.current;
+    const container = this.container.current;
 
-    if (webview) {
-      webview.addEventListener("did-finish-load", this.onLoad);
-      webview.addEventListener("did-navigate", this.onLoad);
-      webview.addEventListener("did-navigate-in-page", this.onLoad);
+    if (container) {
+      container.innerHTML = `<webview src="${this.getUrl()}" allowpopups="on" />`
+      this.webview = container.querySelector("webview");
+    }
+
+    if (this.webview) {
+      this.webview.addEventListener("did-finish-load", this.onLoad);
+      this.webview.addEventListener("did-navigate", this.onLoad);
+      this.webview.addEventListener("did-navigate-in-page", this.onLoad);
     }
   }
 
   componentDidUpdate(props: Props) {
-    if (this.props.src !== props.src) {
-      const { src, input } = this.getInitialState(this.props);
-
-      this.setState({ src, input });
+    if (this.webview && this.props.src !== props.src) {
+      this.setState({ input: this.props.src });
+      this.webview.src = this.getUrl();
     }
   }
 
   componentWillUnmount = () => {
-    const webview = this.webview.current;
-
-    if (webview) {
-      webview.removeEventListener("did-finish-load", this.onLoad);
-      webview.removeEventListener("did-navigate", this.onLoad);
-      webview.removeEventListener("did-navigate-in-page", this.onLoad);
+    if (this.webview) {
+      this.webview.removeEventListener("did-finish-load", this.onLoad);
+      this.webview.removeEventListener("did-navigate", this.onLoad);
+      this.webview.removeEventListener("did-navigate-in-page", this.onLoad);
     }
 
     Emit.off("webview:searchengines", this.onSearchengines);
   }
 
-  private getInitialState(props: Props) {
-    const src = props.src.search(/^(https?:\/\/\w+)|(data:.*\/(.*);base64)/) ? "" : props.src;
-    const input = src ? "" : props.src;
-
-    return { src, input, search: "", engine: Setting.searchengines.findIndex(({ selected }) => selected), searchengines: Setting.searchengines, zoom: 100 };
+  private getUrl() {
+    return this.props.src.search(/^(https?:\/\/\w+)|(data:.*\/(.*);base64)/) ? "about:blank" : this.props.src;
   }
 
   private onSearchengines = () => {
-    const { engine, searchengines } = this.getInitialState(this.props);
-
-    this.setState({ engine, searchengines });
+    this.setState({ engine: Setting.searchengines.findIndex(({ selected }) => selected), searchengines: Setting.searchengines });
   }
 
   private mouseCancel = (e: MouseEvent) => {
@@ -105,70 +102,65 @@ export class WebviewComponent extends React.Component<Props, States> {
     e.stopPropagation();
     e.preventDefault();
 
+    if (!this.webview) return;
+
     if (input) {
       const src = input.search(/^https?:\/\/\w+/) ? engine.uri.replace("${query}", encodeURIComponent(input)) : input;
 
-      this.setState({ src });
+      this.webview.src = src;
     } else {
-      this.setState({ input: this.state.src });
+      this.setState({ input: this.webview.getURL() });
     }
 
     Emit.share("envim:focus");
   }
 
   private onChangeSearch = (e: ChangeEvent<HTMLInputElement>) => {
-    const webview = this.webview.current;
     const search = e.target.value;
 
     this.setState({ search });
 
-    if (webview && !search) {
-      webview.stopFindInPage("clearSelection");
+    if (this.webview && !search) {
+      this.webview.stopFindInPage("clearSelection");
     }
   }
 
   private onSubmitSearch = (e: FormEvent) => {
-    const webview = this.webview.current;
-
     e.stopPropagation();
     e.preventDefault();
 
-    if (webview) {
-      webview.findInPage(this.state.search);
+    if (this.webview) {
+      this.webview.findInPage(this.state.search);
     }
   }
 
   private onLoad = () => {
-    const webview = this.webview.current;
-
-    if (webview) {
-      const url = webview.getURL();
+    if (this.webview) {
+      const url = this.webview.getURL();
 
       url === "about:blank" || this.setState({ input: url });
     }
   }
 
-  private runAction(navigation: "backward" | "forward" | "reload" | "devtool") {
-    const webview = this.webview.current;
-
-    if (webview) {
+  private runAction(navigation: "backward" | "forward" | "reload" | "zoom-out"| "zoom-in" | "devtool") {
+    if (this.webview) {
       switch (navigation) {
-        case "backward": return webview.goBack();
-        case "forward": return webview.goForward();
-        case "reload": return webview.reloadIgnoringCache();
-        case "devtool": return webview.isDevToolsOpened() ? webview.closeDevTools() : webview.openDevTools();
+        case "backward": return this.webview.goBack();
+        case "forward": return this.webview.goForward();
+        case "reload": return this.webview.reloadIgnoringCache();
+        case "zoom-out": return this.setZoom(this.state.zoom - 10)
+        case "zoom-in": return this.setZoom(this.state.zoom + 10)
+        case "devtool": return this.webview.isDevToolsOpened() ? this.webview.closeDevTools() : this.webview.openDevTools();
       }
     }
   }
 
   private setZoom(zoom: number) {
-    const webview = this.webview.current;
-
-    if (webview) {
+    if (this.webview) {
       zoom = Math.min(Math.max(zoom , 0), 300);
 
       this.setState({ zoom });
-      webview.setZoomLevel((zoom / 100) - 1);
+      this.webview.setZoomLevel((zoom / 100) - 1);
     }
   }
 
@@ -209,20 +201,20 @@ export class WebviewComponent extends React.Component<Props, States> {
           { this.renderEngine() }
           <FlexComponent grow={1} padding={[0, 8, 0, 0]}>
             <form style={styles.form} onSubmit={this.onSubmitSrc}>
-              <input style={styles.input} type="text" value={this.state.input} disabled={!this.state.src.search(/^data:.*\/(.*);base64/)} onChange={this.onChangeSrc} onFocus={this.onFocus} />
+              <input style={styles.input} type="text" value={this.state.input} disabled={!this.props.src.search(/^data:.*\/(.*);base64/)} onChange={this.onChangeSrc} onFocus={this.onFocus} />
             </form>
           </FlexComponent>
           <IconComponent font="" />
           <form onSubmit={this.onSubmitSearch}>
             <input type="text" value={this.state.search} onChange={this.onChangeSearch} onFocus={this.onFocus} />
           </form>
-          <IconComponent font="" onClick={() => this.setZoom(this.state.zoom - 10)} />
+          <IconComponent font="" onClick={() => this.runAction("zoom-out")} />
           { this.state.zoom }%
-          <IconComponent font="" onClick={() => this.setZoom(this.state.zoom + 10)} />
+          <IconComponent font="" onClick={() => this.runAction("zoom-in")} />
           <IconComponent font="󱁤" onClick={() => this.runAction("devtool")} />
         </FlexComponent>
-        <FlexComponent vertical="center" horizontal="center" color="default" grow={1}>
-          <webview ref={this.webview} src={this.state.src || "about:blank"} />
+        <FlexComponent color="default" grow={1}>
+          <div className="space" ref={this.container} />
         </FlexComponent>
       </FlexComponent>
     )
