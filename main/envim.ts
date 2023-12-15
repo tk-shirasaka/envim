@@ -31,6 +31,7 @@ export class Envim {
     Emit.on("envim:luafile", this.onLuafile);
     Emit.on("envim:ready", this.onReady);
     Emit.on("envim:theme", this.onTheme);
+    Emit.on("envim:browser", this.onBrowser);
     process.on("uncaughtException", this.onError);
     process.on("unhandledRejection", this.onError);
     nativeTheme.on("updated", this.handleTheme);
@@ -68,7 +69,6 @@ export class Envim {
       }
       delete(this.handleError);
       Emit.send("app:switch", true);
-      Emit.share("browser:update");
 
       this.handleTheme();
     });
@@ -133,7 +133,6 @@ export class Envim {
         this.onConnect(type, path, workspace.bookmark);
       } else {
         Emit.send("app:switch", false);
-        Emit.share("browser:hide");
       }
     });
   }
@@ -158,6 +157,11 @@ export class Envim {
     Emit.update("app:theme", false, theme);
 
     return theme;
+  }
+
+  private onBrowser = async (url: string) => {
+    await this.onCommand("tab split");
+    this.onApi("nvim_call_function", ["EnvimConnect", [0, "envim_preview", url]])
   }
 
   private handleTheme = () => {

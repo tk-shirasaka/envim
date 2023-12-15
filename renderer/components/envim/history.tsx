@@ -1,6 +1,6 @@
 import React, { createRef, RefObject } from "react";
 
-import { ISetting, IMessage, IBrowser } from "../../../common/interface";
+import { ISetting, IMessage } from "../../../common/interface";
 
 import { Emit } from "../../utils/emit";
 import { Setting } from "../../utils/setting";
@@ -24,7 +24,6 @@ interface States {
   ruler?: IMessage;
   options: ISetting["options"];
   debug: string;
-  browser: IBrowser[];
 }
 
 const styles = {
@@ -36,11 +35,6 @@ const styles = {
     width: "100%",
     bottom: 0,
   },
-  browser: {
-    width: 300,
-    overflow: "hidden",
-    textOverflow: "ellipsis"
-  },
 };
 
 export class HistoryComponent extends React.Component<Props, States> {
@@ -50,13 +44,12 @@ export class HistoryComponent extends React.Component<Props, States> {
   constructor(props: Props) {
     super(props);
 
-    this.state = { messages: [], theme: Cache.get<"dark" | "light">("common", "theme"), options: Setting.options, debug: "", browser: [] };
+    this.state = { messages: [], theme: Cache.get<"dark" | "light">("common", "theme"), options: Setting.options, debug: "" };
     Emit.on("messages:mode", this.onMode);
     Emit.on("messages:command", this.onCommand);
     Emit.on("messages:ruler", this.onRuler);
     Emit.on("messages:history", this.onHistory);
     Emit.on("option:set", this.onOption);
-    Emit.on("browser:update", this.browserUpdate);
   }
 
   componentWillUnmount = () => {
@@ -65,7 +58,6 @@ export class HistoryComponent extends React.Component<Props, States> {
     Emit.off("messages:ruler", this.onRuler);
     Emit.off("messages:history", this.onHistory);
     Emit.off("option:set", this.onOption);
-    Emit.off("browser:update", this.browserUpdate);
     Emit.off("debug", this.onDebug);
   }
 
@@ -91,10 +83,6 @@ export class HistoryComponent extends React.Component<Props, States> {
     this.setState({ options: { ...this.state.options, ...options } });
   }
 
-  private browserUpdate = (browser: IBrowser[]) => {
-    this.setState({ browser });
-  }
-
   private onDebug = (direction: "send" | "receive", event: string, ...args: any[]) => {
     if (`${direction} ${event}`.search(this.state.debug) < 0) return;
 
@@ -115,17 +103,6 @@ export class HistoryComponent extends React.Component<Props, States> {
 
   private unloadMessages = () => {
     clearInterval(this.timer);
-  }
-
-  private openBrowser = (id: number) => {
-    Emit.send("browser:open", id);
-  }
-
-  private closeBrowser = (e: MouseEvent, id: number) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    Emit.send("browser:close", id);
   }
 
   private toggleTheme = () => {
@@ -154,18 +131,6 @@ export class HistoryComponent extends React.Component<Props, States> {
     }
   }
 
-  private renderBrowser = (browser: IBrowser) => {
-    const icon = browser.protocol === "http:" ? { color: "gray-fg", font: "" } : { color: "green-fg", font: "" };
-
-    return (
-      <FlexComponent key={browser.id} animate="hover" direction="column" active={browser.active} onClick={() => this.openBrowser(browser.id)} spacing>
-        <div style={styles.browser}>{ browser.title }</div>
-        <div className="small">{ <IconComponent { ...icon } text={browser.origin} /> }</div>
-        <IconComponent color="gray" font="" float="right" onClick={(e) => this.closeBrowser(e, browser.id)} hover />
-      </FlexComponent>
-    );
-  }
-
   render() {
     return (
       <FlexComponent animate="hover" direction="column-reverse" position="absolute" overflow="visible" style={styles.scope}>
@@ -185,14 +150,6 @@ export class HistoryComponent extends React.Component<Props, States> {
               /
               <IconComponent color="yellow-fg" active={this.state.theme === "dark"} font="" />
             </FlexComponent>
-          </MenuComponent>
-          <MenuComponent color="blue-fg" label="󰖟" horizontal>
-            { this.state.browser.length === 0 ? null : (
-              <MenuComponent color="blue-fg" label="󰋚" side>
-                { this.state.browser.map(this.renderBrowser) }
-              </MenuComponent>
-            )}
-            <IconComponent color="green-fg" font="" onClick={() => this.openBrowser(-1)} />
           </MenuComponent>
           <IconComponent color="green-fg" active={this.state.debug.length > 0} font="" onClick={this.toggleDebug} />
         </FlexComponent>

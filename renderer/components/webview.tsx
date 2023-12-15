@@ -178,6 +178,25 @@ export class WebviewComponent extends React.Component<Props, States> {
     Emit.share("webview:searchengines");
   }
 
+  private async addEngine(e: MouseEvent) {
+    Emit.share("envim:focus");
+    e.stopPropagation();
+    e.preventDefault();
+
+    if (this.webview) {
+      const name = await Emit.send<string>("envim:api", "nvim_call_function", ["EnvimInput", ["Engine - Name"]]);
+      const uri = await Emit.send<string>("envim:api", "nvim_call_function", ["EnvimInput", ["Engine - URI", this.webview.getURL()]]);
+
+      Setting.searchengines = [
+        ...this.state.searchengines.map(engine => ({ ...engine, selected: false })),
+        { name, uri, selected: true }
+      ].sort((a, b) => a.name > b.name ? 1 : -1);
+
+      this.setState({ engine: Setting.searchengines.findIndex(engine => engine.name === "name") });
+      Emit.share("webview:searchengines");
+    }
+  }
+
   private renderEngine() {
     return (
       <MenuComponent color="blue-fg" label="󰖟">
@@ -187,6 +206,7 @@ export class WebviewComponent extends React.Component<Props, States> {
             <IconComponent color="gray" font="" float="right" onClick={(e) => this.deleteEngine(e, i)} hover />
           </FlexComponent>
         )) }
+        <IconComponent color="green-fg" font="" onClick={e => this.addEngine(e)} />
       </MenuComponent>
     );
   }

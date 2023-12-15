@@ -7,7 +7,11 @@ export class Bootstrap {
   static win?: BrowserWindow;
 
   constructor() {
-    Menu.setApplicationMenu(null);
+    Menu.setApplicationMenu(
+      Menu.buildFromTemplate([
+        { role: "editMenu", visible: true }
+      ])
+    );
     app.commandLine.appendSwitch("remote-debugging-port", "8315");
     app.on("ready", this.onReady);
     app.on("activate", this.onActivate);
@@ -47,5 +51,12 @@ export class Bootstrap {
     Bootstrap.win.on("closed", this.onQuit);
     Bootstrap.win.on("focus", () => Emit.send("envim:focus"));
     Bootstrap.win.once("ready-to-show", () => Emit.share("envim:theme"));
+    Bootstrap.win.webContents.on("did-attach-webview", (_, webContents) => (
+      webContents.setWindowOpenHandler(details => {
+        Emit.share("envim:browser", details.url);
+
+        return { action: "deny" };
+      })
+    ));
   }
 }

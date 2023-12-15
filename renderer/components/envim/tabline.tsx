@@ -181,7 +181,7 @@ export class TablineComponent extends React.Component<Props, States> {
     return (
       <FlexComponent color="default" overflow="visible" zIndex={1} style={this.props} shadow>
         {this.state.enabled && this.state.tabs.map((tab, i) => this.renderTab(i, tab))}
-        <IconComponent color="green-fg" font="" onClick={e => this.runCommand(e, "$tabnew")} />
+        <IconComponent color="green-fg" font="" onClick={e => this.runCommand(e, "$tab split")} />
         <MenuComponent color="lightblue-fg" label="󰉋">
           { this.renderBookmarkMenu("") }
         </MenuComponent>
