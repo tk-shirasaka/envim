@@ -12,13 +12,13 @@ import { IconComponent } from "./icon";
 
 interface Props {
   src: string;
-  style: Object;
+  style: { [k: string]: string };
 }
 
 interface States {
   input: string;
   search: string;
-  engine: number;
+  title: string;
   searchengines: ISetting["searchengines"];
   zoom: number;
 }
@@ -35,11 +35,12 @@ const styles = {
 export class WebviewComponent extends React.Component<Props, States> {
   private container: RefObject<HTMLDivElement> = createRef<HTMLDivElement>();
   private webview: WebviewTag | null = null;
+  private input: RefObject<HTMLInputElement> = createRef<HTMLInputElement>();
 
   constructor(props: Props) {
     super(props);
 
-    this.state = { input: props.src, search: "", engine: Setting.searchengines.findIndex(({ selected }) => selected), searchengines: Setting.searchengines, zoom: 100 };
+    this.state = { input: props.src, search: "", title: "", searchengines: Setting.searchengines, zoom: 100 };
     Emit.on("webview:searchengines", this.onSearchengines);
   }
 
@@ -55,6 +56,7 @@ export class WebviewComponent extends React.Component<Props, States> {
       this.webview.addEventListener("did-finish-load", this.onLoad);
       this.webview.addEventListener("did-navigate", this.onLoad);
       this.webview.addEventListener("did-navigate-in-page", this.onLoad);
+      this.webview.addEventListener("page-title-updated", this.onLoad);
     }
   }
 
@@ -63,6 +65,10 @@ export class WebviewComponent extends React.Component<Props, States> {
       this.setState({ input: this.props.src });
       this.webview.src = this.getUrl();
     }
+
+    if (props.style.display === "none" && !this.props.style.display) {
+      this.input.current?.focus();
+    }
   }
 
   componentWillUnmount = () => {
@@ -70,6 +76,7 @@ export class WebviewComponent extends React.Component<Props, States> {
       this.webview.removeEventListener("did-finish-load", this.onLoad);
       this.webview.removeEventListener("did-navigate", this.onLoad);
       this.webview.removeEventListener("did-navigate-in-page", this.onLoad);
+      this.webview.removeEventListener("page-title-updated", this.onLoad);
     }
 
     Emit.off("webview:searchengines", this.onSearchengines);
@@ -80,7 +87,7 @@ export class WebviewComponent extends React.Component<Props, States> {
   }
 
   private onSearchengines = () => {
-    this.setState({ engine: Setting.searchengines.findIndex(({ selected }) => selected), searchengines: Setting.searchengines });
+    this.setState({ searchengines: Setting.searchengines });
   }
 
   private mouseCancel = (e: MouseEvent) => {
@@ -97,15 +104,15 @@ export class WebviewComponent extends React.Component<Props, States> {
 
   private onSubmitSrc = (e: FormEvent) => {
     const input = this.state.input;
-    const engine = this.state.searchengines[this.state.engine] || this.state.searchengines[0];
+    const selected = this.state.searchengines.find(({ selected }) => selected);
 
     e.stopPropagation();
     e.preventDefault();
 
     if (!this.webview) return;
 
-    if (input) {
-      const src = input.search(/^https?:\/\/\w+/) ? engine.uri.replace("${query}", encodeURIComponent(input)) : input;
+    if (input && selected) {
+      const src = input.search(/^https?:\/\/\w+/) ? selected.uri.replace("${query}", encodeURIComponent(input)) : input;
 
       this.webview.src = src;
     } else {
@@ -137,8 +144,9 @@ export class WebviewComponent extends React.Component<Props, States> {
   private onLoad = () => {
     if (this.webview) {
       const url = this.webview.getURL();
+      const title = this.webview.getTitle();
 
-      url === "about:blank" || this.setState({ input: url });
+      url === "about:blank" || this.setState({ input: url, title });
     }
   }
 
@@ -164,17 +172,27 @@ export class WebviewComponent extends React.Component<Props, States> {
     }
   }
 
-  private setEngine(engine: number) {
-    this.setState({ engine });
+  private setEngine(name: string) {
+    const selected = this.state.searchengines.find(engine => engine.name === name);
 
-    Setting.searchengines = this.state.searchengines.map((searchengine, i) => ({ ...searchengine, selected: engine === i }));
+    if (this.webview && selected && selected.uri.indexOf("${query}") < 0) {
+      this.webview.src = selected.uri;
+    } else {
+      const searchengines = this.state.searchengines.map(engine => ({ ...engine, selected: selected === engine }));
+
+      this.setState({ searchengines });
+      this.input.current?.focus();
+      Setting.searchengines = searchengines;
+    }
   }
 
-  private deleteEngine(e: MouseEvent, engine: number) {
+  private deleteEngine(e: MouseEvent, name: string) {
+    const selected = this.state.searchengines.find(engine => engine.name === name);
+
     e.stopPropagation();
     e.preventDefault();
 
-    Setting.searchengines = this.state.searchengines.filter((_, i) => engine !== i);
+    Setting.searchengines = this.state.searchengines.filter(engine => selected !== engine);
     Emit.share("webview:searchengines");
   }
 
@@ -184,44 +202,61 @@ export class WebviewComponent extends React.Component<Props, States> {
     e.preventDefault();
 
     if (this.webview) {
-      const name = await Emit.send<string>("envim:api", "nvim_call_function", ["EnvimInput", ["Engine - Name"]]);
-      const uri = await Emit.send<string>("envim:api", "nvim_call_function", ["EnvimInput", ["Engine - URI", this.webview.getURL()]]);
+      const name = await Emit.send<string>("envim:api", "nvim_call_function", ["EnvimInput", ["Name"]]);
+      const uri = name && await Emit.send<string>("envim:api", "nvim_call_function", ["EnvimInput", ["URI", this.webview.getURL()]]);
+      const selected = uri.indexOf("${query}") >= 0;
 
-      Setting.searchengines = [
-        ...this.state.searchengines.map(engine => ({ ...engine, selected: false })),
-        { name, uri, selected: true }
-      ].sort((a, b) => a.name > b.name ? 1 : -1);
+      if (name && uri) {
+        Setting.searchengines = [
+          ...this.state.searchengines.filter(engine => engine.name !== name).map(engine => ({ ...engine, selected: engine.selected && !selected })),
+          { name, uri, selected }
+        ].sort((a, b) => a.name > b.name ? 1 : -1);
 
-      this.setState({ engine: Setting.searchengines.findIndex(engine => engine.name === "name") });
-      Emit.share("webview:searchengines");
+        Emit.share("webview:searchengines");
+      }
     }
+
+    this.input.current?.focus();
   }
 
-  private renderEngine() {
+  private renderEngine(base: string) {
+    const regexp = new RegExp(`^${base}`);
+    const searchengines = this.state.searchengines.filter(({ name }) => name.match(regexp)).map(({ name, ...other }) => ({ ...other, name: name.replace(regexp, "") }));
+    const groups = searchengines.map(({ name }) => name.split("/")).reduce((all, curr) => curr.length === 1 || all.indexOf(curr[0]) >= 0 ? all : [...all, curr[0]], []);
+    const selected = this.state.searchengines.find(({ selected }) => selected);
+
     return (
-      <MenuComponent color="blue-fg" label="󰖟">
-        { this.state.searchengines.map(({ name }, i) => (
-          <FlexComponent key={i} animate="hover" active={i === this.state.engine} onClick={() => this.setEngine(i)} spacing>
+      <>
+        { groups.map(group =>
+          <MenuComponent key={`${base}${group}`} color="lightblue-fg" label={`󰉋 ${group}`} active={selected?.name.indexOf(`${base}${group}/`) === 0} side>
+            { this.renderEngine(`${base}${group}/`) }
+          </MenuComponent>
+        ) }
+        { searchengines.filter(({ name }) => name.split("/").length === 1).map(({ name, selected }, i) =>
+          <FlexComponent  key={`${base}-${i}`} animate="hover" active={selected} onClick={() => this.setEngine(`${base}${name}`)} spacing>
             { name }
-            <IconComponent color="gray" font="" float="right" onClick={(e) => this.deleteEngine(e, i)} hover />
+            <IconComponent color="gray" font="" float="right" onClick={(e) => this.deleteEngine(e, `${base}${name}`)} hover />
           </FlexComponent>
-        )) }
-        <IconComponent color="green-fg" font="" onClick={e => this.addEngine(e)} />
-      </MenuComponent>
+        ) }
+      </>
     );
   }
 
   render() {
     return (
-      <FlexComponent direction="column" position="absolute" color="default" inset={[0]} style={this.props.style} onMouseUp={this.mouseCancel} onMouseDown={this.mouseCancel}>
+      <FlexComponent direction="column" position="absolute" color="default" overflow="visible" inset={[0]} style={this.props.style} onMouseUp={this.mouseCancel} onMouseDown={this.mouseCancel}>
+        <FlexComponent color="gray-fg" horizontal="center">{ this.state.title }</FlexComponent>
         <FlexComponent vertical="center" overflow="visible">
           <IconComponent font="" onClick={() => this.runAction("backward")} />
           <IconComponent font="" onClick={() => this.runAction("forward")} />
           <IconComponent font="󰑓" onClick={() => this.runAction("reload")} />
-          { this.renderEngine() }
+          <MenuComponent color="blue-fg" label="󰖟">
+            { this.renderEngine("") }
+            <IconComponent color="green-fg" font="" onClick={e => this.addEngine(e)} />
+          </MenuComponent>
           <FlexComponent grow={1} padding={[0, 8, 0, 0]}>
             <form style={styles.form} onSubmit={this.onSubmitSrc}>
-              <input style={styles.input} type="text" value={this.state.input} disabled={!this.props.src.search(/^data:.*\/(.*);base64/)} onChange={this.onChangeSrc} onFocus={this.onFocus} />
+              <input style={styles.input} type="text" ref={this.input} value={this.state.input} disabled={!this.props.src.search(/^data:.*\/(.*);base64/)} onChange={this.onChangeSrc} onFocus={this.onFocus} />
             </form>
           </FlexComponent>
           <IconComponent font="" />
