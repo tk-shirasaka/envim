@@ -196,20 +196,21 @@ export class WebviewComponent extends React.Component<Props, States> {
     Emit.share("webview:searchengines");
   }
 
-  private async addEngine(e: MouseEvent) {
+  private async saveEngine(e: MouseEvent) {
     Emit.share("envim:focus");
     e.stopPropagation();
     e.preventDefault();
 
     if (this.webview) {
-      const name = await Emit.send<string>("envim:api", "nvim_call_function", ["EnvimInput", ["Name"]]);
-      const uri = name && await Emit.send<string>("envim:api", "nvim_call_function", ["EnvimInput", ["URI", this.webview.getURL()]]);
-      const selected = uri.indexOf("${query}") >= 0;
+      const uri = await Emit.send<string>("envim:api", "nvim_call_function", ["EnvimInput", ["URI", this.webview.getURL()]]);
+      const selected = this.state.searchengines.find(engine => engine.uri === uri);
+      const name = uri && await Emit.send<string>("envim:api", "nvim_call_function", ["EnvimInput", ["Name", selected?.name || ""]]);
+      const hasquery = uri.indexOf("${query}") >= 0;
 
-      if (name && uri) {
+      if (uri && name) {
         Setting.searchengines = [
-          ...this.state.searchengines.filter(engine => engine.name !== name).map(engine => ({ ...engine, selected: engine.selected && !selected })),
-          { name, uri, selected }
+          ...this.state.searchengines.filter(engine => engine.name !== name && engine.uri !== uri).map(engine => ({ ...engine, selected: engine.selected && !hasquery })),
+          { name, uri, selected: hasquery }
         ].sort((a, b) => a.name > b.name ? 1 : -1);
 
         Emit.share("webview:searchengines");
@@ -243,6 +244,10 @@ export class WebviewComponent extends React.Component<Props, States> {
   }
 
   render() {
+    const icon = this.state.searchengines.some(({ uri }) => uri === this.state.input)
+      ? { color: "blue-fg", font: "" }
+      : { color: "gray-fg", font: "" };
+
     return (
       <FlexComponent direction="column" position="absolute" color="default" overflow="visible" inset={[0]} style={this.props.style} onMouseUp={this.mouseCancel} onMouseDown={this.mouseCancel}>
         <FlexComponent color="gray-fg" horizontal="center">{ this.state.title }</FlexComponent>
@@ -252,8 +257,8 @@ export class WebviewComponent extends React.Component<Props, States> {
           <IconComponent font="󰑓" onClick={() => this.runAction("reload")} />
           <MenuComponent color="blue-fg" label="󰖟">
             { this.renderEngine("") }
-            <IconComponent color="green-fg" font="" onClick={e => this.addEngine(e)} />
           </MenuComponent>
+          <IconComponent { ...icon } onClick={e => this.saveEngine(e)} />
           <FlexComponent grow={1} padding={[0, 8, 0, 0]}>
             <form style={styles.form} onSubmit={this.onSubmitSrc}>
               <input style={styles.input} type="text" ref={this.input} value={this.state.input} disabled={!this.props.src.search(/^data:.*\/(.*);base64/)} onChange={this.onChangeSrc} onFocus={this.onFocus} />

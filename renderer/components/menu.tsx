@@ -83,7 +83,7 @@ export class MenuComponent extends React.Component<PropsWithChildren<Props>, Sta
     if (this.state.haschild === false) return null;
 
     const base = this.props.side ? styles.sidemenu : styles.menu;
-    const style = { ...base, ...{ inset: this.inset.join(" ") } };
+    const style = { ...base, ...{ inset: this.inset.join(" "), maxWidth: window.innerWidth - 20, minWidth: Math.min(150, window.innerWidth / 2 - 20) } };
     const direction = this.props.horizontal ? "row" : "column";
 
     return (

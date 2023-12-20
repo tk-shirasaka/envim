@@ -47,21 +47,6 @@ _G.envim_input = (function ()
   end
 end)()
 
-_G.envim_select = function (prompt, list, values, default)
-  local args = { prompt }
-
-  values = values or list
-  default = (default or 0) + 1
-
-  for i, val in ipairs(list) do
-    table.insert(args, string.format("%d%s	: %s", i, i == default and "*" or "", val))
-  end
-
-  local select = #list == 1 and 1 or vim.fn.inputlist(args)
-
-  return values[select == 0 and default or select] or values[default]
-end
-
 vim.cmd([[
   function! EnvimConnect(sync, ...)
     return v:lua.envim_connect(a:sync, a:000)
@@ -69,9 +54,5 @@ vim.cmd([[
 
   function! EnvimInput(prompt, ...)
     return v:lua.envim_input(a:prompt, get(a:, 1, v:false))
-  endfunction
-
-  function! EnvimSelect(prompt, list, ...)
-    return v:lua.envim_select(a:prompt, a:list, get(a:, 1, v:false), get(a:, 2, 0))
   endfunction
 ]])
