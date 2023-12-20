@@ -1,4 +1,4 @@
-import { app, BrowserWindow, Menu } from "electron";
+import { app, BrowserWindow, Menu, Event } from "electron";
 import { join } from "path";
 
 import { Emit } from "./emit";
@@ -51,12 +51,23 @@ export class Bootstrap {
     Bootstrap.win.on("closed", this.onQuit);
     Bootstrap.win.on("focus", () => Emit.send("envim:focus"));
     Bootstrap.win.once("ready-to-show", () => Emit.share("envim:theme"));
-    Bootstrap.win.webContents.on("did-attach-webview", (_, webContents) => (
+    Bootstrap.win.webContents.on("did-attach-webview", (_, webContents) => {
       webContents.setWindowOpenHandler(details => {
         Emit.share("envim:browser", details.url);
 
         return { action: "deny" };
-      })
-    ));
+      });
+
+      webContents.on("login", async (e: Event, _, __, callback: Function) => {
+        Emit.send("envim:focus");
+
+        e.preventDefault();
+
+        const user = await Emit.share("envim:api", "nvim_call_function", ["EnvimInput", ["User"]]);
+        const password = await Emit.share("envim:api", "nvim_call_function", ["EnvimInput", ["Password"]]);
+
+        user && callback(user, password);
+      });
+    });
   }
 }
