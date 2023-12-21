@@ -76,7 +76,7 @@ export class SettingComponent extends React.Component<Props, States> {
     if (type === this.state.type) {
       this.setState({ type });
     } else {
-      const { presets, ...state } = this.state.presets[`[${type}]:${path}`] || { type, path };
+      const { presets, searchengines, ...state } = this.state.presets[`[${type}]:${path}`] || { type, path };
       this.setState({ ...this.state, ...state });
     }
   }
@@ -88,7 +88,7 @@ export class SettingComponent extends React.Component<Props, States> {
     if (path === this.state.path) {
       this.setState({ path });
     } else {
-      const { presets, ...state } = this.state.presets[`[${type}]:${path}`] || { type, path };
+      const { presets, searchengines, ...state } = this.state.presets[`[${type}]:${path}`] || { type, path };
       this.setState({ ...this.state, ...state });
     }
   }
@@ -122,13 +122,13 @@ export class SettingComponent extends React.Component<Props, States> {
   }
 
   private onSelectPreset(key: string) {
-    const presets = this.state.presets;
+    const { searchengines, presets } = this.state;
 
-    this.setState({ ...this.state.presets[key], presets });
+    this.setState({ ...this.state.presets[key], searchengines, presets });
   }
 
   private onSubmit = (e: FormEvent) => {
-    const { type, path, font, opacity, options, bookmarks } = this.state;
+    const { type, path, font, opacity, options, bookmarks, searchengines } = this.state;
 
     e.stopPropagation();
     e.preventDefault();
@@ -139,6 +139,7 @@ export class SettingComponent extends React.Component<Props, States> {
     Setting.opacity = opacity;
     Setting.options = options;
     Setting.bookmarks = bookmarks;
+    Setting.searchengines = searchengines;
 
     Emit.send("envim:connect", type, path, bookmarks.find(({ selected }) => selected)?.path);
   }

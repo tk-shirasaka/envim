@@ -1,6 +1,6 @@
 import { ISetting } from "common/interface";
 
-import { Localstorage } from "./localstorage";
+import { Structure } from "./structure";
 
 const defaultSetting: ISetting = {
   type: "command",
@@ -23,18 +23,18 @@ const defaultSetting: ISetting = {
   presets: {},
 };
 
-const ls: Localstorage<ISetting> = new Localstorage<ISetting>("setting", defaultSetting);
+const structure: Structure<ISetting> = new Structure<ISetting>(defaultSetting);
 
 export class Setting {
-  private static item: ISetting = ls.get();
+  private static item: ISetting = structure.get();
 
   static get() {
     return Setting.item;
   }
 
   private static set(item: ISetting) {
-    ls.set(item);
-    Setting.item = ls.get();
+    structure.set(item);
+    Setting.item = structure.get();
   }
 
   static get type() {
