@@ -1,4 +1,4 @@
-import { app, BrowserWindow, Menu, Event } from "electron";
+import { app, dialog, BrowserWindow, Menu, Event } from "electron";
 import { join } from "path";
 
 import { Emit } from "./emit";
@@ -67,6 +67,12 @@ export class Bootstrap {
         const password = await Emit.share("envim:api", "nvim_call_function", ["EnvimInput", ["Password"]]);
 
         user && callback(user, password);
+      });
+
+      webContents.on("will-prevent-unload", (e: Event) => {
+        if (dialog.showMessageBoxSync({ message: "Leave this page?", buttons: ["Yes", "No"], defaultId: 0 }) === 0) {
+          e.preventDefault();
+        }
       });
     });
   }
