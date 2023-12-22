@@ -48,7 +48,7 @@ export class WebviewComponent extends React.Component<Props, States> {
     const container = this.container.current;
 
     if (container) {
-      container.innerHTML = `<webview src="${this.getUrl()}" allowpopups="on" />`
+      container.innerHTML = `<webview src="${this.getUrl()}" allowpopups="on" />`;
       this.webview = container.querySelector("webview");
     }
 
@@ -172,11 +172,15 @@ export class WebviewComponent extends React.Component<Props, States> {
     }
   }
 
-  private setEngine(name: string) {
+  private selectEngine(e: MouseEvent, name: string) {
     const selected = this.state.searchengines.find(engine => engine.name === name);
 
     if (this.webview && selected && selected.uri.indexOf("${query}") < 0) {
-      this.webview.src = selected.uri;
+      if (e.ctrlKey || e.metaKey) {
+        Emit.send("envim:browser", selected.uri);
+      } else {
+        this.webview.src = selected.uri;
+      }
     } else {
       const searchengines = this.state.searchengines.map(engine => ({ ...engine, selected: selected === engine }));
 
@@ -234,9 +238,9 @@ export class WebviewComponent extends React.Component<Props, States> {
           </MenuComponent>
         ) }
         { searchengines.filter(({ name }) => name.split("/").length === 1).map(({ name, selected }, i) =>
-          <FlexComponent  key={`${base}-${i}`} animate="hover" active={selected} onClick={() => this.setEngine(`${base}${name}`)} spacing>
+          <FlexComponent  key={`${base}-${i}`} animate="hover" active={selected} onClick={e => this.selectEngine(e, `${base}${name}`)} spacing>
             { name }
-            <IconComponent color="gray" font="" float="right" onClick={(e) => this.deleteEngine(e, `${base}${name}`)} hover />
+            <IconComponent color="gray" font="" float="right" onClick={e => this.deleteEngine(e, `${base}${name}`)} hover />
           </FlexComponent>
         ) }
       </>
@@ -259,15 +263,17 @@ export class WebviewComponent extends React.Component<Props, States> {
             { this.renderEngine("") }
           </MenuComponent>
           <IconComponent { ...icon } onClick={e => this.saveEngine(e)} />
-          <FlexComponent grow={1} padding={[0, 8, 0, 0]}>
+          <FlexComponent grow={1} shrink={2} padding={[0, 8, 0, 0]}>
             <form style={styles.form} onSubmit={this.onSubmitSrc}>
               <input style={styles.input} type="text" ref={this.input} value={this.state.input} disabled={!this.props.src.search(/^data:.*\/(.*);base64/)} onChange={this.onChangeSrc} onFocus={this.onFocus} />
             </form>
           </FlexComponent>
           <IconComponent font="" />
-          <form onSubmit={this.onSubmitSearch}>
-            <input type="text" value={this.state.search} onChange={this.onChangeSearch} onFocus={this.onFocus} />
-          </form>
+          <FlexComponent shrink={3}>
+            <form style={styles.input} onSubmit={this.onSubmitSearch}>
+              <input style={styles.input} type="text" value={this.state.search} onChange={this.onChangeSearch} onFocus={this.onFocus} />
+            </form>
+          </FlexComponent>
           <IconComponent font="" onClick={() => this.runAction("zoom-out")} />
           { this.state.zoom }%
           <IconComponent font="" onClick={() => this.runAction("zoom-in")} />

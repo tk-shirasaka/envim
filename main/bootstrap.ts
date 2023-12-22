@@ -53,9 +53,11 @@ export class Bootstrap {
     Bootstrap.win.once("ready-to-show", () => Emit.share("envim:theme"));
     Bootstrap.win.webContents.on("did-attach-webview", (_, webContents) => {
       webContents.setWindowOpenHandler(details => {
-        Emit.share("envim:browser", details.url);
+        const action = details.frameName || details.postBody ? "allow" : "deny";
 
-        return { action: "deny" };
+        action === "deny" && Emit.share("envim:browser", details.url);
+
+        return { action };
       });
 
       webContents.on("login", async (e: Event, _, __, callback: Function) => {
