@@ -207,9 +207,9 @@ export class App {
     });
   }
 
-  private gridResize(grid: number, width: number, height: number) {
-    Grids.get(grid).resize(width, height);
-    Grids.setStatus(grid, "show", true);
+  private gridResize(gid: number, width: number, height: number) {
+    Grids.get(gid).resize(width, height);
+    Grids.setStatus(gid, "show", true);
   }
 
   private defaultColorsSet(foreground: number, background: number, special: number) {
@@ -231,88 +231,88 @@ export class App {
     Emit.update("highlight:set", false, highlights);
   }
 
-  private gridLine(grid: number, row: number, col: number, cells: string[][]) {
+  private gridLine(gid: number, row: number, col: number, cells: string[][]) {
     let i = 0;
     cells.forEach(cell => {
       const repeat = cell.length >= 3 ? +cell[2] : 1;
       for (let j = 0; j < repeat; j++) {
-        Grids.get(grid).setCell(row, col + i++, cell[0], cell.length > 1 ? cell[1] : "-1");
+        Grids.get(gid).setCell(row, col + i++, cell[0], cell.length > 1 ? cell[1] : "-1");
       }
     });
   }
 
-  private gridClear(grid: number) {
-    const { width, height } = Grids.get(grid).getInfo();
+  private gridClear(gid: number) {
+    const { id, width, height } = Grids.get(gid).getInfo();
 
-    Grids.get(grid).resize(width, height, true);
-    Emit.send(`clear:${grid}`);
+    Grids.get(gid).resize(width, height, true);
+    Emit.send(`clear:${id}`);
   }
 
-  private gridDestory(grid: number) {
-    Grids.setStatus(grid, "delete", false);
+  private gridDestory(gid: number) {
+    Grids.setStatus(gid, "delete", false);
   }
 
-  private gridCursorGoto(grid: number, row: number, col: number) {
-    Grids.cursor(grid, row, col);
+  private gridCursorGoto(gid: number, row: number, col: number) {
+    Grids.cursor(gid, row, col);
   }
 
-  private gridScroll(grid: number, top: number, bottom: number, left: number, right: number, rows: number, cols: number) {
-    Grids.get(grid).setScroll(top, bottom, left, right, rows, cols)
+  private gridScroll(gid: number, top: number, bottom: number, left: number, right: number, rows: number, cols: number) {
+    Grids.get(gid).setScroll(top, bottom, left, right, rows, cols)
   }
 
-  private winPos(grid: number, win: Window | null, row: number, col: number, width: number, height: number, focusable: boolean, zIndex: number, type: "normal" | "floating" | "external") {
+  private winPos(gid: number, win: Window | null, row: number, col: number, width: number, height: number, focusable: boolean, zIndex: number, type: "normal" | "floating" | "external") {
     const winsize = Grids.get().getInfo();
-    const current = Grids.get(grid);
+    const current = Grids.get(gid);
     const winid = win ? win.id : 0;
     const overwidth = Math.max(0, col + width - winsize.width);
     const overheight = Math.max(0, row + height - winsize.height);
 
     col = Math.min(winsize.width - 1, Math.max(0, col - overwidth));
     row = Math.min(winsize.height - 1, Math.max(0, row - overheight));
-    zIndex = grid === 1 ? 1 : zIndex;
+    zIndex = gid === 1 ? 1 : zIndex;
 
     const update = current.setInfo({ winid, x: col, y: row, width, height, zIndex, focusable, type });
-    Grids.setStatus(grid, "show", update);
+    Grids.setStatus(gid, "show", update);
   }
 
-  private winFloatPos(grid: number, win: Window, anchor: string, pgrid: number, row: number, col: number, focusable: boolean, zIndex: number) {
-    const current = Grids.get(grid).getInfo();
-    const parent = Grids.get(pgrid).getInfo();
+  private winFloatPos(gid: number, win: Window, anchor: string, pgid: number, row: number, col: number, focusable: boolean, zIndex: number) {
+    const current = Grids.get(gid).getInfo();
+    const parent = Grids.get(pgid).getInfo();
 
     row = parent.y + (anchor[0] === "N" ? row : row - current.height);
     col = parent.x + (anchor[1] === "W" ? col : col - current.width);
 
-    this.winPos(grid, win, row, col, current.width, current.height, focusable, Math.max(zIndex, parent.zIndex + 4), "floating");
+    this.winPos(gid, win, row, col, current.width, current.height, focusable, Math.max(zIndex, parent.zIndex + 4), "floating");
   }
 
-  private async winExternalPos(grid: number, win: Window) {
+  private async winExternalPos(gid: number, win: Window) {
     if (!await win.valid) return;
 
-    const { x, y } = Grids.get(grid).getInfo();
+    const { x, y } = Grids.get(gid).getInfo();
     const width = await win.width;
     const height = await win.height;
 
-    this.winPos(grid, win, y, x, width, height, true, 10000, "external");
+    this.winPos(gid, win, y, x, width, height, true, 10000, "external");
   }
 
-  private msgSetPos(grid: number, row: number) {
+  private msgSetPos(gid: number, row: number) {
     const winsize = Grids.get().getInfo();
     const width = winsize.width;
     const height = winsize.height - row;
 
-    this.winPos(grid, null, row, 0, width, height, false, 50, "floating");
+    this.winPos(gid, null, row, 0, width, height, false, 50, "floating");
   }
 
-  private winHide(grid: number) {
-    Grids.setStatus(grid, "hide", false);
+  private winHide(gid: number) {
+    Grids.setStatus(gid, "hide", false);
   }
 
-  private winClose(grid: number) {
-    Grids.setStatus(grid, "delete", false);
+  private winClose(gid: number) {
+    Grids.setStatus(gid, "delete", false);
   }
 
-  private winViewport(grid: number, top: number, bottom: number, total: number) {
-    Grids.get(grid, false).setViewport(top, bottom, total);
+  private winViewport(gid: number, top: number, bottom: number, total: number) {
+    Grids.get(gid, false).setViewport(top, bottom, total);
   }
 
   private async tablineUpdate(ctab: Tabpage, tabs: { tab: Tabpage, name: string }[], cbuf: Buffer, bufs: { buffer: Buffer, name: string }[]) {
@@ -365,9 +365,9 @@ export class App {
     Emit.update("cmdline:blockhide", true);
   }
 
-  private popupmenuShow(items: string[][], selected: number, row: number, col: number, grid: number) {
+  private popupmenuShow(items: string[][], selected: number, row: number, col: number, gid: number) {
     const parent = Grids.get().getInfo();
-    const current = grid === -1 ? { y: 1, x: parent.width * 0.1 + 3, zIndex: 20 } : Grids.get(grid).getInfo();
+    const current = gid === -1 ? { y: 1, x: parent.width * 0.1 + 3, zIndex: 20 } : Grids.get(gid).getInfo();
     const [ x, y ] = [ col + current.x, row + current.y ];
     const height = Math.min(Math.max(y, parent.height - y - 1), items.length);
     const zIndex = current.zIndex + 1;

@@ -14,7 +14,8 @@ import { MenuComponent } from "../menu";
 import { WebviewComponent } from "../webview";
 
 interface Props {
-  grid: number;
+  id: string;
+  gid: number;
   winid: number;
   focusable: boolean;
   type: "normal" | "floating" | "external";
@@ -67,10 +68,10 @@ export class EditorComponent extends React.Component<Props, States> {
 
     this.busy = Cache.get<boolean>(TYPE, "busy");
     this.state = { bufs: Cache.get<IBuffer[]>(TYPE, "bufs") || [], nomouse: Cache.get<boolean>(TYPE, "nomouse"), dragging: false, scrolling: 0, preview: { src: "", active: false }, scroll: { total: 0, height: "100%", transform: "" } };
-    Emit.on(`clear:${this.props.grid}`, this.onClear);
-    Emit.on(`flush:${this.props.grid}`, this.onFlush);
-    Emit.on(`preview:${this.props.grid}`, this.onPreview);
-    Emit.on(`viewport:${this.props.grid}`, this.onViewport);
+    Emit.on(`clear:${this.props.id}`, this.onClear);
+    Emit.on(`flush:${this.props.id}`, this.onFlush);
+    Emit.on(`preview:${this.props.id}`, this.onPreview);
+    Emit.on(`viewport:${this.props.id}`, this.onViewport);
     Emit.on("envim:drag", this.onDrag);
     Emit.on("grid:busy", this.onBusy);
     Emit.on("mode:change", this.changeMode);
@@ -81,29 +82,27 @@ export class EditorComponent extends React.Component<Props, States> {
     const ctx = this.canvas.current?.getContext("2d");
 
     if (this.canvas.current && ctx) {
-      Canvas.set(this.props.grid, this.canvas.current, ctx, this.props.type === "normal");
-      Canvas.clear(this.props.grid, x2Col(this.props.style.width), y2Row(this.props.style.height));
-      Emit.send("envim:ready", this.props.grid);
+      Canvas.set(this.props.id, this.canvas.current, ctx, this.props.type === "normal");
+      Canvas.clear(this.props.id, x2Col(this.props.style.width), y2Row(this.props.style.height));
+      Emit.send("envim:ready", this.props.gid);
     }
   }
 
   componentDidUpdate() {
     if (this.capture) {
-      Canvas.clear(this.props.grid, x2Col(this.props.style.width), y2Row(this.props.style.height));
-      Canvas.putCapture(this.props.grid, this.capture);
+      Canvas.clear(this.props.id, x2Col(this.props.style.width), y2Row(this.props.style.height));
+      Canvas.putCapture(this.props.id, this.capture);
       delete(this.capture);
     }
   }
 
   componentWillUnmount = () => {
-    const grid = this.props.grid;
-
     clearInterval(this.timer);
-    Canvas.delete(grid);
-    Emit.off(`clear:${this.props.grid}`, this.onClear);
-    Emit.off(`flush:${this.props.grid}`, this.onFlush);
-    Emit.off(`preview:${this.props.grid}`, this.onPreview);
-    Emit.off(`viewport:${this.props.grid}`, this.onViewport);
+    Canvas.delete(this.props.id);
+    Emit.off(`clear:${this.props.id}`, this.onClear);
+    Emit.off(`flush:${this.props.id}`, this.onFlush);
+    Emit.off(`preview:${this.props.id}`, this.onPreview);
+    Emit.off(`viewport:${this.props.id}`, this.onViewport);
     Emit.off("envim:drag", this.onDrag);
     Emit.off("grid:busy", this.onBusy);
     Emit.off("mode:change", this.changeMode);
@@ -114,7 +113,7 @@ export class EditorComponent extends React.Component<Props, States> {
     const prev = this.props;
     const next = props;
     if (prev.style.width < next.style.width || prev.style.height < next.style.height || prev.editor.width !== next.editor.width || prev.editor.height !== next.editor.height) {
-      this.capture = Canvas.getCapture(this.props.grid);
+      this.capture = Canvas.getCapture(this.props.id);
     }
     return true;
   }
@@ -132,7 +131,7 @@ export class EditorComponent extends React.Component<Props, States> {
     const [col, row] = [ x2Col(e.nativeEvent.offsetX), y2Row(e.nativeEvent.offsetY) ];
     const modiffier = [];
     const skip = (button === "move" || action === "drag") && row === this.pointer.row && col === this.pointer.col;
-    const grid = this.props.grid === 1 ? 0 : this.props.grid;
+    const gid = this.props.gid === 1 ? 0 : this.props.gid;
 
     button === "wheel" || e.stopPropagation();
     button === "wheel" || e.preventDefault();
@@ -141,7 +140,7 @@ export class EditorComponent extends React.Component<Props, States> {
     e.altKey && modiffier.push("A");
 
     this.pointer = { row, col };
-    skip || Emit.send("envim:mouse", grid, button, action, modiffier.join("-"), row, col);
+    skip || Emit.send("envim:mouse", gid, button, action, modiffier.join("-"), row, col);
     Emit.share("envim:focus");
   }
 
@@ -150,7 +149,7 @@ export class EditorComponent extends React.Component<Props, States> {
 
     this.timer = +setTimeout(() => {
       this.drag = true;
-      Emit.share("envim:drag", this.props.grid);
+      Emit.share("envim:drag", this.props.id);
     });
 
     this.onMouseEvent(e, "press");
@@ -167,7 +166,7 @@ export class EditorComponent extends React.Component<Props, States> {
 
     if (this.drag) {
       this.drag = false;
-      Emit.share("envim:drag", -1);
+      Emit.share("envim:drag", "");
     }
     this.onMouseEvent(e, "release");
   }
@@ -189,9 +188,9 @@ export class EditorComponent extends React.Component<Props, States> {
       this.dragging = { x: 0, y: 0 };
       this.setState({ dragging: false });
 
-      Emit.share("envim:drag", -1);
-      Emit.send("envim:position", this.props.grid, x2Col(Math.max(0, offset.x)), y2Row(Math.max(0, offset.y)));
-      Emit.send("envim:resize", this.props.grid, Math.max(x2Col(resize.width), 18), y2Row(resize.height));
+      Emit.share("envim:drag", "");
+      Emit.send("envim:position", this.props.gid, x2Col(Math.max(0, offset.x)), y2Row(Math.max(0, offset.y)));
+      Emit.send("envim:resize", this.props.gid, Math.max(x2Col(resize.width), 18), y2Row(resize.height));
     }
   }
 
@@ -220,11 +219,11 @@ export class EditorComponent extends React.Component<Props, States> {
   }
 
   private onClear = () => {
-    Canvas.clear(this.props.grid, x2Col(this.props.style.width), y2Row(this.props.style.height));
+    Canvas.clear(this.props.id, x2Col(this.props.style.width), y2Row(this.props.style.height));
   }
 
   private onFlush = (flush: { cells: ICell[], scroll?: IScroll }[]) => {
-    flush.forEach(({ cells, scroll }) => Canvas.update(this.props.grid, cells, scroll));
+    flush.forEach(({ cells, scroll }) => Canvas.update(this.props.id, cells, scroll));
   }
 
   private onPreview = (src: string) => {
@@ -255,7 +254,7 @@ export class EditorComponent extends React.Component<Props, States> {
     e.preventDefault();
 
     this.setState({ dragging: true });
-    Emit.share("envim:drag", this.props.grid);
+    Emit.share("envim:drag", this.props.id);
   }
 
   private onViewport = (top: number, bottom: number, total: number) => {
@@ -272,12 +271,12 @@ export class EditorComponent extends React.Component<Props, States> {
     }});
   }
 
-  private onDrag = (grid: number) => {
-    const nomouse = [-1, this.props.grid].indexOf(grid) < 0;
+  private onDrag = (id: string) => {
+    const nomouse = ["", this.props.id].indexOf(id) < 0;
 
     this.setState({ nomouse });
-    grid === -1 && this.setState({ dragging: false });
-    Cache.set<boolean>(TYPE, "nomouse", grid >= 0);
+    id === "" && this.setState({ dragging: false });
+    Cache.set<boolean>(TYPE, "nomouse", id.length > 0);
   }
 
   private onBusy = (busy: boolean) => {
@@ -326,8 +325,8 @@ export class EditorComponent extends React.Component<Props, States> {
         <FlexComponent grow={1} nomouse>
           <canvas style={{ ...styles.canvas, transform: `scale(${1 / scale})` }} width={this.props.editor.width * scale} height={this.props.editor.height * scale} ref={this.canvas} />
         </FlexComponent>
-        { this.props.grid === 1 || this.renderPreview() }
-        { this.props.grid === 1 || !this.props.focusable ? null : (
+        { this.props.gid === 1 || this.renderPreview() }
+        { this.props.gid === 1 || !this.props.focusable ? null : (
           <>
             <FlexComponent color="default" grow={1} position="absolute" inset={[0, -4, 0, "auto"]} onMouseDown={this.onScroll} hover={this.state.scrolling === 0}>
               <FlexComponent animate="fade-in" color="blue" border={[0, 2]} rounded={[2]} style={this.state.scroll} shadow nomouse></FlexComponent>

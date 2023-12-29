@@ -11,19 +11,21 @@ class Grid {
   private viewport: { top: number; bottom: number; total: number; } = { top: 0, bottom: 0, total: 0 };
   private ready: boolean = false;
 
-  constructor(id: number, width :number, height: number) {
-    this.info = { id, winid: 0, x: 0, y: 0, width: 0, height: 0, zIndex: 1, focusable: true, type: "normal", status: "hide" };
+  constructor(gid: number, workspace: string, width :number, height: number) {
+    const id = `${workspace}.${gid}`;
+
+    this.info = { id, gid, winid: 0, x: 0, y: 0, width: 0, height: 0, zIndex: 1, focusable: true, type: "normal", status: "hide" };
     this.resize(width, height);
   }
 
   setInfo(info: Object) {
-    const { id, ...curr } = this.info;
+    const { id, gid, ...curr } = this.info;
     const next = { ...curr, ...info };
     const update = JSON.stringify(curr) !== JSON.stringify(next);
 
     if (update) {
       this.resize(next.width, next.height);
-      this.info = { id, ...next };
+      this.info = { id, gid, ...next };
     }
 
     return update;
@@ -149,15 +151,15 @@ class Grid {
     return { flush, viewport };
   }
 
-  onReady(ready: boolean = true) {
-    this.ready = ready;
+  onReady() {
+    this.ready = true;
   }
 }
 
 export class Grids {
   private static grids: { [k: number]: Grid } = {};
   private static default: 1 = 1;
-  private static active: { grid: number; row: number; col: number; } = { grid: 0, row: 0, col: 0 };
+  private static active: { gid: number; row: number; col: number; } = { gid: 0, row: 0, col: 0 };
   private static changes: { [k: number]: number } = {};
   private static workspace: { current: string; caches: { [k: string]: Grid[] } } = { current: "", caches: {} };
 
@@ -170,25 +172,23 @@ export class Grids {
     }
 
     Grids.grids = {};
-    Grids.active = { grid: 0, row: 0, col: 0 };
+    Grids.active = { gid: 0, row: 0, col: 0 };
     Grids.changes = {};
     Grids.workspace.current = workspace;
 
     Grids.workspace.caches[workspace].forEach(grid => {
-      const { id, status } = grid.getInfo();
+      const { gid, status } = grid.getInfo();
 
-      grid.refresh();
-      grid.onReady(false);
-      Grids.grids[id] = grid;
-      Grids.setStatus(id, status, true);
+      Grids.grids[gid] = grid;
+      Grids.setStatus(gid, status, true);
     });
   }
 
-  static get(grid: number = Grids.default, add: boolean = true) {
-    const curr = Grids.grids[grid] || new Grid(grid, 0, 0);
+  static get(gid: number = Grids.default, add: boolean = true) {
+    const curr = Grids.grids[gid] || new Grid(gid, Grids.workspace.current, 0, 0);
 
-    if (!Grids.grids[grid] && add) {
-      Grids.grids[grid] = curr;
+    if (!Grids.grids[gid] && add) {
+      Grids.grids[gid] = curr;
     }
 
     return curr;
@@ -198,19 +198,19 @@ export class Grids {
     return Object.values(Grids.grids).find(grid => grid.getInfo().winid === winid);
   }
 
-  static cursor(grid: number, row: number, col: number) {
-    if (Object.keys(Grids.grids).length <= 1 || grid !== Grids.default) {
-      const active = Grids.get(Grids.active.grid, false).getInfo();
+  static cursor(gid: number, row: number, col: number) {
+    if (Object.keys(Grids.grids).length <= 1 || gid !== Grids.default) {
+      const active = Grids.get(Grids.active.gid, false).getInfo();
 
-      active.id !== grid &&  Grids.setStatus(active.id, active.status, active.status === "show");
-      Grids.active = { grid, row, col };
-      Grids.setStatus(grid, "show", true);
+      active.gid !== gid &&  Grids.setStatus(active.gid, active.status, active.status === "show");
+      Grids.active = { gid, row, col };
+      Grids.setStatus(gid, "show", true);
     }
   }
 
-  static setStatus(grid: number, status: "show" | "hide" | "delete", update: boolean) {
-    if (Grids.get(grid, false).setInfo({ status }) || update) {
-      Grids.changes[grid] = grid;
+  static setStatus(gid: number, status: "show" | "hide" | "delete", update: boolean) {
+    if (Grids.get(gid, false).setInfo({ status }) || update) {
+      Grids.changes[gid] = gid;
     }
   }
 
@@ -220,7 +220,7 @@ export class Grids {
 
   static flush() {
     const winsize = Grids.get().getInfo();
-    const cursor = Grids.get(Grids.active.grid, false).getCursorPos(Grids.active.row, Grids.active.col);
+    const cursor = Grids.get(Grids.active.gid, false).getCursorPos(Grids.active.row, Grids.active.col);
 
     if (cursor && cursor.x >= 0 && cursor.y >= 0) {
       Emit.update("grid:cursor", false, cursor);
@@ -229,11 +229,11 @@ export class Grids {
     const wins: IWindow[] = Object.values(Grids.changes).map(grid => {
       const info = { ...Grids.get(grid).getInfo() };
 
-      info.zIndex = info.id === Grids.active.grid ? info.zIndex + 1 : info.zIndex;
+      info.zIndex = info.gid === Grids.active.gid ? info.zIndex + 1 : info.zIndex;
       info.status = info.width && info.height ? info.status : "delete";
 
       if (info.status === "delete") {
-        delete(Grids.grids[info.id]);
+        delete(Grids.grids[info.gid]);
       }
 
       if (info.status === "show" && winsize.width < info.width || winsize.height < info.height) {
@@ -244,7 +244,7 @@ export class Grids {
     });
 
     Grids.changes = {};
-    wins.length && Emit.update("win:pos", false, wins);
+    wins.length && Emit.update("win:pos", false, Grids.workspace.current, wins);
 
     Object.values(Grids.grids).map(grid => {
       const { id } = grid.getInfo();

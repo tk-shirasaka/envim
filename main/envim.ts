@@ -84,13 +84,13 @@ export class Envim {
     await this.onCommand("doautocmd envim DirChanged");
   }
 
-  private onResize = (grid: number, width: number, height: number) => {
-    grid ? this.nvim.uiTryResizeGrid(grid, width, height) : this.nvim.uiTryResize(width, height);
+  private onResize = (gid: number, width: number, height: number) => {
+    gid ? this.nvim.uiTryResizeGrid(gid, width, height) : this.nvim.uiTryResize(width, height);
   }
 
-  private onPosition = (grid: number, x: number, y: number) => {
-    Grids.get(grid).setInfo({ x, y });
-    Grids.setStatus(grid, "show", true);
+  private onPosition = (gid: number, x: number, y: number) => {
+    Grids.get(gid).setInfo({ x, y });
+    Grids.setStatus(gid, "show", true);
     Grids.flush();
   }
 
@@ -102,8 +102,8 @@ export class Envim {
     return await this.nvim.request(fname, args);
   }
 
-  private onMouse = async (grid: number, button: string, action: string, modifier: string, row: number, col: number) => {
-    return await this.nvim.inputMouse(button, action, modifier, grid, row, col);
+  private onMouse = async (gid: number, button: string, action: string, modifier: string, row: number, col: number) => {
+    return await this.nvim.inputMouse(button, action, modifier, gid, row, col);
   }
 
   private onInput = async (input: string) => {
@@ -120,8 +120,8 @@ export class Envim {
     });
   }
 
-  private onReady = (grid: number) => {
-    Grids.get(grid).onReady();
+  private onReady = (gid: number) => {
+    Grids.get(gid).onReady();
     Grids.flush();
   }
 

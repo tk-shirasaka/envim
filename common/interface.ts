@@ -10,7 +10,8 @@ export interface ISetting {
 }
 
 export interface IWindow {
-  id: number;
+  id: string;
+  gid: number;
   winid: number;
   x: number;
   y: number

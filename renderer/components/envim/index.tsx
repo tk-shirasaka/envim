@@ -26,7 +26,8 @@ interface States {
   pause: boolean;
   mousemoveevent: boolean;
   grids: { [k: string]: {
-    grid: number;
+    id: string;
+    gid: number;
     winid: number;
     order: number;
     focusable: boolean;
@@ -105,7 +106,6 @@ export class EnvimComponent extends React.Component<Props, States> {
   }
 
   private onSwitch = () => {
-    this.setState( { grids: {} } );
     Emit.send("envim:attach", x2Col(this.editor.width), y2Row(this.editor.height), Setting.options);
   }
 
@@ -115,11 +115,12 @@ export class EnvimComponent extends React.Component<Props, States> {
     });
   }
 
-  private onWin = (wins: IWindow[]) => {
+  private onWin = (workspace: string, wins: IWindow[]) => {
     const grids = this.state.grids;
     const nextOrder = Object.values(grids).reduce((order, grid) => Math.max(order, grid.order), 1);
 
-    wins.reverse().forEach(({ id, winid, x, y, width, height, zIndex, focusable, type, status }, i) => {
+    Object.values(grids).forEach(grid => grid.id.indexOf(`${workspace}.`) < 0 && (grid.style.visibility = "hidden"));
+    wins.reverse().forEach(({ id, gid, winid, x, y, width, height, zIndex, focusable, type, status }, i) => {
       const curr = grids[id]?.style || {};
       const order = grids[id]?.order || i + nextOrder;
       const next = {
@@ -135,7 +136,7 @@ export class EnvimComponent extends React.Component<Props, States> {
         delete(grids[id]);
       } else if (JSON.stringify(curr) !== JSON.stringify(next)) {
         this.refresh = this.refresh || (zIndex < 5 && (curr.width !== next.width || curr.height !== next.height));
-        grids[id] = { grid: id, winid, order, focusable, type, style: next };
+        grids[id] = { id, gid, winid, order, focusable, type, style: next };
       }
     });
 
@@ -158,7 +159,7 @@ export class EnvimComponent extends React.Component<Props, States> {
   }
 
   private onMouseUp = () => {
-    Emit.share("envim:drag", -1);
+    Emit.share("envim:drag", "");
     Emit.share("envim:focus");
   }
 
@@ -172,7 +173,7 @@ export class EnvimComponent extends React.Component<Props, States> {
             <div className="color-default" style={{height: Setting.font.height}} />
             <FlexComponent overflow="visible" style={this.editor}>
               { Object.values(this.state.grids).sort((a, b) => a.order - b.order).map(grid => (
-                <EditorComponent key={grid.grid} editor={this.editor} mousemoveevent={this.state.mousemoveevent} { ...grid } />
+                <EditorComponent key={grid.id} editor={this.editor} mousemoveevent={this.state.mousemoveevent} { ...grid } />
               )) }
               <PopupmenuComponent />
               <InputComponent />

@@ -9,7 +9,7 @@ export class Canvas {
   private static init = false;
 
   static set(
-    grid: number,
+    id: string,
     canvas: HTMLCanvasElement,
     ctx: CanvasRenderingContext2D,
     lighten: boolean,
@@ -24,28 +24,28 @@ export class Canvas {
       bgcanvas.width = canvas.width;
       bgcanvas.height = canvas.height;
 
-      Cache.set<Context2D>(TYPE, grid, new Context2D(canvas, ctx, bgcanvas, bgctx, lighten));
+      Cache.set<Context2D>(TYPE, id, new Context2D(canvas, ctx, bgcanvas, bgctx, lighten));
     }
   }
 
-  static delete(grid: number) {
-    Cache.delete(TYPE, grid);
+  static delete(id: string) {
+    Cache.delete(TYPE, id);
   }
 
-  static clear(grid: number, width: number, height: number) {
-    Cache.get<Context2D>(TYPE, grid)?.clear(0, 0, width, height);
+  static clear(id: string, width: number, height: number) {
+    Cache.get<Context2D>(TYPE, id)?.clear(0, 0, width, height);
   }
 
-  static getCapture(grid: number) {
-    return Cache.get<Context2D>(TYPE, grid)?.getCapture();
+  static getCapture(id: string) {
+    return Cache.get<Context2D>(TYPE, id)?.getCapture();
   }
 
-  static putCapture(grid: number, capture: HTMLCanvasElement) {
-    Cache.get<Context2D>(TYPE, grid)?.putCapture(capture, 0, 0)
+  static putCapture(id: string, capture: HTMLCanvasElement) {
+    Cache.get<Context2D>(TYPE, id)?.putCapture(capture, 0, 0)
   }
 
-  static update(grid: number, cells: ICell[], scroll: IScroll | undefined) {
-    Cache.get<Context2D>(TYPE, grid)?.push(cells, scroll)
+  static update(id: string, cells: ICell[], scroll: IScroll | undefined) {
+    Cache.get<Context2D>(TYPE, id)?.push(cells, scroll)
   }
 
   private static render() {
