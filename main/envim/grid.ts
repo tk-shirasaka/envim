@@ -184,6 +184,11 @@ export class Grids {
     });
   }
 
+  static disconnect() {
+    Object.keys(Grids.grids).forEach(gid => Grids.setStatus(+gid, "delete", true));
+    Grids.flush();
+  }
+
   static get(gid: number = Grids.default, add: boolean = true) {
     const curr = Grids.grids[gid] || new Grid(gid, Grids.workspace.current, 0, 0);
 
