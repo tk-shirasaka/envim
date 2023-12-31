@@ -19,6 +19,7 @@ interface States {
   input: string;
   search: string;
   title: string;
+  loading: boolean;
   searchengines: ISetting["searchengines"];
   zoom: number;
 }
@@ -40,7 +41,7 @@ export class WebviewComponent extends React.Component<Props, States> {
   constructor(props: Props) {
     super(props);
 
-    this.state = { input: props.src, search: "", title: "", searchengines: Setting.searchengines, zoom: 100 };
+    this.state = { input: props.src, search: "", title: "", loading: false, searchengines: Setting.searchengines, zoom: 100 };
     Emit.on("webview:searchengines", this.onSearchengines);
   }
 
@@ -53,6 +54,8 @@ export class WebviewComponent extends React.Component<Props, States> {
     }
 
     if (this.webview) {
+      this.webview.addEventListener("did-start-loading", this.onLoad);
+      this.webview.addEventListener("did-stop-loading", this.onLoad);
       this.webview.addEventListener("did-finish-load", this.onLoad);
       this.webview.addEventListener("did-navigate", this.onLoad);
       this.webview.addEventListener("did-navigate-in-page", this.onLoad);
@@ -73,6 +76,8 @@ export class WebviewComponent extends React.Component<Props, States> {
 
   componentWillUnmount = () => {
     if (this.webview) {
+      this.webview.removeEventListener("did-start-loading", this.onLoad);
+      this.webview.removeEventListener("did-stop-loading", this.onLoad);
       this.webview.removeEventListener("did-finish-load", this.onLoad);
       this.webview.removeEventListener("did-navigate", this.onLoad);
       this.webview.removeEventListener("did-navigate-in-page", this.onLoad);
@@ -145,8 +150,9 @@ export class WebviewComponent extends React.Component<Props, States> {
     if (this.webview) {
       const url = this.webview.getURL();
       const title = this.webview.getTitle();
+      const loading = !!title && this.webview.isLoading();
 
-      url === "about:blank" || this.setState({ input: url, title });
+      url === "about:blank" || this.setState({ input: url, title, loading });
     }
   }
 
@@ -253,8 +259,11 @@ export class WebviewComponent extends React.Component<Props, States> {
       : { color: "gray-fg", font: "" };
 
     return (
-      <FlexComponent direction="column" position="absolute" color="default" overflow="visible" inset={[0]} style={this.props.style} onMouseUp={this.mouseCancel} onMouseDown={this.mouseCancel}>
-        <FlexComponent color="gray-fg" horizontal="center">{ this.state.title }</FlexComponent>
+      <FlexComponent animate="fade-in" direction="column" position="absolute" color="default" overflow="visible" inset={[0]} style={this.props.style} onMouseUp={this.mouseCancel} onMouseDown={this.mouseCancel}>
+        <FlexComponent color="gray-fg" vertical="center" horizontal="center">
+          { this.state.loading && <div className="animate loading inline"></div> }
+          <FlexComponent margin={[0, 8]}>{ this.state.title }</FlexComponent>
+        </FlexComponent>
         <FlexComponent vertical="center" overflow="visible">
           <IconComponent font="" onClick={() => this.runAction("backward")} />
           <IconComponent font="" onClick={() => this.runAction("forward")} />
