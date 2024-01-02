@@ -42,6 +42,7 @@ export class Bootstrap {
       titleBarOverlay: true,
       webPreferences: {
         webviewTag: true,
+        spellcheck: false,
         preload: join(__dirname, "preload.js"),
       },
     });
@@ -56,8 +57,14 @@ export class Bootstrap {
         const action = details.frameName || details.postBody ? "allow" : "deny";
 
         action === "deny" && Emit.share("envim:browser", details.url);
+        action === "allow" && !details.frameName && app.once("browser-window-created", (_, browserWindow) => (
+          browserWindow.webContents.once("did-navigate", () => {
+            Emit.share("envim:browser", browserWindow.webContents.getURL());
+            browserWindow.close();
+          })
+        ));
 
-        return { action };
+        return { action, overrideBrowserWindowOptions: { show: !!details.frameName } };
       });
 
       webContents.on("login", async (e: Event, _, __, callback: Function) => {
