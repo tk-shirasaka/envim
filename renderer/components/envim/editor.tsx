@@ -236,17 +236,10 @@ export class EditorComponent extends React.Component<Props, States> {
   }
 
   private openExtWindow = (e: MouseEvent) => {
-    e.stopPropagation();
-    e.preventDefault();
+    const width = x2Col(this.props.editor.width);
+    const height = y2Row(this.props.editor.height);
 
-    const minimize = this.props.type === "external" && y2Row(this.props.style.height) > 1;
-    const args = {
-      external: true,
-      width: minimize ? 18 : x2Col(this.props.editor.width),
-      height: minimize ? 1 : y2Row(this.props.editor.height),
-    };
-
-    Emit.send("envim:api", "nvim_win_set_config", [this.props.winid, args]);
+    this.runCommand(e, `call nvim_win_set_config(0, { "width": ${width}, "height": ${height}, "external": 1 })`)
   }
 
   private dragExtWIndow = (e: MouseEvent) => {
@@ -306,6 +299,18 @@ export class EditorComponent extends React.Component<Props, States> {
     );
   }
 
+  private renderIconMenu(label: string, menus: { font: string, onClick: (e: MouseEvent) => void }[][]) {
+    return (
+      <MenuComponent color="gray-fg" label={label} fit>
+        { menus.map((menu, i) => (
+          <FlexComponent key={i}>
+            { menu.map((item, j) => <IconComponent key={`${i}-${j}`} color="gray-fg" { ...item } />) }
+          </FlexComponent>
+        )) }
+      </MenuComponent>
+    );
+  }
+
   private renderPreview() {
     return <WebviewComponent src={this.state.preview.src} style={this.state.preview.active ? {} : { display: "none" }} />;
   }
@@ -338,18 +343,39 @@ export class EditorComponent extends React.Component<Props, States> {
               { this.props.type === "normal" && (
                 <>
                   { this.renderMenu("", "buffer ") }
-                  <IconComponent color="gray-fg" font="" onClick={e => this.runCommand(e, "enew")} />
-                  <IconComponent color="gray-fg" font="" onClick={e => this.runCommand(e, "vsplit")} />
-                  <IconComponent color="gray-fg" font="" onClick={e => this.runCommand(e, "split")} />
-                  <IconComponent color="gray-fg" font="󰶭" onClick={this.openExtWindow} />
+                  { this.renderIconMenu("", [
+                    [
+                      { font: "", onClick: e => this.runCommand(e, "enew") },
+                      { font: "", onClick: e => this.runCommand(e, "vsplit") },
+                      { font: "", onClick: e => this.runCommand(e, "split") },
+                    ],
+                    [
+                      { font: "󰶭", onClick: this.openExtWindow },
+                      { font: "󱂪", onClick: e => this.runCommand(e, "wincmd H") },
+                      { font: "󱂫", onClick: e => this.runCommand(e, "wincmd L") },
+                    ],
+                    [
+                      { font: "󱔓", onClick: e => this.runCommand(e, "wincmd K") },
+                      { font: "󱂩", onClick: e => this.runCommand(e, "wincmd J") },
+                      { font: "󰉡", onClick: e => this.runCommand(e, "wincmd =") },
+                    ],
+                  ]) }
                   <IconComponent color="gray-fg" font="" onClick={e => this.runCommand(e, "write")} />
                 </>
               )}
               { this.props.type === "external" && (
                 <>
                   <IconComponent color="gray-fg" font="󰮐" active={this.state.dragging} onClick={this.dragExtWIndow} />
-                  <IconComponent color="gray-fg" font="󰶮" onClick={e => this.runCommand(e, "wincmd H")} />
-                  <IconComponent color="gray-fg" font={y2Row(this.props.style.height) === 1 ? "󰖯" : "󰖰"} onClick={this.openExtWindow} />
+                  { this.renderIconMenu("", [
+                    [
+                      { font: "󱂪", onClick: e => this.runCommand(e, "wincmd H") },
+                      { font: "󱂫", onClick: e => this.runCommand(e, "wincmd L") },
+                    ],
+                    [
+                      { font: "󱔓", onClick: e => this.runCommand(e, "wincmd K") },
+                      { font: "󱂩", onClick: e => this.runCommand(e, "wincmd J") },
+                    ],
+                  ]) }
                 </>
               )}
               <IconComponent color="gray-fg" font="" onClick={e => this.runCommand(e, "confirm quit")} />

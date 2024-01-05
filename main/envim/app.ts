@@ -293,6 +293,7 @@ export class App {
     const height = await win.height;
 
     this.winPos(gid, win, y, x, width, height, true, 10000, "external");
+    Grids.flush();
   }
 
   private msgSetPos(gid: number, row: number) {
