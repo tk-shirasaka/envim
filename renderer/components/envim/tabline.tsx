@@ -54,14 +54,16 @@ export class TablineComponent extends React.Component<Props, States> {
   }
 
   private onCwd = (cwd: string) => {
-    Setting.bookmarks = this.state.bookmarks
-      .map(bookmark => ({ ...bookmark, selected: bookmark.path === cwd }));
-
-    if (this.state.bookmarks.some(({ path, selected }) => !selected && path === cwd)) {
-      Emit.send("envim:connect", Setting.type, Setting.path, cwd);
-    }
+    const bookmarks = Setting.bookmarks;
+    const current = bookmarks.find(({ selected }) => selected);
+    const selected = bookmarks
+      .filter(({ path }) => cwd.indexOf(path) === 0)
+      .sort((a, b) => a.path.length - b.path.length)
+      .pop();
+    Setting.bookmarks = bookmarks.map(bookmark => ({ ...bookmark, selected: bookmark === selected }));
 
     this.setState({ cwd, bookmarks: Setting.bookmarks });
+    selected && current !== selected && Emit.send("envim:connect", Setting.type, Setting.path, selected.path);
   }
 
   private async saveBookmark(bookmark: { name: string, path: string, selected: boolean }) {
@@ -73,11 +75,10 @@ export class TablineComponent extends React.Component<Props, States> {
 
     if (name) {
       bookmark.name = name.replace(/^\//, "").replace(/\/+/, "/").replace(/\/$/, "");
-      bookmark.selected = bookmark.path === this.state.cwd;
       bookmarks.push(bookmark);
       Setting.bookmarks = bookmarks.sort((a, b) => a.name > b.name ? 1 : -1);
 
-      this.setState({ bookmarks });
+      this.onCwd(this.state.cwd);
     }
   }
 
@@ -145,7 +146,7 @@ export class TablineComponent extends React.Component<Props, States> {
 
   private renderBookmark() {
     const cwd = this.state.cwd
-    const index = this.state.bookmarks.findIndex(({ path }) => path === cwd);
+    const index = this.state.bookmarks.findIndex(({ selected }) => selected);
     const bookmark = index >= 0 ? this.state.bookmarks[index] : { name: cwd, group: "", path: cwd, selected: false };
     const text = bookmark.selected && bookmark.name.split("/").pop() || "";
     const icon = index >= 0 ? { color: "blue-fg", font: "", text } : { color: "gray-fg", font: "", text };
