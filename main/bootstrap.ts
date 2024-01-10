@@ -83,6 +83,10 @@ export class Bootstrap {
           e.preventDefault();
         }
       });
+
+      webContents.on("context-menu", (_, params) => {
+        params.selectionText && Emit.share("envim:browser", params.selectionText);
+      });
     });
   }
 }

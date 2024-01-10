@@ -49,7 +49,7 @@ export class WebviewComponent extends React.Component<Props, States> {
     const container = this.container.current;
 
     if (container) {
-      container.innerHTML = `<webview src="${this.getUrl()}" allowpopups="on" />`;
+      container.innerHTML = `<webview src="${this.getUrl(this.props.src)}" allowpopups="on" />`;
       this.webview = container.querySelector("webview");
     }
 
@@ -66,7 +66,7 @@ export class WebviewComponent extends React.Component<Props, States> {
   componentDidUpdate(props: Props) {
     if (this.webview && this.props.src !== props.src) {
       this.setState({ input: this.props.src });
-      this.webview.src = this.getUrl();
+      this.webview.src = this.getUrl(this.props.src);
     }
 
     if (props.style.display === "none" && !this.props.style.display) {
@@ -87,8 +87,17 @@ export class WebviewComponent extends React.Component<Props, States> {
     Emit.off("webview:searchengines", this.onSearchengines);
   }
 
-  private getUrl() {
-    return this.props.src.search(/^(https?:\/\/\w+)|(data:.*\/(.*);base64)/) ? "about:blank" : this.props.src;
+  private getUrl(input: string) {
+
+    if (!input) {
+      return "about:blank";
+    } else if (input.search(/^((https?)|(file):\/\/)|(data:.*\/(.*);base64)/) === 0) {
+      return input;
+    } else {
+      const selected = this.state.searchengines.find(({ selected }) => selected);
+
+      return selected?.uri.replace("${query}", encodeURIComponent(input)) || "about:blank";
+    }
   }
 
   private onSearchengines = () => {
@@ -108,18 +117,13 @@ export class WebviewComponent extends React.Component<Props, States> {
   }
 
   private onSubmitSrc = (e: FormEvent) => {
-    const input = this.state.input;
-    const selected = this.state.searchengines.find(({ selected }) => selected);
-
     e.stopPropagation();
     e.preventDefault();
 
     if (!this.webview) return;
 
-    if (input && selected) {
-      const src = input.search(/^https?:\/\/\w+/) ? selected.uri.replace("${query}", encodeURIComponent(input)) : input;
-
-      this.webview.src = src;
+    if (this.state.input) {
+      this.webview.src = this.getUrl(this.state.input);
     } else {
       this.setState({ input: this.webview.getURL() });
     }

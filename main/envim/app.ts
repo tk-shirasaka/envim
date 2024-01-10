@@ -58,7 +58,7 @@ export class App {
       const media = Object.keys(mediamap).find(key => ext.search(mediamap[key]) >= 0);
       const { id } = grid.getInfo();
 
-      if (name.match(/^https?:\/\//)) {
+      if (name.match(/^(https?)|(file):\/\//)) {
         src = name;
       } else if (src === undefined && name && ext && media) {
         const blob = await Emit.share("envim:api", "nvim_call_function", ["win_execute", [winid, `echo blob2list(readblob("${name}"))`]]) || "[]";
