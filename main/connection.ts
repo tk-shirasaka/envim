@@ -7,8 +7,8 @@ import { Client as SSHClient } from "ssh2";
 import { NeovimClient } from "neovim";
 
 export class Connection {
-  private static workspaces: { [k: string]: { nvim: NeovimClient; bookmark: string } } = {};
-  private static current: string = "";
+  private static workspaces: { nvim: NeovimClient; bookmark: string, key: string }[] = [];
+  private static current?: { nvim: NeovimClient; bookmark: string, key: string };
   private static timer: number = 0;
 
   private static attach(reader: Readable, writer: Writable) {
@@ -79,13 +79,16 @@ export class Connection {
   }
 
   static connect(type: string, path: string, bookmark: string, callback: (nvim: NeovimClient, init: boolean, workspace: string) => void) {
-    const workspace = { address: path }[type] || `${path}::${bookmark}`;
-    const current = Connection.workspaces[Connection.current];
-    const next = Connection.workspaces[workspace];
+    const next = Connection.workspaces.find(workspace => !workspace.bookmark || workspace.bookmark === bookmark);
     const attach = (nvim: NeovimClient, init: boolean = true) => {
-      Connection.current = workspace;
-      Connection.workspaces[workspace] = { nvim, bookmark };
+      const workspace = next?.key || { address: path }[type] || `${path}::${bookmark}`;
+      const current = Connection.current;
 
+      Connection.current = { nvim, bookmark, key: workspace };
+      Connection.workspaces = Connection.workspaces.filter(workspace => workspace.nvim !== nvim);
+      Connection.workspaces.push(Connection.current);
+
+      if (next && next === current) return;
       if (current) {
         current.nvim.uiDetach();
         current.nvim.removeAllListeners("request");
@@ -95,7 +98,6 @@ export class Connection {
       callback(nvim, init, workspace);
     };
 
-    if (next && workspace === Connection.current) return;
     if (next) return attach(next.nvim, false);
 
     switch (type) {
@@ -106,12 +108,12 @@ export class Connection {
     }
   }
 
-  static disconnect(workspace: string, callback: (workspace?: { nvim: NeovimClient, bookmark: string }) => void) {
-    workspace && delete(Connection.workspaces[workspace]);
+  static disconnect(workspace: string, callback: (workspace?: { nvim: NeovimClient, bookmark: string, key: string }) => void) {
+    Connection.workspaces = Connection.workspaces.filter(({ key }) => workspace !== key);
 
     clearTimeout(Connection.timer);
     Connection.timer = +setTimeout(() => {
-      callback(Object.values(Connection.workspaces).pop());
+      callback([ ...Connection.workspaces ].pop());
     }, 200);
   }
 }

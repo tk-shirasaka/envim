@@ -127,7 +127,7 @@ export class Envim {
 
   private onDisconnect = (workspace: string) => {
     Grids.disconnect();
-    Connection.disconnect(workspace, (workspace?: { nvim: NeovimClient, bookmark: string }) => {
+    Connection.disconnect(workspace, (workspace?: { nvim: NeovimClient, bookmark: string, key: string }) => {
       const { type, path } = Setting.get();
 
       if (workspace) {
