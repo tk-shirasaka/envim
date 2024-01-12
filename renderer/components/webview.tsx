@@ -120,8 +120,6 @@ export class WebviewComponent extends React.Component<Props, States> {
     if (!this.webview) return;
 
     switch (e.key) {
-      case "y": return this.webview.copy();
-      case "p": return this.webview.paste();
       case "h": return this.runAction("navigate-backward");
       case "j": return this.webview.sendInputEvent({ type: "keyDown", keyCode: "Down" })
       case "k": return this.webview.sendInputEvent({ type: "keyDown", keyCode: "Up" })
@@ -134,6 +132,9 @@ export class WebviewComponent extends React.Component<Props, States> {
       case "i": return modkey && this.runAction("devtool");
       case "u": return modkey && this.webview.sendInputEvent({ type: "keyDown", keyCode: "PageUp" });
       case "d": return modkey && this.webview.sendInputEvent({ type: "keyDown", keyCode: "PageDown" });
+      case "s": return modkey && Emit.send("envim:browser", this.webview.getURL(), "split");
+      case "v": return modkey && Emit.send("envim:browser", this.webview.getURL(), "vsplit");
+      case "t": return modkey && Emit.send("envim:browser", this.webview.getURL());
       case "-": return this.runAction("zoom-out");
       case "+": return this.runAction("zoom-in");
       case ":": return this.runAction("mode-input");

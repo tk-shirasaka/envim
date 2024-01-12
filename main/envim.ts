@@ -160,8 +160,8 @@ export class Envim {
     return theme;
   }
 
-  private onBrowser = async (url: string) => {
-    await this.onCommand("tab split");
+  private onBrowser = async (url: string, command: "split" | "vsplit" | "tab split" = "tab split") => {
+    await this.onCommand(command);
     this.onApi("nvim_call_function", ["EnvimConnect", [0, "envim_preview", url]])
   }
 
