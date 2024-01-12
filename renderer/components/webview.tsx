@@ -1,5 +1,5 @@
 import { WebviewTag } from "electron";
-import React, { createRef, RefObject, MouseEvent, FormEvent, ChangeEvent } from "react";
+import React, { createRef, RefObject, MouseEvent, FormEvent, ChangeEvent, KeyboardEvent } from "react";
 
 import { ISetting } from "../../common/interface";
 
@@ -24,7 +24,14 @@ interface States {
   zoom: number;
 }
 
+const position: "absolute" = "absolute";
 const styles = {
+  command: {
+    position,
+    width: 0,
+    height: 0,
+    padding: 0,
+  },
   form: {
     width: "100%",
   },
@@ -37,11 +44,14 @@ export class WebviewComponent extends React.Component<Props, States> {
   private container: RefObject<HTMLDivElement> = createRef<HTMLDivElement>();
   private webview: WebviewTag | null = null;
   private input: RefObject<HTMLInputElement> = createRef<HTMLInputElement>();
+  private search: RefObject<HTMLInputElement> = createRef<HTMLInputElement>();
+  private command: RefObject<HTMLInputElement> = createRef<HTMLInputElement>();
 
   constructor(props: Props) {
     super(props);
 
     this.state = { input: props.src, search: "", title: "", loading: false, searchengines: Setting.searchengines, zoom: 100 };
+    Emit.on("webview:action", this.onAction);
     Emit.on("webview:searchengines", this.onSearchengines);
   }
 
@@ -70,7 +80,7 @@ export class WebviewComponent extends React.Component<Props, States> {
     }
 
     if (props.style.display === "none" && !this.props.style.display) {
-      this.input.current?.focus();
+      this.runAction(this.state.input ? "mode-command" : "mode-input");
     }
   }
 
@@ -84,6 +94,7 @@ export class WebviewComponent extends React.Component<Props, States> {
       this.webview.removeEventListener("page-title-updated", this.onLoad);
     }
 
+    Emit.off("webview:action", this.onAction);
     Emit.off("webview:searchengines", this.onSearchengines);
   }
 
@@ -97,6 +108,37 @@ export class WebviewComponent extends React.Component<Props, States> {
       const selected = this.state.searchengines.find(({ selected }) => selected);
 
       return selected?.uri.replace("${query}", encodeURIComponent(input)) || "about:blank";
+    }
+  }
+
+  private onKeyDown = (e: KeyboardEvent) => {
+    const modkey = e.ctrlKey || e.metaKey;
+
+    e.stopPropagation();
+    e.preventDefault();
+
+    if (!this.webview) return;
+
+    switch (e.key) {
+      case "y": return this.webview.copy();
+      case "p": return this.webview.paste();
+      case "h": return this.runAction("navigate-backward");
+      case "j": return this.webview.sendInputEvent({ type: "keyDown", keyCode: "Down" })
+      case "k": return this.webview.sendInputEvent({ type: "keyDown", keyCode: "Up" })
+      case "l": return this.runAction("navigate-forward");
+      case "N": return this.runAction("search-backward");
+      case "n": return this.runAction("search-forward");
+      case "g": return this.webview.sendInputEvent({ type: "keyDown", keyCode: "Home" });
+      case "G": return this.webview.sendInputEvent({ type: "keyDown", keyCode: "End" });
+      case "r": return modkey && this.runAction("reload");
+      case "i": return modkey && this.runAction("devtool");
+      case "u": return modkey && this.webview.sendInputEvent({ type: "keyDown", keyCode: "PageUp" });
+      case "d": return modkey && this.webview.sendInputEvent({ type: "keyDown", keyCode: "PageDown" });
+      case "-": return this.runAction("zoom-out");
+      case "+": return this.runAction("zoom-in");
+      case ":": return this.runAction("mode-input");
+      case "/": return this.runAction("mode-search");
+      case "Escape": return this.runAction("mode-command");
     }
   }
 
@@ -145,9 +187,8 @@ export class WebviewComponent extends React.Component<Props, States> {
     e.stopPropagation();
     e.preventDefault();
 
-    if (this.webview) {
-      this.webview.findInPage(this.state.search);
-    }
+    this.runAction("mode-command");
+    this.runAction("search-forward");
   }
 
   private onLoad = () => {
@@ -156,19 +197,36 @@ export class WebviewComponent extends React.Component<Props, States> {
       const title = this.webview.getTitle();
       const loading = !!title && this.webview.isLoading();
 
-      url === "about:blank" || this.setState({ input: url, title, loading });
+      this.setState({ input: url === "about:blank" ? "" : url, title, loading });
+      this.runAction("mode-command");
     }
   }
 
-  private runAction(navigation: "backward" | "forward" | "reload" | "zoom-out"| "zoom-in" | "devtool") {
+  private onAction = (id: number, action: string) => {
+    this.webview?.getWebContentsId() === id && this.runAction(action);
+  }
+
+  private runAction(action: string) {
     if (this.webview) {
-      switch (navigation) {
-        case "backward": return this.webview.goBack();
-        case "forward": return this.webview.goForward();
-        case "reload": return this.webview.reloadIgnoringCache();
-        case "zoom-out": return this.setZoom(this.state.zoom - 10)
-        case "zoom-in": return this.setZoom(this.state.zoom + 10)
-        case "devtool": return this.webview.isDevToolsOpened() ? this.webview.closeDevTools() : this.webview.openDevTools();
+      try {
+        switch (action) {
+          case "search-backward": return this.state.search && this.webview.findInPage(this.state.search, { forward: false });
+          case "search-forward": return this.state.search && this.webview.findInPage(this.state.search, { forward: true });
+          case "navigate-backward": return this.webview.goBack();
+          case "navigate-forward": return this.webview.goForward();
+          case "reload": return this.webview.reloadIgnoringCache();
+          case "zoom-out": return this.setZoom(this.state.zoom - 10)
+          case "zoom-in": return this.setZoom(this.state.zoom + 10)
+          case "devtool": return this.webview.isDevToolsOpened() ? this.webview.closeDevTools() : this.webview.openDevTools();
+          case "mode-input": return this.input.current?.focus() || this.webview.stopFindInPage("clearSelection");
+          case "mode-search": return this.search.current?.focus() || this.webview.stopFindInPage("clearSelection");
+          case "mode-command": return this.command.current?.focus() || this.webview.stopFindInPage("clearSelection");
+        }
+      } catch (e: any) {
+        if (e instanceof Error) {
+          const contents = [{ hl: "red", content: e.message }];
+          Emit.share("messages:show", [{ kind: "debug", contents }], true);
+        }
       }
     }
   }
@@ -195,7 +253,7 @@ export class WebviewComponent extends React.Component<Props, States> {
       const searchengines = this.state.searchengines.map(engine => ({ ...engine, selected: selected === engine }));
 
       this.setState({ searchengines });
-      this.input.current?.focus();
+      this.runAction("mode-input");
       Setting.searchengines = searchengines;
     }
   }
@@ -231,7 +289,7 @@ export class WebviewComponent extends React.Component<Props, States> {
       }
     }
 
-    this.input.current?.focus();
+    this.runAction("mode-input");
   }
 
   private renderEngine(base: string) {
@@ -264,13 +322,14 @@ export class WebviewComponent extends React.Component<Props, States> {
 
     return (
       <FlexComponent animate="fade-in" direction="column" position="absolute" color="default" overflow="visible" inset={[0]} style={this.props.style} onMouseUp={this.mouseCancel} onMouseDown={this.mouseCancel}>
+        <input style={styles.command} ref={this.command} type="text" onKeyDown={this.onKeyDown} />
         <FlexComponent color="gray-fg" vertical="center" horizontal="center">
           { this.state.loading && <div className="animate loading inline"></div> }
           <FlexComponent margin={[0, 8]}>{ this.state.title }</FlexComponent>
         </FlexComponent>
         <FlexComponent vertical="center" overflow="visible">
-          <IconComponent font="" onClick={() => this.runAction("backward")} />
-          <IconComponent font="" onClick={() => this.runAction("forward")} />
+          <IconComponent font="" onClick={() => this.runAction("navigate-backward")} />
+          <IconComponent font="" onClick={() => this.runAction("navigate-forward")} />
           <IconComponent font="󰑓" onClick={() => this.runAction("reload")} />
           <MenuComponent color="blue-fg" label="󰖟">
             { this.renderEngine("") }
@@ -284,7 +343,7 @@ export class WebviewComponent extends React.Component<Props, States> {
           <IconComponent font="" />
           <FlexComponent shrink={3}>
             <form style={styles.input} onSubmit={this.onSubmitSearch}>
-              <input style={styles.input} type="text" value={this.state.search} onChange={this.onChangeSearch} onFocus={this.onFocus} />
+              <input style={styles.input} type="text" ref={this.search} value={this.state.search} onChange={this.onChangeSearch} onFocus={this.onFocus} />
             </form>
           </FlexComponent>
           <IconComponent font="" onClick={() => this.runAction("zoom-out")} />

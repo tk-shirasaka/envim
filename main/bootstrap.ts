@@ -67,6 +67,11 @@ export class Bootstrap {
         return { action, overrideBrowserWindowOptions: { show: !!details.frameName } };
       });
 
+      webContents.on("devtools-open-url", (_, url) => {
+        Bootstrap.win?.focus();
+        Emit.share("envim:browser", url);
+      });
+
       webContents.on("login", async (e: Event, _, __, callback: Function) => {
         Emit.send("envim:focus");
 
@@ -85,8 +90,15 @@ export class Bootstrap {
       });
 
       webContents.on("context-menu", (_, params) => {
-        params.selectionText && Emit.share("envim:browser", params.selectionText);
+        const contents = params.selectionText || params.srcURL;
+        contents && Emit.share("envim:browser", contents);
       });
+
+      webContents.on("before-input-event", (_, input) => {
+        switch (input.key) {
+          case "Escape": return Emit.send("webview:action", webContents.id, "mode-command");
+        }
+      })
     });
   }
 }
