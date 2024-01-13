@@ -1,4 +1,4 @@
-import { IWindow, ICell, IScroll } from "common/interface";
+import { IWindow, ICell, IScroll, IMode } from "common/interface";
 
 import { Emit } from "../emit";
 import { Highlights } from "./highlight";
@@ -14,7 +14,7 @@ class Grid {
   constructor(gid: number, workspace: string, width :number, height: number) {
     const id = `${workspace}.${gid}`;
 
-    this.info = { id, gid, winid: 0, x: 0, y: 0, width: 0, height: 0, zIndex: 1, focusable: true, type: "normal", status: "hide" };
+    this.info = { id, gid, winid: 0, x: 0, y: 0, width: 0, height: 0, zIndex: 1, focusable: true, focus: false, type: "normal", status: "hide" };
     this.resize(width, height);
   }
 
@@ -161,6 +161,7 @@ export class Grids {
   private static default: 1 = 1;
   private static active: { gid: number; row: number; col: number; } = { gid: 0, row: 0, col: 0 };
   private static changes: { [k: number]: number } = {};
+  private static mode?: IMode;
   private static workspace: { current: string; caches: { [k: string]: Grid[] } } = { current: "", caches: {} };
 
   static init(init: boolean, workspace: string) {
@@ -219,6 +220,11 @@ export class Grids {
     }
   }
 
+  static setMode(mode: IMode) {
+    Grids.mode = mode;
+    Grids.setStatus(Grids.active.gid, "show", Grids.mode.short_name === "c");
+  }
+
   static refresh() {
     Object.values(Grids.grids).forEach(grid => grid.refresh());
   }
@@ -234,7 +240,7 @@ export class Grids {
     const wins: IWindow[] = Object.values(Grids.changes).map(grid => {
       const info = { ...Grids.get(grid).getInfo() };
 
-      info.zIndex = info.gid === Grids.active.gid ? info.zIndex + 1 : info.zIndex;
+      info.focus = info.gid === Grids.active.gid && Grids.mode?.short_name !== "c";
       info.status = info.width && info.height ? info.status : "delete";
 
       if (info.status === "delete") {
@@ -257,5 +263,8 @@ export class Grids {
       flush && flush.length && Emit.send(`flush:${id}`, flush);
       viewport && Emit.update(`viewport:${id}`, false, viewport.top, viewport.bottom, viewport.total);
     });
+
+    Grids.mode && Emit.update("mode:change", true, Grids.mode);
+    delete(Grids.mode);
   }
 }

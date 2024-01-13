@@ -12,6 +12,7 @@ import { IconComponent } from "./icon";
 
 interface Props {
   src: string;
+  active: number;
   style: { [k: string]: string };
 }
 
@@ -20,6 +21,7 @@ interface States {
   search: string;
   title: string;
   loading: boolean;
+  focus: boolean;
   searchengines: ISetting["searchengines"];
   zoom: number;
 }
@@ -50,7 +52,7 @@ export class WebviewComponent extends React.Component<Props, States> {
   constructor(props: Props) {
     super(props);
 
-    this.state = { input: props.src, search: "", title: "", loading: false, searchengines: Setting.searchengines, zoom: 100 };
+    this.state = { input: props.src, search: "", title: "", loading: false, focus: false, searchengines: Setting.searchengines, zoom: 100 };
     Emit.on("webview:action", this.onAction);
     Emit.on("webview:searchengines", this.onSearchengines);
   }
@@ -70,6 +72,8 @@ export class WebviewComponent extends React.Component<Props, States> {
       this.webview.addEventListener("did-navigate", this.onLoad);
       this.webview.addEventListener("did-navigate-in-page", this.onLoad);
       this.webview.addEventListener("page-title-updated", this.onLoad);
+      this.webview.addEventListener("focus", this.onWebviewFocus);
+      this.webview.addEventListener("blur", this.onWebviewBlur);
     }
   }
 
@@ -79,8 +83,8 @@ export class WebviewComponent extends React.Component<Props, States> {
       this.webview.src = this.getUrl(this.props.src);
     }
 
-    if (props.style.display === "none" && !this.props.style.display) {
-      this.runAction(this.state.input ? "mode-command" : "mode-input");
+    if (this.webview && props.active < this.props.active) {
+      this.runAction(this.webview.getURL() === "about:blank" ? "mode-input" : "mode-command");
     }
   }
 
@@ -92,6 +96,8 @@ export class WebviewComponent extends React.Component<Props, States> {
       this.webview.removeEventListener("did-navigate", this.onLoad);
       this.webview.removeEventListener("did-navigate-in-page", this.onLoad);
       this.webview.removeEventListener("page-title-updated", this.onLoad);
+      this.webview.removeEventListener("focus", this.onWebviewFocus);
+      this.webview.removeEventListener("blur", this.onWebviewBlur);
     }
 
     Emit.off("webview:action", this.onAction);
@@ -170,8 +176,6 @@ export class WebviewComponent extends React.Component<Props, States> {
     } else {
       this.setState({ input: this.webview.getURL() });
     }
-
-    Emit.share("envim:focus");
   }
 
   private onChangeSearch = (e: ChangeEvent<HTMLInputElement>) => {
@@ -203,31 +207,32 @@ export class WebviewComponent extends React.Component<Props, States> {
     }
   }
 
+  private onWebviewFocus = () => {
+    this.setState({ focus: true });
+  }
+
+  private onWebviewBlur = () => {
+    this.setState({ focus: false });
+  }
+
   private onAction = (id: number, action: string) => {
     this.webview?.getWebContentsId() === id && this.runAction(action);
   }
 
   private runAction(action: string) {
     if (this.webview) {
-      try {
-        switch (action) {
-          case "search-backward": return this.state.search && this.webview.findInPage(this.state.search, { forward: false });
-          case "search-forward": return this.state.search && this.webview.findInPage(this.state.search, { forward: true });
-          case "navigate-backward": return this.webview.goBack();
-          case "navigate-forward": return this.webview.goForward();
-          case "reload": return this.webview.reloadIgnoringCache();
-          case "zoom-out": return this.setZoom(this.state.zoom - 10)
-          case "zoom-in": return this.setZoom(this.state.zoom + 10)
-          case "devtool": return this.webview.isDevToolsOpened() ? this.webview.closeDevTools() : this.webview.openDevTools();
-          case "mode-input": return this.input.current?.focus() || this.webview.stopFindInPage("clearSelection");
-          case "mode-search": return this.search.current?.focus() || this.webview.stopFindInPage("clearSelection");
-          case "mode-command": return this.command.current?.focus() || this.webview.stopFindInPage("clearSelection");
-        }
-      } catch (e: any) {
-        if (e instanceof Error) {
-          const contents = [{ hl: "red", content: e.message }];
-          Emit.share("messages:show", [{ kind: "debug", contents }], true);
-        }
+      switch (action) {
+        case "search-backward": return this.state.search && this.webview.findInPage(this.state.search, { forward: false });
+        case "search-forward": return this.state.search && this.webview.findInPage(this.state.search, { forward: true });
+        case "navigate-backward": return this.webview.goBack();
+        case "navigate-forward": return this.webview.goForward();
+        case "reload": return this.webview.reloadIgnoringCache();
+        case "zoom-out": return this.setZoom(this.state.zoom - 10)
+        case "zoom-in": return this.setZoom(this.state.zoom + 10)
+        case "devtool": return this.webview.isDevToolsOpened() ? this.webview.closeDevTools() : this.webview.openDevTools();
+        case "mode-input": return this.input.current?.focus() || this.webview.stopFindInPage("clearSelection");
+        case "mode-search": return this.search.current?.focus() || this.webview.stopFindInPage("clearSelection");
+        case "mode-command": return this.command.current?.focus() || this.webview.stopFindInPage("clearSelection");
       }
     }
   }
@@ -270,7 +275,6 @@ export class WebviewComponent extends React.Component<Props, States> {
   }
 
   private async saveEngine(e: MouseEvent) {
-    Emit.share("envim:focus");
     e.stopPropagation();
     e.preventDefault();
 
@@ -352,7 +356,7 @@ export class WebviewComponent extends React.Component<Props, States> {
           <IconComponent font="" onClick={() => this.runAction("zoom-in")} />
           <IconComponent font="󱁤" onClick={() => this.runAction("devtool")} />
         </FlexComponent>
-        <FlexComponent color="default" grow={1}>
+        <FlexComponent color={this.state.focus ? "blue" : "gray"} margin={[2]} border={[1]} rounded={[2]} grow={1}>
           <div className="space" ref={this.container} />
         </FlexComponent>
       </FlexComponent>

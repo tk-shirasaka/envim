@@ -18,6 +18,7 @@ interface Props {
   gid: number;
   winid: number;
   focusable: boolean;
+  focus: boolean;
   type: "normal" | "floating" | "external";
   editor: { width: number; height: number; };
   mousemoveevent: boolean;
@@ -35,7 +36,7 @@ interface States {
   nomouse: boolean;
   dragging: boolean;
   scrolling: number;
-  preview: { src: string; active: boolean; };
+  preview: { src: string; active: number; };
   scroll: {
     total: number;
     height: string;
@@ -67,7 +68,7 @@ export class EditorComponent extends React.Component<Props, States> {
     super(props);
 
     this.busy = Cache.get<boolean>(TYPE, "busy");
-    this.state = { bufs: Cache.get<IBuffer[]>(TYPE, "bufs") || [], nomouse: Cache.get<boolean>(TYPE, "nomouse"), dragging: false, scrolling: 0, preview: { src: "", active: false }, scroll: { total: 0, height: "100%", transform: "" } };
+    this.state = { bufs: Cache.get<IBuffer[]>(TYPE, "bufs") || [], nomouse: Cache.get<boolean>(TYPE, "nomouse"), dragging: false, scrolling: 0, preview: { src: "", active: 0 }, scroll: { total: 0, height: "100%", transform: "" } };
     Emit.on(`clear:${this.props.id}`, this.onClear);
     Emit.on(`flush:${this.props.id}`, this.onFlush);
     Emit.on(`preview:${this.props.id}`, this.onPreview);
@@ -227,12 +228,12 @@ export class EditorComponent extends React.Component<Props, States> {
   }
 
   private onPreview = (src: string) => {
-    this.setState({ preview: { src, active: src.length > 0 } });
+    this.setState({ preview: { src, active: src.length > 0 ? (new Date).getTime() : 0 } });
   }
 
   private togglePreview = () => {
     const preview = this.state.preview;
-    this.setState({ preview: { ...preview, active: !preview.active } });
+    this.setState({ preview: { ...preview, active: preview.active ? 0 : (new Date).getTime() } });
   }
 
   private openExtWindow = (e: MouseEvent) => {
@@ -312,7 +313,8 @@ export class EditorComponent extends React.Component<Props, States> {
   }
 
   private renderPreview() {
-    return <WebviewComponent src={this.state.preview.src} style={this.state.preview.active ? {} : { display: "none" }} />;
+    const { src, active } = this.state.preview;
+    return <WebviewComponent src={src} active={active && this.props.focus ? (new Date).getTime() : active} style={active ? {} : { display: "none" }} />;
   }
 
   render() {

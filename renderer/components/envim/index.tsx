@@ -31,6 +31,7 @@ interface States {
     winid: number;
     order: number;
     focusable: boolean;
+    focus: boolean
     type: "normal" | "floating" | "external";
     style: {
       zIndex: number;
@@ -120,11 +121,11 @@ export class EnvimComponent extends React.Component<Props, States> {
     const nextOrder = Object.values(grids).reduce((order, grid) => Math.max(order, grid.order), 1);
 
     Object.values(grids).forEach(grid => grid.id.indexOf(`${workspace}.`) < 0 && (grid.style.visibility = "hidden"));
-    wins.reverse().forEach(({ id, gid, winid, x, y, width, height, zIndex, focusable, type, status }, i) => {
+    wins.reverse().forEach(({ id, gid, winid, x, y, width, height, zIndex, focusable, focus, type, status }, i) => {
       const curr = grids[id]?.style || {};
       const order = grids[id]?.order || i + nextOrder;
       const next = {
-        zIndex: status === "show" ? zIndex : -1,
+        zIndex: (status === "show" ? zIndex : -1) + +focus ,
         width: col2X(width),
         height: row2Y(height),
         transform: `translate(${col2X(x)}px, ${row2Y(y)}px)`,
@@ -136,13 +137,14 @@ export class EnvimComponent extends React.Component<Props, States> {
         delete(grids[id]);
       } else if (JSON.stringify(curr) !== JSON.stringify(next)) {
         this.refresh = this.refresh || (zIndex < 5 && (curr.width !== next.width || curr.height !== next.height));
-        grids[id] = { id, gid, winid, order, focusable, type, style: next };
+        grids[id] = { id, gid, winid, order, focusable, focus, type, style: next };
       }
     });
 
     this.setState({ grids });
     this.refresh && Emit.send("envim:command", "mode");
     this.refresh = false;
+    Emit.share("envim:focus");
   }
 
   private onOption = (options: ISetting["options"]) => {

@@ -50,7 +50,6 @@ export class Bootstrap {
     Bootstrap.win.maximize();
     Bootstrap.win.loadFile(join(__dirname, "index.html"));
     Bootstrap.win.on("closed", this.onQuit);
-    Bootstrap.win.on("focus", () => Emit.send("envim:focus"));
     Bootstrap.win.once("ready-to-show", () => Emit.share("envim:theme"));
     Bootstrap.win.webContents.on("did-attach-webview", (_, webContents) => {
       webContents.setWindowOpenHandler(details => {
@@ -73,8 +72,6 @@ export class Bootstrap {
       });
 
       webContents.on("login", async (e: Event, _, __, callback: Function) => {
-        Emit.send("envim:focus");
-
         e.preventDefault();
 
         const user = await Emit.share("envim:api", "nvim_call_function", ["EnvimInput", ["User"]]);

@@ -443,7 +443,7 @@ export class App {
   }
 
   private modeChange(index: number) {
-    Emit.update("mode:change", true, this.modes[index]);
+    Grids.setMode(this.modes[index]);
   }
 
   private optionsSet(options: string[][]) {
