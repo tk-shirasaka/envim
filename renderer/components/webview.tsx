@@ -63,10 +63,11 @@ export class WebviewComponent extends React.Component<Props, States> {
     if (container) {
       container.innerHTML = `<webview src="${this.getUrl(this.props.src)}" allowpopups="on" />`;
       const webview = container.querySelector("webview") as WebviewTag;
+      const listener = () => {
+        const url = this.getUrl(this.props.src);
 
-      webview.addEventListener("dom-ready", () => {
         this.webview = webview;
-
+        this.webview.removeEventListener("dom-ready", listener);
         this.webview.addEventListener("did-start-loading", this.onLoad);
         this.webview.addEventListener("did-stop-loading", this.onLoad);
         this.webview.addEventListener("did-finish-load", this.onLoad);
@@ -75,7 +76,11 @@ export class WebviewComponent extends React.Component<Props, States> {
         this.webview.addEventListener("page-title-updated", this.onLoad);
         this.webview.addEventListener("focus", this.onWebviewFocus);
         this.webview.addEventListener("blur", this.onWebviewBlur);
-      });
+
+        url == this.webview.getURL() || (this.webview.src = url);
+      }
+
+      webview.addEventListener("dom-ready", listener);
     }
   }
 
