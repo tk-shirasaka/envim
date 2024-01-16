@@ -17,6 +17,7 @@ interface States {
   composit: boolean;
   value: string;
   busy: boolean;
+  focus: boolean;
 }
 
 const position: "absolute" = "absolute";
@@ -40,7 +41,7 @@ export class InputComponent extends React.Component<Props, States> {
   constructor(props: Props) {
     super(props);
 
-    this.state = { style: { pointerEvent: "none", transform: "", height: row2Y(1), zIndex: 0, color: "", background: "" }, composit: false, value: "", busy: false };
+    this.state = { style: { pointerEvent: "none", transform: "", height: row2Y(1), zIndex: 0, color: "", background: "" }, composit: false, value: "", busy: false, focus: true };
     Emit.on("envim:focus", this.onFocus);
     Emit.on("grid:cursor", this.onCursor);
     Emit.on("grid:busy", this.onBusy);
@@ -75,6 +76,7 @@ export class InputComponent extends React.Component<Props, States> {
     const style = this.makeStyle({ shape: mode.cursor_shape });
 
     this.setState({ style });
+    mode.short_name === "c" && this.onFocus();
   }
 
   private makeStyle(cursor: { x?: number, y?: number, width?: number, hl?: string, zIndex?: number, shape?: "block" | "vertical" | "horizontal" }) {
@@ -92,8 +94,12 @@ export class InputComponent extends React.Component<Props, States> {
   }
 
   private getWidth() {
-    if (this.state.busy) return 0;
+    if (this.state.busy || !this.state.focus) return 0;
     return this.cursor.shape === "block" ? col2X(this.cursor.width) : 2;
+  }
+
+  private toggleFocus = (focus: boolean) => {
+    this.setState({ focus });
   }
 
   private onKeyDown = (e: KeyboardEvent) => {
@@ -129,8 +135,10 @@ export class InputComponent extends React.Component<Props, States> {
     const minWidth = this.getWidth();
 
     return (
-      <FlexComponent animate="fade-in" style={{ opacity, minWidth, ...this.state.style}} shadow={!this.state.busy} nomouse>
+      <FlexComponent animate="fade-in" style={{ opacity, minWidth, ...this.state.style}} shadow={!this.state.busy && this.state.focus} nomouse>
         <input type="text" style={styles.input} ref={this.input} autoFocus
+          onFocus={() => this.toggleFocus(true)}
+          onBlur={() => this.toggleFocus(false)}
           onKeyDown={this.onKeyDown}
           onKeyUp={this.onKeyUp}
           onCompositionStart={this.onCompositionStart}
