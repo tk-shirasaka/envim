@@ -62,18 +62,20 @@ export class WebviewComponent extends React.Component<Props, States> {
 
     if (container) {
       container.innerHTML = `<webview src="${this.getUrl(this.props.src)}" allowpopups="on" />`;
-      this.webview = container.querySelector("webview");
-    }
+      const webview = container.querySelector("webview") as WebviewTag;
 
-    if (this.webview) {
-      this.webview.addEventListener("did-start-loading", this.onLoad);
-      this.webview.addEventListener("did-stop-loading", this.onLoad);
-      this.webview.addEventListener("did-finish-load", this.onLoad);
-      this.webview.addEventListener("did-navigate", this.onLoad);
-      this.webview.addEventListener("did-navigate-in-page", this.onLoad);
-      this.webview.addEventListener("page-title-updated", this.onLoad);
-      this.webview.addEventListener("focus", this.onWebviewFocus);
-      this.webview.addEventListener("blur", this.onWebviewBlur);
+      webview.addEventListener("dom-ready", () => {
+        this.webview = webview;
+
+        this.webview.addEventListener("did-start-loading", this.onLoad);
+        this.webview.addEventListener("did-stop-loading", this.onLoad);
+        this.webview.addEventListener("did-finish-load", this.onLoad);
+        this.webview.addEventListener("did-navigate", this.onLoad);
+        this.webview.addEventListener("did-navigate-in-page", this.onLoad);
+        this.webview.addEventListener("page-title-updated", this.onLoad);
+        this.webview.addEventListener("focus", this.onWebviewFocus);
+        this.webview.addEventListener("blur", this.onWebviewBlur);
+      });
     }
   }
 
@@ -200,7 +202,7 @@ export class WebviewComponent extends React.Component<Props, States> {
     if (this.webview) {
       const url = this.webview.getURL();
       const title = this.webview.getTitle();
-      const loading = !!title && this.webview.isLoading();
+      const loading = this.webview.isLoading();
 
       this.setState({ input: url === "about:blank" ? "" : url, title, loading });
       this.runAction("mode-command");
