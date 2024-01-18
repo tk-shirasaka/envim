@@ -124,6 +124,15 @@ export class WebviewComponent extends React.Component<Props, States> {
     }
   }
 
+  private getMode() {
+    switch (document.activeElement) {
+      case this.command.current: return "mode-command";
+      case this.input.current: return "mode-input";
+      case this.search.current: return "mode-search";
+      case this.webview: return "mode-browser";
+    }
+  }
+
   private onKeyDown = (e: KeyboardEvent) => {
     const modkey = e.ctrlKey || e.metaKey;
 
@@ -131,6 +140,16 @@ export class WebviewComponent extends React.Component<Props, States> {
     e.preventDefault();
 
     if (!this.webview) return;
+
+    switch (modkey && e.key) {
+      case "r": return this.runAction("reload");
+      case "i": return this.runAction("devtool");
+      case "u": return this.webview.sendInputEvent({ type: "keyDown", keyCode: "PageUp" });
+      case "d": return this.webview.sendInputEvent({ type: "keyDown", keyCode: "PageDown" });
+      case "s": return Emit.send("envim:browser", this.webview.getURL(), "split");
+      case "v": return Emit.send("envim:browser", this.webview.getURL(), "vsplit");
+      case "t": return Emit.send("envim:browser", this.webview.getURL());
+    }
 
     switch (e.key) {
       case "h": return this.runAction("navigate-backward");
@@ -141,15 +160,9 @@ export class WebviewComponent extends React.Component<Props, States> {
       case "n": return this.runAction("search-forward");
       case "g": return this.webview.sendInputEvent({ type: "keyDown", keyCode: "Home" });
       case "G": return this.webview.sendInputEvent({ type: "keyDown", keyCode: "End" });
-      case "r": return modkey && this.runAction("reload");
-      case "i": return modkey && this.runAction("devtool");
-      case "u": return modkey && this.webview.sendInputEvent({ type: "keyDown", keyCode: "PageUp" });
-      case "d": return modkey && this.webview.sendInputEvent({ type: "keyDown", keyCode: "PageDown" });
-      case "s": return modkey && Emit.send("envim:browser", this.webview.getURL(), "split");
-      case "v": return modkey && Emit.send("envim:browser", this.webview.getURL(), "vsplit");
-      case "t": return modkey && Emit.send("envim:browser", this.webview.getURL());
       case "-": return this.runAction("zoom-out");
       case "+": return this.runAction("zoom-in");
+      case "i": return this.runAction("mode-browser");
       case ":": return this.runAction("mode-input");
       case "/": return this.runAction("mode-search");
       case "Escape": return this.runAction("mode-command");
@@ -183,6 +196,7 @@ export class WebviewComponent extends React.Component<Props, States> {
     } else {
       this.setState({ input: this.webview.getURL() });
     }
+    this.runAction("mode-command");
   }
 
   private onChangeSearch = (e: ChangeEvent<HTMLInputElement>) => {
@@ -205,12 +219,14 @@ export class WebviewComponent extends React.Component<Props, States> {
 
   private onLoad = () => {
     if (this.webview) {
+      const mode = this.getMode();
       const url = this.webview.getURL();
+      const input = url === "about:blank" ? "" : url;
       const title = this.webview.getTitle();
       const loading = this.webview.isLoading();
 
-      this.setState({ input: url === "about:blank" ? "" : url, title, loading });
-      this.runAction("mode-command");
+      mode === "mode-input" ? this.setState({ title, loading }) : this.setState({ input, title, loading });
+      mode === "mode-browser" && this.runAction("mode-command");
     }
   }
 
@@ -237,6 +253,7 @@ export class WebviewComponent extends React.Component<Props, States> {
         case "zoom-out": return this.setZoom(this.state.zoom - 10)
         case "zoom-in": return this.setZoom(this.state.zoom + 10)
         case "devtool": return this.webview.isDevToolsOpened() ? this.webview.closeDevTools() : this.webview.openDevTools();
+        case "mode-browser": return this.webview.focus();
         case "mode-input": return this.input.current?.focus() || this.webview.stopFindInPage("clearSelection");
         case "mode-search": return this.search.current?.focus() || this.webview.stopFindInPage("clearSelection");
         case "mode-command": return this.command.current?.focus() || this.webview.stopFindInPage("clearSelection");
@@ -363,7 +380,7 @@ export class WebviewComponent extends React.Component<Props, States> {
           <IconComponent font="" onClick={() => this.runAction("zoom-in")} />
           <IconComponent font="󱁤" onClick={() => this.runAction("devtool")} />
         </FlexComponent>
-        <FlexComponent color={this.state.focus ? "blue" : "gray"} margin={[2]} border={[1]} rounded={[2]} grow={1}>
+        <FlexComponent color={this.state.focus ? "blue" : "default"} margin={[2]} padding={[2]} border={[1]} rounded={[2]} grow={1} shadow>
           <div className="space" ref={this.container} />
         </FlexComponent>
       </FlexComponent>
