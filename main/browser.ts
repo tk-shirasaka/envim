@@ -1,16 +1,24 @@
 import { app, dialog, WebContents, Event, HandlerDetails, AuthenticationResponseDetails, AuthInfo, ContextMenuParams, Input } from "electron";
+import { lookup } from "dns";
 
 import { Bootstrap } from "./bootstrap";
 import { Emit } from "./emit";
 
 export class Browser {
+  private ignoreCertErrorHost: string[] = [];
+
   constructor(private webContents: WebContents) {
     webContents.setWindowOpenHandler(this.onOpenWindow);
     webContents.on("devtools-open-url", this.onOpenUrl);
     webContents.on("login", this.onLogin);
+    webContents.on("certificate-error", this.onCertError);
     webContents.on("will-prevent-unload", this.onUnload);
     webContents.on("context-menu", this.onContextMenu);
     webContents.on("before-input-event", this.onInput);
+  }
+
+  private confirm = (message: string) => {
+    return dialog.showMessageBoxSync({ message, buttons: ["Yes", "No"], defaultId: 0 }) === 0;
   }
 
   private onOpenWindow = (details: HandlerDetails) => {
@@ -41,10 +49,28 @@ export class Browser {
     user && callback(user, password);
   }
 
-  private onUnload = (e: Event) => {
-    if (dialog.showMessageBoxSync({ message: "Leave this page?", buttons: ["Yes", "No"], defaultId: 0 }) === 0) {
+  private onCertError = async (e: Event, url: string, __: string, ___: Object, callback: Function) => {
+    const { hostname } = new URL(url);
+
+    if (this.ignoreCertErrorHost.indexOf(hostname) < 0) {
+      lookup(hostname, 4, (e, address) => {
+        if (e) return;
+        if (
+          ["0.0.0.0", "127.0.0.1"].indexOf(address) >= 0 ||
+          this.confirm(`Certication Error on "${hostname}"\nContinue it?`)
+        ) {
+          this.ignoreCertErrorHost.push(hostname);
+          this.webContents.loadURL(url);
+        }
+      });
+    } else {
       e.preventDefault();
+      callback(true);
     }
+  }
+
+  private onUnload = (e: Event) => {
+    this.confirm("Leave this page?") && e.preventDefault();
   }
 
   private onContextMenu = (_: Event, params: ContextMenuParams) => {
