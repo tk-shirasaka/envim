@@ -221,8 +221,10 @@ export class Grids {
   }
 
   static setMode(mode: IMode) {
+    const { status } = Grids.get(Grids.active.gid, false).getInfo();
+
     Grids.mode = mode;
-    Grids.setStatus(Grids.active.gid, "show", Grids.mode.short_name === "c");
+    status === "show" && Grids.setStatus(Grids.active.gid, "show", Grids.mode.short_name === "c");
   }
 
   static refresh() {
