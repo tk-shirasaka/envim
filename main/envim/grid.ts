@@ -39,6 +39,7 @@ class Grid {
     if (clear === false && this.info.width === width && this.info.height === height) return;
     const old = clear ? [] : this.lines;
 
+    this.ready = this.ready && this.info.width === width && this.info.height === height;
     this.info.width = width;
     this.info.height = height;
     this.lines = [];

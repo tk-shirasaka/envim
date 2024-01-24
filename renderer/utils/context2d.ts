@@ -4,6 +4,8 @@ import { Highlights } from "./highlight";
 import { Setting } from "./setting";
 
 export class Context2D {
+  private bgcanvas: HTMLCanvasElement;
+  private bgctx: CanvasRenderingContext2D;
   private font: { size: number; width: number; height: number; } = { size: 0, width: 0, height: 0 };
   private queues: { cells?: ICell[], scroll?: IScroll }[] = [];
   private scrolltmp?: { i: number; capture: HTMLCanvasElement; };
@@ -12,15 +14,43 @@ export class Context2D {
   constructor(
     private canvas: HTMLCanvasElement,
     private ctx: CanvasRenderingContext2D,
-    private bgcanvas: HTMLCanvasElement,
-    private bgctx: CanvasRenderingContext2D,
     private lighten: boolean,
   ) {
     const { size, width, height, scale } = Setting.font;
+    const bg = this.getCanvas();
+
     this.font = { size: size * scale, width: width * scale, height: height * scale };
-    bgctx.lineWidth = scale;
-    bgctx.textBaseline = "top";
-    bgctx.textAlign = "left";
+    this.bgcanvas = bg.canvas;
+    this.bgctx = bg.ctx;
+    this.clear(0, 0, canvas.width, canvas.height);
+  }
+
+  update(lighten: boolean) {
+    const { canvas, ctx } = this.getCanvas();
+    const bgcanvas = this.bgcanvas;
+
+    this.lighten = lighten;
+    this.bgcanvas = canvas;
+    this.bgctx = ctx;
+    this.clear(0, 0, canvas.width, canvas.height);
+    this.bgctx.clearRect(0, 0, bgcanvas.width, bgcanvas.height);
+    this.bgctx.drawImage(bgcanvas, 0, 0);
+    this.ctx.drawImage(canvas, 0, 0);
+  }
+
+  private getCanvas() {
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+
+    if (!canvas || !ctx) throw "Failed create canvas";
+
+    canvas.width = this.canvas.width;
+    canvas.height = this.canvas.height;
+    ctx.lineWidth = Setting.font.scale;
+    ctx.textBaseline = "top";
+    ctx.textAlign = "left";
+
+    return { canvas, ctx };
   }
 
   private style(hl: string, type: "foreground" | "background" | "special") {
@@ -92,19 +122,15 @@ export class Context2D {
     this.rect(x * this.font.width, y * this.font.height, width, height, "0");
   }
 
-  getCapture() {
-    const canvas = document.createElement("canvas");
-    const ctx = canvas.getContext("2d");
+  private getCapture() {
+    const { canvas, ctx } = this.getCanvas();
 
-    canvas.width = this.canvas.width;
-    canvas.height = this.canvas.height;
-
-    ctx && ctx.drawImage(this.bgcanvas, 0, 0);
+    ctx.drawImage(this.bgcanvas, 0, 0);
 
     return canvas;
   }
 
-  putCapture(capture: HTMLCanvasElement, x: number, y: number, dx: number = 0, dy: number = 0, dwidth: number = 0, dheight: number = 0) {
+  private putCapture(capture: HTMLCanvasElement, x: number, y: number, dx: number = 0, dy: number = 0, dwidth: number = 0, dheight: number = 0) {
     const width = dwidth * this.font.width || capture.width;
     const height = dheight * this.font.height || capture.height;
     this.bgctx.clearRect(dx * this.font.width, dy * this.font.height, width, height);

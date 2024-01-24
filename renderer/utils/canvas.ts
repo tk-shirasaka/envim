@@ -8,7 +8,7 @@ const TYPE = "renderer";
 export class Canvas {
   private static init = false;
 
-  static set(
+  static create(
     id: string,
     canvas: HTMLCanvasElement,
     ctx: CanvasRenderingContext2D,
@@ -16,16 +16,11 @@ export class Canvas {
   ) {
     Canvas.init || Canvas.render();
     Canvas.init = true;
+    Cache.set<Context2D>(TYPE, id, new Context2D(canvas, ctx, lighten));
+  }
 
-    const bgcanvas = document.createElement("canvas");
-    const bgctx = bgcanvas.getContext("2d");
-
-    if (bgctx) {
-      bgcanvas.width = canvas.width;
-      bgcanvas.height = canvas.height;
-
-      Cache.set<Context2D>(TYPE, id, new Context2D(canvas, ctx, bgcanvas, bgctx, lighten));
-    }
+  static update(id: string, lighten: boolean) {
+    Cache.get<Context2D>(TYPE, id)?.update(lighten);
   }
 
   static delete(id: string) {
@@ -36,15 +31,7 @@ export class Canvas {
     Cache.get<Context2D>(TYPE, id)?.clear(0, 0, width, height);
   }
 
-  static getCapture(id: string) {
-    return Cache.get<Context2D>(TYPE, id)?.getCapture();
-  }
-
-  static putCapture(id: string, capture: HTMLCanvasElement) {
-    Cache.get<Context2D>(TYPE, id)?.putCapture(capture, 0, 0)
-  }
-
-  static update(id: string, cells: ICell[], scroll: IScroll | undefined) {
+  static push(id: string, cells: ICell[], scroll: IScroll | undefined) {
     Cache.get<Context2D>(TYPE, id)?.push(cells, scroll)
   }
 

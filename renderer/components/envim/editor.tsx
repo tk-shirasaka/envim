@@ -44,14 +44,6 @@ interface States {
   };
 }
 
-const position: "absolute" = "absolute";
-const styles = {
-  canvas: {
-    position,
-    transformOrigin: "0 0",
-  },
-};
-
 const TYPE = "editor";
 
 export class EditorComponent extends React.Component<Props, States> {
@@ -62,7 +54,7 @@ export class EditorComponent extends React.Component<Props, States> {
   private pointer: { row: number; col: number } = { row: 0, col: 0 };
   private dragging: { x: number; y: number } = { x: 0, y: 0 };
   private delta: { x: number; y: number } = { x: 0, y: 0 };
-  private capture?: HTMLCanvasElement;
+  private update: boolean = false;
 
   constructor(props: Props) {
     super(props);
@@ -83,17 +75,16 @@ export class EditorComponent extends React.Component<Props, States> {
     const ctx = this.canvas.current?.getContext("2d");
 
     if (this.canvas.current && ctx) {
-      Canvas.set(this.props.id, this.canvas.current, ctx, this.props.type === "normal");
-      Canvas.clear(this.props.id, x2Col(this.props.style.width), y2Row(this.props.style.height));
+      Canvas.create(this.props.id, this.canvas.current, ctx, this.props.type === "normal");
       Emit.send("envim:ready", this.props.gid);
     }
   }
 
   componentDidUpdate() {
-    if (this.capture) {
-      Canvas.clear(this.props.id, x2Col(this.props.style.width), y2Row(this.props.style.height));
-      Canvas.putCapture(this.props.id, this.capture);
-      delete(this.capture);
+    if (this.update) {
+      this.update = false;
+      Canvas.update(this.props.id, this.props.type === "normal");
+      Emit.send("envim:ready", this.props.gid);
     }
   }
 
@@ -113,8 +104,8 @@ export class EditorComponent extends React.Component<Props, States> {
   shouldComponentUpdate(props: Props) {
     const prev = this.props;
     const next = props;
-    if (prev.style.width < next.style.width || prev.style.height < next.style.height || prev.editor.width !== next.editor.width || prev.editor.height !== next.editor.height) {
-      this.capture = Canvas.getCapture(this.props.id);
+    if (prev.style.width !== next.style.width || prev.style.height !== next.style.height) {
+      this.update = true;
     }
     return true;
   }
@@ -182,8 +173,8 @@ export class EditorComponent extends React.Component<Props, States> {
     if (match) {
       const offset = { x: +match[1] + e.clientX - this.dragging.x, y: +match[2] + e.clientY - this.dragging.y };
       const resize = {
-        width: Math.min(this.props.editor.width - offset.x, this.props.style.width + Math.min(0, offset.x)),
-        height: Math.min(this.props.editor.height - offset.y, this.props.style.height + Math.min(0, offset.y)),
+        width: this.props.style.width + Math.min(0, offset.x),
+        height: this.props.style.height + Math.min(0, offset.y),
       };
 
       this.dragging = { x: 0, y: 0 };
@@ -224,7 +215,7 @@ export class EditorComponent extends React.Component<Props, States> {
   }
 
   private onFlush = (flush: { cells: ICell[], scroll?: IScroll }[]) => {
-    flush.forEach(({ cells, scroll }) => Canvas.update(this.props.id, cells, scroll));
+    flush.forEach(({ cells, scroll }) => Canvas.push(this.props.id, cells, scroll));
   }
 
   private onPreview = (src: string) => {
@@ -329,8 +320,8 @@ export class EditorComponent extends React.Component<Props, States> {
         onDragStart={this.state.dragging ? this.onDragStart : undefined}
         onDragEnd={this.state.dragging ? this.onDragEnd : undefined}
       >
-        <FlexComponent grow={1} nomouse>
-          <canvas style={{ ...styles.canvas, transform: `scale(${1 / scale})` }} width={this.props.editor.width * scale} height={this.props.editor.height * scale} ref={this.canvas} />
+        <FlexComponent nomouse>
+          <canvas width={this.props.style.width * scale} height={this.props.style.height * scale} ref={this.canvas} />
         </FlexComponent>
         { this.props.gid === 1 || this.renderPreview() }
         { this.props.gid === 1 || !this.props.focusable ? null : (
