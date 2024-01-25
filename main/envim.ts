@@ -27,6 +27,7 @@ export class Envim {
     Emit.on("envim:api", this.onApi);
     Emit.on("envim:mouse", this.onMouse);
     Emit.on("envim:input", this.onInput);
+    Emit.on("envim:readline", this.onReadline);
     Emit.on("envim:command", this.onCommand);
     Emit.on("envim:luafile", this.onLuafile);
     Emit.on("envim:ready", this.onReady);
@@ -108,6 +109,10 @@ export class Envim {
 
   private onInput = async (input: string) => {
     return await this.nvim.input(input);
+  }
+
+  private onReadline = async (prompt: string, value: string = "") => {
+    return await this.onApi("nvim_call_function", ["EnvimInput", [prompt, value]]);
   }
 
   private onCommand = async (command: string) => {

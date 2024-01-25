@@ -303,9 +303,9 @@ export class WebviewComponent extends React.Component<Props, States> {
     e.preventDefault();
 
     if (this.webview) {
-      const uri = await Emit.send<string>("envim:api", "nvim_call_function", ["EnvimInput", ["URI", this.webview.getURL()]]);
+      const uri = await Emit.send<string>("envim:readline", "URI", this.webview.getURL());
       const selected = this.state.searchengines.find(engine => engine.uri === uri);
-      const name = uri && await Emit.send<string>("envim:api", "nvim_call_function", ["EnvimInput", ["Name", selected?.name || ""]]);
+      const name = uri && await Emit.send<string>("envim:readline", "Name", selected?.name || "");
       const hasquery = uri.indexOf("${query}") >= 0;
 
       if (uri && name) {

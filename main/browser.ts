@@ -43,8 +43,8 @@ export class Browser {
   private onLogin = async (e: Event, _: AuthenticationResponseDetails, __: AuthInfo, callback: Function) => {
     e.preventDefault();
 
-    const user = await Emit.share("envim:api", "nvim_call_function", ["EnvimInput", ["User"]]);
-    const password = await Emit.share("envim:api", "nvim_call_function", ["EnvimInput", ["Password"]]);
+    const user = await Emit.share("envim:readline", "User");
+    const password = await Emit.share("envim:readline", "Password");
 
     user && callback(user, password);
   }

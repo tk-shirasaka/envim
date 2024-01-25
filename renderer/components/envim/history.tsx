@@ -113,8 +113,7 @@ export class HistoryComponent extends React.Component<Props, States> {
   }
 
   private toggleDebug = async () => {
-    const args = ["EnvimInput", ["Event name"]]
-    const debug = await Emit.send<string>("envim:api", "nvim_call_function", args);
+    const debug = await Emit.send<string>("envim:readline", "Event name");
 
     try {
       "".search(debug);
