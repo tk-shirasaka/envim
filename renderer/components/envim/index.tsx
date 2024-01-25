@@ -18,8 +18,9 @@ import { NotificateComponent } from "./notificate";
 import { InputComponent } from "./input";
 
 interface Props {
-  width: number;
-  height: number;
+  header: { width: number; height: number; paddingLeft: number };
+  main: { width: number; height: number; };
+  footer: { width: number; height: number; };
 }
 
 interface States {
@@ -52,15 +53,10 @@ const styles = {
 
 export class EnvimComponent extends React.Component<Props, States> {
   private refresh: boolean = false;
-  private main: { fontSize: number; lineHeight: string; } = { fontSize: 0, lineHeight: "" };
-  private editor: { width: number; height: number } = { width: 0, height: 0 };
-  private header: { width: number; height: number; padding: string } = { width: 0, height: 0, padding: "" };
-  private footer: { width: number; height: number; } = { width: 0, height: 0 };
 
   constructor(props: Props) {
     super(props);
 
-    this.setSize();
     this.state = { pause: false, mousemoveevent: false, grids: {} };
     Emit.on("app:switch", this.onSwitch);
     Emit.on("highlight:set", this.onHighlight);
@@ -68,14 +64,13 @@ export class EnvimComponent extends React.Component<Props, States> {
     Emit.on("option:set", this.onOption);
     Emit.on("envim:setting", this.onSetting);
     Emit.on("envim:pause", this.onPause);
-    Emit.send("envim:attach", x2Col(this.editor.width), y2Row(this.editor.height), Setting.options);
+    Emit.send("envim:attach", x2Col(this.props.main.width), y2Row(this.props.main.height), Setting.options);
   }
 
-  componentDidUpdate({width, height}: Props) {
-    if (this.props.width === width && this.props.height === height) return
+  componentDidUpdate({ main }: Props) {
+    if (this.props.main.width === main.width && this.props.main.height === main.height) return
 
-    this.setSize();
-    Emit.send("envim:resize", 0, x2Col(this.editor.width), y2Row(this.editor.height));
+    Emit.send("envim:resize", 0, x2Col(this.props.main.width), y2Row(this.props.main.height));
   }
 
   componentWillUnmount = () => {
@@ -87,27 +82,8 @@ export class EnvimComponent extends React.Component<Props, States> {
     Emit.off("envim:pause", this.onPause);
   }
 
-  private setSize() {
-    const font  = Setting.font;
-    const titlebar = navigator.windowControlsOverlay.getTitlebarAreaRect
-      ? navigator.windowControlsOverlay.getTitlebarAreaRect()
-      : { x: 0, y: 0, width: 0, height: 0, left: 0, right: 0 };
-
-    this.main = { fontSize: font.size, lineHeight: `${font.height}px` };
-    this.header = {
-      width: titlebar.width + titlebar.left,
-      height: Math.min(row2Y(2), (titlebar.y * 2) + titlebar.height || row2Y(2)),
-      padding: titlebar.left ? `0 0 0 ${titlebar.left}px` : `0`,
-    };
-    this.editor = {
-      width: col2X(x2Col(this.props.width) - 2),
-      height: row2Y(y2Row(this.props.height - this.header.height - font.height - 4) - 1),
-    };
-    this.footer = { width: this.props.width, height: this.props.height - this.header.height - this.editor.height - font.height };
-  }
-
   private onSwitch = () => {
-    Emit.send("envim:attach", x2Col(this.editor.width), y2Row(this.editor.height), Setting.options);
+    Emit.send("envim:attach", x2Col(this.props.main.width), y2Row(this.props.main.height), Setting.options);
   }
 
   private onHighlight = (highlights: {id: string, ui: boolean, hl: IHighlight}[]) => {
@@ -166,16 +142,18 @@ export class EnvimComponent extends React.Component<Props, States> {
   }
 
   render() {
+    const { size, height } = Setting.font;
+
     return (
-      <div style={this.main} onMouseUp={this.onMouseUp}>
-        <TablineComponent {...this.header} />
+      <div style={{fontSize: size, lineHeight: `${height}px`}} onMouseUp={this.onMouseUp}>
+        <TablineComponent {...this.props.header} />
         <FlexComponent zIndex={0}>
           <FlexComponent color="default" zIndex={-1} grow={1} shrink={1} />
           <FlexComponent zIndex={0} direction="column" overflow="visible">
             <div className="color-default" style={{height: Setting.font.height}} />
-            <FlexComponent overflow="visible" style={this.editor}>
+            <FlexComponent overflow="visible" style={this.props.main}>
               { Object.values(this.state.grids).sort((a, b) => a.order - b.order).map(grid => (
-                <EditorComponent key={grid.id} editor={this.editor} mousemoveevent={this.state.mousemoveevent} { ...grid } />
+                <EditorComponent key={grid.id} mousemoveevent={this.state.mousemoveevent} { ...grid } />
               )) }
               <PopupmenuComponent />
               <InputComponent />
@@ -185,7 +163,7 @@ export class EnvimComponent extends React.Component<Props, States> {
           <NotificateComponent />
           <FlexComponent color="default" zIndex={-1} grow={1} shrink={1} />
         </FlexComponent>
-        <HistoryComponent {...this.footer} />
+        <HistoryComponent {...this.props.footer} />
         { this.state.pause && (
           <FlexComponent direction="column" horizontal="center" vertical="center" color="default" position="absolute" zIndex={100} inset={[0]} style={styles.backdrop}>
             <div className="animate loading" />

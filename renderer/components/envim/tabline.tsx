@@ -13,7 +13,7 @@ import { MenuComponent } from "../menu";
 interface Props {
   width: number;
   height: number;
-  padding: string;
+  paddingLeft: number;
 }
 
 interface States {

@@ -20,7 +20,6 @@ interface Props {
   focusable: boolean;
   focus: boolean;
   type: "normal" | "floating" | "external";
-  editor: { width: number; height: number; };
   mousemoveevent: boolean;
   style: {
     zIndex: number;
@@ -228,8 +227,8 @@ export class EditorComponent extends React.Component<Props, States> {
   }
 
   private openExtWindow = (e: MouseEvent) => {
-    const width = x2Col(this.props.editor.width);
-    const height = y2Row(this.props.editor.height);
+    const width = x2Col(this.props.style.width);
+    const height = y2Row(this.props.style.height);
 
     this.runCommand(e, `call nvim_win_set_config(0, { "width": ${width}, "height": ${height}, "external": 1 })`)
   }
