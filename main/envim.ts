@@ -31,6 +31,7 @@ export class Envim {
     Emit.on("envim:command", this.onCommand);
     Emit.on("envim:luafile", this.onLuafile);
     Emit.on("envim:ready", this.onReady);
+    Emit.on("envim:resized", this.onReady);
     Emit.on("envim:theme", this.onTheme);
     Emit.on("envim:browser", this.onBrowser);
     process.on("uncaughtException", this.onError);
@@ -165,9 +166,14 @@ export class Envim {
     return theme;
   }
 
-  private onBrowser = (url: string, command: "split" | "vsplit" | "tab split" = "tab split") => {
-    Emit.once("envim:ready", () => this.onApi("nvim_call_function", ["EnvimConnect", [0, "envim_preview", url]]));
-    this.onCommand(command);
+  private onBrowser = (src: string, command: "new" | "vnew" | "tabnew" = "tabnew") => {
+    Emit.once("envim:ready", (gid: number) => {
+      const { id } = Grids.get(gid).getInfo();
+
+      Emit.update(`preview:${id}`, false, src);
+    });
+
+    this.onCommand(`${command} +set\\ bufhidden=wipe`);
   }
 
   private handleTheme = () => {

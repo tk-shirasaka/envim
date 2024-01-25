@@ -83,7 +83,7 @@ export class EditorComponent extends React.Component<Props, States> {
     if (this.update) {
       this.update = false;
       Canvas.update(this.props.id, this.props.type === "normal");
-      Emit.send("envim:ready", this.props.gid);
+      Emit.send("envim:resized", this.props.gid);
     }
   }
 
@@ -331,7 +331,7 @@ export class EditorComponent extends React.Component<Props, States> {
             <FlexComponent color="default" position="absolute" overflow="visible" inset={[-height, -4, "auto", "auto"]} rounded={[4, 4, 0, 0]} spacing hover
               onMouseDown={e => this.runCommand(e, "")}
             >
-              <IconComponent color="gray-fg" font="" onClick={this.togglePreview} />
+              { !this.state.preview.src && <IconComponent color="gray-fg" font="" onClick={this.togglePreview} /> }
               { this.props.type === "normal" && (
                 <>
                   { this.renderMenu("", "buffer ") }

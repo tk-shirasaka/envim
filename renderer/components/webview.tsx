@@ -146,8 +146,8 @@ export class WebviewComponent extends React.Component<Props, States> {
       case "i": return this.runAction("devtool");
       case "u": return this.webview.sendInputEvent({ type: "keyDown", keyCode: "PageUp" });
       case "d": return this.webview.sendInputEvent({ type: "keyDown", keyCode: "PageDown" });
-      case "s": return Emit.send("envim:browser", this.webview.getURL(), "split");
-      case "v": return Emit.send("envim:browser", this.webview.getURL(), "vsplit");
+      case "s": return Emit.send("envim:browser", this.webview.getURL(), "new");
+      case "v": return Emit.send("envim:browser", this.webview.getURL(), "vnew");
       case "t": return Emit.send("envim:browser", this.webview.getURL());
     }
 
