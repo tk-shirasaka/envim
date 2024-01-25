@@ -14,6 +14,15 @@ export class Emit {
     Emit.events[event].push(callback);
   }
 
+  static once(event: string, callback: (...args: any[]) => void) {
+    const wrap = (...args: any[]) => {
+      Emit.off(event, wrap);
+      callback(...args);
+    };
+
+    Emit.on(event, wrap);
+  }
+
   static share(event: string, ...args: any[]) {
     Emit.events[event].forEach(callback => callback(...args))
   }

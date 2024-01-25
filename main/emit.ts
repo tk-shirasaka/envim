@@ -22,6 +22,15 @@ export class Emit {
     Emit.events[event].push(callback);
   }
 
+  static once(event: string, callback: (...args: any[]) => void) {
+    const wrap = (...args: any[]) => {
+      Emit.off(event, wrap);
+      callback(...args);
+    };
+
+    Emit.on(event, wrap);
+  }
+
   static async share(event: string, ...args: any[]) {
     return Emit.events[event]
       .map(callback => callback(...args))
