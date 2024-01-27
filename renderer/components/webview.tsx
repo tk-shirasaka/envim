@@ -86,6 +86,7 @@ export class WebviewComponent extends React.Component<Props, States> {
 
   componentDidUpdate(props: Props) {
     if (this.webview && this.props.src !== props.src) {
+      this.runAction("mode-command");
       this.setState({ input: this.props.src });
       this.webview.src = this.getUrl(this.props.src);
     }
@@ -115,7 +116,7 @@ export class WebviewComponent extends React.Component<Props, States> {
 
     if (!input) {
       return "about:blank";
-    } else if (input.search(/^((https?)|(file):\/\/)|(data:.*\/(.*);base64)/) === 0) {
+    } else if (input.search(/^((https?)|(file):\/\/)|(data:.*\/.*;base64)/) === 0) {
       return input;
     } else {
       const selected = this.state.searchengines.find(({ selected }) => selected);
@@ -348,15 +349,16 @@ export class WebviewComponent extends React.Component<Props, States> {
     const icon = this.state.searchengines.some(({ uri }) => uri === this.state.input)
       ? { color: "blue-fg", font: "" }
       : { color: "gray-fg", font: "" };
+    const preview = this.props.src.search(/^file:\/\/.*\/Envim\/tmp.\w+$/) === 0;
 
     return (
       <FlexComponent animate="fade-in" direction="column" position="absolute" color="default" overflow="visible" inset={[0]} style={this.props.style} onMouseUp={this.mouseCancel} onMouseDown={this.mouseCancel}>
-        <input style={styles.command} ref={this.command} type="text" onKeyDown={this.onKeyDown} />
+        <input style={styles.command} ref={this.command} type="text" onKeyDown={preview ? undefined : this.onKeyDown} />
         <FlexComponent color="gray-fg" vertical="center" horizontal="center">
           { this.state.loading && <div className="animate loading inline"></div> }
           <FlexComponent margin={[0, 8]}>{ this.state.title }</FlexComponent>
         </FlexComponent>
-        <FlexComponent vertical="center" overflow="visible">
+        <FlexComponent vertical="center" overflow="visible" nomouse={preview}>
           <IconComponent font="" onClick={() => this.runAction("navigate-backward")} />
           <IconComponent font="" onClick={() => this.runAction("navigate-forward")} />
           <IconComponent font="󰑓" onClick={() => this.runAction("reload")} />
@@ -366,13 +368,13 @@ export class WebviewComponent extends React.Component<Props, States> {
           <IconComponent { ...icon } onClick={e => this.saveEngine(e)} />
           <FlexComponent grow={1} shrink={2} padding={[0, 8, 0, 0]}>
             <form style={styles.form} onSubmit={this.onSubmitSrc}>
-              <input style={styles.input} type="text" ref={this.input} value={this.state.input} disabled={!this.props.src.search(/^data:.*\/(.*);base64/)} onChange={this.onChangeSrc} onFocus={this.onFocus} />
+              <input style={styles.input} type="text" ref={this.input} value={this.state.input} onChange={this.onChangeSrc} onFocus={this.onFocus} disabled={preview} />
             </form>
           </FlexComponent>
           <IconComponent font="" />
           <FlexComponent shrink={3}>
             <form style={styles.input} onSubmit={this.onSubmitSearch}>
-              <input style={styles.input} type="text" ref={this.search} value={this.state.search} onChange={this.onChangeSearch} onFocus={this.onFocus} />
+              <input style={styles.input} type="text" ref={this.search} value={this.state.search} onChange={this.onChangeSearch} onFocus={this.onFocus} disabled={preview} />
             </form>
           </FlexComponent>
           <IconComponent font="" onClick={() => this.runAction("zoom-out")} />

@@ -1,6 +1,6 @@
-import { dialog, nativeTheme } from "electron";
+import { app, dialog, nativeTheme } from "electron";
 import { join } from "path"
-import { readFile } from "fs/promises";
+import { readFile, writeFile } from "fs/promises";
 import { NeovimClient } from "neovim";
 import { UiAttachOptions } from "neovim/lib/api/Neovim"
 
@@ -121,7 +121,7 @@ export class Envim {
   }
 
   private onLuafile = (path: string) => {
-    readFile(join(__dirname, "lua", path), { encoding: "utf8" }).then((file) => {
+    readFile(join(__dirname, "lua", path), { encoding: "utf8" }).then(file => {
       this.nvim.lua(file);
     });
   }
@@ -166,13 +166,25 @@ export class Envim {
     return theme;
   }
 
-  private onBrowser = (src: string, command: "new" | "vnew" | "tabnew" = "tabnew") => {
+  private onBrowser = (src: string, command?: string) => {
     Emit.once("envim:ready", (gid: number) => {
       const { id } = Grids.get(gid).getInfo();
+      const match = src.match(/^data:(.*\/.*);base64,(.*)/);
 
-      Emit.update(`preview:${id}`, false, src);
+      (() => {
+        if (!match) return new Promise((resolve) => resolve(true));
+
+        const mime = match[1];
+        const blob = atob(match[2]);
+        const ext = mime.match(/\/(\w+)/)?.pop();
+        const path = join(app.getPath("userData"), `tmp.${ext}`);
+
+        src = `file://${path}`;
+        return writeFile(path, (new Uint8Array(blob.length)).map((_, i) => blob.charCodeAt(i)));
+      })().then(() => Emit.update(`preview:${id}`, false, src));
     });
 
+    command = ["new", "vnew", "tabnew"].find(val => val === command) || "tabnew";
     this.onCommand(`${command} +set\\ bufhidden=wipe`);
   }
 
