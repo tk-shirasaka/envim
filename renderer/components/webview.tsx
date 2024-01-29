@@ -86,13 +86,10 @@ export class WebviewComponent extends React.Component<Props, States> {
 
   componentDidUpdate(props: Props) {
     if (this.webview && this.props.src !== props.src) {
-      this.runAction("mode-command");
       this.setState({ input: this.props.src });
       this.webview.src = this.getUrl(this.props.src);
-    }
-
-    if (this.webview && props.active < this.props.active) {
-      this.runAction(this.webview.getURL() === "about:blank" ? "mode-input" : "mode-command");
+    } else if (this.webview && props.active < this.props.active) {
+      this.runAction(!this.props.src && this.webview.getURL() === "about:blank" ? "mode-input" : "mode-command");
     }
   }
 
@@ -227,7 +224,7 @@ export class WebviewComponent extends React.Component<Props, States> {
       const loading = this.webview.isLoading();
 
       mode === "mode-input" ? this.setState({ title, loading }) : this.setState({ input, title, loading });
-      mode === "mode-browser" && this.runAction("mode-command");
+      loading && mode === "mode-browser" && this.runAction("mode-command");
     }
   }
 
@@ -353,7 +350,7 @@ export class WebviewComponent extends React.Component<Props, States> {
 
     return (
       <FlexComponent animate="fade-in" direction="column" position="absolute" color="default" overflow="visible" inset={[0]} style={this.props.style} onMouseUp={this.mouseCancel} onMouseDown={this.mouseCancel}>
-        <input style={styles.command} ref={this.command} type="text" onKeyDown={preview ? undefined : this.onKeyDown} />
+        <input style={styles.command} ref={this.command} type="text" onKeyDown={preview ? undefined : this.onKeyDown} tabIndex={-1} />
         <FlexComponent color="gray-fg" vertical="center" horizontal="center">
           { this.state.loading && <div className="animate loading inline"></div> }
           <FlexComponent margin={[0, 8]}>{ this.state.title }</FlexComponent>
@@ -368,13 +365,13 @@ export class WebviewComponent extends React.Component<Props, States> {
           <IconComponent { ...icon } onClick={e => this.saveEngine(e)} />
           <FlexComponent grow={1} shrink={2} padding={[0, 8, 0, 0]}>
             <form style={styles.form} onSubmit={this.onSubmitSrc}>
-              <input style={styles.input} type="text" ref={this.input} value={this.state.input} onChange={this.onChangeSrc} onFocus={this.onFocus} disabled={preview} />
+              <input style={styles.input} type="text" ref={this.input} value={this.state.input} onChange={this.onChangeSrc} onFocus={this.onFocus} disabled={preview} tabIndex={-1} />
             </form>
           </FlexComponent>
           <IconComponent font="" />
           <FlexComponent shrink={3}>
             <form style={styles.input} onSubmit={this.onSubmitSearch}>
-              <input style={styles.input} type="text" ref={this.search} value={this.state.search} onChange={this.onChangeSearch} onFocus={this.onFocus} disabled={preview} />
+              <input style={styles.input} type="text" ref={this.search} value={this.state.search} onChange={this.onChangeSearch} onFocus={this.onFocus} disabled={preview} tabIndex={-1} />
             </form>
           </FlexComponent>
           <IconComponent font="" onClick={() => this.runAction("zoom-out")} />

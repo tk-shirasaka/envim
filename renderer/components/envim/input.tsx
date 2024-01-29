@@ -136,7 +136,7 @@ export class InputComponent extends React.Component<Props, States> {
 
     return (
       <FlexComponent animate="fade-in" style={{ opacity, minWidth, ...this.state.style}} shadow={!this.state.busy && this.state.focus} nomouse>
-        <input type="text" style={styles.input} ref={this.input} autoFocus
+        <input type="text" style={styles.input} ref={this.input} tabIndex={-1} autoFocus
           onFocus={() => this.toggleFocus(true)}
           onBlur={() => this.toggleFocus(false)}
           onKeyDown={this.onKeyDown}
