@@ -185,7 +185,7 @@ export class Envim {
     });
 
     command = ["new", "vnew", "tabnew"].find(val => val === command) || "tabnew";
-    this.onCommand(`${command} +set\\ bufhidden=wipe`);
+    this.onCommand(`${command} +set\\ bufhidden=wipe|set\\ buftype=nofile|set\\ nobuflisted [Envim\\ Browser]`);
   }
 
   private handleTheme = () => {

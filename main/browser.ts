@@ -75,7 +75,12 @@ export class Browser {
 
   private onContextMenu = (_: Event, params: ContextMenuParams) => {
     const contents = params.selectionText || params.srcURL;
-    contents && Emit.share("envim:browser", contents);
+
+    if (params.srcURL === this.webContents.getURL()) {
+      this.webContents.downloadURL(contents);
+    } else if (contents) {
+      Emit.share("envim:browser", contents);
+    }
   }
 
   private onInput = (_: Event, input: Input) => {

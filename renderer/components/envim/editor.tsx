@@ -34,6 +34,7 @@ interface States {
   bufs: IBuffer[];
   nomouse: boolean;
   dragging: boolean;
+  hidden: boolean;
   scrolling: number;
   preview: { src: string; active: number; };
   scroll: {
@@ -59,7 +60,7 @@ export class EditorComponent extends React.Component<Props, States> {
     super(props);
 
     this.busy = Cache.get<boolean>(TYPE, "busy");
-    this.state = { bufs: Cache.get<IBuffer[]>(TYPE, "bufs") || [], nomouse: Cache.get<boolean>(TYPE, "nomouse"), dragging: false, scrolling: 0, preview: { src: "", active: 0 }, scroll: { total: 0, height: "100%", transform: "" } };
+    this.state = { bufs: Cache.get<IBuffer[]>(TYPE, "bufs") || [], nomouse: Cache.get<boolean>(TYPE, "nomouse"), dragging: false, hidden: false, scrolling: 0, preview: { src: "", active: 0 }, scroll: { total: 0, height: "100%", transform: "" } };
     Emit.on(`clear:${this.props.id}`, this.onClear);
     Emit.on(`flush:${this.props.id}`, this.onFlush);
     Emit.on(`preview:${this.props.id}`, this.onPreview);
@@ -241,6 +242,13 @@ export class EditorComponent extends React.Component<Props, States> {
     Emit.share("envim:drag", this.props.id);
   }
 
+  private toggleExtWindow = (e: MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+
+    this.setState({ hidden: !this.state.hidden });
+  }
+
   private onViewport = (top: number, bottom: number, total: number) => {
     const limit = this.props.style.height;
     const height = Math.min(Math.floor((bottom - top) / total * 100), 100);
@@ -304,14 +312,14 @@ export class EditorComponent extends React.Component<Props, States> {
 
   private renderPreview() {
     const { src, active } = this.state.preview;
-    return <WebviewComponent src={src} active={active && this.props.focus ? (new Date).getTime() : active} style={active ? {} : { display: "none" }} />;
+    return <WebviewComponent src={src} active={active && this.props.focus ? (new Date).getTime() : active} style={!this.state.hidden && active ? {} : { display: "none" }} />;
   }
 
   render() {
     const { height, scale } = Setting.font;
 
     return (
-      <FlexComponent animate="fade-in hover" position="absolute" overflow="visible" nomouse={this.state.nomouse} style={this.props.style} shadow
+      <FlexComponent animate="fade-in hover" position="absolute" overflow="visible" nomouse={this.state.nomouse} style={{ ...this.props.style, ...(this.state.hidden ? { height: 0 } : {}) }} shadow={!this.state.hidden}
         onMouseDown={this.state.dragging ? undefined : this.onMouseDown}
         onMouseMove={this.state.dragging ? undefined : this.onMouseMove}
         onMouseUp={this.state.dragging ? undefined : this.onMouseUp}
@@ -328,13 +336,17 @@ export class EditorComponent extends React.Component<Props, States> {
             <FlexComponent color="default" grow={1} position="absolute" inset={[0, -4, 0, "auto"]} onMouseDown={this.onScroll} hover={this.state.scrolling === 0}>
               <FlexComponent animate="fade-in" color="blue" border={[0, 2]} rounded={[2]} style={this.state.scroll} shadow nomouse></FlexComponent>
             </FlexComponent>
-            <FlexComponent color="default" position="absolute" overflow="visible" inset={[-height, -4, "auto", "auto"]} rounded={[4, 4, 0, 0]} spacing hover
+            <FlexComponent color={this.state.hidden ? "orange" : "default"} position="absolute" overflow="visible" inset={[-height, -4, "auto", "auto"]} rounded={this.state.hidden ? [4] : [4, 4, 0, 0]} hover={!this.state.hidden} spacing
               onMouseDown={e => this.runCommand(e, "")}
             >
-              { !this.state.preview.src && <IconComponent color="gray-fg" font="" onClick={this.togglePreview} /> }
+              { !this.state.preview.src && this.props.type === "normal" && (
+                <>
+                  <IconComponent color="gray-fg" font="" onClick={this.togglePreview} />
+                  { this.renderMenu("", "buffer ") }
+                </>
+              ) }
               { this.props.type === "normal" && (
                 <>
-                  { this.renderMenu("", "buffer ") }
                   { this.renderIconMenu("", [
                     [
                       { font: "", onClick: e => this.runCommand(e, "enew") },
@@ -354,8 +366,9 @@ export class EditorComponent extends React.Component<Props, States> {
                   ]) }
                   <IconComponent color="gray-fg" font="" onClick={e => this.runCommand(e, "write")} />
                 </>
-              )}
-              { this.props.type === "external" && (
+              ) }
+              { this.props.type === "external" && <IconComponent color="gray-fg" font={this.state.hidden ? "" : ""} onClick={this.toggleExtWindow} /> }
+              { this.props.type === "external" && !this.state.hidden && (
                 <>
                   <IconComponent color="gray-fg" font="󰮐" active={this.state.dragging} onClick={this.dragExtWIndow} />
                   { this.renderIconMenu("", [
@@ -369,7 +382,7 @@ export class EditorComponent extends React.Component<Props, States> {
                     ],
                   ]) }
                 </>
-              )}
+              ) }
               <IconComponent color="gray-fg" font="" onClick={e => this.runCommand(e, "confirm quit")} />
             </FlexComponent>
           </>
