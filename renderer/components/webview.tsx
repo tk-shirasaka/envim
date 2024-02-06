@@ -235,6 +235,7 @@ export class WebviewComponent extends React.Component<Props, States> {
       const title = this.webview.getTitle();
       const loading = this.webview.isLoading();
 
+      this.state.input === "" && this.webview.clearHistory();
       this.state.mode === "input" ? this.setState({ title, loading }) : this.setState({ input, title, loading });
     }
   }
