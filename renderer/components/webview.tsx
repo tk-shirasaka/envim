@@ -297,7 +297,7 @@ export class WebviewComponent extends React.Component<Props, States> {
     Emit.share("webview:searchengines");
   }
 
-  private async saveEngine() {
+  private saveEngine = async () => {
     if (this.webview) {
       const uri = await Emit.send<string>("envim:readline", "URI", this.webview.getURL());
       const selected = this.state.searchengines.find(engine => engine.uri === uri);
