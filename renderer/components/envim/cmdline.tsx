@@ -71,47 +71,52 @@ export class CmdlineComponent extends React.Component<Props, States> {
   }
 
   private onCmdline = (cmd: string[][], pos: number, prompt: string, indent: number) => {
-    const cmdline = this.convertContent(cmd, indent)
+    this.setState(() => {
+      const cmdline = this.convertContent(cmd, indent)
 
-    if (cmdline.length) {
-      pos = this.getPos(cmdline, pos + indent);
-    }
+      if (cmdline.length) {
+        pos = this.getPos(cmdline, pos + indent);
+      }
 
-    this.setState({ cmdline, pos, prompt, indent })
+      return { cmdline, pos, prompt, indent };
+    });
   }
 
   private onCursor = (pos: number) => {
-    const cmdline = this.state.cmdline;
-
-    if (pos < cmdline.length) {
-      pos = this.getPos(cmdline, pos + this.state.indent);
-
-      this.setState({ pos });
-    }
+    this.setState(state => {
+      if (pos < state.cmdline.length) {
+        pos = this.getPos(state.cmdline, pos + state.indent);
+      }
+      return { pos };
+    });
   }
 
   private onSpecial = (c: string, shift: boolean) => {
-    const cmdline = this.state.cmdline;
-    const pos = shift ? this.state.pos + 1 : this.state.pos;
+    this.setState(state => {
+      const cmdline = state.cmdline;
+      const pos = shift ? state.pos + 1 : state.pos;
 
-    cmdline.splice(this.state.pos, 0, { hl: "0", c });
-    this.setState({ cmdline, pos });
+      cmdline.splice(state.pos, 0, { hl: "0", c });
+
+      return { cmdline, pos };
+    });
   }
 
   private onBlock = (lines: string[][][]) => {
-    const contents = [
-      ...this.state.contents,
-      ...lines.map(line => this.convertContent(line, 0)),
-    ];
-    this.setState({ contents });
+    this.setState(state => ({
+      contents: [
+        ...state.contents,
+        ...lines.map(line => this.convertContent(line, 0)),
+      ]
+    }));
   }
 
   private offBlock = () => {
-    this.setState({ contents: [], cmdline: [] });
+    this.setState(() => ({ contents: [], cmdline: [] }));
   }
 
-  private onOption = (options: { ext_cmdline?: boolean }) => {
-    options.ext_cmdline === undefined || this.setState({ enabled: options.ext_cmdline });
+  private onOption = (options: { ext_cmdline: boolean }) => {
+    options.ext_cmdline === undefined || this.setState(() => ({ enabled: options.ext_cmdline }));
   }
 
   private getScopeStyle() {

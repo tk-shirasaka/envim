@@ -93,39 +93,42 @@ export class EnvimComponent extends React.Component<Props, States> {
   }
 
   private onWin = (workspace: string, wins: IWindow[]) => {
-    const grids = this.state.grids;
-    const nextOrder = Object.values(grids).reduce((order, grid) => Math.max(order, grid.order), 1);
+    this.setState(() => {
+      const grids = this.state.grids;
+      const nextOrder = Object.values(grids).reduce((order, grid) => Math.max(order, grid.order), 1);
 
-    Object.values(grids).forEach(grid => grid.id.indexOf(`${workspace}.`) < 0 && (grid.style.visibility = "hidden"));
-    wins.reverse().forEach(({ id, gid, winid, x, y, width, height, zIndex, focusable, focus, type, status }, i) => {
-      const curr = grids[id]?.style || {};
-      const order = grids[id]?.order || i + nextOrder;
-      const next = {
-        zIndex: (status === "show" ? zIndex : -1) + +focus ,
-        width: col2X(width),
-        height: row2Y(height),
-        transform: `translate(${col2X(x)}px, ${row2Y(y)}px)`,
-        visibility: status === "show" ? "visible" : "hidden" as "visible" | "hidden",
-      };
+      Object.values(grids).forEach(grid => grid.id.indexOf(`${workspace}.`) < 0 && (grid.style.visibility = "hidden"));
+      wins.reverse().forEach(({ id, gid, winid, x, y, width, height, zIndex, focusable, focus, type, status }, i) => {
+        const curr = grids[id]?.style || {};
+        const order = grids[id]?.order || i + nextOrder;
+        const next = {
+          zIndex: (status === "show" ? zIndex : -1) + +focus ,
+          width: col2X(width),
+          height: row2Y(height),
+          transform: `translate(${col2X(x)}px, ${row2Y(y)}px)`,
+          visibility: status === "show" ? "visible" : "hidden" as "visible" | "hidden",
+        };
 
-      this.refresh = this.refresh || (status !== "show" && zIndex < 5);
-      if (status === "delete") {
-        delete(grids[id]);
-      } else if (JSON.stringify(curr) !== JSON.stringify(next)) {
-        this.refresh = this.refresh || (zIndex < 5 && (curr.width !== next.width || curr.height !== next.height));
-        grids[id] = { id, gid, winid, order, focusable, focus, type, style: next };
-      }
+        this.refresh = this.refresh || (status !== "show" && zIndex < 5);
+        if (status === "delete") {
+          delete(grids[id]);
+        } else if (JSON.stringify(curr) !== JSON.stringify(next)) {
+          this.refresh = this.refresh || (zIndex < 5 && (curr.width !== next.width || curr.height !== next.height));
+          grids[id] = { id, gid, winid, order, focusable, focus, type, style: next };
+        }
+      });
+
+      this.refresh && Emit.send("envim:command", "mode");
+      this.refresh = false;
+      Emit.share("envim:focus");
+
+      return { grids };
     });
-
-    this.setState({ grids });
-    this.refresh && Emit.send("envim:command", "mode");
-    this.refresh = false;
-    Emit.share("envim:focus");
   }
 
   private onOption = (options: ISetting["options"]) => {
     Setting.options = options;
-    "mousemoveevent" in options && this.setState({ mousemoveevent: options.mousemoveevent });
+    "mousemoveevent" in options && this.setState(() => ({ mousemoveevent: options.mousemoveevent }));
   }
 
   private onSetting = (setting: ISetting) => {
@@ -133,7 +136,7 @@ export class EnvimComponent extends React.Component<Props, States> {
   }
 
   private onPause = (pause: boolean) => {
-    this.setState({ pause });
+    this.setState(() => ({ pause }));
   }
 
   private onMouseUp = () => {

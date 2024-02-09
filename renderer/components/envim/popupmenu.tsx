@@ -58,28 +58,30 @@ export class PopupmenuComponent extends React.Component<Props, States> {
   private onPopupmenu = (state: States) => {
     state.col--;
 
-    this.setState(state);
+    this.setState(() => state);
     Emit.share("envim:drag", -1);
   }
 
   private onSelect = (selected: number) => {
-    const top = row2Y(Math.max(0, Math.min(selected, this.state.items.length - this.state.height)));
+    this.setState(state => {
+      const top = row2Y(Math.max(0, Math.min(selected, state.items.length - state.height)));
 
-    this.state.clicked || setTimeout(() => this.scope.current?.parentElement?.scrollTo({ top, behavior: "smooth" }));
-    this.setState({ selected, clicked: false });
+      state.clicked || setTimeout(() => this.scope.current?.parentElement?.scrollTo({ top, behavior: "smooth" }));
+      return { selected, clicked: false };
+    })
   }
 
   private offPopupmenu = () => {
-    this.setState({ items: [] });
+    this.setState(() => ({ items: [] }));
     Emit.share("envim:drag", "");
   }
 
   private onOption = (options: { ext_popupmenu: boolean }) => {
-    options.ext_popupmenu === undefined || this.setState({ enabled: options.ext_popupmenu });
+    options.ext_popupmenu === undefined || this.setState(() => ({ enabled: options.ext_popupmenu }));
   }
 
   private onItem(i: number) {
-    this.setState({ clicked: true });
+    this.setState(() => ({ clicked: true }));
     Emit.send("envim:api", "nvim_select_popupmenu_item", [i, true, false, {}]);
   }
 

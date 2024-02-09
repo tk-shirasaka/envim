@@ -42,13 +42,15 @@ export class NotificateComponent extends React.Component<Props, States> {
   }
 
   private onShow = (messages: IMessage[], replace: boolean) => {
-    replace && this.state.messages.splice(0);
+    this.setState(state => {
+      replace && state.messages.splice(0);
 
-    this.setState({ messages: [ ...this.state.messages, ...messages ] });
+      return { messages: [ ...state.messages, ...messages ] };
+    })
   }
 
   private onOption = (options: { ext_messages: boolean }) => {
-    options.ext_messages === undefined || this.setState({ enabled: options.ext_messages });
+    options.ext_messages === undefined || this.setState(() => ({ enabled: options.ext_messages }));
   }
 
   render() {

@@ -62,7 +62,7 @@ export class TablineComponent extends React.Component<Props, States> {
       .pop();
     Setting.bookmarks = bookmarks.map(bookmark => ({ ...bookmark, selected: bookmark === selected }));
 
-    this.setState({ cwd, bookmarks: Setting.bookmarks });
+    this.setState(() => ({ cwd, bookmarks: Setting.bookmarks }));
     selected && current !== selected && Emit.send("envim:connect", Setting.type, Setting.path, selected.path);
   }
 
@@ -88,7 +88,7 @@ export class TablineComponent extends React.Component<Props, States> {
     e.preventDefault();
 
     Setting.bookmarks = bookmarks;
-    this.setState({ bookmarks });
+    this.setState(() => ({ bookmarks }));
   }
 
   private runCommand(e: MouseEvent, command: string) {
@@ -99,19 +99,19 @@ export class TablineComponent extends React.Component<Props, States> {
   }
 
   private onTabline = (tabs: ITab[], _: IBuffer[]) => {
-    this.setState({ tabs });
+    this.setState(() => ({ tabs }));
   }
 
   private onMenu = (menus: IMenu[]) => {
-    this.setState({ menus });
+    this.setState(() => ({ menus }));
   }
 
   private changeMode = (mode: IMode) => {
-    this.setState({ mode });
+    this.setState(() => ({ mode }));
   }
 
   private onOption = (options: { ext_tabline: boolean }) => {
-    options.ext_tabline === undefined || this.setState({ enabled: options.ext_tabline });
+    options.ext_tabline === undefined || this.setState(() => ({ enabled: options.ext_tabline }));
   }
 
   private renderTab(i: number, tab: ITab) {

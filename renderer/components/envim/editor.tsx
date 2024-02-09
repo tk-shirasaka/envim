@@ -178,7 +178,7 @@ export class EditorComponent extends React.Component<Props, States> {
       };
 
       this.dragging = { x: 0, y: 0 };
-      this.setState({ dragging: false });
+      this.setState(() => ({ dragging: false }));
 
       Emit.share("envim:drag", "");
       Emit.send("envim:position", this.props.gid, x2Col(Math.max(0, offset.x)), y2Row(Math.max(0, offset.y)));
@@ -219,12 +219,11 @@ export class EditorComponent extends React.Component<Props, States> {
   }
 
   private onPreview = (src: string) => {
-    this.setState({ preview: { src, active: src.length > 0 ? (new Date).getTime() : 0 } });
+    this.setState(() => ({ preview: { src, active: src.length > 0 ? (new Date).getTime() : 0 } }));
   }
 
   private togglePreview = () => {
-    const preview = this.state.preview;
-    this.setState({ preview: { ...preview, active: preview.active ? 0 : (new Date).getTime() } });
+    this.setState(({ preview }) => ({ preview: { ...preview, active: preview.active ? 0 : (new Date).getTime() } }));
   }
 
   private openExtWindow = (e: MouseEvent) => {
@@ -238,7 +237,7 @@ export class EditorComponent extends React.Component<Props, States> {
     e.stopPropagation();
     e.preventDefault();
 
-    this.setState({ dragging: true });
+    this.setState(() => ({ dragging: true }));
     Emit.share("envim:drag", this.props.id);
   }
 
@@ -246,28 +245,29 @@ export class EditorComponent extends React.Component<Props, States> {
     e.stopPropagation();
     e.preventDefault();
 
-    this.setState({ hidden: !this.state.hidden });
+    this.setState(() => ({ hidden: !this.state.hidden }));
   }
 
   private onViewport = (top: number, bottom: number, total: number) => {
-    const limit = this.props.style.height;
-    const height = Math.min(Math.floor((bottom - top) / total * 100), 100);
-    const scrolling = height === 100 ? this.state.scrolling : +setTimeout(() => {
-      this.state.scrolling === scrolling && this.setState({ scrolling: 0 });
-    }, 500);
+    this.setState(() => {
+      const limit = this.props.style.height;
+      const height = Math.min(Math.floor((bottom - top) / total * 100), 100);
+      const scrolling = height === 100 ? 0 : +setTimeout(() => {
+        this.state.scrolling === scrolling && this.setState(() => ({ scrolling: 0 }));
+      }, 500);
 
-    this.setState({ scrolling, scroll: {
-      total,
-      height: height ? `${height}%` : "4px",
-      transform: `translateY(${Math.min(Math.floor(top / total * limit), limit - 4)}px)`,
-    }});
+      return { scrolling, scroll: {
+        total,
+        height: height ? `${height}%` : "4px",
+        transform: `translateY(${Math.min(Math.floor(top / total * limit), limit - 4)}px)`,
+      }};
+    });
   }
 
   private onDrag = (id: string) => {
     const nomouse = ["", this.props.id].indexOf(id) < 0;
 
-    this.setState({ nomouse });
-    id === "" && this.setState({ dragging: false });
+    this.setState(state => ({ nomouse, dragging: id === "" ? false : state.dragging }));
     Cache.set<boolean>(TYPE, "nomouse", id.length > 0);
   }
 
@@ -283,7 +283,7 @@ export class EditorComponent extends React.Component<Props, States> {
 
   private onTabline = (_: ITab[], bufs: IBuffer[]) => {
     Cache.set<IBuffer[]>(TYPE, "bufs", bufs);
-    this.setState({ bufs });
+    this.setState(() => ({ bufs }));
   }
 
   private renderMenu(label: string, command: string) {

@@ -66,65 +66,57 @@ export class SettingComponent extends React.Component<Props, States> {
   }
 
   private onSetting = (state: ISetting) => {
-    this.setState(state);
+    this.setState(() => state);
   }
 
-  private onToggleType = (e: ChangeEvent) => {
-    const type = (e.target as HTMLInputElement).value as ISetting["type"];
-    const path = this.state.path;
+  private onToggleType = (e: ChangeEvent<HTMLInputElement>) => {
+    this.setState(state => {
+      const type = e.target.value as ISetting["type"];
+      const path = state.path;
+      const { presets, searchengines, ...rest } = state.presets[`[${type}]:${path}`] || { type, path };
 
-    if (type === this.state.type) {
-      this.setState({ type });
-    } else {
-      const { presets, searchengines, ...state } = this.state.presets[`[${type}]:${path}`] || { type, path };
-      this.setState({ ...this.state, ...state });
-    }
+      return { ...state, ...rest };
+    });
   }
 
-  private onChangePath = (e: ChangeEvent) => {
-    const path = (e.target as HTMLInputElement).value;
-    const type = this.state.type;
+  private onChangePath = (e: ChangeEvent<HTMLInputElement>) => {
+    this.setState(state => {
+      const path = e.target.value;
+      const type = state.type;
+      const { presets, searchengines, ...rest } = state.presets[`[${type}]:${path}`] || { type, path };
 
-    if (path === this.state.path) {
-      this.setState({ path });
-    } else {
-      const { presets, searchengines, ...state } = this.state.presets[`[${type}]:${path}`] || { type, path };
-      this.setState({ ...this.state, ...state });
-    }
+      return { ...state, ...rest };
+    });
   }
 
-  private onChangeFont = (e: ChangeEvent) => {
-    const size = +(e.target as HTMLInputElement).value;
-    this.setState({ font: { ...this.state.font, size } });
+  private onChangeFont = (e: ChangeEvent<HTMLInputElement>) => {
+    this.setState(state => ({ font: { ...state.font, size: +e.target.value } }));
   }
 
-  private onChangeLspace = (e: ChangeEvent) => {
-    const lspace = +(e.target as HTMLInputElement).value;
-    this.setState({ font: { ...this.state.font, lspace } });
+  private onChangeLspace = (e: ChangeEvent<HTMLInputElement>) => {
+    this.setState(state => ({ font: { ...state.font, lspace: +e.target.value } }));
   }
 
-  private onChangeOpacity = (e: ChangeEvent) => {
-    const opacity = +(e.target as HTMLInputElement).value;
-    this.setState({ opacity });
+  private onChangeOpacity = (e: ChangeEvent<HTMLInputElement>) => {
+    this.setState(() => ({ opacity: +e.target.value }));
   }
 
-  private onToggleOption = (e: ChangeEvent) => {
-    const input = e.target as HTMLInputElement;
-    const options = this.state.options;
-    options[input.name] = input.checked;
-    this.setState({ options });
+  private onToggleOption = (e: ChangeEvent<HTMLInputElement>) => {
+    this.setState(({ options }) => {
+      options[e.target.name] = e.target.checked;
+
+      return { options };
+    });
   }
 
   private onSelectBookmark(index: number) {
-    const bookmarks = this.state.bookmarks.map((bookmark, i) => ({ ...bookmark, selected: i === index }));
-
-    this.setState({ bookmarks });
+    this.setState(state => ({
+      bookmarks: state.bookmarks.map((bookmark, i) => ({ ...bookmark, selected: i === index }))
+    }));
   }
 
   private onSelectPreset(key: string) {
-    const { searchengines, presets } = this.state;
-
-    this.setState({ ...this.state.presets[key], searchengines, presets });
+    this.setState(({ searchengines, presets }) => ({ ...presets[key], searchengines, presets }));
   }
 
   private onSubmit = (e: FormEvent) => {

@@ -86,7 +86,7 @@ export class WebviewComponent extends React.Component<Props, States> {
 
   componentDidUpdate(props: Props) {
     if (this.webview && this.props.src !== props.src) {
-      this.setState({ input: this.props.src });
+      this.setState(() => ({ input: this.props.src }));
       this.webview.src = this.getUrl(this.props.src);
     } else if (this.webview && props.active < this.props.active) {
       this.runAction(!this.props.src && this.webview.getURL() === "about:blank" ? "mode-input" : "mode-command");
@@ -136,7 +136,7 @@ export class WebviewComponent extends React.Component<Props, States> {
     })();
 
     if (this.state.mode !== mode) {
-      this.setState({ mode });
+      this.setState(() => ({ mode }));
       this.webview?.stopFindInPage("clearSelection");
       ["input", "search"].includes(mode) && (document.activeElement as HTMLInputElement).select();
     }
@@ -180,7 +180,7 @@ export class WebviewComponent extends React.Component<Props, States> {
   }
 
   private onSearchengines = () => {
-    this.setState({ searchengines: Setting.searchengines });
+    this.setState(() => ({ searchengines: Setting.searchengines }));
   }
 
   private mouseCancel = (e: MouseEvent) => {
@@ -199,8 +199,8 @@ export class WebviewComponent extends React.Component<Props, States> {
     const value = e.target.value;
 
     switch (this.state.mode) {
-      case "input": return this.setState({ input: value });
-      case "search": return this.setState({ search: value });
+      case "input": return this.setState(() => ({ input: value }));
+      case "search": return this.setState(() => ({ search: value }));
     }
   }
 
@@ -217,7 +217,7 @@ export class WebviewComponent extends React.Component<Props, States> {
         if (this.state.input) {
           this.webview.src = this.getUrl(this.state.input);
         } else {
-          this.setState({ input: this.webview.getURL() });
+          this.setState(({ input }) => ({ input: this.webview?.getURL() || input }));
         }
         break;
       case "search":
@@ -235,8 +235,11 @@ export class WebviewComponent extends React.Component<Props, States> {
       const title = this.webview.getTitle();
       const loading = this.webview.isLoading();
 
-      this.state.input === "" && this.webview.clearHistory();
-      this.state.mode === "input" ? this.setState({ title, loading }) : this.setState({ input, title, loading });
+      this.setState(state => {
+        state.input === "" && this.webview?.clearHistory();
+
+        return { input: state.mode === "input" ? state.input : input, title, loading }
+      });
     }
   }
 
@@ -267,7 +270,7 @@ export class WebviewComponent extends React.Component<Props, States> {
     if (this.webview) {
       zoom = Math.min(Math.max(zoom , 0), 300);
 
-      this.setState({ zoom });
+      this.setState(() => ({ zoom }));
       this.webview.setZoomLevel((zoom / 100) - 1);
     }
   }
@@ -284,7 +287,7 @@ export class WebviewComponent extends React.Component<Props, States> {
     } else {
       const searchengines = this.state.searchengines.map(engine => ({ ...engine, selected: selected === engine }));
 
-      this.setState({ searchengines });
+      this.setState(() => ({ searchengines }));
       this.runAction("mode-input");
       Setting.searchengines = searchengines;
     }

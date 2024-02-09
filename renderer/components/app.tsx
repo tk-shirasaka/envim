@@ -33,20 +33,21 @@ export class AppComponent extends React.Component<Props, States> {
   }
 
   private onResize = () => {
-    this.setState({ window: { width: window.innerWidth, height: window.innerHeight } });
+    this.setState(() => ({ window: { width: window.innerWidth, height: window.innerHeight } }));
   }
 
   private onSwitch = (init: boolean) => {
-    Emit.initialize();
+    this.setState(state => {
+      Emit.initialize();
 
-    if (this.state.init === init) return;
+      state.init === init || Emit.send("envim:setting", Setting.get());
 
-    Emit.send("envim:setting", Setting.get());
-    this.setState({ init });
+      return { init };
+    });
   }
 
   private onTheme = (theme: "dark" | "light") => {
-    this.setState({ theme });
+    this.setState(() => ({ theme }));
     Cache.set<"dark" | "light">("common", "theme", theme);
   }
 

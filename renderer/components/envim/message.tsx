@@ -35,7 +35,7 @@ export class MessageComponent extends React.Component<Props, States> {
   }
 
   private onToggleOpen = () => {
-    this.setState({ open: !this.state.open });
+    this.setState(state => ({ open: !state.open }));
   }
 
   private contentStyle(defaultStyle: { [k: string]: string }, style: { [k: string]: string }) {

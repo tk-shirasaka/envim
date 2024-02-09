@@ -62,25 +62,28 @@ export class HistoryComponent extends React.Component<Props, States> {
   }
 
   private onMode = (message: IMessage) => {
-    this.setState({ mode: message.contents.length ? message : undefined });
+    this.setState(() => ({ mode: message.contents.length ? message : undefined }));
   }
 
   private onCommand = (message: IMessage) => {
-    this.setState({ command: message.contents.length ? message : undefined });
+    this.setState(() => ({ command: message.contents.length ? message : undefined }));
   }
 
   private onRuler = (message: IMessage) => {
-    this.setState({ ruler: message.contents.length ? message : undefined });
+    this.setState(() => ({ ruler: message.contents.length ? message : undefined }));
   }
 
   private onHistory = (messages: IMessage[]) => {
-    messages = [ ...this.state.messages, ...messages ];
-    this.setState({ messages: messages.slice(-1000) });
-    setTimeout(() => this.bottom.current?.scrollIntoView({ behavior: "smooth" }));
+    this.setState(state => {
+      setTimeout(() => this.bottom.current?.scrollIntoView({ behavior: "smooth" }));
+      messages = [ ...state.messages, ...messages ];
+
+      return { messages: messages.slice(-1000) };
+    })
   }
 
   private onOption = (options: { [k: string]: boolean }) => {
-    this.setState({ options: { ...this.state.options, ...options } });
+    this.setState(state => ({ options: { ...state.options, ...options } }));
   }
 
   private onDebug = (direction: "send" | "receive", event: string, ...args: any[]) => {
@@ -93,7 +96,7 @@ export class HistoryComponent extends React.Component<Props, States> {
   }
 
   private onClear = () => {
-    this.setState({ messages: [] });
+    this.setState(() => ({ messages: [] }));
   }
 
   private loadMessages = () => {
@@ -106,10 +109,13 @@ export class HistoryComponent extends React.Component<Props, States> {
   }
 
   private toggleTheme = () => {
-    const theme = this.state.theme === "dark" ? "light" : "dark";
+    this.setState(state => {
+      const theme = state.theme === "dark" ? "light" : "dark";
 
-    this.setState({ theme });
-    Emit.send("envim:command", `set background=${theme}`);
+      Emit.send("envim:command", `set background=${theme}`);
+
+      return { theme };
+    });
   }
 
   private toggleDebug = async () => {
@@ -121,7 +127,7 @@ export class HistoryComponent extends React.Component<Props, States> {
       this.state.debug === "" && debug && Emit.on("debug", this.onDebug);
       debug === "" && Emit.off("debug", this.onDebug);
 
-      this.setState({ debug });
+      this.setState(() => ({ debug }));
     } catch (e: any) {
       if (e instanceof Error) {
         const contents = [{ hl: "red", content: e.message }];

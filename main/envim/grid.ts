@@ -54,12 +54,12 @@ class Grid {
   }
 
   getCursorPos(y: number, x: number) {
-    const { width, hl } = this.getCell(y, x).cell;
+    const { width } = this.getCell(y, x).cell;
 
     y = this.info.status === "show" && this.info.height > y ? y + this.info.y : -1;
     x = this.info.status === "show" && this.info.width > x ? x + this.info.x : -1;
 
-    return { x, y, width, hl, zIndex: this.info.zIndex + 1 };
+    return { x, y, width, zIndex: this.info.zIndex + 1 };
   }
 
   setViewport(top: number, bottom: number, total: number) {

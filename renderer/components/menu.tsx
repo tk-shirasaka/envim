@@ -57,27 +57,29 @@ export class MenuComponent extends React.Component<PropsWithChildren<Props>, Sta
   private updateProperty() {
     const haschild = !(Array.isArray(this.props.children) && this.props.children.length === 0);
 
-    this.state.haschild === haschild || this.setState({ haschild });
+    this.state.haschild === haschild || this.setState(() => {
+      if (this.div.current) {
+        const { top, left } = this.div.current.getBoundingClientRect();
+        const vert = window.innerHeight / 2 < top ? "top" : "bottom";
+        const hori = window.innerWidth / 2 < left ? "left" : "right";
 
-    if (this.div.current) {
-      const { top, left } = this.div.current.getBoundingClientRect();
-      const vert = window.innerHeight / 2 < top ? "top" : "bottom";
-      const hori = window.innerWidth / 2 < left ? "left" : "right";
+        this.inset = ["auto", "auto", "auto", "auto"];
+        if (vert === "bottom") {
+          this.inset[0] = this.props.side ? 0 : "100%";
+        }
+        if (hori === "left") {
+          this.inset[1] = this.props.side ? "100%" : 0;
+        }
+        if (vert === "top") {
+          this.inset[2] = this.props.side ? 0 : "100%";
+        }
+        if (hori === "right") {
+          this.inset[3] = this.props.side ? "100%" : 0;
+        }
+      }
 
-      this.inset = ["auto", "auto", "auto", "auto"];
-      if (vert === "bottom") {
-        this.inset[0] = this.props.side ? 0 : "100%";
-      }
-      if (hori === "left") {
-        this.inset[1] = this.props.side ? "100%" : 0;
-      }
-      if (vert === "top") {
-        this.inset[2] = this.props.side ? 0 : "100%";
-      }
-      if (hori === "right") {
-        this.inset[3] = this.props.side ? "100%" : 0;
-      }
-    }
+      return { haschild };
+    });
   }
 
   private renderMenu() {
