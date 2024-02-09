@@ -133,7 +133,6 @@ export class EditorComponent extends React.Component<Props, States> {
 
     this.pointer = { row, col };
     skip || Emit.send("envim:mouse", gid, button, action, modiffier.join("-"), row, col);
-    Emit.share("envim:focus");
   }
 
   private onMouseDown = (e: MouseEvent) => {
@@ -161,6 +160,7 @@ export class EditorComponent extends React.Component<Props, States> {
       Emit.share("envim:drag", "");
     }
     this.onMouseEvent(e, "release");
+    Emit.share("envim:focus");
   }
 
   private onDragStart = (e: MouseEvent) => {
@@ -224,6 +224,7 @@ export class EditorComponent extends React.Component<Props, States> {
 
   private togglePreview = () => {
     this.setState(({ preview }) => ({ preview: { ...preview, active: preview.active ? 0 : (new Date).getTime() } }));
+    Emit.send("envim:api", "nvim_call_function", ["win_gotoid", [this.props.winid]]);
   }
 
   private openExtWindow = (e: MouseEvent) => {

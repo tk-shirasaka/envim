@@ -120,7 +120,6 @@ export class EnvimComponent extends React.Component<Props, States> {
 
       this.refresh && Emit.send("envim:command", "mode");
       this.refresh = false;
-      Emit.share("envim:focus");
 
       return { grids };
     });

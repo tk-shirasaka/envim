@@ -77,7 +77,10 @@ export class WebviewComponent extends React.Component<Props, States> {
         this.webview.addEventListener("focus", this.onMode);
         this.webview.addEventListener("blur", this.onMode);
 
-        url == this.webview.getURL() || (this.webview.src = url);
+        if (url !== this.webview.getURL()) {
+          this.webview.src = url;
+          this.props.style.display !== "none" && this.runAction("mode-command");
+        }
       }
 
       webview.addEventListener("dom-ready", listener);
@@ -90,8 +93,6 @@ export class WebviewComponent extends React.Component<Props, States> {
       this.webview.src = this.getUrl(this.props.src);
     } else if (this.webview && props.active < this.props.active) {
       this.runAction(!this.props.src && this.webview.getURL() === "about:blank" ? "mode-input" : "mode-command");
-    } else if (props.active && !this.props.active) {
-      Emit.share("envim:focus");
     }
   }
 
