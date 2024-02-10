@@ -9,7 +9,8 @@ class Grid {
   private flush: { cells: ICell[], scroll?: IScroll }[] = [];
   private dirty: { [k: string]: ICell } = {};
   private viewport: { top: number; bottom: number; total: number; } = { top: 0, bottom: 0, total: 0 };
-  private ready: boolean = false;
+  private ready: "init" | "resize" | true = "init";
+  private size?: { width: number; height: number; };
 
   constructor(gid: number, workspace: string, width :number, height: number) {
     const id = `${workspace}.${gid}`;
@@ -39,7 +40,8 @@ class Grid {
     if (clear === false && this.info.width === width && this.info.height === height) return;
     const old = clear ? [] : this.lines;
 
-    this.ready = this.ready && this.info.width === width && this.info.height === height;
+    this.size = this.size || { width: this.info.width, height: this.info.height };
+    this.ready = this.ready === "init" ? "init" : this.size.width === width && this.size.height === height || "resize";
     this.info.width = width;
     this.info.height = height;
     this.lines = [];
@@ -141,7 +143,7 @@ class Grid {
   }
 
   getFlush() {
-    if (!this.ready) return {};
+    if (this.ready !== true) return {};
 
     const { flush, viewport } = this;
     this.flush = [];
@@ -154,6 +156,7 @@ class Grid {
 
   onReady() {
     this.ready = true;
+    delete(this.size);
   }
 }
 
