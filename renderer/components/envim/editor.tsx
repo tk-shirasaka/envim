@@ -80,12 +80,13 @@ export class EditorComponent extends React.Component<Props, States> {
     }
   }
 
-  componentDidUpdate() {
+  componentDidUpdate(props: Props) {
     if (this.update) {
       this.update = false;
       Canvas.update(this.props.id, this.props.type === "normal");
       Emit.send("envim:resized", this.props.gid);
     }
+    !props.focus && this.props.focus && !this.state.preview.active && Emit.share("envim:focus");
   }
 
   componentWillUnmount = () => {
