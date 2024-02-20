@@ -420,7 +420,7 @@ export class App {
   }
 
   private optionsSet(options: string[][]) {
-    Emit.update("option:set", true, options.reduce((obj: { [k: string]: string }, [name, value]) => {
+    Emit.send("option:set", options.reduce((obj: { [k: string]: string }, [name, value]) => {
       obj[name] = value;
       return obj;
     }, {}));
