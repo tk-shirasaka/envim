@@ -17,6 +17,7 @@ interface States {
   value: string;
   busy: boolean;
   focus: boolean;
+  focusable: boolean;
 }
 
 const position: "absolute" = "absolute";
@@ -39,8 +40,9 @@ export class InputComponent extends React.Component<Props, States> {
   constructor(props: Props) {
     super(props);
 
-    this.state = { cursor: { x: 0, y: 0, width: 0, zIndex: 0, shape: "block" }, composit: false, value: "", busy: false, focus: true };
+    this.state = { cursor: { x: 0, y: 0, width: 0, zIndex: 0, shape: "block" }, composit: false, value: "", busy: false, focus: true, focusable: true };
     Emit.on("envim:focus", this.onFocus);
+    Emit.on("envim:focusable", this.onFocusable);
     Emit.on("grid:cursor", this.onCursor);
     Emit.on("grid:busy", this.onBusy);
     Emit.on("mode:change", this.changeMode);
@@ -48,16 +50,24 @@ export class InputComponent extends React.Component<Props, States> {
 
   componentWillUnmount = () => {
     Emit.off("envim:focus", this.onFocus);
+    Emit.off("envim:focusable", this.onFocusable);
     Emit.off("grid:cursor", this.onCursor);
     Emit.off("grid:busy", this.onBusy);
     Emit.off("mode:change", this.changeMode);
   }
 
   private onFocus = () => {
+    if (!this.state.focusable) return;
+
     const selected = window.getSelection()?.toString();
 
     selected && navigator.clipboard.writeText(selected);
     this.input.current?.focus();
+  }
+
+  private onFocusable = (focusable: boolean) => {
+    this.setState(() => ({ focusable }));
+    focusable && this.input.current?.focus();
   }
 
   private onCursor = (cursor: { x: number, y: number, width: number, hl: string, zIndex: number }) => {
@@ -70,7 +80,7 @@ export class InputComponent extends React.Component<Props, States> {
 
   private changeMode = (mode: IMode) => {
     this.setState(state => ({ cursor: { ...state.cursor, shape: mode.cursor_shape }}));
-    mode.short_name === "c" && this.onFocus();
+    mode.short_name === "c" && this.input.current?.focus();
   }
 
   private makeStyle() {
@@ -94,6 +104,7 @@ export class InputComponent extends React.Component<Props, States> {
 
   private toggleFocus = (focus: boolean) => {
     this.setState(() => ({ focus }));
+    focus && Emit.share("envim:focused")
   }
 
   private onKeyDown = (e: KeyboardEvent) => {
