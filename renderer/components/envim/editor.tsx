@@ -36,7 +36,7 @@ interface States {
   dragging: boolean;
   hidden: boolean;
   scrolling: number;
-  preview: { src: string; active: number; };
+  preview: { src: string; active: boolean; };
   scroll: {
     total: number;
     height: string;
@@ -60,7 +60,7 @@ export class EditorComponent extends React.Component<Props, States> {
     super(props);
 
     this.busy = Cache.get<boolean>(TYPE, "busy");
-    this.state = { bufs: Cache.get<IBuffer[]>(TYPE, "bufs") || [], nomouse: Cache.get<boolean>(TYPE, "nomouse"), dragging: false, hidden: false, scrolling: 0, preview: { src: "", active: 0 }, scroll: { total: 0, height: "100%", transform: "" } };
+    this.state = { bufs: Cache.get<IBuffer[]>(TYPE, "bufs") || [], nomouse: Cache.get<boolean>(TYPE, "nomouse"), dragging: false, hidden: false, scrolling: 0, preview: { src: "", active: false }, scroll: { total: 0, height: "100%", transform: "" } };
     Emit.on(`clear:${this.props.id}`, this.onClear);
     Emit.on(`flush:${this.props.id}`, this.onFlush);
     Emit.on(`preview:${this.props.id}`, this.onPreview);
@@ -78,6 +78,7 @@ export class EditorComponent extends React.Component<Props, States> {
       Canvas.create(this.props.id, this.canvas.current, ctx, this.props.type === "normal");
       Emit.send("envim:ready", this.props.gid);
     }
+    this.props.focus && Emit.share("envim:focusable", !this.state.preview.active);
   }
 
   componentDidUpdate(props: Props) {
@@ -86,7 +87,7 @@ export class EditorComponent extends React.Component<Props, States> {
       Canvas.update(this.props.id, this.props.type === "normal");
       Emit.send("envim:resized", this.props.gid);
     }
-    !props.focus && this.props.focus && !this.state.preview.active && Emit.share("envim:focus");
+    !props.focus && this.props.focus && Emit.share("envim:focusable", !this.state.preview.active);
   }
 
   componentWillUnmount = () => {
@@ -126,8 +127,6 @@ export class EditorComponent extends React.Component<Props, States> {
     const skip = (button === "move" || action === "drag") && row === this.pointer.row && col === this.pointer.col;
     const gid = this.props.gid === 1 ? 0 : this.props.gid;
 
-    button === "wheel" || e.stopPropagation();
-    button === "wheel" || e.preventDefault();
     e.shiftKey && modiffier.push("S");
     e.ctrlKey && modiffier.push("C");
     e.altKey && modiffier.push("A");
@@ -161,7 +160,6 @@ export class EditorComponent extends React.Component<Props, States> {
       Emit.share("envim:drag", "");
     }
     this.onMouseEvent(e, "release");
-    Emit.share("envim:focus");
   }
 
   private onDragStart = (e: MouseEvent) => {
@@ -220,12 +218,7 @@ export class EditorComponent extends React.Component<Props, States> {
   }
 
   private onPreview = (src: string) => {
-    this.setState(() => ({ preview: { src, active: src.length > 0 ? (new Date).getTime() : 0 } }));
-  }
-
-  private togglePreview = () => {
-    this.setState(({ preview }) => ({ preview: { ...preview, active: preview.active ? 0 : (new Date).getTime() } }));
-    Emit.send("envim:api", "nvim_call_function", ["win_gotoid", [this.props.winid]]);
+    this.setState(() => ({ preview: { src, active: true } }));
   }
 
   private openExtWindow = (e: MouseEvent) => {
@@ -314,7 +307,7 @@ export class EditorComponent extends React.Component<Props, States> {
 
   private renderPreview() {
     const { src, active } = this.state.preview;
-    return <WebviewComponent src={src} active={active && this.props.focus ? (new Date).getTime() : active} style={!this.state.hidden && active ? {} : { display: "none" }} />;
+    return active && <WebviewComponent src={src} active={this.props.focus} style={!this.state.hidden ? {} : { display: "none" }} />;
   }
 
   render() {
@@ -341,34 +334,25 @@ export class EditorComponent extends React.Component<Props, States> {
             <FlexComponent color={this.state.hidden ? "orange" : "default"} position="absolute" overflow="visible" inset={[-height, -4, "auto", "auto"]} rounded={this.state.hidden ? [4] : [4, 4, 0, 0]} hover={!this.state.hidden} spacing
               onMouseDown={e => this.runCommand(e, "")}
             >
-              { !this.state.preview.src && this.props.type === "normal" && (
-                <>
-                  <IconComponent color="gray-fg" font="" onClick={this.togglePreview} />
-                  { this.renderMenu("", "buffer ") }
-                </>
-              ) }
-              { this.props.type === "normal" && (
-                <>
-                  { this.renderIconMenu("", [
-                    [
-                      { font: "", onClick: e => this.runCommand(e, "enew") },
-                      { font: "", onClick: e => this.runCommand(e, "vsplit") },
-                      { font: "", onClick: e => this.runCommand(e, "split") },
-                    ],
-                    [
-                      { font: "󰶭", onClick: this.openExtWindow },
-                      { font: "󱂪", onClick: e => this.runCommand(e, "wincmd H") },
-                      { font: "󱂫", onClick: e => this.runCommand(e, "wincmd L") },
-                    ],
-                    [
-                      { font: "󱔓", onClick: e => this.runCommand(e, "wincmd K") },
-                      { font: "󱂩", onClick: e => this.runCommand(e, "wincmd J") },
-                      { font: "󰉡", onClick: e => this.runCommand(e, "wincmd =") },
-                    ],
-                  ]) }
-                  <IconComponent color="gray-fg" font="" onClick={e => this.runCommand(e, "write")} />
-                </>
-              ) }
+              { !this.state.preview.active && this.props.type === "normal" && this.renderMenu("", "buffer ") }
+              { this.props.type === "normal" && this.renderIconMenu("", [
+                [
+                  { font: "", onClick: e => this.runCommand(e, "enew") },
+                  { font: "", onClick: e => this.runCommand(e, "vsplit") },
+                  { font: "", onClick: e => this.runCommand(e, "split") },
+                ],
+                [
+                  { font: "󰶭", onClick: this.openExtWindow },
+                  { font: "󱂪", onClick: e => this.runCommand(e, "wincmd H") },
+                  { font: "󱂫", onClick: e => this.runCommand(e, "wincmd L") },
+                ],
+                [
+                  { font: "󱔓", onClick: e => this.runCommand(e, "wincmd K") },
+                  { font: "󱂩", onClick: e => this.runCommand(e, "wincmd J") },
+                  { font: "󰉡", onClick: e => this.runCommand(e, "wincmd =") },
+                ],
+              ]) }
+              { !this.state.preview.active && this.props.type === "normal" && <IconComponent color="gray-fg" font="" onClick={e => this.runCommand(e, "write")} /> }
               { this.props.type === "external" && <IconComponent color="gray-fg" font={this.state.hidden ? "" : ""} onClick={this.toggleExtWindow} /> }
               { this.props.type === "external" && !this.state.hidden && (
                 <>

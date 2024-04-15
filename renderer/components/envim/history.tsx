@@ -156,6 +156,7 @@ export class HistoryComponent extends React.Component<Props, States> {
               <IconComponent color="yellow-fg" active={this.state.theme === "dark"} font="" />
             </FlexComponent>
           </MenuComponent>
+          <IconComponent color="lightblue-fg" font="󰖟" onClick={() => Emit.send("envim:browser", "")} />
           <IconComponent color="green-fg" active={this.state.debug.length > 0} font="" onClick={this.toggleDebug} />
         </FlexComponent>
         <FlexComponent overflow="visible" hover>

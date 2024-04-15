@@ -208,7 +208,7 @@ export class Grids {
     if (Object.keys(Grids.grids).length <= 1 || gid !== Grids.default) {
       const active = Grids.get(Grids.active.gid, false).getInfo();
 
-      active.gid !== gid &&  Grids.setStatus(active.gid, active.status, active.status === "show");
+      active.gid !== gid &&  Grids.setStatus(active.gid, active.status, true);
       Grids.active = { gid, row, col };
       Grids.setStatus(gid, "show", true);
     }

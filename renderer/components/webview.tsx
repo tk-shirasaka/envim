@@ -12,7 +12,7 @@ import { IconComponent } from "./icon";
 
 interface Props {
   src: string;
-  active: number;
+  active: boolean;
   style: { [k: string]: string };
 }
 
@@ -53,6 +53,7 @@ export class WebviewComponent extends React.Component<Props, States> {
     super(props);
 
     this.state = { input: props.src, search: "", title: "", loading: false, mode: "blur", searchengines: Setting.searchengines, zoom: 100 };
+    Emit.on("envim:focused", this.onMode);
     Emit.on("webview:action", this.onAction);
     Emit.on("webview:searchengines", this.onSearchengines);
   }
@@ -74,13 +75,10 @@ export class WebviewComponent extends React.Component<Props, States> {
         this.webview.addEventListener("did-navigate", this.onLoad);
         this.webview.addEventListener("did-navigate-in-page", this.onLoad);
         this.webview.addEventListener("page-title-updated", this.onLoad);
-        this.webview.addEventListener("focus", this.onMode);
-        this.webview.addEventListener("blur", this.onMode);
+        this.webview.addEventListener("focus", this.onFocus);
 
-        if (url !== this.webview.getURL()) {
-          this.webview.src = url;
-          this.props.style.display !== "none" && this.runAction("mode-command");
-        }
+        this.props.active && this.runAction(this.webview.getURL() === "about:blank" ? "mode-input" : "mode-command");
+        url !== this.webview.getURL() && (this.webview.src = url);
       }
 
       webview.addEventListener("dom-ready", listener);
@@ -91,8 +89,8 @@ export class WebviewComponent extends React.Component<Props, States> {
     if (this.webview && this.props.src !== props.src) {
       this.setState(() => ({ input: this.props.src }));
       this.webview.src = this.getUrl(this.props.src);
-    } else if (this.webview && props.active < this.props.active) {
-      this.runAction(!this.props.src && this.webview.getURL() === "about:blank" ? "mode-input" : "mode-command");
+    } else if (this.webview && !props.active && this.props.active) {
+      this.runAction(this.webview.getURL() === "about:blank" ? "mode-input" : "mode-command");
     }
   }
 
@@ -104,17 +102,19 @@ export class WebviewComponent extends React.Component<Props, States> {
       this.webview.removeEventListener("did-navigate", this.onLoad);
       this.webview.removeEventListener("did-navigate-in-page", this.onLoad);
       this.webview.removeEventListener("page-title-updated", this.onLoad);
-      this.webview.removeEventListener("focus", this.onMode);
-      this.webview.removeEventListener("blur", this.onMode);
+      this.webview.removeEventListener("focus", this.onFocus);
+
+      this.webview.isDevToolsOpened() && this.runAction("devtool");
     }
 
+    Emit.off("envim:focused", this.onMode);
     Emit.off("webview:action", this.onAction);
     Emit.off("webview:searchengines", this.onSearchengines);
   }
 
   private getUrl(input: string) {
 
-    if (!input) {
+    if (!input || input === "about:blank") {
       return "about:blank";
     } else if (input.search(/^((https?)|(file):\/\/)|(data:.*\/.*;base64)/) === 0) {
       return input;
@@ -125,22 +125,26 @@ export class WebviewComponent extends React.Component<Props, States> {
     }
   }
 
-  private onMode = () => {
-    const mode = (() => {
-      switch (document.activeElement) {
-        case this.command.current: return "command";
-        case this.input.current: return "input";
-        case this.search.current: return "search";
-        case this.webview: return "browser";
-        default: return "blur";
-      }
-    })();
+  private onFocus = () => {
+    Emit.share("envim:focused");
+  }
 
-    if (this.state.mode !== mode) {
-      this.setState(() => ({ mode }));
-      this.webview?.stopFindInPage("clearSelection");
-      ["input", "search"].includes(mode) && (document.activeElement as HTMLInputElement).select();
-    }
+  private onMode = () => {
+    this.setState(state => {
+      const mode = (() => {
+        switch (document.activeElement) {
+          case this.command.current: return "command";
+          case this.input.current: return "input";
+          case this.search.current: return "search";
+          case this.webview: return "browser";
+          default: return "blur";
+        }
+      })();
+
+      state.mode !== mode && ["input", "search"].includes(mode) && (document.activeElement as HTMLInputElement).select();
+
+      return { mode }
+    });
   }
 
   private onKeyDown = (e: KeyboardEvent) => {
@@ -182,18 +186,6 @@ export class WebviewComponent extends React.Component<Props, States> {
 
   private onSearchengines = () => {
     this.setState(() => ({ searchengines: Setting.searchengines }));
-  }
-
-  private mouseCancel = (e: MouseEvent) => {
-    e.stopPropagation();
-
-    if (!document.activeElement || document.activeElement === document.body) {
-      switch (this.state.mode) {
-        case "input": return this.runAction("mode-input");
-        case "search": return this.runAction("mode-search");
-        default: return this.runAction("mode-command");
-      }
-    }
   }
 
   private onChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -352,8 +344,8 @@ export class WebviewComponent extends React.Component<Props, States> {
     const color = { command: "green", input: "default", search: "default", browser: "blue", blur: "default" }[this.state.mode];
 
     return (
-      <FlexComponent animate="fade-in" direction="column" position="absolute" color="default" overflow="visible" inset={[0]} style={this.props.style} onMouseUp={this.mouseCancel} onMouseDown={this.mouseCancel}>
-        <input style={styles.command} type="text" ref={this.command} onChange={this.onChange} onFocus={this.onMode} onBlur={this.onMode} onKeyDown={preview ? undefined : this.onKeyDown} tabIndex={-1} />
+      <FlexComponent animate="fade-in" direction="column" position="absolute" color="default" overflow="visible" inset={[0]} style={this.props.style}>
+        <input style={styles.command} type="text" ref={this.command} onChange={this.onChange} onFocus={this.onFocus} onKeyDown={preview ? undefined : this.onKeyDown} tabIndex={-1} />
         <FlexComponent color="gray-fg" vertical="center" horizontal="center">
           { this.state.loading && <div className="animate loading inline"></div> }
           <FlexComponent margin={[0, 8]}>{ this.state.title }</FlexComponent>
@@ -368,13 +360,13 @@ export class WebviewComponent extends React.Component<Props, States> {
           <IconComponent { ...icon } onClick={this.saveEngine} />
           <FlexComponent grow={1} shrink={2} padding={[0, 8, 0, 0]}>
             <form style={styles.form} onSubmit={this.onSubmit}>
-              <input style={styles.input} type="text" ref={this.input} value={this.state.input} onChange={this.onChange} onFocus={this.onMode} onBlur={this.onMode} disabled={preview} tabIndex={-1} />
+              <input style={styles.input} type="text" ref={this.input} value={this.state.input} onChange={this.onChange} onFocus={this.onFocus} disabled={preview} tabIndex={-1} />
             </form>
           </FlexComponent>
           <IconComponent font="" />
           <FlexComponent shrink={3}>
             <form style={styles.input} onSubmit={this.onSubmit}>
-              <input style={styles.input} type="text" ref={this.search} value={this.state.search} onChange={this.onChange} onFocus={this.onMode} onBlur={this.onMode} disabled={preview} tabIndex={-1} />
+              <input style={styles.input} type="text" ref={this.search} value={this.state.search} onChange={this.onChange} onFocus={this.onFocus} disabled={preview} tabIndex={-1} />
             </form>
           </FlexComponent>
           <IconComponent font="" onClick={() => this.runAction("zoom-out")} />
