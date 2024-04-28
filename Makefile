@@ -2,8 +2,8 @@ NORMAL_FONT_DOWNLOAD_URL	=
 NORMAL_FONT_DOWNLOAD_FILE	=
 NORMAL_REGULAR_FONT_FILE_NAME	=
 NORMAL_BOLD_FONT_FILE_NAME	=
-ICON_FONT_DOWNLOAD_URL		= https://github.com/ryanoasis/nerd-fonts/releases/download/v3.1.1/NerdFontsSymbolsOnly.zip
-ICON_FONT_DOWNLOAD_FILE		= NerdFontsSymbolsOnly_v3.1.1
+ICON_FONT_DOWNLOAD_URL		= https://github.com/ryanoasis/nerd-fonts/releases/download/v3.2.1/NerdFontsSymbolsOnly.zip
+ICON_FONT_DOWNLOAD_FILE		= NerdFontsSymbolsOnly_v3.2.1
 ICON_REGULAR_FONT_FILE_NAME	= SymbolsNerdFontMono-Regular.ttf
 ICON_BOLD_FONT_FILE_NAME	= SymbolsNerdFontMono-Regular.ttf
 
