@@ -62,7 +62,7 @@ export class WebviewComponent extends React.Component<Props, States> {
     const container = this.container.current;
 
     if (container) {
-      container.innerHTML = `<webview src="${this.getUrl(this.props.src)}" allowpopups="on" />`;
+      container.innerHTML = `<webview src="${this.getUrl(this.props.src)}" allowpopups="on" webpreferences="transparent=false" />`;
       const webview = container.querySelector("webview") as WebviewTag;
       const listener = () => {
         const url = this.getUrl(this.props.src);
