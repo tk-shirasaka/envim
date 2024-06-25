@@ -15,6 +15,7 @@ import { Grids } from "./envim/grid";
 export class Envim {
   private nvim = new NeovimClient;
   private handleError?: (e: Error | any) => boolean;
+  private browserQueue: ((gid: number) => void)[] = [];
 
   constructor() {
     Emit.on("envim:init", this.onInit);
@@ -31,7 +32,7 @@ export class Envim {
     Emit.on("envim:command", this.onCommand);
     Emit.on("envim:luafile", this.onLuafile);
     Emit.on("envim:ready", this.onReady);
-    Emit.on("envim:resized", this.onReady);
+    Emit.on("envim:resized", this.onResized);
     Emit.on("envim:theme", this.onTheme);
     Emit.on("envim:browser", this.onBrowser);
     process.on("uncaughtException", this.onError);
@@ -127,6 +128,13 @@ export class Envim {
   }
 
   private onReady = (gid: number) => {
+    const queue = this.browserQueue.shift();
+
+    this.onResized(gid);
+    queue && queue(gid);
+  }
+
+  private onResized = (gid: number) => {
     Grids.get(gid).onReady();
     Grids.flush();
   }
@@ -167,7 +175,7 @@ export class Envim {
   }
 
   private onBrowser = (src: string, command?: string) => {
-    Emit.once("envim:ready", (gid: number) => {
+    this.browserQueue.push((gid: number) => {
       const { id } = Grids.get(gid).getInfo();
       const match = src.match(/^data:(.*\/.*);base64,(.*)/);
 
