@@ -45,6 +45,7 @@ export class InputComponent extends React.Component<Props, States> {
     Emit.on("envim:focusable", this.onFocusable);
     Emit.on("grid:cursor", this.onCursor);
     Emit.on("grid:busy", this.onBusy);
+    Emit.on("messages:show", this.onMessage);
     Emit.on("mode:change", this.changeMode);
   }
 
@@ -53,6 +54,7 @@ export class InputComponent extends React.Component<Props, States> {
     Emit.off("envim:focusable", this.onFocusable);
     Emit.off("grid:cursor", this.onCursor);
     Emit.off("grid:busy", this.onBusy);
+    Emit.off("messages:show", this.onMessage);
     Emit.off("mode:change", this.changeMode);
   }
 
@@ -76,6 +78,10 @@ export class InputComponent extends React.Component<Props, States> {
 
   private onBusy = (busy: boolean) => {
     this.setState(() => ({ busy }));
+  }
+
+  private onMessage = () => {
+    this.input.current?.focus();
   }
 
   private changeMode = (mode: IMode) => {

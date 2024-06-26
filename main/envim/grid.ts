@@ -221,10 +221,7 @@ export class Grids {
   }
 
   static setMode(mode: IMode) {
-    const { status } = Grids.get(Grids.active.gid, false).getInfo();
-
     Grids.mode = mode;
-    status === "show" && Grids.setStatus(Grids.active.gid, "show", Grids.mode.short_name === "c");
   }
 
   static refresh() {
@@ -266,7 +263,6 @@ export class Grids {
       viewport && Emit.update(`viewport:${id}`, false, viewport.top, viewport.bottom, viewport.total);
     });
 
-    Grids.mode && Emit.update("mode:change", true, Grids.mode);
-    delete(Grids.mode);
+    Emit.update("mode:change", true, Grids.mode);
   }
 }
