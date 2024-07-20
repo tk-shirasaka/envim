@@ -66,18 +66,22 @@ export class TablineComponent extends React.Component<Props, States> {
     selected && current !== selected && Emit.send("envim:connect", Setting.type, Setting.path, selected.path);
   }
 
-  private async saveBookmark(bookmark: { name: string, path: string, selected: boolean }) {
+  private async saveBookmark(path: string) {
+    if (path !== this.state.cwd) {
+      path = await Emit.send<string>("envim:readline", "Bookmark Path", this.state.cwd, "dir") || path;
+    }
+
+    const bookmark = this.state.bookmarks.find(bookmark => bookmark.path === path);
     const bookmarks = this.state.bookmarks
-      .filter(({ path }) => bookmark.path !== path)
+      .filter(bookmark => bookmark.path !== path)
       .map(bookmark => ({ ...bookmark, selected: false }));
-    const name = await Emit.send<string>("envim:readline", "Bookmark", bookmark.name);
+    const name = await Emit.send<string>("envim:readline", "Bookmark Name", bookmark?.name || this.state.cwd);
 
     if (name) {
-      bookmark.name = name.replace(/^\//, "").replace(/\/+/, "/").replace(/\/$/, "");
-      bookmarks.push(bookmark);
+      bookmarks.push({ name: name.replace(/^\//, "").replace(/\/+/, "/").replace(/\/$/, ""), path, selected: false });
       Setting.bookmarks = bookmarks.sort((a, b) => a.name > b.name ? 1 : -1);
 
-      this.onCwd(this.state.cwd);
+      this.onCwd(path);
     }
   }
 
@@ -144,13 +148,11 @@ export class TablineComponent extends React.Component<Props, States> {
   }
 
   private renderBookmark() {
-    const cwd = this.state.cwd
-    const index = this.state.bookmarks.findIndex(({ selected }) => selected);
-    const bookmark = index >= 0 ? this.state.bookmarks[index] : { name: cwd, group: "", path: cwd, selected: false };
-    const text = bookmark.selected && bookmark.name.split("/").pop() || "";
-    const icon = index >= 0 ? { color: "blue-fg", font: "", text } : { color: "gray-fg", font: "", text };
+    const bookmark = this.state.bookmarks.find(({ selected }) => selected);
+    const text = bookmark && bookmark.name.split("/").pop() || "";
+    const icon = bookmark ? { color: "blue-fg", font: "", text } : { color: "gray-fg", font: "", text };
 
-    return <IconComponent { ...icon } onClick={() => this.saveBookmark(bookmark)} />;
+    return <IconComponent { ...icon } onClick={() => this.saveBookmark(bookmark?.path || this.state.cwd)} />;
   }
 
   private renderBookmarkMenu(base: string) {

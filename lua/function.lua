@@ -9,7 +9,7 @@ end
 _G.envim_input = (function ()
   local cache = {}
 
-  return function (prompt, default)
+  return function (prompt, default, completion)
     local old = {}
     local history = cache[prompt] or {}
 
@@ -21,7 +21,7 @@ _G.envim_input = (function ()
 
     vim.fn.histdel("input")
 
-    local input = vim.fn.input(string.format("%s: ", prompt), default or "", "customlist,v:lua.envim_completion")
+    local input = vim.fn.input(string.format("%s: ", prompt), default or "", completion or "customlist,v:lua.envim_completion")
 
     input = vim.fn.trim(input or "")
     if input ~= "" then
@@ -53,6 +53,6 @@ vim.cmd([[
   endfunction
 
   function! EnvimInput(prompt, ...)
-    return v:lua.envim_input(a:prompt, get(a:, 1, v:false))
+    return v:lua.envim_input(a:prompt, get(a:, 1, v:false), get(a:, 2, v:false))
   endfunction
 ]])
