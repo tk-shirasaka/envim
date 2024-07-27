@@ -53,7 +53,7 @@ export class WebviewComponent extends React.Component<Props, States> {
     super(props);
 
     this.state = { input: props.src, search: "", title: "", loading: false, mode: "blur", searchengines: Setting.searchengines, zoom: 100 };
-    Emit.on("envim:focused", this.onMode);
+    Emit.on("envim:focused", this.onFocused);
     Emit.on("webview:action", this.onAction);
     Emit.on("webview:searchengines", this.onSearchengines);
   }
@@ -62,11 +62,10 @@ export class WebviewComponent extends React.Component<Props, States> {
     const container = this.container.current;
 
     if (container) {
-      container.innerHTML = `<webview src="${this.getUrl(this.props.src)}" allowpopups="on" webpreferences="transparent=false" />`;
+      container.innerHTML = `<webview allowpopups="on" webpreferences="transparent=false" />`;
+
       const webview = container.querySelector("webview") as WebviewTag;
       const listener = () => {
-        const url = this.getUrl(this.props.src);
-
         this.webview = webview;
         this.webview.removeEventListener("dom-ready", listener);
         this.webview.addEventListener("did-start-loading", this.onLoad);
@@ -78,10 +77,10 @@ export class WebviewComponent extends React.Component<Props, States> {
         this.webview.addEventListener("focus", this.onFocus);
 
         this.props.active && this.runAction(this.webview.getURL() === "about:blank" ? "mode-input" : "mode-command");
-        url !== this.webview.getURL() && (this.webview.src = url);
       }
 
       webview.addEventListener("dom-ready", listener);
+      webview.src = this.getUrl(this.props.src);
     }
   }
 
@@ -107,7 +106,7 @@ export class WebviewComponent extends React.Component<Props, States> {
       this.webview.isDevToolsOpened() && this.runAction("devtool");
     }
 
-    Emit.off("envim:focused", this.onMode);
+    Emit.off("envim:focused", this.onFocused);
     Emit.off("webview:action", this.onAction);
     Emit.off("webview:searchengines", this.onSearchengines);
   }
@@ -129,7 +128,7 @@ export class WebviewComponent extends React.Component<Props, States> {
     Emit.share("envim:focused");
   }
 
-  private onMode = () => {
+  private onFocused = () => {
     this.setState(state => {
       const mode = (() => {
         switch (document.activeElement) {

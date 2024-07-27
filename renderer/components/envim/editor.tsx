@@ -78,7 +78,6 @@ export class EditorComponent extends React.Component<Props, States> {
       Canvas.create(this.props.id, this.canvas.current, ctx, this.props.type === "normal");
       Emit.send("envim:ready", this.props.gid);
     }
-    this.props.focus && Emit.share("envim:focusable", !this.state.preview.active);
   }
 
   componentDidUpdate(props: Props) {
@@ -87,7 +86,6 @@ export class EditorComponent extends React.Component<Props, States> {
       Canvas.update(this.props.id, this.props.type === "normal");
       Emit.send("envim:resized", this.props.gid);
     }
-    !props.focus && this.props.focus && Emit.share("envim:focusable", !this.state.preview.active);
   }
 
   componentWillUnmount = () => {

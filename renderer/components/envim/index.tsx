@@ -92,12 +92,11 @@ export class EnvimComponent extends React.Component<Props, States> {
     });
   }
 
-  private onWin = (workspace: string, wins: IWindow[]) => {
+  private onWin = (wins: IWindow[]) => {
     this.setState(() => {
       const grids = this.state.grids;
       const nextOrder = Object.values(grids).reduce((order, grid) => Math.max(order, grid.order), 1);
 
-      Object.values(grids).forEach(grid => grid.id.indexOf(`${workspace}.`) < 0 && (grid.style.visibility = "hidden"));
       wins.reverse().forEach(({ id, gid, winid, x, y, width, height, zIndex, focusable, focus, type, status }, i) => {
         const curr = grids[id]?.style || {};
         const order = grids[id]?.order || i + nextOrder;

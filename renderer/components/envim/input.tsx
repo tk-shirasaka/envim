@@ -17,7 +17,6 @@ interface States {
   value: string;
   busy: boolean;
   focus: boolean;
-  focusable: boolean;
 }
 
 const position: "absolute" = "absolute";
@@ -40,36 +39,27 @@ export class InputComponent extends React.Component<Props, States> {
   constructor(props: Props) {
     super(props);
 
-    this.state = { cursor: { x: 0, y: 0, width: 0, zIndex: 0, shape: "block" }, composit: false, value: "", busy: false, focus: true, focusable: true };
+    this.state = { cursor: { x: 0, y: 0, width: 0, zIndex: 0, shape: "block" }, composit: false, value: "", busy: false, focus: true };
     Emit.on("envim:focus", this.onFocus);
-    Emit.on("envim:focusable", this.onFocusable);
     Emit.on("grid:cursor", this.onCursor);
     Emit.on("grid:busy", this.onBusy);
-    Emit.on("messages:show", this.onMessage);
     Emit.on("mode:change", this.changeMode);
   }
 
   componentWillUnmount = () => {
     Emit.off("envim:focus", this.onFocus);
-    Emit.off("envim:focusable", this.onFocusable);
     Emit.off("grid:cursor", this.onCursor);
     Emit.off("grid:busy", this.onBusy);
-    Emit.off("messages:show", this.onMessage);
     Emit.off("mode:change", this.changeMode);
   }
 
   private onFocus = () => {
-    if (!this.state.focusable) return;
+    if (document.activeElement !== document.body) return;
 
     const selected = window.getSelection()?.toString();
 
     selected && navigator.clipboard.writeText(selected);
     this.input.current?.focus();
-  }
-
-  private onFocusable = (focusable: boolean) => {
-    this.setState(() => ({ focusable }));
-    focusable && this.input.current?.focus();
   }
 
   private onCursor = (cursor: { x: number, y: number, width: number, hl: string, zIndex: number }) => {
@@ -78,10 +68,6 @@ export class InputComponent extends React.Component<Props, States> {
 
   private onBusy = (busy: boolean) => {
     this.setState(() => ({ busy }));
-  }
-
-  private onMessage = () => {
-    this.input.current?.focus();
   }
 
   private changeMode = (mode: IMode) => {

@@ -170,7 +170,14 @@ export class Grids {
 
   static init(init: boolean, workspace: string) {
     if (Grids.workspace.current) {
-      Grids.workspace.caches[Grids.workspace.current] = Object.values(Grids.grids);
+      Grids.workspace.caches[Grids.workspace.current] = [];
+      Object.values(Grids.grids).forEach(grid => {
+        const { gid } = grid.getInfo();
+
+        Grids.setStatus(gid, "hide", false);
+        Grids.workspace.caches[Grids.workspace.current].push(grid);
+      });
+      Grids.flush();
     }
     if (init) {
       Grids.workspace.caches[workspace] = [];
@@ -239,7 +246,7 @@ export class Grids {
     const wins: IWindow[] = Object.values(Grids.changes).map(grid => {
       const info = { ...Grids.get(grid).getInfo() };
 
-      info.focus = info.gid === Grids.active.gid && Grids.mode?.short_name !== "c";
+      info.focus = info.status === "show" && info.gid === Grids.active.gid && Grids.mode?.short_name !== "c";
       info.status = info.width && info.height ? info.status : "delete";
 
       if (info.status === "delete") {
@@ -254,7 +261,7 @@ export class Grids {
     });
 
     Grids.changes = {};
-    wins.length && Emit.update("win:pos", false, Grids.workspace.current, wins);
+    wins.length && Emit.update("win:pos", false, wins);
 
     Object.values(Grids.grids).map(grid => {
       const { id } = grid.getInfo();
