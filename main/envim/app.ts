@@ -432,7 +432,7 @@ export class App {
 
   private async menu() {
     const menus: IMenu[] = await this.nvim.call("menu_get", [""]);
-    Emit.update("menu:update", true, menus.filter(({ name }) => !name.match(/^PopUp/)));
+    Emit.update("menu:update", true, menus.filter(({ name }) => !name.match(/^(PopUp)|\]/)));
   }
 
   private flush() {
