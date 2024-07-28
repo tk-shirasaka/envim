@@ -50,7 +50,7 @@ export class CmdlineComponent extends React.Component<Props, States> {
   private getPos(cmdline: States["cmdline"], pos: number) {
     let result = 0;
     for (; pos >= 0; result++) {
-      pos -= encodeURIComponent(cmdline[result].c).replace(/%../g, "x").length;
+      pos -= encodeURIComponent(cmdline[result]?.c || " ").replace(/%../g, "x").length;
     }
     return result - 1;
   }
