@@ -59,9 +59,10 @@ export interface IHighlight {
 
 export interface ITab {
   name: string;
+  buffer: number;
   active: boolean;
-  filetype: string;
-  buftype: string;
+  filetype?: string;
+  buftype?: string;
 }
 
 export interface IBuffer {

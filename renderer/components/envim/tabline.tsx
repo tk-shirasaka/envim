@@ -1,6 +1,6 @@
 import React, { MouseEvent } from "react";
 
-import { ISetting, ITab, IBuffer, IMode, IMenu } from "../../../common/interface";
+import { ISetting, ITab, IMode, IMenu } from "../../../common/interface";
 
 import { Emit } from "../../utils/emit";
 import { Setting } from "../../utils/setting";
@@ -102,7 +102,16 @@ export class TablineComponent extends React.Component<Props, States> {
     Emit.send("envim:command", command);
   }
 
-  private onTabline = (tabs: ITab[], _: IBuffer[]) => {
+  private onTabline = async (tabs: ITab[]) => {
+    for (let i = 0; i < tabs.length; i++) {
+      const tab = tabs[i];
+      const curr = this.state.tabs.find(({ buffer }) => tab.buffer === buffer) || tab;
+      const filetype = curr.filetype || await Emit.send<string>("envim:api", "nvim_buf_get_option", [tab.buffer, "filetype"]);
+      const buftype = curr.buftype || await Emit.send<string>("envim:api", "nvim_buf_get_option", [tab.buffer, "buftype"]);
+
+      tabs[i] = { ...curr, ...tab, filetype, buftype };
+    }
+
     this.setState(() => ({ tabs }));
   }
 
@@ -119,7 +128,7 @@ export class TablineComponent extends React.Component<Props, States> {
   }
 
   private renderTab(i: number, tab: ITab) {
-    const icon = icons.filter(icon => tab.filetype.search(icon.type) >= 0 || tab.buftype.search(icon.type) >= 0).shift();
+    const icon = icons.filter(icon => (tab.filetype || "").search(icon.type) >= 0 || (tab.buftype || "").search(icon.type) >= 0).shift();
 
     return !icon ? null : (
       <FlexComponent key={i} animate="fade-in hover" color={icon.color} active={tab.active} title={tab.name} shrink={1} margin={[4, 4, 0, 0]} padding={[0, 8]} rounded={[4, 4, 0, 0]} shadow={tab.active} style={styles.tab} nomouse={this.state.tabs.length === 1} onClick={e => this.runCommand(e, `tabnext ${i + 1}`,)}>

@@ -298,10 +298,8 @@ export class App {
 
       if (buffer) {
         const active = ctab.data === tab.data;
-        const filetype = await this.nvim.request("nvim_buf_get_option", [buffer.data, "filetype"]).catch(() => "");
-        const buftype = await this.nvim.request("nvim_buf_get_option", [buffer.data, "buftype"]).catch(() => "");
 
-        next.tabs.push({ name, active, filetype, buftype });
+        next.tabs.push({ name, buffer: +buffer.data, active });
       }
     }
 
