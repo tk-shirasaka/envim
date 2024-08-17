@@ -296,7 +296,7 @@ export class App {
       const { tab, name } = tabs[i];
       const buffer = await tab.window.buffer.catch(() => null);
 
-      if (buffer) {
+      if (buffer?.data) {
         const active = ctab.data === tab.data;
 
         next.tabs.push({ name, buffer: +buffer.data, active });
@@ -307,7 +307,7 @@ export class App {
       const { buffer, name } = bufs[i];
       const active = cbuf.data === buffer.data;
 
-      next.bufs.push({ name, buffer: +buffer.data, active });
+      buffer.data && next.bufs.push({ name, buffer: +buffer.data, active });
     }
 
     Emit.update("tabline:update", true, next.tabs, next.bufs);
