@@ -169,7 +169,7 @@ export class Grids {
   private static workspace: { current: string; caches: { [k: string]: Grid[] } } = { current: "", caches: {} };
 
   static init(init: boolean, workspace: string) {
-    if (Grids.workspace.current) {
+    if (Grids.workspace.current && Object.keys(Grids.grids).length) {
       Grids.workspace.caches[Grids.workspace.current] = [];
       Object.values(Grids.grids).forEach(grid => {
         const { gid } = grid.getInfo();
@@ -189,10 +189,9 @@ export class Grids {
     Grids.workspace.current = workspace;
 
     Grids.workspace.caches[workspace].forEach(grid => {
-      const { gid, status } = grid.getInfo();
+      const { gid } = grid.getInfo();
 
       Grids.grids[gid] = grid;
-      Grids.setStatus(gid, status, true);
     });
   }
 
