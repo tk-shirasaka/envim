@@ -1,4 +1,4 @@
-import React, { PropsWithChildren, createRef, RefObject } from "react";
+import React, { PropsWithChildren, createRef, RefObject, MouseEvent } from "react";
 
 import { FlexComponent } from "./flex";
 
@@ -12,7 +12,7 @@ interface Props {
 }
 
 interface States {
-  haschild: boolean;
+  inset: (0 | "100%" | "auto")[];
 }
 
 const position: "relative" = "relative";
@@ -37,60 +37,61 @@ const styles = {
 
 export class MenuComponent extends React.Component<PropsWithChildren<Props>, States> {
   private div: RefObject<HTMLDivElement> = createRef<HTMLDivElement>();
-  private inset: (0 | "100%" | "auto")[] = ["auto", "auto", "auto", "auto"];
+  private timer: number = 0;
 
   constructor(props: Props) {
     super(props);
-    this.state = { haschild: false };
-  }
-
-  componentDidMount() {
-    this.updateProperty();
-  }
-
-  componentDidUpdate() {
-    this.updateProperty();
+    this.state = { inset: [] };
   }
 
   private onClick() { }
 
-  private updateProperty() {
-    const haschild = !(Array.isArray(this.props.children) && this.props.children.length === 0);
+  private onMouseEnter= (e: MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
 
-    this.state.haschild === haschild || this.setState(() => {
-      if (this.div.current) {
+    clearTimeout(this.timer);
+    this.timer = +setTimeout(() => this.setState(() => {
+      const haschild = !(Array.isArray(this.props.children) && this.props.children.length === 0);
+      const inset: (0 | "100%" | "auto")[] = haschild ? ["auto", "auto", "auto", "auto"] : [];
+
+      if (haschild && this.div.current) {
         const { top, left } = this.div.current.getBoundingClientRect();
         const vert = window.innerHeight / 2 < top ? "top" : "bottom";
         const hori = window.innerWidth / 2 < left ? "left" : "right";
 
-        this.inset = ["auto", "auto", "auto", "auto"];
         if (vert === "bottom") {
-          this.inset[0] = this.props.side ? 0 : "100%";
+          inset[0] = this.props.side ? 0 : "100%";
         }
         if (hori === "left") {
-          this.inset[1] = this.props.side ? "100%" : 0;
+          inset[1] = this.props.side ? "100%" : 0;
         }
         if (vert === "top") {
-          this.inset[2] = this.props.side ? 0 : "100%";
+          inset[2] = this.props.side ? 0 : "100%";
         }
         if (hori === "right") {
-          this.inset[3] = this.props.side ? "100%" : 0;
+          inset[3] = this.props.side ? "100%" : 0;
         }
       }
 
-      return { haschild };
-    });
+      return { inset };
+    }), 200);
+  }
+
+  private onMouseLeave= () => {
+    clearTimeout(this.timer);
+    this.timer = +setTimeout(() => this.setState(() => ({ inset: [] })), 200);
   }
 
   private renderMenu() {
-    if (this.state.haschild === false) return null;
+    if (this.state.inset.length === 0) return null;
 
     const base = this.props.side ? styles.sidemenu : styles.menu;
-    const style = { ...base, ...{ inset: this.inset.join(" "), maxWidth: window.innerWidth - 20, minWidth: Math.min(this.props.fit ? 0 : 150, window.innerWidth / 2 - 20) } };
+    const style = { ...base, ...{ inset: this.state.inset.join(" "), maxWidth: window.innerWidth - 20, minWidth: Math.min(this.props.fit ? 0 : 150, window.innerWidth / 2 - 20) } };
     const direction = this.props.horizontal ? "row" : "column";
 
     return (
-      <FlexComponent color="default" direction={direction} position="absolute" overflow="visible" zIndex={20} rounded={[2]} style={style} shadow hover>
+      <FlexComponent color="default" animate="fade-in" direction={direction} position="absolute" overflow="visible" zIndex={20} rounded={[2]} style={style} shadow>
         { this.props.children }
       </FlexComponent>
     );
@@ -99,7 +100,7 @@ export class MenuComponent extends React.Component<PropsWithChildren<Props>, Sta
   render() {
     return (
       <FlexComponent vertical="center" overflow="visible">
-        <div className="animate hover space" style={styles.wrap} ref={this.div}>
+        <div className="space" style={styles.wrap} onMouseEnter={this.onMouseEnter} onMouseLeave={this.onMouseLeave} ref={this.div}>
           <FlexComponent grow={1} vertical="center" color={this.props.color} onClick={this.onClick} active={this.props.active} spacing>{ this.props.label }</FlexComponent>
           { this.renderMenu() }
         </div>
