@@ -38,7 +38,6 @@ vim.api.nvim_create_autocmd({ "BufWinEnter" }, {
 
 vim.api.nvim_create_autocmd({ "DirChanged" }, {
   group = group,
-  pattern = { "*" },
   callback = function() envim_connect(0, { "envim_dirchanged", vim.fn.getcwd() }) end,
 })
 
@@ -53,6 +52,10 @@ vim.api.nvim_create_autocmd({ "OptionSet" }, {
 
 vim.api.nvim_create_autocmd({ "TabLeave" }, {
   group = group,
-  pattern = { "*" },
   callback = function() return vim.api.nvim_win_get_config(0).external and vim.cmd([[wincmd j]]) end,
+})
+
+vim.api.nvim_create_autocmd({ "UILeave" }, {
+  group = group,
+  callback = function() return vim.api.nvim_del_augroup_by_id(group) end,
 })
