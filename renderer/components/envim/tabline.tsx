@@ -43,6 +43,7 @@ export class TablineComponent extends React.Component<Props, States> {
     Emit.on("menu:update", this.onMenu);
     Emit.on("mode:change", this.changeMode);
     Emit.on("option:set", this.onOption);
+    Emit.send("envim:command", "menu ]Envim.version <silent> :version<cr>");
   }
 
   componentWillUnmount = () => {

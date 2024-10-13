@@ -24,6 +24,7 @@ interface Props {
 }
 
 interface States {
+  init: boolean;
   pause: boolean;
   mousemoveevent: boolean;
   grids: { [k: string]: {
@@ -57,7 +58,7 @@ export class EnvimComponent extends React.Component<Props, States> {
   constructor(props: Props) {
     super(props);
 
-    this.state = { pause: false, mousemoveevent: false, grids: {} };
+    this.state = { init: false, pause: false, mousemoveevent: false, grids: {} };
     Emit.on("app:switch", this.onSwitch);
     Emit.on("highlight:set", this.onHighlight);
     Emit.on("win:pos", this.onWin);
@@ -83,6 +84,10 @@ export class EnvimComponent extends React.Component<Props, States> {
   }
 
   private onSwitch = () => {
+    this.setState(({ grids }) => {
+      Object.values(grids).forEach(grid => grid.style.visibility = "hidden");
+      return { init: false, grids };
+    });
     Emit.send("envim:attach", x2Col(this.props.main.width), y2Row(this.props.main.height), Setting.options);
   }
 
@@ -90,11 +95,11 @@ export class EnvimComponent extends React.Component<Props, States> {
     highlights.forEach(({id, ui, hl}) => {
       Highlights.setHighlight(id, ui, hl);
     });
+    this.setState(() => ({ init: true }));
   }
 
   private onWin = (wins: IWindow[]) => {
-    this.setState(() => {
-      const grids = this.state.grids;
+    this.setState(({ grids }) => {
       const nextOrder = Object.values(grids).reduce((order, grid) => Math.max(order, grid.order), 1);
 
       wins.reverse().forEach(({ id, gid, winid, x, y, width, height, zIndex, focusable, focus, type, status }, i) => {
@@ -147,7 +152,7 @@ export class EnvimComponent extends React.Component<Props, States> {
 
     return (
       <div style={{fontSize: size, lineHeight: `${height}px`}} onMouseUp={this.onMouseUp}>
-        <TablineComponent {...this.props.header} />
+        { this.state.init && <TablineComponent {...this.props.header} /> }
         <FlexComponent zIndex={0}>
           <FlexComponent color="default" zIndex={-1} grow={1} shrink={1} />
           <FlexComponent zIndex={0} direction="column" overflow="visible">
@@ -156,15 +161,15 @@ export class EnvimComponent extends React.Component<Props, States> {
               { Object.values(this.state.grids).sort((a, b) => a.order - b.order).map(grid => (
                 <EditorComponent key={grid.id} mousemoveevent={this.state.mousemoveevent} { ...grid } />
               )) }
-              <PopupmenuComponent />
-              <InputComponent />
+              { this.state.init && <PopupmenuComponent /> }
+              { this.state.init && <InputComponent /> }
             </FlexComponent>
           </FlexComponent>
-          <CmdlineComponent />
-          <NotificateComponent />
+          { this.state.init && <CmdlineComponent /> }
+          { this.state.init && <NotificateComponent /> }
           <FlexComponent color="default" zIndex={-1} grow={1} shrink={1} />
         </FlexComponent>
-        <HistoryComponent {...this.props.footer} />
+        { this.state.init && <HistoryComponent {...this.props.footer} /> }
         { this.state.pause && (
           <FlexComponent direction="column" horizontal="center" vertical="center" color="default" position="absolute" zIndex={100} inset={[0]} style={styles.backdrop}>
             <div className="animate loading" />
