@@ -6,6 +6,7 @@ import { Setting } from "./setting";
 export class Context2D {
   private bgcanvas: HTMLCanvasElement;
   private bgctx: CanvasRenderingContext2D;
+  private textcanvases: { canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D }[] = [];
   private font: { size: number; width: number; height: number; } = { size: 0, width: 0, height: 0 };
   private queues: { cells?: ICell[], scroll?: IScroll }[] = [];
   private scrolltmp?: { i: number; capture: HTMLCanvasElement; };
@@ -22,6 +23,7 @@ export class Context2D {
     this.font = { size: size * scale, width: width * scale, height: height * scale };
     this.bgcanvas = bg.canvas;
     this.bgctx = bg.ctx;
+    this.textcanvases = [ this.getCanvas(), this.getCanvas(), this.getCanvas() ];
     this.clear(0, 0, canvas.width, canvas.height);
   }
 
@@ -166,6 +168,8 @@ export class Context2D {
   }
 
   private flush(cells: ICell[]) {
+    this.textcanvases.forEach((text) => text.ctx.clearRect(0, 0, text.canvas.width, text.canvas.height));
+
     cells.forEach(cell => {
       const [y, x] = [cell.row * this.font.height, cell.col * this.font.width];
       this.rect(x, y, cell.width, 1, cell.hl);
@@ -179,10 +183,18 @@ export class Context2D {
     cells.forEach(cell => {
       if ([" ", ""].indexOf(cell.text) >= 0) return;
 
+      const bgctx = this.bgctx;
       const [y, x] = [cell.row * this.font.height, cell.col * this.font.width];
+      this.bgctx = this.textcanvases[(cell.row + cell.col) % 3].ctx;
       this.style(cell.hl, "foreground");
       this.bgctx.fillText(cell.text, x, y + (this.font.height - this.font.size) / 2);
+      this.bgctx.clearRect(x - this.font.width, y, this.font.width, this.font.height);
+      this.bgctx.clearRect(x, y - this.font.height, this.font.width, this.font.height);
+      this.bgctx.clearRect(x, y + this.font.height, this.font.width, this.font.height);
+      this.bgctx = bgctx;
     });
+
+    this.textcanvases.forEach(({ canvas }) => this.bgctx.drawImage(canvas, 0, 0));
   }
 
   render(nest: boolean = false) {
