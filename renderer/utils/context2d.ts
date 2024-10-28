@@ -38,6 +38,7 @@ export class Context2D {
     this.bgctx.clearRect(0, 0, bgcanvas.width, bgcanvas.height);
     this.bgctx.drawImage(bgcanvas, 0, 0);
     this.ctx.drawImage(canvas, 0, 0);
+    this.textcanvases = [ this.getCanvas(), this.getCanvas(), this.getCanvas() ];
   }
 
   private getCanvas() {
