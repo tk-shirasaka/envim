@@ -23,7 +23,7 @@ export class Context2D {
     this.font = { size: size * scale, width: width * scale, height: height * scale };
     this.bgcanvas = bg.canvas;
     this.bgctx = bg.ctx;
-    this.textcanvases = [ this.getCanvas(), this.getCanvas(), this.getCanvas() ];
+    this.textcanvases = [ this.getCanvas(), this.getCanvas(), this.getCanvas(), this.getCanvas() ];
     this.clear(0, 0, canvas.width, canvas.height);
   }
 
@@ -38,7 +38,7 @@ export class Context2D {
     this.bgctx.clearRect(0, 0, bgcanvas.width, bgcanvas.height);
     this.bgctx.drawImage(bgcanvas, 0, 0);
     this.ctx.drawImage(canvas, 0, 0);
-    this.textcanvases = [ this.getCanvas(), this.getCanvas(), this.getCanvas() ];
+    this.textcanvases = [ this.getCanvas(), this.getCanvas(), this.getCanvas(), this.getCanvas() ];
   }
 
   private getCanvas() {
@@ -186,7 +186,7 @@ export class Context2D {
 
       const bgctx = this.bgctx;
       const [y, x] = [cell.row * this.font.height, cell.col * this.font.width];
-      this.bgctx = this.textcanvases[(cell.row + cell.col) % 3].ctx;
+      this.bgctx = this.textcanvases[((cell.row % 2 ? 0 : 2) + cell.col) % 4].ctx;
       this.style(cell.hl, "foreground");
       this.bgctx.fillText(cell.text, x, y + (this.font.height - this.font.size) / 2);
       this.bgctx.clearRect(x - this.font.width, y, this.font.width, this.font.height);
