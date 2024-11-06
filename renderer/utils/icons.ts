@@ -16,7 +16,7 @@ export const icons = [
   { font: "", color: "lightblue", name: "CSS", type: /^(css)|(less)$/ },
   { font: "", color: "red", name: "Sass", type: /^(sass)|(scss)$/ },
   { font: "", color: "green", name: "Vim", type: /^vim$/ },
-  { font: "", color: "green", name: "Shell", type: /^(sh)|(fish)|(zsh)|(terminal)$/ },
+  { font: "", color: "green", name: "Shell", type: /^(sh)|(fish)|(zsh)|(terminal)|(prompt)$/ },
   { font: "", color: "red", name: "Git", type: /git/ },
   { font: "", color: "blue", name: "Docker", type: /docker/i },
   { font: "ﬥ", color: "gray", name: "JSON", type: /^json$/ },
