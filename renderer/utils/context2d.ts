@@ -56,16 +56,16 @@ export class Context2D {
     return { canvas, ctx };
   }
 
-  private style(hl: string, type: "foreground" | "background" | "special") {
+  private style(ctx: CanvasRenderingContext2D, hl: string, type: "foreground" | "background" | "special") {
     const color = Highlights.color(hl, type, { lighten: this.lighten });
     const field = type === "special" ? "strokeStyle" : "fillStyle";
 
-    this.bgctx[field] === color || (this.bgctx[field] = color);
+    ctx[field] === color || (ctx[field] = color);
 
     if (type === "foreground") {
       const font = Highlights.font(hl, this.font.size);
 
-      this.bgctx.font === font || (this.bgctx.font = font);
+      ctx.font === font || (ctx.font = font);
     }
   }
 
@@ -74,7 +74,7 @@ export class Context2D {
     const lineWidth = this.bgctx.lineWidth;
 
     Highlights.decoration(hl).forEach(type => {
-      this.style(hl, "special");
+      this.style(this.bgctx, hl, "special");
       this.bgctx.beginPath();
       this.bgctx.setLineDash([]);
 
@@ -116,7 +116,7 @@ export class Context2D {
   }
 
   private rect(x: number, y: number, width: number, height: number, hl: string) {
-    this.style(hl, "background");
+    this.style(this.bgctx, hl, "background");
     this.bgctx.clearRect(x, y, width * this.font.width, height * this.font.height);
     this.bgctx.fillRect(x, y, width * this.font.width, height * this.font.height);
   }
@@ -184,15 +184,14 @@ export class Context2D {
     cells.forEach(cell => {
       if ([" ", ""].indexOf(cell.text) >= 0) return;
 
-      const bgctx = this.bgctx;
       const [y, x] = [cell.row * this.font.height, cell.col * this.font.width];
-      this.bgctx = this.textcanvases[((cell.row % 2 ? 0 : 2) + cell.col) % 4].ctx;
-      this.style(cell.hl, "foreground");
-      this.bgctx.fillText(cell.text, x, y + (this.font.height - this.font.size) / 2);
-      this.bgctx.clearRect(x - this.font.width, y, this.font.width, this.font.height);
-      this.bgctx.clearRect(x, y - this.font.height, this.font.width, this.font.height);
-      this.bgctx.clearRect(x, y + this.font.height, this.font.width, this.font.height);
-      this.bgctx = bgctx;
+      const ctx = this.textcanvases[((cell.row % 2 ? 0 : 2) + cell.col) % 4].ctx;
+
+      this.style(ctx, cell.hl, "foreground");
+      ctx.fillText(cell.text, x, y + (this.font.height - this.font.size) / 2);
+      ctx.clearRect(x - this.font.width, y - 1, this.font.width, this.font.height + 2);
+      ctx.clearRect(x - 1, y - this.font.height, this.font.width + 2, this.font.height);
+      ctx.clearRect(x - 1, y + this.font.height, this.font.width + 2, this.font.height);
     });
 
     this.textcanvases.forEach(({ canvas }) => this.bgctx.drawImage(canvas, 0, 0));
