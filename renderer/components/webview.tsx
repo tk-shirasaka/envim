@@ -115,7 +115,7 @@ export class WebviewComponent extends React.Component<Props, States> {
 
     if (!input || input === "about:blank") {
       return "about:blank";
-    } else if (input.search(/^((https?)|(file):\/\/)|(data:.*\/.*;base64)/) === 0) {
+    } else if (input.search(/^(((https?)|(file)):\/\/)|(data:.*\/.*;base64)/) === 0) {
       return input;
     } else {
       const selected = this.state.searchengines.find(({ selected }) => selected);
