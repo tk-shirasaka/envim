@@ -1,4 +1,4 @@
-import { app, dialog, WebContents, Event, HandlerDetails, AuthenticationResponseDetails, AuthInfo, ContextMenuParams, Input } from "electron";
+import { app, dialog, WebContents, Event, HandlerDetails, LoginAuthenticationResponseDetails, AuthInfo, ContextMenuParams, Input } from "electron";
 import { lookup } from "dns";
 
 import { Bootstrap } from "./bootstrap";
@@ -40,7 +40,7 @@ export class Browser {
     Emit.share("envim:browser", url);
   }
 
-  private onLogin = async (e: Event, _: AuthenticationResponseDetails, __: AuthInfo, callback: Function) => {
+  private onLogin = async (e: Event, _: LoginAuthenticationResponseDetails, __: AuthInfo, callback: Function) => {
     e.preventDefault();
 
     const user = await Emit.share("envim:readline", "User");
