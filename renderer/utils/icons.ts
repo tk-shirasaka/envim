@@ -37,7 +37,7 @@ export const notificates = [
   { font: "", kinds: ["emsg", "echoerr", "lua_error", "rpc_error"]},
   { font: "", kinds: ["confirm", "confirm_sub"]},
   { font: "󰌑", kinds: ["return_prompt"]},
-  { font: "", kinds: ["mode", "command"]},
+  { font: "", kinds: ["mode", "command", "list_cmd", "number_prompt", "wildlist"]},
   { font: "", kinds: ["ruler"]},
   { font: "", kinds: ["debug"]},
 ];
