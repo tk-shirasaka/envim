@@ -13,24 +13,21 @@
   src: url(fonts/ICON-Regular);
 }
 
+@font-face {
+  font-family: "Git";
+  src: url(fonts/GIT-Regular);
+}
+
 body {
-  font-family: "Icon","Regular";
+  font-family: "Icon","Git","Regular";
 }
 
 .bold {
-  font-family: "Icon","Bold" !important;
+  font-family: "Icon","Git","Bold" !important;
 }
 
 .italic {
   font-style: italic !important;
-}
-
-.editor {
-  font-family: "Editor Regular","Icon" !important;
-}
-
-.editor-bold {
-  font-family: "Editor Bold","Icon" !important;
 }
 
 .small {

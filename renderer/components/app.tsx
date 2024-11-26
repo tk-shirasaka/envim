@@ -27,6 +27,7 @@ export class AppComponent extends React.Component<Props, States> {
     (document as any).fonts.load("10px Editor Regular").then();
     (document as any).fonts.load("10px Editor Bold").then();
     (document as any).fonts.load("10px Icon").then();
+    (document as any).fonts.load("10px Git").then();
     Emit.on("app:switch", this.onSwitch);
     Emit.on("app:theme", this.onTheme);
     Highlights.setHighlight("0", true, {  })

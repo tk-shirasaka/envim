@@ -6,13 +6,17 @@ ICON_FONT_DOWNLOAD_URL		= https://github.com/ryanoasis/nerd-fonts/releases/downl
 ICON_FONT_DOWNLOAD_FILE		= NerdFontsSymbolsOnly_v3.3.0
 ICON_REGULAR_FONT_FILE_NAME	= SymbolsNerdFontMono-Regular.ttf
 ICON_BOLD_FONT_FILE_NAME	= SymbolsNerdFontMono-Regular.ttf
+GIT_FONT_DOWNLOAD_URL		= https://github.com/rbong/flog-symbols/archive/refs/tags/v1.1.0.zip
+GIT_FONT_DOWNLOAD_FILE		= flog-symbols-1.1.0
+GIT_REGULAR_FONT_FILE_NAME	= flog-symbols-1.1.0/FlogSymbols.ttf
+GIT_BOLD_FONT_FILE_NAME		= flog-symbols-1.1.0/FlogSymbols.ttf
 
 DOWNLOAD_CMD			= curl -L
 UNZIP_CMD			= unzip -o
 RELEASE_CMD			= npm run release --
 TARGET_FILE_NAME		=
 
-build: install fonts/NORMAL/$(NORMAL_FONT_DOWNLOAD_FILE).zip fonts/ICON/$(ICON_FONT_DOWNLOAD_FILE).zip
+build: install fonts/NORMAL/$(NORMAL_FONT_DOWNLOAD_FILE).zip fonts/ICON/$(ICON_FONT_DOWNLOAD_FILE).zip fonts/GIT/$(GIT_FONT_DOWNLOAD_FILE).zip
 	npm run build
 
 install:

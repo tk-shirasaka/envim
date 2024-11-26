@@ -63,9 +63,9 @@ class Highlight {
 
   fontFamily() {
     return {
-      normal: `"Regular","Icon"`,
-      bold: `"Bold","Icon"`,
-      italic: `"Regular","Icon"`
+      normal: `"Regular","Icon","Git"`,
+      bold: `"Bold","Icon","Git"`,
+      italic: `"Regular","Icon","Git"`
     }[this.type];
   }
 
