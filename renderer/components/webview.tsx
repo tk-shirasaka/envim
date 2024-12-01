@@ -225,10 +225,11 @@ export class WebviewComponent extends React.Component<Props, States> {
       const url = this.webview.getURL();
       const input = url === "about:blank" ? "" : url;
       const title = this.webview.getTitle();
-      const loading = this.webview.isLoading();
+      const loading = this.webview.isLoadingMainFrame();
 
       this.setState(state => {
         state.input === "" && this.webview?.clearHistory();
+        state.mode !== "command" && state.loading !== loading && this.runAction("mode-command");
 
         return { input: state.mode === "input" ? state.input : input, title, loading }
       });
