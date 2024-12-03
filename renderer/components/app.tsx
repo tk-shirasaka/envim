@@ -58,7 +58,7 @@ export class AppComponent extends React.Component<Props, States> {
       : { x: 0, y: 0, width: 0, height: 0, left: 0, right: 0 };
     const header = {
       width: titlebar.width + titlebar.left,
-      height: Math.min(row2Y(2), (titlebar.y * 2) + titlebar.height || row2Y(2)),
+      height: Math.max(row2Y(2), (titlebar.y * 2) + titlebar.height),
       paddingLeft: titlebar.left || 0,
     };
     const main = {
