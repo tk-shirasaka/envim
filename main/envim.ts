@@ -87,7 +87,9 @@ export class Envim {
   }
 
   private onResize = (gid: number, width: number, height: number) => {
-    gid ? this.nvim.uiTryResizeGrid(gid, width, height) : this.nvim.uiTryResize(width, height);
+    gid
+      ? this.nvim.uiTryResizeGrid(gid, width, height).catch(() => Grids.setStatus(gid, "delete", true))
+      : this.nvim.uiTryResize(width, height);
   }
 
   private onPosition = (gid: number, x: number, y: number) => {
