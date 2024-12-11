@@ -173,6 +173,7 @@ export class WebviewComponent extends React.Component<Props, States> {
       case "n": return this.runAction("search-forward");
       case "g": return this.webview.sendInputEvent({ type: "keyDown", keyCode: "Home" });
       case "G": return this.webview.sendInputEvent({ type: "keyDown", keyCode: "End" });
+      case "Y": return Emit.send(`capture:${this.webview.getWebContentsId()}`);
       case "-": return this.runAction("zoom-out");
       case "+": return this.runAction("zoom-in");
       case "i": return this.runAction("mode-browser");

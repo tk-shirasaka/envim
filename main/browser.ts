@@ -1,4 +1,4 @@
-import { app, dialog, WebContents, Event, HandlerDetails, LoginAuthenticationResponseDetails, AuthInfo, ContextMenuParams, Input } from "electron";
+import { app, dialog, clipboard, WebContents, Event, HandlerDetails, LoginAuthenticationResponseDetails, AuthInfo, ContextMenuParams, Input } from "electron";
 import { lookup } from "dns";
 
 import { Bootstrap } from "./bootstrap";
@@ -15,6 +15,7 @@ export class Browser {
     webContents.on("will-prevent-unload", this.onUnload);
     webContents.on("context-menu", this.onContextMenu);
     webContents.on("before-input-event", this.onInput);
+    Emit.on(`capture:${webContents.id}`, this.onCapture);
   }
 
   private confirm = (message: string) => {
@@ -87,5 +88,9 @@ export class Browser {
     switch (input.key) {
       case "Escape": return Emit.send("webview:action", this.webContents.id, "mode-command");
     }
+  }
+
+  private onCapture = async () => {
+    clipboard.writeImage(await this.webContents.capturePage());
   }
 }
