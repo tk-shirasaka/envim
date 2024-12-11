@@ -38,6 +38,7 @@ export const notificates = [
   { font: "", kinds: ["confirm", "confirm_sub"]},
   { font: "󰌑", kinds: ["return_prompt"]},
   { font: "", kinds: ["mode", "command", "list_cmd", "number_prompt", "wildlist"]},
+  { font: "", kinds: ["bufwrite"]},
   { font: "", kinds: ["ruler"]},
   { font: "", kinds: ["debug"]},
 ];
