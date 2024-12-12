@@ -85,7 +85,10 @@ export class EnvimComponent extends React.Component<Props, States> {
 
   private onSwitch = () => {
     this.setState(({ grids }) => {
-      Object.values(grids).forEach(grid => grid.style.visibility = "hidden");
+      Object.values(grids).forEach(grid => {
+        grid.focus = false;
+        grid.style.visibility = "hidden";
+      });
       return { init: false, grids };
     });
     Emit.send("envim:attach", x2Col(this.props.main.width), y2Row(this.props.main.height), Setting.options);
