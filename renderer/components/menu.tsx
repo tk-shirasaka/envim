@@ -1,4 +1,4 @@
-import React, { PropsWithChildren, createRef, RefObject, MouseEvent } from "react";
+import React, { PropsWithChildren, createRef, RefObject } from "react";
 
 import { FlexComponent } from "./flex";
 
@@ -46,10 +46,7 @@ export class MenuComponent extends React.Component<PropsWithChildren<Props>, Sta
 
   private onClick() { }
 
-  private onMouseEnter= (e: MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-
+  private onMouseEnter= () => {
     clearTimeout(this.timer);
     this.timer = +setTimeout(() => this.setState(() => {
       const haschild = !(Array.isArray(this.props.children) && this.props.children.length === 0);
