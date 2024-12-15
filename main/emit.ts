@@ -9,6 +9,7 @@ export class Emit {
   private static cache: { [k: string ]: { json: string; timer: number; } } = {};
 
   static init() {
+    Object.values(Emit.cache).forEach(({ timer }) => clearTimeout(timer));
     Emit.cache = {};
   }
 

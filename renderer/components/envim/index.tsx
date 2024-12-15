@@ -58,7 +58,7 @@ export class EnvimComponent extends React.Component<Props, States> {
   constructor(props: Props) {
     super(props);
 
-    this.state = { init: false, pause: false, mousemoveevent: false, grids: {} };
+    this.state = { init: true, pause: false, mousemoveevent: false, grids: {} };
     Emit.on("app:switch", this.onSwitch);
     Emit.on("highlight:set", this.onHighlight);
     Emit.on("win:pos", this.onWin);
@@ -89,16 +89,18 @@ export class EnvimComponent extends React.Component<Props, States> {
         grid.focus = false;
         grid.style.visibility = "hidden";
       });
+      setTimeout(() => this.setState(() => {
+        Emit.send("envim:attach", x2Col(this.props.main.width), y2Row(this.props.main.height), Setting.options);
+        return { init: true };
+      }));
       return { init: false, grids };
     });
-    Emit.send("envim:attach", x2Col(this.props.main.width), y2Row(this.props.main.height), Setting.options);
   }
 
   private onHighlight = (highlights: {id: string, ui: boolean, hl: IHighlight}[]) => {
     highlights.forEach(({id, ui, hl}) => {
       Highlights.setHighlight(id, ui, hl);
     });
-    this.setState(() => ({ init: true }));
   }
 
   private onWin = (wins: IWindow[]) => {
