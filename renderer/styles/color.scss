@@ -31,8 +31,8 @@ $color-purple: #723eac;
   @include make-variable("fg", $color-light);
   @include make-variable("bg", $color-dark);
   --brightness-light: 1.1;
-  --brightness-normal: 1.2;
-  --brightness-deep: 1.4;
+  --brightness-normal: 1.3;
+  --brightness-deep: 1.5;
 }
 
 .theme-light {

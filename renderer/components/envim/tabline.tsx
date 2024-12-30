@@ -132,9 +132,9 @@ export class TablineComponent extends React.Component<Props, States> {
     const icon = icons.filter(icon => (tab.filetype || "").search(icon.type) >= 0 || (tab.buftype || "").search(icon.type) >= 0).shift();
 
     return !icon ? null : (
-      <FlexComponent key={i} animate="fade-in hover" color={icon.color} active={tab.active} title={tab.name} shrink={1} margin={[4, 4, 0, 0]} padding={[0, 8]} rounded={[4, 4, 0, 0]} shadow={tab.active} style={styles.tab} nomouse={this.state.tabs.length === 1} onClick={e => this.runCommand(e, `tabnext ${i + 1}`,)}>
+      <FlexComponent key={i} animate="fade-in hover" color={icon.color} active={tab.active} title={tab.name} shrink={tab.active ? 0 : 2} margin={[4, 2, 0]} padding={[0, 8]} rounded={[4, 4, 0, 0]} shadow={tab.active} style={styles.tab} onClick={e => this.runCommand(e, `tabnext ${i + 1}`,)}>
         <IconComponent font={icon.font} text={tab.name.replace(/.*\//, "…/")} />
-        <IconComponent color="gray" font="" float="right" onClick={e => this.runCommand(e, `confirm tabclose ${i + 1}`)} hover />
+        { this.state.tabs.length > 1 && <IconComponent color="gray" font="" float="right" onClick={e => this.runCommand(e, `confirm tabclose ${i + 1}`)} hover /> }
       </FlexComponent>
     );
   }
