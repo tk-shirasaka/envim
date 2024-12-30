@@ -351,7 +351,7 @@ export class WebviewComponent extends React.Component<Props, States> {
     const color = { command: "green", input: "default", search: "default", browser: "blue", blur: "default" }[this.state.mode];
 
     return (
-      <FlexComponent animate="fade-in" direction="column" position="absolute" color="default" overflow="visible" inset={[0]} style={this.props.style} onMouseDown={this.onCancel} onMouseUp={this.onCancel}>
+      <FlexComponent animate="fade-in" direction="column" position="absolute" color="default" overflow="visible" inset={[0]} style={this.props.style} onMouseDown={this.onCancel} onMouseMove={this.onCancel} onMouseUp={this.onCancel}>
         <input style={styles.command} type="text" ref={this.command} onChange={this.onChange} onFocus={this.onFocus} onKeyDown={preview ? undefined : this.onKeyDown} tabIndex={-1} />
         <FlexComponent color="gray-fg" vertical="center" horizontal="center">
           { this.state.loading && <div className="animate loading inline"></div> }
