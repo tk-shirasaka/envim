@@ -217,6 +217,7 @@ export class EditorComponent extends React.Component<Props, States> {
 
   private onPreview = (src: string) => {
     this.setState(() => ({ preview: { src, active: true } }));
+    this.props.focus && document.body.focus();
   }
 
   private openExtWindow = (e: MouseEvent) => {
