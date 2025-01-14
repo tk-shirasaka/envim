@@ -54,7 +54,6 @@ export class EditorComponent extends React.Component<Props, States> {
   private pointer: { row: number; col: number } = { row: 0, col: 0 };
   private dragging: { x: number; y: number } = { x: 0, y: 0 };
   private delta: { x: number; y: number } = { x: 0, y: 0 };
-  private update: boolean = false;
 
   constructor(props: Props) {
     super(props);
@@ -81,8 +80,7 @@ export class EditorComponent extends React.Component<Props, States> {
   }
 
   componentDidUpdate(props: Props) {
-    if (this.update) {
-      this.update = false;
+    if (props.style.width !== this.props.style.width || props.style.height !== this.props.style.height) {
       Canvas.update(this.props.id, this.props.type === "normal");
       Emit.send("envim:resized", this.props.gid);
     }
@@ -99,15 +97,6 @@ export class EditorComponent extends React.Component<Props, States> {
     Emit.off("grid:busy", this.onBusy);
     Emit.off("mode:change", this.changeMode);
     Emit.off("tabline:update", this.onTabline);
-  }
-
-  shouldComponentUpdate(props: Props) {
-    const prev = this.props;
-    const next = props;
-    if (prev.style.width !== next.style.width || prev.style.height !== next.style.height) {
-      this.update = true;
-    }
-    return true;
   }
 
   private runCommand(e: MouseEvent, command: string) {
