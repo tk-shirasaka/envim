@@ -13,7 +13,6 @@ interface Props {
 
 interface States {
   cursor: { x: number, y: number, width: number, zIndex: number, shape: "block" | "vertical" | "horizontal" };
-  composit: boolean;
   value: string;
   busy: boolean;
   focus: boolean;
@@ -39,7 +38,7 @@ export class InputComponent extends React.Component<Props, States> {
   constructor(props: Props) {
     super(props);
 
-    this.state = { cursor: { x: 0, y: 0, width: 0, zIndex: 0, shape: "block" }, composit: false, value: "", busy: false, focus: true };
+    this.state = { cursor: { x: 0, y: 0, width: 0, zIndex: 0, shape: "block" }, value: "", busy: false, focus: true };
     Emit.on("envim:focus", this.onFocus);
     Emit.on("grid:cursor", this.onCursor);
     Emit.on("grid:busy", this.onBusy);
@@ -100,7 +99,7 @@ export class InputComponent extends React.Component<Props, States> {
   }
 
   private onKeyDown = (e: KeyboardEvent) => {
-    if (this.state.composit) return;
+    if (e.nativeEvent.isComposing) return;
     const code = keycode(e);
 
     e.stopPropagation();
@@ -109,22 +108,15 @@ export class InputComponent extends React.Component<Props, States> {
     code && Emit.send("envim:input", code);
   }
 
-  private onKeyUp = () => {
-    if (this.state.composit === false) return;
+  private onKeyUp = (e: KeyboardEvent) => {
+    if (!e.nativeEvent.isComposing) {
+      if (!this.input.current?.value) return;
 
-    this.setState(() => ({ value: this.input.current?.value || "" }));
-  }
-
-  private onCompositionStart = () => {
-    this.setState(() => ({ composit: true }));
-  }
-
-  private onCompositionEnd = () => {
-    if (this.input.current) {
       Emit.send("envim:input", this.input.current.value);
       this.input.current.value = "";
     }
-    this.setState(() => ({ composit: false, value: "" }));
+
+    this.setState(() => ({ value: this.input.current?.value || "" }));
   }
 
   render() {
@@ -135,8 +127,6 @@ export class InputComponent extends React.Component<Props, States> {
           onBlur={() => this.toggleFocus(false)}
           onKeyDown={this.onKeyDown}
           onKeyUp={this.onKeyUp}
-          onCompositionStart={this.onCompositionStart}
-          onCompositionEnd={this.onCompositionEnd}
           />
         <FlexComponent style={styles.text}>{ this.state.value }</FlexComponent>
       </FlexComponent>
