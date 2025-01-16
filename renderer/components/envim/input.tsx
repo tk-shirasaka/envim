@@ -109,14 +109,12 @@ export class InputComponent extends React.Component<Props, States> {
   }
 
   private onKeyUp = (e: KeyboardEvent) => {
-    if (!e.nativeEvent.isComposing) {
-      if (!this.input.current?.value) return;
-
+    if (!e.nativeEvent.isComposing && this.input.current?.value) {
       Emit.send("envim:input", this.input.current.value);
       this.input.current.value = "";
     }
 
-    this.setState(() => ({ value: this.input.current?.value || "" }));
+    (this.input.current?.value || this.state.value) && this.setState(() => ({ value: this.input.current?.value || "" }));
   }
 
   render() {
