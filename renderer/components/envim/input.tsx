@@ -77,12 +77,14 @@ export class InputComponent extends React.Component<Props, States> {
   private makeStyle() {
     const pointerEvent: "none" = "none";
     const cursor = this.state.cursor
+    const multibyte = (encodeURIComponent(this.state.value).replace(/%../g, "x").length - this.state.value.length) / 2;
+    const offset = Math.max(col2X(cursor.x + this.state.value.length + multibyte + 1) - document.body.clientWidth, 0);
 
     return {
       pointerEvent,
       minWidth: this.getWidth(),
       height: row2Y(1),
-      transform: `translate(${col2X(cursor.x)}px, ${row2Y(cursor.y)}px)`,
+      transform: `translate(${col2X(cursor.x) - offset}px, ${row2Y(cursor.y)}px)`,
       zIndex: cursor.zIndex,
       backdropFilter: "invert(1)",
     };
