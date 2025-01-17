@@ -112,6 +112,7 @@ export class WebviewComponent extends React.Component<Props, States> {
   }
 
   private getUrl(input: string) {
+    input = input.trim();
 
     if (!input || input === "about:blank") {
       return "about:blank";
