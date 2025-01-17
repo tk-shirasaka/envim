@@ -127,7 +127,7 @@ export class WebviewComponent extends React.Component<Props, States> {
   private onCancel = (e: MouseEvent) => {
     e.stopPropagation();
 
-    this.state.mode === "blur" && this.runAction("mode-command");
+    e.type !== "mousemove" && this.state.mode === "blur" && this.runAction("mode-command");
   }
 
   private onFocus = () => {

@@ -84,6 +84,9 @@ export class EditorComponent extends React.Component<Props, States> {
       Canvas.update(this.props.id, this.props.type === "normal");
       Emit.send("envim:resized", this.props.gid);
     }
+    if (this.props.focus) {
+      Emit.share("envim:focusable", !this.state.preview.active);
+    }
   }
 
   componentWillUnmount = () => {
@@ -206,7 +209,6 @@ export class EditorComponent extends React.Component<Props, States> {
 
   private onPreview = (src: string) => {
     this.setState(() => ({ preview: { src, active: true } }));
-    this.props.focus && document.body.focus();
   }
 
   private openExtWindow = (e: MouseEvent) => {

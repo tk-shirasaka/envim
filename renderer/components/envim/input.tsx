@@ -16,6 +16,7 @@ interface States {
   value: string;
   busy: boolean;
   focus: boolean;
+  focusable: boolean;
 }
 
 const position: "absolute" = "absolute";
@@ -38,8 +39,9 @@ export class InputComponent extends React.Component<Props, States> {
   constructor(props: Props) {
     super(props);
 
-    this.state = { cursor: { x: 0, y: 0, width: 0, zIndex: 0, shape: "block" }, value: "", busy: false, focus: true };
+    this.state = { cursor: { x: 0, y: 0, width: 0, zIndex: 0, shape: "block" }, value: "", busy: false, focus: true, focusable: true };
     Emit.on("envim:focus", this.onFocus);
+    Emit.on("envim:focusable", this.onFocusable);
     Emit.on("grid:cursor", this.onCursor);
     Emit.on("grid:busy", this.onBusy);
     Emit.on("mode:change", this.changeMode);
@@ -53,12 +55,17 @@ export class InputComponent extends React.Component<Props, States> {
   }
 
   private onFocus = () => {
-    if (document.activeElement !== document.body) return;
+    if (!this.state.focusable) return;
 
     const selected = window.getSelection()?.toString();
 
     selected && navigator.clipboard.writeText(selected);
     this.input.current?.focus();
+  }
+
+  private onFocusable = (focusable: boolean) => {
+    focusable && this.input.current?.focus();
+    this.setState(() => ({ focusable }));
   }
 
   private onCursor = (cursor: { x: number, y: number, width: number, hl: string, zIndex: number }) => {
