@@ -35,6 +35,7 @@ export class Envim {
     Emit.on("envim:resized", this.onResized);
     Emit.on("envim:theme", this.onTheme);
     Emit.on("envim:browser", this.onBrowser);
+    Emit.on("envim:preview", this.onPreview);
     process.on("uncaughtException", this.onError);
     process.on("unhandledRejection", this.onError);
     nativeTheme.on("updated", this.handleTheme);
@@ -178,23 +179,19 @@ export class Envim {
   private onBrowser = (src: string, command?: string) => {
     this.browserQueue.push((gid: number) => {
       const { id } = Grids.get(gid).getInfo();
-      const match = src.match(/^data:(.*\/.*);base64,(.*)/);
 
-      (() => {
-        if (!match) return new Promise((resolve) => resolve(true));
-
-        const mime = match[1];
-        const blob = atob(match[2]);
-        const ext = mime.match(/\/(\w+)/)?.pop();
-        const path = join(app.getPath("userData"), `tmp.${ext}`);
-
-        src = `file://${path}`;
-        return writeFile(path, (new Uint8Array(blob.length)).map((_, i) => blob.charCodeAt(i)));
-      })().then(() => Emit.update(`preview:${id}`, false, src));
+      Emit.update(`preview:${id}`, false, src)
     });
 
     command = ["new", "vnew", "tabnew"].find(val => val === command) || "tabnew";
     this.onCommand(`${command} +set\\ bufhidden=wipe|set\\ buftype=nofile|set\\ nobuflisted [Envim\\ Browser]`);
+  }
+
+  private onPreview = (content: any, ext: string, command?: string) => {
+    const path = join(app.getPath("userData"), `tmp.${ext}`);;
+    const src = `file://${path}`;
+
+    writeFile(path, Buffer.from(content)).then(() => this.onBrowser(src, command));
   }
 
   private handleTheme = () => {
