@@ -104,15 +104,19 @@ export class TablineComponent extends React.Component<Props, States> {
   }
 
   private onTabline = async (tabs: ITab[]) => {
-    for (let i = 0; i < tabs.length; i++) {
-      const tab = tabs[i];
-      const curr = this.state.tabs.find(({ buffer }) => tab.buffer === buffer) || tab;
-      const filetype = curr.filetype || await Emit.send<string>("envim:api", "nvim_buf_get_option", [tab.buffer, "filetype"]);
-      const buftype = curr.buftype || await Emit.send<string>("envim:api", "nvim_buf_get_option", [tab.buffer, "buftype"]);
+    const buflist: { [key: number]: { filetype?: string, buftype?: string } } = {};;
 
-      tabs[i] = { ...curr, ...tab, filetype, buftype };
+    for (let i = 0; i < tabs.length; i++) {
+      const { buffer } = tabs[i];
+      const { filetype, buftype } = buflist[buffer] || this.state.tabs.find(tab => tab.buffer === buffer) || {
+        filetype: await Emit.send<string>("envim:api", "nvim_buf_get_option", [buffer, "filetype"]),
+        buftype: await Emit.send<string>("envim:api", "nvim_buf_get_option", [buffer, "buftype"]),
+      };
+
+      buflist[buffer] = { filetype, buftype };
     }
 
+    tabs = tabs.map(tab => ({ ...tab, ...buflist[tab.buffer] }))
     this.setState(() => ({ tabs }));
   }
 

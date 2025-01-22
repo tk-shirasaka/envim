@@ -13,8 +13,10 @@ import { Highlights } from "./highlight";
 
 export class App {
   private modes: IMode[] = [];
+  private static nvim: NeovimClient;
 
-  constructor(private nvim: NeovimClient, init: boolean, workspace: string) {
+  constructor(nvim: NeovimClient, init: boolean, workspace: string) {
+    App.nvim = nvim;
     Emit.init();
     Highlights.init();
     Grids.init(init, workspace);
@@ -262,12 +264,15 @@ export class App {
   private async winExternalPos(gid: number, win: Window) {
     if (!await win.valid) return;
 
+    const nvim = App.nvim;
     const { x, y } = Grids.get(gid).getInfo();
     const width = await win.width;
     const height = await win.height;
 
-    this.winPos(gid, win, y, x, width, height, true, 10000, "external");
-    Grids.flush();
+    if (App.nvim === nvim) {
+      this.winPos(gid, win, y, x, width, height, true, 10000, "external");
+      Grids.flush();
+    }
   }
 
   private msgSetPos(gid: number, row: number) {
@@ -291,6 +296,7 @@ export class App {
   }
 
   private async tablineUpdate(ctab: Tabpage, tabs: { tab: Tabpage, name: string }[], cbuf: Buffer, bufs: { buffer: Buffer, name: string }[]) {
+    const nvim = App.nvim;
     const next: { tabs: ITab[]; bufs: IBuffer[] } = { tabs: [], bufs: [] };
 
     for (let i = 0; i < tabs.length; i++) {
@@ -311,7 +317,7 @@ export class App {
       buffer.data && next.bufs.push({ name, buffer: +buffer.data, active });
     }
 
-    Emit.update("tabline:update", true, next.tabs, next.bufs);
+    App.nvim === nvim && Emit.update("tabline:update", true, next.tabs, next.bufs);
   }
 
   private cmdlineShow(content: string[][], pos: number, prompt: string, indent: number) {
@@ -394,7 +400,7 @@ export class App {
 
   private msgHistoryShow(entries: [string, [string, string][]][]) {
     if (entries.length) {
-      this.nvim.command("messages clear");
+      App.nvim.command("messages clear");
       Emit.send("messages:history", entries.map(
         ([kind, contents]) => this.convertMessage(kind, contents)
       ));
@@ -430,8 +436,10 @@ export class App {
   }
 
   private async menu() {
-    const menus: IMenu[] = await this.nvim.call("menu_get", [""]);
-    Emit.send("menu:update", menus.filter(({ name }) => !name.match(/^(PopUp)|\]/)));
+    const nvim = App.nvim;
+    const menus: IMenu[] = await App.nvim.call("menu_get", [""]);
+
+    App.nvim === nvim && Emit.send("menu:update", menus.filter(({ name }) => !name.match(/^(PopUp)|\]/)));
   }
 
   private flush() {
