@@ -40,13 +40,9 @@ interface Props {
   style?: Object;
 }
 
-interface States {
-}
-
-export class FlexComponent extends React.Component<PropsWithChildren<Props>, States> {
-  private getClassName() {
+export function FlexComponent(props: PropsWithChildren<Props>)  {
+  function getClassName() {
     const classes: string[] = [];
-    const props = this.props;
 
     props.selectable && classes.push("selectable");
     props.animate && classes.push(`animate ${props.animate}`);
@@ -58,9 +54,7 @@ export class FlexComponent extends React.Component<PropsWithChildren<Props>, Sta
     return classes.join(" ");
   }
 
-  private getStyle() {
-    const props = this.props;
-
+  function getStyle() {
     return {
       display: "flex",
       borderStyle: "solid",
@@ -78,33 +72,31 @@ export class FlexComponent extends React.Component<PropsWithChildren<Props>, Sta
       borderRadius: (props.rounded || [0]).map(px => `${px}px`).join(" "),
       position: props.position || "relative",
       overflow: props.overflow || "hidden",
-      wordBreak: this.props.wordBreak || "break-all",
-      whiteSpace: this.props.whiteSpace || "nowrap",
+      wordBreak: props.wordBreak || "break-all",
+      whiteSpace: props.whiteSpace || "nowrap",
       ...( props.nomouse ? { pointerEvents: "none" as "none" } : {} ),
       ...( props.zIndex !== undefined ? { zIndex: props.zIndex } : {} ),
       ...( props.style || {} )
     };
   }
 
-  render() {
-    return (
-      <div
-        className={this.getClassName()}
-        title={this.props.title}
-        onClick={this.props.onClick}
-        onMouseDown={this.props.onMouseDown}
-        onMouseMove={this.props.onMouseMove}
-        onMouseUp={this.props.onMouseUp}
-        onMouseEnter={this.props.onMouseEnter}
-        onMouseLeave={this.props.onMouseLeave}
-        onDragStart={this.props.onDragStart}
-        onDragEnd={this.props.onDragEnd}
-        onWheel={this.props.onWheel}
-        style={this.getStyle()}
-        draggable={!!(this.props.onDragStart && this.props.onDragEnd)}
-      >
-        { this.props.children }
-      </div>
-    );
-  }
+  return (
+    <div
+      className={getClassName()}
+      title={props.title}
+      onClick={props.onClick}
+      onMouseDown={props.onMouseDown}
+      onMouseMove={props.onMouseMove}
+      onMouseUp={props.onMouseUp}
+      onMouseEnter={props.onMouseEnter}
+      onMouseLeave={props.onMouseLeave}
+      onDragStart={props.onDragStart}
+      onDragEnd={props.onDragEnd}
+      onWheel={props.onWheel}
+      style={getStyle()}
+      draggable={!!(props.onDragStart && props.onDragEnd)}
+    >
+      { props.children }
+    </div>
+  );
 }

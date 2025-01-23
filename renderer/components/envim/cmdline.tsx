@@ -1,13 +1,10 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 import { Emit } from "../../utils/emit";
 import { Highlights } from "../../utils/highlight";
 import { Setting } from "../../utils/setting";
 
 import { FlexComponent } from "../flex";
-
-interface Props {
-}
 
 interface States {
   cmdline: { hl: string, c: string }[];
@@ -25,29 +22,28 @@ const styles = {
   },
 };
 
-export class CmdlineComponent extends React.Component<Props, States> {
-  constructor(props: Props) {
-    super(props);
+export function CmdlineComponent() {
+  const [state, setState] = useState<States>({ cmdline: [], contents: [], pos: 0, prompt: "", indent: 0, enabled: Setting.options.ext_cmdline });
 
-    this.state = { cmdline: [], contents: [], pos: 0, prompt: "", indent: 0, enabled: Setting.options.ext_cmdline };
-    Emit.on("cmdline:show", this.onCmdline);
-    Emit.on("cmdline:cursor", this.onCursor);
-    Emit.on("cmdline:special", this.onSpecial);
-    Emit.on("cmdline:blockshow", this.onBlock);
-    Emit.on("cmdline:blockhide", this.offBlock);
-    Emit.on("option:set", this.onOption);
-  }
+  useEffect(() => {
+    Emit.on("cmdline:show", onCmdline);
+    Emit.on("cmdline:cursor", onCursor);
+    Emit.on("cmdline:special", onSpecial);
+    Emit.on("cmdline:blockshow", onBlock);
+    Emit.on("cmdline:blockhide", offBlock);
+    Emit.on("option:set", onOption);
 
-  componentWillUnmount = () => {
-    Emit.off("cmdline:show", this.onCmdline);
-    Emit.off("cmdline:cursor", this.onCursor);
-    Emit.off("cmdline:special", this.onSpecial);
-    Emit.off("cmdline:blockshow", this.onBlock);
-    Emit.off("cmdline:blockhide", this.offBlock);
-    Emit.off("option:set", this.onOption);
-  }
+    return () => {
+      Emit.off("cmdline:show", onCmdline);
+      Emit.off("cmdline:cursor", onCursor);
+      Emit.off("cmdline:special", onSpecial);
+      Emit.off("cmdline:blockshow", onBlock);
+      Emit.off("cmdline:blockhide", offBlock);
+      Emit.off("option:set", onOption);
+    };
+  }, []);
 
-  private getPos(cmdline: States["cmdline"], pos: number) {
+  function getPos(cmdline: States["cmdline"], pos: number) {
     let result = 0;
     for (; pos >= 0; result++) {
       pos -= encodeURIComponent(cmdline[result]?.c || " ").replace(/%../g, "x").length;
@@ -55,7 +51,7 @@ export class CmdlineComponent extends React.Component<Props, States> {
     return result - 1;
   }
 
-  private convertContent(content: string[][], indent: number) {
+  function convertContent(content: string[][], indent: number) {
     let result: States["cmdline"] = [];
     let i = 0;
 
@@ -70,77 +66,76 @@ export class CmdlineComponent extends React.Component<Props, States> {
     return result;
   }
 
-  private onCmdline = (cmd: string[][], pos: number, prompt: string, indent: number) => {
-    this.setState(() => {
-      const cmdline = this.convertContent(cmd, indent)
+  function onCmdline(cmd: string[][], pos: number, prompt: string, indent: number) {
+    setState(state => {
+      const cmdline = convertContent(cmd, indent)
 
       if (cmdline.length) {
-        pos = this.getPos(cmdline, pos + indent);
+        pos = getPos(cmdline, pos + indent);
       }
 
-      return { cmdline, pos, prompt, indent };
+      return { ...state, cmdline, pos, prompt, indent };
     });
   }
 
-  private onCursor = (pos: number) => {
-    this.setState(state => {
+  function onCursor(pos: number) {
+    setState(state => {
       if (pos < state.cmdline.length) {
-        pos = this.getPos(state.cmdline, pos + state.indent);
+        pos = getPos(state.cmdline, pos + state.indent);
       }
-      return { pos };
+      return { ...state, pos };
     });
   }
 
-  private onSpecial = (c: string, shift: boolean) => {
-    this.setState(state => {
+  function onSpecial(c: string, shift: boolean) {
+    setState(state => {
       const cmdline = state.cmdline;
       const pos = shift ? state.pos + 1 : state.pos;
 
       cmdline.splice(state.pos, 0, { hl: "0", c });
 
-      return { cmdline, pos };
+      return { ...state, cmdline, pos };
     });
   }
 
-  private onBlock = (lines: string[][][]) => {
-    this.setState(state => ({
+  function onBlock(lines: string[][][]) {
+    setState(state => ({
+      ...state,
       contents: [
         ...state.contents,
-        ...lines.map(line => this.convertContent(line, 0)),
+        ...lines.map(line => convertContent(line, 0)),
       ]
     }));
   }
 
-  private offBlock = () => {
-    this.setState(() => ({ contents: [], cmdline: [] }));
+  function offBlock() {
+    setState(state => ({ ...state, contents: [], cmdline: [] }));
   }
 
-  private onOption = (options: { ext_cmdline: boolean }) => {
-    options.ext_cmdline === undefined || this.setState(() => ({ enabled: options.ext_cmdline }));
+  function onOption(options: { ext_cmdline: boolean }) {
+    options.ext_cmdline === undefined || setState(state => ({ ...state, enabled: options.ext_cmdline }));
   }
 
-  private getScopeStyle() {
+  function getScopeStyle() {
     const { height } = Setting.font;
     return { padding: height, ...Highlights.style("0"), ...styles.scope };
   }
 
-  private renderCmdline(cmdline: States["cmdline"], cursor: boolean) {
+  function renderCmdline(cmdline: States["cmdline"], cursor: boolean) {
     return cmdline.map(({hl, c}, i) => {
-      const reverse = cursor && i === this.state.pos;
+      const reverse = cursor && i === state.pos;
       c = c.charCodeAt(0) < 0x20 ? `^${String.fromCharCode(c.charCodeAt(0) + 0x40)}` : c;
       return (hl || reverse) ? <div className="inline-block" style={Highlights.style(hl, { reverse })} key={i}>{ c }</div> : c;
     });
   }
 
-  render() {
-    return this.state.enabled && this.state.cmdline.length > 0 && (
-      <FlexComponent animate="slide-down" position="absolute" whiteSpace="pre-wrap" rounded={[0, 0, 4, 4]} style={this.getScopeStyle()} shadow nomouse>
-        <FlexComponent whiteSpace="pre-wrap" shrink={0}><div className="bold">{ this.state.prompt }</div></FlexComponent>
-        <div>
-          {this.state.contents.map((content, i) => <div key={i}>{ this.renderCmdline(content, false) }</div>)}
-          <div>{ this.renderCmdline(this.state.cmdline, true) }</div>
-        </div>
-      </FlexComponent>
-    );
-  }
+  return state.enabled && state.cmdline.length > 0 && (
+    <FlexComponent animate="slide-down" position="absolute" whiteSpace="pre-wrap" rounded={[0, 0, 4, 4]} style={getScopeStyle()} shadow nomouse>
+      <FlexComponent whiteSpace="pre-wrap" shrink={0}><div className="bold">{ state.prompt }</div></FlexComponent>
+      <div>
+        {state.contents.map((content, i) => <div key={i}>{ renderCmdline(content, false) }</div>)}
+        <div>{ renderCmdline(state.cmdline, true) }</div>
+      </div>
+    </FlexComponent>
+  );
 }

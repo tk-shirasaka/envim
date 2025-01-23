@@ -1,4 +1,4 @@
-import React, { createRef, RefObject, MouseEvent, WheelEvent } from "react";
+import React, { useEffect, useState, useRef, RefObject, MouseEvent, WheelEvent } from "react";
 
 import { ICell, IScroll, ITab, IBuffer, IMode } from "common/interface";
 
@@ -46,202 +46,199 @@ interface States {
 
 const TYPE = "editor";
 
-export class EditorComponent extends React.Component<Props, States> {
-  private canvas: RefObject<HTMLCanvasElement | null> = createRef<HTMLCanvasElement>();
-  private timer: number = 0;
-  private drag: boolean = false;
-  private busy: boolean = false;
-  private pointer: { row: number; col: number } = { row: 0, col: 0 };
-  private dragging: { x: number; y: number } = { x: 0, y: 0 };
-  private delta: { x: number; y: number } = { x: 0, y: 0 };
+export function EditorComponent(props: Props) {
+  const [state, setState] = useState<States>({ bufs: Cache.get<IBuffer[]>(TYPE, "bufs") || [], nomouse: Cache.get<boolean>(TYPE, "nomouse"), dragging: false, hidden: false, scrolling: 0, preview: { src: "", active: false }, scroll: { total: 0, height: "100%", transform: "" } });
+  const canvas: RefObject<HTMLCanvasElement | null> = useRef<HTMLCanvasElement>(null);
+  const timer: RefObject<number> = useRef(0);
+  const drag: RefObject<boolean> = useRef(false);
+  const busy: RefObject<boolean> = useRef(Cache.get<boolean>(TYPE, "busy"));
+  const pointer: RefObject<{ row: number; col: number }> = useRef({ row: 0, col: 0 });
+  const dragging: RefObject<{ x: number; y: number }> = useRef({ x: 0, y: 0 });
+  const delta: RefObject<{ x: number; y: number }> = useRef({ x: 0, y: 0 });
+  const { height, scale } = Setting.font;
 
-  constructor(props: Props) {
-    super(props);
+  useEffect(() => {
+    Emit.on(`clear:${props.id}`, onClear);
+    Emit.on(`flush:${props.id}`, onFlush);
+    Emit.on(`preview:${props.id}`, onPreview);
+    Emit.on(`viewport:${props.id}`, onViewport);
+    Emit.on("envim:drag", onDrag);
+    Emit.on("grid:busy", onBusy);
+    Emit.on("mode:change", changeMode);
+    Emit.on("tabline:update", onTabline);
 
-    this.busy = Cache.get<boolean>(TYPE, "busy");
-    this.state = { bufs: Cache.get<IBuffer[]>(TYPE, "bufs") || [], nomouse: Cache.get<boolean>(TYPE, "nomouse"), dragging: false, hidden: false, scrolling: 0, preview: { src: "", active: false }, scroll: { total: 0, height: "100%", transform: "" } };
-    Emit.on(`clear:${this.props.id}`, this.onClear);
-    Emit.on(`flush:${this.props.id}`, this.onFlush);
-    Emit.on(`preview:${this.props.id}`, this.onPreview);
-    Emit.on(`viewport:${this.props.id}`, this.onViewport);
-    Emit.on("envim:drag", this.onDrag);
-    Emit.on("grid:busy", this.onBusy);
-    Emit.on("mode:change", this.changeMode);
-    Emit.on("tabline:update", this.onTabline);
-  }
+    return () => {
+      clearInterval(timer.current);
+      Canvas.delete(props.id);
+      Emit.off(`clear:${props.id}`, onClear);
+      Emit.off(`flush:${props.id}`, onFlush);
+      Emit.off(`preview:${props.id}`, onPreview);
+      Emit.off(`viewport:${props.id}`, onViewport);
+      Emit.off("envim:drag", onDrag);
+      Emit.off("grid:busy", onBusy);
+      Emit.off("mode:change", changeMode);
+      Emit.off("tabline:update", onTabline);
+    };
+  }, [])
 
-  componentDidMount() {
-    const ctx = this.canvas.current?.getContext("2d");
+  useEffect(() => {
+    const ctx = canvas.current?.getContext("2d");
 
-    if (this.canvas.current && ctx) {
-      Canvas.create(this.props.id, this.canvas.current, ctx, this.props.type === "normal");
-      Emit.send("envim:ready", this.props.gid);
+    if (canvas.current && ctx) {
+      Canvas.create(props.id, canvas.current, ctx, props.type === "normal");
+      Emit.send("envim:ready", props.gid);
     }
-  }
+  }, []);
 
-  componentDidUpdate(props: Props) {
-    if (props.style.width !== this.props.style.width || props.style.height !== this.props.style.height) {
-      Canvas.update(this.props.id, this.props.type === "normal");
-      Emit.send("envim:resized", this.props.gid);
-    }
-    if (this.props.focus) {
-      Emit.share("envim:focusable", !this.state.preview.active);
-    }
-  }
+  useEffect(() => {
+      Canvas.update(props.id, props.type === "normal");
+      Emit.send("envim:resized", props.gid);
+  }, [props.style.width, props.style.height]);
 
-  componentWillUnmount = () => {
-    clearInterval(this.timer);
-    Canvas.delete(this.props.id);
-    Emit.off(`clear:${this.props.id}`, this.onClear);
-    Emit.off(`flush:${this.props.id}`, this.onFlush);
-    Emit.off(`preview:${this.props.id}`, this.onPreview);
-    Emit.off(`viewport:${this.props.id}`, this.onViewport);
-    Emit.off("envim:drag", this.onDrag);
-    Emit.off("grid:busy", this.onBusy);
-    Emit.off("mode:change", this.changeMode);
-    Emit.off("tabline:update", this.onTabline);
-  }
+  useEffect(() => {
+      props.focus && Emit.share("envim:focusable", !state.preview.active);
+  }, [props.focus, state.preview.active]);
 
-  private runCommand(e: MouseEvent, command: string) {
+  function runCommand(e: MouseEvent, command: string) {
     e.stopPropagation();
     e.preventDefault();
 
-    command && Emit.send("envim:api", "nvim_call_function", ["win_execute", [this.props.winid, command]]);
+    command && Emit.send("envim:api", "nvim_call_function", ["win_execute", [props.winid, command]]);
   }
 
-  private onMouseEvent(e: MouseEvent, action: string, button: string = "") {
+  function onMouseEvent(e: MouseEvent, action: string, button: string = "") {
     button = button || ["left", "middle", "right"][e.button] || "left";
 
     const [col, row] = [ x2Col(e.nativeEvent.offsetX), y2Row(e.nativeEvent.offsetY) ];
     const modiffier = [];
-    const skip = (button === "move" || action === "drag") && row === this.pointer.row && col === this.pointer.col;
-    const gid = this.props.gid === 1 ? 0 : this.props.gid;
+    const skip = (button === "move" || action === "drag") && row === pointer.current.row && col === pointer.current.col;
+    const gid = props.gid === 1 ? 0 : props.gid;
 
     e.shiftKey && modiffier.push("S");
     e.ctrlKey && modiffier.push("C");
     e.altKey && modiffier.push("A");
 
-    this.pointer = { row, col };
+    pointer.current = { row, col };
     skip || Emit.send("envim:mouse", gid, button, action, modiffier.join("-"), row, col);
   }
 
-  private onMouseDown = (e: MouseEvent) => {
-    clearTimeout(this.timer);
+  function onMouseDown(e: MouseEvent) {
+    clearTimeout(timer.current);
 
-    this.timer = +setTimeout(() => {
-      this.drag = true;
-      Emit.share("envim:drag", this.props.id);
+    timer.current = +setTimeout(() => {
+      drag.current = true;
+      Emit.share("envim:drag", props.id);
     });
 
-    this.onMouseEvent(e, "press");
+    onMouseEvent(e, "press");
   }
 
-  private onMouseMove = (e: MouseEvent) => {
-    if (!(this.drag || this.props.mousemoveevent) || this.busy) return;
+  function onMouseMove(e: MouseEvent) {
+    if (!(drag.current || props.mousemoveevent) || busy.current) return;
 
-    this.onMouseEvent(e, "drag", this.drag ? "" : "move");
+    onMouseEvent(e, "drag", drag.current ? "" : "move");
   }
 
-  private onMouseUp = (e: MouseEvent) => {
-    clearTimeout(this.timer);
+  function onMouseUp(e: MouseEvent) {
+    clearTimeout(timer.current);
 
-    if (this.drag) {
-      this.drag = false;
+    if (drag.current) {
+      drag.current = false;
       Emit.share("envim:drag", "");
     }
-    this.onMouseEvent(e, "release");
+    onMouseEvent(e, "release");
   }
 
-  private onDragStart = (e: MouseEvent) => {
-    this.dragging = { x: e.clientX, y: e.clientY };
+  function onDragStart(e: MouseEvent) {
+    dragging.current = { x: e.clientX, y: e.clientY };
   }
 
-  private onDragEnd = (e: MouseEvent) => {
-    const match = this.props.style.transform.match(/^translate\((\d+)px, (\d+)px\)$/);
+  function onDragEnd(e: MouseEvent) {
+    const match = props.style.transform.match(/^translate\((\d+)px, (\d+)px\)$/);
 
     if (match) {
-      const offset = { x: +match[1] + e.clientX - this.dragging.x, y: +match[2] + e.clientY - this.dragging.y };
+      const offset = { x: +match[1] + e.clientX - dragging.current.x, y: +match[2] + e.clientY - dragging.current.y };
       const resize = {
-        width: this.props.style.width + Math.min(0, offset.x),
-        height: this.props.style.height + Math.min(0, offset.y),
+        width: props.style.width + Math.min(0, offset.x),
+        height: props.style.height + Math.min(0, offset.y),
       };
 
-      this.dragging = { x: 0, y: 0 };
-      this.setState(() => ({ dragging: false }));
+      dragging.current = { x: 0, y: 0 };
+      setState(state => ({ ...state, dragging: false }));
 
       Emit.share("envim:drag", "");
-      Emit.send("envim:position", this.props.gid, x2Col(Math.max(0, offset.x)), y2Row(Math.max(0, offset.y)));
-      Emit.send("envim:resize", this.props.gid, Math.max(x2Col(resize.width), 18), y2Row(resize.height));
+      Emit.send("envim:position", props.gid, x2Col(Math.max(0, offset.x)), y2Row(Math.max(0, offset.y)));
+      Emit.send("envim:resize", props.gid, Math.max(x2Col(resize.width), 18), y2Row(resize.height));
     }
   }
 
-  private onWheel = (e: WheelEvent) => {
-    this.delta.x = this.delta.x * e.deltaX >= 0 ? this.delta.x + e.deltaX : 0;
-    this.delta.y = this.delta.y * e.deltaY >= 0 ? this.delta.y + e.deltaY : 0;
+  function onWheel(e: WheelEvent) {
+    delta.current.x = delta.current.x * e.deltaX >= 0 ? delta.current.x + e.deltaX : 0;
+    delta.current.y = delta.current.y * e.deltaY >= 0 ? delta.current.y + e.deltaY : 0;
 
-    const row = Math.abs(y2Row(this.delta.y));
-    const col = Math.abs(x2Col(this.delta.x));
+    const row = Math.abs(y2Row(delta.current.y));
+    const col = Math.abs(x2Col(delta.current.x));
 
     for (let i = 0; i < row; i++) {
-      this.delta = { x: 0, y: 0 };
-      this.onMouseEvent(e, e.deltaY < 0 ? "up" : "down", "wheel");
+      delta.current = { x: 0, y: 0 };
+      onMouseEvent(e, e.deltaY < 0 ? "up" : "down", "wheel");
     }
     for (let i = 0; i < col; i++) {
-      this.delta = { x: 0, y: 0 };
-      this.onMouseEvent(e, e.deltaX < 0 ? "left" : "right", "wheel");
+      delta.current = { x: 0, y: 0 };
+      onMouseEvent(e, e.deltaX < 0 ? "left" : "right", "wheel");
     }
   }
 
-  private onScroll = (e: MouseEvent) => {
+  function onScroll(e: MouseEvent) {
     const per = e.nativeEvent.offsetY / e.currentTarget.clientHeight;
-    const line = Math.ceil(this.state.scroll.total * per);
+    const line = Math.ceil(state.scroll.total * per);
 
-    this.runCommand(e, `${line} | redraw`);
+    runCommand(e, `${line} | redraw`);
   }
 
-  private onClear = () => {
-    Canvas.clear(this.props.id, x2Col(this.props.style.width), y2Row(this.props.style.height));
+  function onClear() {
+    Canvas.clear(props.id, x2Col(props.style.width), y2Row(props.style.height));
   }
 
-  private onFlush = (flush: { cells: ICell[], scroll?: IScroll }[]) => {
-    flush.forEach(({ cells, scroll }) => Canvas.push(this.props.id, cells, scroll));
+  function onFlush(flush: { cells: ICell[], scroll?: IScroll }[]) {
+    flush.forEach(({ cells, scroll }) => Canvas.push(props.id, cells, scroll));
   }
 
-  private onPreview = (src: string) => {
-    this.setState(() => ({ preview: { src, active: true } }));
+  function onPreview(src: string) {
+    setState(state => ({ ...state, preview: { src, active: true } }));
   }
 
-  private openExtWindow = (e: MouseEvent) => {
-    const width = x2Col(this.props.style.width);
-    const height = y2Row(this.props.style.height);
+  function openExtWindow(e: MouseEvent) {
+    const width = x2Col(props.style.width);
+    const height = y2Row(props.style.height);
 
-    this.runCommand(e, `call nvim_win_set_config(0, { "width": ${width}, "height": ${height}, "external": 1 })`)
+    runCommand(e, `call nvim_win_set_config(0, { "width": ${width}, "height": ${height}, "external": 1 })`)
   }
 
-  private dragExtWIndow = (e: MouseEvent) => {
+  function dragExtWIndow(e: MouseEvent) {
     e.stopPropagation();
     e.preventDefault();
 
-    this.setState(() => ({ dragging: true }));
-    Emit.share("envim:drag", this.props.id);
+    setState(state => ({ ...state, dragging: true }));
+    Emit.share("envim:drag", props.id);
   }
 
-  private toggleExtWindow = (e: MouseEvent) => {
+  function toggleExtWindow(e: MouseEvent) {
     e.stopPropagation();
     e.preventDefault();
 
-    this.setState(() => ({ hidden: !this.state.hidden }));
+    setState(state => ({ ...state, hidden: !state.hidden }));
   }
 
-  private onViewport = (top: number, bottom: number, total: number) => {
-    this.setState(() => {
-      const limit = this.props.style.height;
+  function onViewport(top: number, bottom: number, total: number) {
+    setState(state => {
+      const limit = props.style.height;
       const height = Math.min(Math.floor((bottom - top) / total * 100), 100);
       const scrolling = height === 100 ? 0 : +setTimeout(() => {
-        this.state.scrolling === scrolling && this.setState(() => ({ scrolling: 0 }));
+        state.scrolling === scrolling && setState(state => ({ ...state, scrolling: 0 }));
       }, 500);
 
-      return { scrolling, scroll: {
+      return { ...state, scrolling, scroll: {
         total,
         height: height ? `${height}%` : "4px",
         transform: `translateY(${Math.min(Math.floor(top / total * limit), limit - 4)}px)`,
@@ -249,33 +246,33 @@ export class EditorComponent extends React.Component<Props, States> {
     });
   }
 
-  private onDrag = (id: string) => {
-    const nomouse = ["", this.props.id].indexOf(id) < 0;
+  function onDrag(id: string) {
+    const nomouse = ["", props.id].indexOf(id) < 0;
 
-    this.setState(state => ({ nomouse, dragging: id === "" ? false : state.dragging }));
+    setState(state => ({ ...state, nomouse, dragging: id === "" ? false : state.dragging }));
     Cache.set<boolean>(TYPE, "nomouse", id.length > 0);
   }
 
-  private onBusy = (busy: boolean) => {
-    this.busy = busy;
-    Cache.set<boolean>(TYPE, "busy", this.busy);
+  function onBusy(curr: boolean) {
+    busy.current = curr;
+    Cache.set<boolean>(TYPE, "busy", busy.current);
   }
 
-  private changeMode = (mode: IMode) => {
-    this.busy = mode.short_name === 'i';
-    Cache.set<boolean>(TYPE, "busy", this.busy);
+  function changeMode(mode: IMode) {
+    busy.current = mode.short_name === 'i';
+    Cache.set<boolean>(TYPE, "busy", busy.current);
   }
 
-  private onTabline = (_: ITab[], bufs: IBuffer[]) => {
+  function onTabline(_: ITab[], bufs: IBuffer[]) {
     Cache.set<IBuffer[]>(TYPE, "bufs", bufs);
-    this.setState(() => ({ bufs }));
+    setState(state => ({ ...state, bufs }));
   }
 
-  private renderMenu(label: string, command: string) {
+  function renderMenu(label: string, command: string) {
     return (
       <MenuComponent color="gray-fg" label={label}>
-        { this.state.bufs.map(({ name, buffer, active }, i) => (
-          <FlexComponent active={active} title={name} onClick={e => this.runCommand(e, `${command}${buffer}`)} key={i} spacing>
+        { state.bufs.map(({ name, buffer, active }, i) => (
+          <FlexComponent active={active} title={name} onClick={e => runCommand(e, `${command}${buffer}`)} key={i} spacing>
             { name.replace(/.*\//, "…/") }
           </FlexComponent>
         )) }
@@ -283,7 +280,7 @@ export class EditorComponent extends React.Component<Props, States> {
     );
   }
 
-  private renderIconMenu(label: string, menus: { font: string, onClick: (e: MouseEvent) => void }[][]) {
+  function renderIconMenu(label: string, menus: { font: string, onClick: (e: MouseEvent) => void }[][]) {
     return (
       <MenuComponent color="gray-fg" label={label} fit>
         { menus.map((menu, i) => (
@@ -295,75 +292,71 @@ export class EditorComponent extends React.Component<Props, States> {
     );
   }
 
-  private renderPreview() {
-    const { src, active } = this.state.preview;
-    return active && <WebviewComponent src={src} active={this.props.focus} style={!this.state.hidden ? {} : { display: "none" }} />;
+  function renderPreview() {
+    const { src, active } = state.preview;
+    return active && <WebviewComponent src={src} active={props.focus} style={!state.hidden ? {} : { display: "none" }} />;
   }
 
-  render() {
-    const { height, scale } = Setting.font;
-
-    return (
-      <FlexComponent animate="fade-in hover" position="absolute" overflow="visible" nomouse={this.state.nomouse} style={{ ...this.props.style, ...(this.state.hidden ? { height: 0 } : {}) }} shadow={!this.state.hidden}
-        onMouseDown={this.state.dragging ? undefined : this.onMouseDown}
-        onMouseMove={this.state.dragging ? undefined : this.onMouseMove}
-        onMouseUp={this.state.dragging ? undefined : this.onMouseUp}
-        onWheel={this.state.dragging ? undefined : this.onWheel}
-        onDragStart={this.state.dragging ? this.onDragStart : undefined}
-        onDragEnd={this.state.dragging ? this.onDragEnd : undefined}
-      >
-        <FlexComponent nomouse>
-          <canvas width={this.props.style.width * scale} height={this.props.style.height * scale} ref={this.canvas} />
-        </FlexComponent>
-        { this.props.gid === 1 || this.renderPreview() }
-        { this.props.gid === 1 || !this.props.focusable ? null : (
-          <>
-            <FlexComponent color="default" grow={1} position="absolute" inset={[0, -4, 0, "auto"]} onMouseDown={this.onScroll} hover={this.state.scrolling === 0}>
-              <FlexComponent animate="fade-in" color="blue" border={[0, 2]} rounded={[2]} style={this.state.scroll} shadow nomouse></FlexComponent>
-            </FlexComponent>
-            <FlexComponent color={this.state.hidden ? "orange" : "default"} position="absolute" overflow="visible" inset={[-height, -4, "auto", "auto"]} rounded={this.state.hidden ? [4] : [4, 4, 0, 0]} hover={!this.state.hidden} spacing
-              onMouseDown={e => this.runCommand(e, "")}
-            >
-              { !this.state.preview.active && this.props.type === "normal" && this.renderMenu("", "buffer ") }
-              { this.props.type === "normal" && this.renderIconMenu("", [
-                [
-                  { font: "", onClick: e => this.runCommand(e, "enew") },
-                  { font: "", onClick: e => this.runCommand(e, "vsplit") },
-                  { font: "", onClick: e => this.runCommand(e, "split") },
-                ],
-                [
-                  { font: "󰶭", onClick: this.openExtWindow },
-                  { font: "󱂪", onClick: e => this.runCommand(e, "wincmd H") },
-                  { font: "󱂫", onClick: e => this.runCommand(e, "wincmd L") },
-                ],
-                [
-                  { font: "󱔓", onClick: e => this.runCommand(e, "wincmd K") },
-                  { font: "󱂩", onClick: e => this.runCommand(e, "wincmd J") },
-                  { font: "󰉡", onClick: e => this.runCommand(e, "wincmd =") },
-                ],
-              ]) }
-              { !this.state.preview.active && this.props.type === "normal" && <IconComponent color="gray-fg" font="" onClick={e => this.runCommand(e, "write")} /> }
-              { this.props.type === "external" && <IconComponent color="gray-fg" font={this.state.hidden ? "" : ""} onClick={this.toggleExtWindow} /> }
-              { this.props.type === "external" && !this.state.hidden && (
-                <>
-                  <IconComponent color="gray-fg" font="󰮐" active={this.state.dragging} onClick={this.dragExtWIndow} />
-                  { this.renderIconMenu("", [
-                    [
-                      { font: "󱂪", onClick: e => this.runCommand(e, "wincmd H") },
-                      { font: "󱂫", onClick: e => this.runCommand(e, "wincmd L") },
-                    ],
-                    [
-                      { font: "󱔓", onClick: e => this.runCommand(e, "wincmd K") },
-                      { font: "󱂩", onClick: e => this.runCommand(e, "wincmd J") },
-                    ],
-                  ]) }
-                </>
-              ) }
-              <IconComponent color="gray-fg" font="" onClick={e => this.runCommand(e, "confirm quit")} />
-            </FlexComponent>
-          </>
-        )}
+  return (
+    <FlexComponent animate="fade-in hover" position="absolute" overflow="visible" nomouse={state.nomouse} style={{ ...props.style, ...(state.hidden ? { height: 0 } : {}) }} shadow={!state.hidden}
+      onMouseDown={state.dragging ? undefined : onMouseDown}
+      onMouseMove={state.dragging ? undefined : onMouseMove}
+      onMouseUp={state.dragging ? undefined : onMouseUp}
+      onWheel={state.dragging ? undefined : onWheel}
+      onDragStart={state.dragging ? onDragStart : undefined}
+      onDragEnd={state.dragging ? onDragEnd : undefined}
+    >
+      <FlexComponent nomouse>
+        <canvas width={props.style.width * scale} height={props.style.height * scale} ref={canvas} />
       </FlexComponent>
-    );
-  }
+      { props.gid === 1 || renderPreview() }
+      { props.gid === 1 || !props.focusable ? null : (
+        <>
+          <FlexComponent color="default" grow={1} position="absolute" inset={[0, -4, 0, "auto"]} onMouseDown={onScroll} hover={state.scrolling === 0}>
+            <FlexComponent animate="fade-in" color="blue" border={[0, 2]} rounded={[2]} style={state.scroll} shadow nomouse></FlexComponent>
+          </FlexComponent>
+          <FlexComponent color={state.hidden ? "orange" : "default"} position="absolute" overflow="visible" inset={[-height, -4, "auto", "auto"]} rounded={state.hidden ? [4] : [4, 4, 0, 0]} hover={!state.hidden} spacing
+            onMouseDown={e => runCommand(e, "")}
+          >
+            { !state.preview.active && props.type === "normal" && renderMenu("", "buffer ") }
+            { props.type === "normal" && renderIconMenu("", [
+              [
+                { font: "", onClick: e => runCommand(e, "enew") },
+                { font: "", onClick: e => runCommand(e, "vsplit") },
+                { font: "", onClick: e => runCommand(e, "split") },
+              ],
+              [
+                { font: "󰶭", onClick: openExtWindow },
+                { font: "󱂪", onClick: e => runCommand(e, "wincmd H") },
+                { font: "󱂫", onClick: e => runCommand(e, "wincmd L") },
+              ],
+              [
+                { font: "󱔓", onClick: e => runCommand(e, "wincmd K") },
+                { font: "󱂩", onClick: e => runCommand(e, "wincmd J") },
+                { font: "󰉡", onClick: e => runCommand(e, "wincmd =") },
+              ],
+            ]) }
+            { !state.preview.active && props.type === "normal" && <IconComponent color="gray-fg" font="" onClick={e => runCommand(e, "write")} /> }
+            { props.type === "external" && <IconComponent color="gray-fg" font={state.hidden ? "" : ""} onClick={toggleExtWindow} /> }
+            { props.type === "external" && !state.hidden && (
+              <>
+                <IconComponent color="gray-fg" font="󰮐" active={state.dragging} onClick={dragExtWIndow} />
+                { renderIconMenu("", [
+                  [
+                    { font: "󱂪", onClick: e => runCommand(e, "wincmd H") },
+                    { font: "󱂫", onClick: e => runCommand(e, "wincmd L") },
+                  ],
+                  [
+                    { font: "󱔓", onClick: e => runCommand(e, "wincmd K") },
+                    { font: "󱂩", onClick: e => runCommand(e, "wincmd J") },
+                  ],
+                ]) }
+              </>
+            ) }
+            <IconComponent color="gray-fg" font="" onClick={e => runCommand(e, "confirm quit")} />
+          </FlexComponent>
+        </>
+      )}
+    </FlexComponent>
+  );
 }

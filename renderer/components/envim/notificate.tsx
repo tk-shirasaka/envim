@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 import { IMessage } from "../../../common/interface";
 
@@ -7,9 +7,6 @@ import { Setting } from "../../utils/setting";
 
 import { FlexComponent } from "../flex";
 import { MessageComponent } from "./message";
-
-interface Props {
-}
 
 interface States {
   messages: IMessage[];
@@ -27,25 +24,25 @@ const styles = {
   },
 };
 
-export class NotificateComponent extends React.Component<Props, States> {
-  constructor(props: Props) {
-    super(props);
-    this.state = { messages: [], enabled: Setting.options.ext_messages };
+export function NotificateComponent() {
+  const [state, setState] = useState<States>({ messages: [], enabled: Setting.options.ext_messages });
 
-    Emit.on("messages:show", this.onShow);
-    Emit.on("option:set", this.onOption);
-  }
+  useEffect(() => {
+    Emit.on("messages:show", onShow);
+    Emit.on("option:set", onOption);
 
-  componentWillUnmount = () => {
-    Emit.off("messages:show", this.onShow);
-    Emit.off("option:set", this.onOption);
-  }
+    return () => {
+      Emit.off("messages:show", onShow);
+      Emit.off("option:set", onOption);
+    };
+  }, []);
 
-  private onShow = (messages: IMessage[], replace: boolean) => {
-    this.setState(state => {
+  function onShow(messages: IMessage[], replace: boolean) {
+    setState(state => {
       replace && state.messages.splice(0);
 
       return {
+        ...state,
         messages: [ ...state.messages, ...messages ].reduce(
           (all: IMessage[], curr: IMessage) => {
             const last = all.pop();
@@ -64,17 +61,15 @@ export class NotificateComponent extends React.Component<Props, States> {
     })
   }
 
-  private onOption = (options: { ext_messages: boolean }) => {
-    options.ext_messages === undefined || this.setState(() => ({ enabled: options.ext_messages }));
+  function onOption(options: { ext_messages: boolean }){
+    options.ext_messages === undefined || setState(state => ({ ...state, enabled: options.ext_messages }));
   }
 
-  render() {
-    return this.state.enabled && this.state.messages.length > 0 && (
-      <FlexComponent direction="column" inset={["auto", 0, 0, "auto"]} position="absolute" style={styles.scope} spacing>
-        {this.state.messages.map((message, i) =>
-          <FlexComponent animate="slide-right" margin={[4, 0]} rounded={[4]} style={styles.messages} key={i} shadow><MessageComponent message={message} open /></FlexComponent>
-        )}
-      </FlexComponent>
-    );
-  }
+  return state.enabled && state.messages.length > 0 && (
+    <FlexComponent direction="column" inset={["auto", 0, 0, "auto"]} position="absolute" style={styles.scope} spacing>
+      {state.messages.map((message, i) =>
+        <FlexComponent animate="slide-right" margin={[4, 0]} rounded={[4]} style={styles.messages} key={i} shadow><MessageComponent message={message} open /></FlexComponent>
+      )}
+    </FlexComponent>
+  );
 }

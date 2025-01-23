@@ -1,4 +1,4 @@
-import React, { createRef, RefObject } from "react";
+import React, { useEffect, useState, useRef, RefObject } from "react";
 
 import { Emit } from "../../utils/emit";
 import { Setting } from "../../utils/setting";
@@ -6,9 +6,6 @@ import { Highlights } from "../../utils/highlight";
 import { row2Y, col2X, x2Col } from "../../utils/size";
 
 import { FlexComponent } from "../flex";
-
-interface Props {
-}
 
 interface States {
   items: { word: string, kind: string, menu: string }[];
@@ -21,79 +18,71 @@ interface States {
   enabled: boolean;
 }
 
-export class PopupmenuComponent extends React.Component<Props, States> {
-  private width: number = 0;
-  private scope: RefObject<HTMLDivElement | null> = createRef<HTMLDivElement>();
+export function PopupmenuComponent() {
+  const [ state, setState ] = useState<States>({ items: [], selected: -1, clicked: false, row: 0, col: 0, height: 0, zIndex: 0, enabled: Setting.options.ext_popupmenu });
+  const scope: RefObject<HTMLDivElement | null> = useRef(null);
 
-  constructor(props: Props) {
-    super(props);
+  useEffect(() => {
+    Emit.on("popupmenu:show", onPopupmenu);
+    Emit.on("popupmenu:select", onSelect);
+    Emit.on("popupmenu:hide", offPopupmenu);
+    Emit.on("option:set", onOption);
 
-    this.state = { items: [], selected: -1, clicked: false, row: 0, col: 0, height: 0, zIndex: 0, enabled: Setting.options.ext_popupmenu  };
+    return () => {
+      Emit.off("popupmenu:show", onPopupmenu);
+      Emit.off("popupmenu:select", onSelect);
+      Emit.off("popupmenu:hide", offPopupmenu);
+      Emit.off("option:set", onOption);
+    };
+  });
 
-    Emit.on("popupmenu:show", this.onPopupmenu);
-    Emit.on("popupmenu:select", this.onSelect);
-    Emit.on("popupmenu:hide", this.offPopupmenu);
-    Emit.on("option:set", this.onOption);
-  }
+  useEffect(() => {
+    if (!scope.current?.clientWidth || state.items.length === 0) return;
 
-  componentDidUpdate(_: Props, state: States) {
-    if (!this.scope.current || this.state.items.length === 0) return;
+    const width = x2Col(scope.current.clientWidth) + 2;
 
-    const { row, col, height } = this.state;
-    const width = x2Col(this.scope.current.clientWidth) + 2;
+    Emit.send("envim:api", "nvim_ui_pum_set_bounds", [width, state.height, state.row, state.col]);
+  }, [scope.current?.clientWidth, state.items.length, state.height, state.row, state.col]);
 
-    if (row === state.row && col === state.col && height === state.height && this.width === width) return;
-
-    this.width = width;
-    Emit.send("envim:api", "nvim_ui_pum_set_bounds", [width, height, row, col]);
-  }
-
-  componentWillUnmount = () => {
-    Emit.off("popupmenu:show", this.onPopupmenu);
-    Emit.off("popupmenu:select", this.onSelect);
-    Emit.off("popupmenu:hide", this.offPopupmenu);
-    Emit.off("option:set", this.onOption);
-  }
-
-  private onPopupmenu = (state: States) => {
+  function onPopupmenu(state: States) {
     state.col--;
 
-    this.setState(() => state);
+    setState(({ enabled }) => ({ ...state, enabled }));
     Emit.share("envim:drag", -1);
   }
 
-  private onSelect = (selected: number) => {
-    this.setState(state => {
+  function onSelect(selected: number) {
+    setState(state => {
       const top = row2Y(Math.max(0, Math.min(selected, state.items.length - state.height)));
 
-      state.clicked || setTimeout(() => this.scope.current?.parentElement?.scrollTo({ top, behavior: "smooth" }));
-      return { selected, clicked: false };
+      state.clicked || setTimeout(() => scope.current?.parentElement?.scrollTo({ top, behavior: "smooth" }));
+      return { ...state, selected, clicked: false };
     })
   }
 
-  private offPopupmenu = () => {
-    this.setState(() => ({ items: [] }));
+  function offPopupmenu() {
+    setState(state => ({ ...state, items: [] }));
     Emit.share("envim:drag", "");
   }
 
-  private onOption = (options: { ext_popupmenu: boolean }) => {
-    options.ext_popupmenu === undefined || this.setState(() => ({ enabled: options.ext_popupmenu }));
+  function onOption(options: { ext_popupmenu: boolean }) {
+    options.ext_popupmenu === undefined || setState(state => ({ ...state, enabled: options.ext_popupmenu }));
   }
 
-  private onItem(i: number) {
-    this.setState(() => ({ clicked: true }));
+  function onItem(i: number) {
+    setState(state => ({ ...state, clicked: true }));
     Emit.send("envim:api", "nvim_select_popupmenu_item", [i, true, false, {}]);
   }
 
-  private getScopeStyle() {
+  function getScopeStyle() {
     return {
-      transform: `translate(${col2X(this.state.col)}px, ${row2Y(this.state.row)}px)`,
-      height: row2Y(this.state.height),
-      zIndex: this.state.zIndex,
+      transform: `translate(${col2X(state.col)}px, ${row2Y(state.row)}px)`,
+      height: row2Y(state.height),
+      zIndex: state.zIndex,
     };
   }
 
-  private getKindStyle(kind: string) {
+  function getKindStyle(kind: string) {
     switch (kind[0].charCodeAt(0) % 6) {
       case 0: return "red";
       case 1: return "green";
@@ -105,17 +94,15 @@ export class PopupmenuComponent extends React.Component<Props, States> {
     }
   }
 
-  render() {
-    return this.state.enabled && this.state.items.length > 0 && (
-      <FlexComponent animate="fade-in" color="default" direction="column" position="absolute" overflow="auto" whiteSpace="pre-wrap" style={this.getScopeStyle()} shadow>
-        <div ref={this.scope}></div>
-        {this.state.items.map(({ word, kind, menu }, i) => (
-          <FlexComponent active={this.state.selected === i} onClick={() => this.onItem(i)} key={i}>
-            <FlexComponent padding={[0, Setting.font.width]} grow={1} style={Highlights.style("0")}>{ word }</FlexComponent>
-            { `${kind}${menu}` && <FlexComponent padding={[0, Setting.font.width]} color={this.getKindStyle(`${kind}${menu}`)}>{ kind } { menu }</FlexComponent> }
-          </FlexComponent>
-        ))}
-      </FlexComponent>
-    )
-  }
+  return state.enabled && state.items.length > 0 && (
+    <FlexComponent animate="fade-in" color="default" direction="column" position="absolute" overflow="auto" whiteSpace="pre-wrap" style={getScopeStyle()} shadow>
+      <div ref={scope}></div>
+      {state.items.map(({ word, kind, menu }, i) => (
+        <FlexComponent active={state.selected === i} onClick={() => onItem(i)} key={i}>
+          <FlexComponent padding={[0, Setting.font.width]} grow={1} style={Highlights.style("0")}>{ word }</FlexComponent>
+          { `${kind}${menu}` && <FlexComponent padding={[0, Setting.font.width]} color={getKindStyle(`${kind}${menu}`)}>{ kind } { menu }</FlexComponent> }
+        </FlexComponent>
+      ))}
+    </FlexComponent>
+  )
 }

@@ -1,4 +1,4 @@
-import React, { createRef, RefObject, KeyboardEvent } from "react";
+import React, { useEffect, useState, useRef, RefObject, KeyboardEvent } from "react";
 
 import { IMode } from "../../../common/interface";
 
@@ -7,9 +7,6 @@ import { keycode } from "../../utils/keycode";
 import { row2Y, col2X } from "../../utils/size";
 
 import { FlexComponent } from "../flex";
-
-interface Props {
-}
 
 interface States {
   cursor: { x: number, y: number, width: number, zIndex: number, shape: "block" | "vertical" | "horizontal" };
@@ -33,63 +30,61 @@ const styles = {
   },
 };
 
-export class InputComponent extends React.Component<Props, States> {
-  private input: RefObject<HTMLInputElement | null> = createRef<HTMLInputElement>();
+export function InputComponent () {
+  const [state, setState] = useState<States>({ cursor: { x: 0, y: 0, width: 0, zIndex: 0, shape: "block" }, value: "", busy: false, focus: true, focusable: true });
+  const input: RefObject<HTMLInputElement | null> = useRef<HTMLInputElement>(null);
 
-  constructor(props: Props) {
-    super(props);
+  useEffect(() => {
+    Emit.on("envim:focus", onFocus);
+    Emit.on("envim:focusable", onFocusable);
+    Emit.on("grid:cursor", onCursor);
+    Emit.on("grid:busy", onBusy);
+    Emit.on("mode:change", changeMode);
 
-    this.state = { cursor: { x: 0, y: 0, width: 0, zIndex: 0, shape: "block" }, value: "", busy: false, focus: true, focusable: true };
-    Emit.on("envim:focus", this.onFocus);
-    Emit.on("envim:focusable", this.onFocusable);
-    Emit.on("grid:cursor", this.onCursor);
-    Emit.on("grid:busy", this.onBusy);
-    Emit.on("mode:change", this.changeMode);
-  }
+    return () => {
+      Emit.off("envim:focus", onFocus);
+      Emit.off("grid:cursor", onCursor);
+      Emit.off("grid:busy", onBusy);
+      Emit.off("mode:change", changeMode);
+    };
+  }, [])
 
-  componentWillUnmount = () => {
-    Emit.off("envim:focus", this.onFocus);
-    Emit.off("grid:cursor", this.onCursor);
-    Emit.off("grid:busy", this.onBusy);
-    Emit.off("mode:change", this.changeMode);
-  }
-
-  private onFocus = () => {
-    if (!this.state.focusable) return;
+  function onFocus () {
+    if (!state.focusable) return;
 
     const selected = window.getSelection()?.toString();
 
     selected && navigator.clipboard.writeText(selected);
-    this.input.current?.focus();
+    input.current?.focus();
   }
 
-  private onFocusable = (focusable: boolean) => {
-    focusable && this.input.current?.focus();
-    this.setState(() => ({ focusable }));
+  function onFocusable (focusable: boolean) {
+    focusable && input.current?.focus();
+    setState(state => ({ ...state, focusable }));
   }
 
-  private onCursor = (cursor: { x: number, y: number, width: number, hl: string, zIndex: number }) => {
-    this.setState(state => ({ cursor: { ...state.cursor, ...cursor }}));
+  function onCursor (cursor: { x: number, y: number, width: number, hl: string, zIndex: number }) {
+    setState(state => ({ ...state, cursor: { ...state.cursor, ...cursor }}));
   }
 
-  private onBusy = (busy: boolean) => {
-    this.setState(() => ({ busy }));
+  function onBusy (busy: boolean) {
+    setState(state => ({ ...state, busy }));
   }
 
-  private changeMode = (mode: IMode) => {
-    this.setState(state => ({ cursor: { ...state.cursor, shape: mode.cursor_shape }}));
-    mode.short_name === "c" && this.input.current?.focus();
+  function changeMode (mode: IMode) {
+    setState(state => ({ ...state, cursor: { ...state.cursor, shape: mode.cursor_shape }}));
+    mode.short_name === "c" && input.current?.focus();
   }
 
-  private makeStyle() {
+  function makeStyle() {
     const pointerEvent: "none" = "none";
-    const cursor = this.state.cursor
-    const multibyte = (encodeURIComponent(this.state.value).replace(/%../g, "x").length - this.state.value.length) / 2;
-    const offset = Math.max(col2X(cursor.x + this.state.value.length + multibyte + 1) - document.body.clientWidth, 0);
+    const cursor = state.cursor
+    const multibyte = (encodeURIComponent(state.value).replace(/%../g, "x").length - state.value.length) / 2;
+    const offset = Math.max(col2X(cursor.x + state.value.length + multibyte + 1) - document.body.clientWidth, 0);
 
     return {
       pointerEvent,
-      minWidth: this.getWidth(),
+      minWidth: getWidth(),
       height: row2Y(1),
       transform: `translate(${col2X(cursor.x) - offset}px, ${row2Y(cursor.y)}px)`,
       zIndex: cursor.zIndex,
@@ -97,17 +92,17 @@ export class InputComponent extends React.Component<Props, States> {
     };
   }
 
-  private getWidth() {
-    if (this.state.busy || !this.state.focus) return 0;
-    return this.state.cursor.shape === "block" ? col2X(this.state.cursor.width) : 2;
+  function getWidth() {
+    if (state.busy || !state.focus) return 0;
+    return state.cursor.shape === "block" ? col2X(state.cursor.width) : 2;
   }
 
-  private toggleFocus = (focus: boolean) => {
-    this.setState(() => ({ focus }));
+  function toggleFocus (focus: boolean) {
+    setState(state => ({ ...state, focus }));
     focus && Emit.share("envim:focused")
   }
 
-  private onKeyDown = (e: KeyboardEvent) => {
+  function onKeyDown (e: KeyboardEvent) {
     if (e.nativeEvent.isComposing) return;
     const code = keycode(e);
 
@@ -117,26 +112,24 @@ export class InputComponent extends React.Component<Props, States> {
     code && Emit.send("envim:input", code);
   }
 
-  private onKeyUp = (e: KeyboardEvent) => {
-    if (!e.nativeEvent.isComposing && this.input.current?.value) {
-      Emit.send("envim:input", this.input.current.value);
-      this.input.current.value = "";
+  function onKeyUp (e: KeyboardEvent) {
+    if (!e.nativeEvent.isComposing && input.current?.value) {
+      Emit.send("envim:input", input.current.value);
+      input.current.value = "";
     }
 
-    (this.input.current?.value || this.state.value) && this.setState(() => ({ value: this.input.current?.value || "" }));
+    (input.current?.value || state.value) && setState(state => ({ ...state, value: input.current?.value || "" }));
   }
 
-  render() {
-    return (
-      <FlexComponent animate="fade-in" style={this.makeStyle()} shadow={!this.state.busy && this.state.focus} nomouse>
-        <input type="text" style={styles.input} ref={this.input} tabIndex={-1} autoFocus
-          onFocus={() => this.toggleFocus(true)}
-          onBlur={() => this.toggleFocus(false)}
-          onKeyDown={this.onKeyDown}
-          onKeyUp={this.onKeyUp}
-          />
-        <FlexComponent style={styles.text}>{ this.state.value }</FlexComponent>
-      </FlexComponent>
-    );
-  }
+  return (
+    <FlexComponent animate="fade-in" style={makeStyle()} shadow={!state.busy && state.focus} nomouse>
+      <input type="text" style={styles.input} ref={input} tabIndex={-1} autoFocus
+        onFocus={() => toggleFocus(true)}
+        onBlur={() => toggleFocus(false)}
+        onKeyDown={onKeyDown}
+        onKeyUp={onKeyUp}
+      />
+      <FlexComponent style={styles.text}>{ state.value }</FlexComponent>
+    </FlexComponent>
+  );
 }

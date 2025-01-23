@@ -1,4 +1,4 @@
-import React, { FormEvent, ChangeEvent } from "react";
+import React, { useEffect, useState, FormEvent, ChangeEvent } from "react";
 
 import { ISetting } from "common/interface";
 
@@ -8,9 +8,6 @@ import { Setting } from "../utils/setting";
 interface Props {
   width: number;
   height: number;
-}
-
-interface States extends ISetting {
 }
 
 const flexDirection: "column" = "column";
@@ -52,25 +49,24 @@ const styles = {
   },
 };
 
-export class SettingComponent extends React.Component<Props, States> {
-  constructor(props: Props) {
-    super(props);
-    this.state = { ...Setting.get() };
+export function SettingComponent (props: Props) {
+  const [state, setState] = useState<ISetting>({...Setting.get() });
 
-    Emit.on("envim:setting", this.onSetting);
+  useEffect(() => {
+    Emit.on("envim:setting", onSetting);
     Emit.send("envim:init");
+
+    return () => {
+      Emit.off("envim:setting", onSetting);
+    }
+  }, []);
+
+  function onSetting (state: ISetting) {
+    setState(() => state);
   }
 
-  componentWillUnmount = () => {
-    Emit.off("envim:setting", this.onSetting);
-  }
-
-  private onSetting = (state: ISetting) => {
-    this.setState(() => state);
-  }
-
-  private onToggleType = (e: ChangeEvent<HTMLInputElement>) => {
-    this.setState(state => {
+  function onToggleType (e: ChangeEvent<HTMLInputElement>) {
+    setState(state => {
       const type = e.target.value as ISetting["type"];
       const path = state.path;
       const { presets, searchengines, ...rest } = state.presets[`[${type}]:${path}`] || { type, path };
@@ -79,8 +75,8 @@ export class SettingComponent extends React.Component<Props, States> {
     });
   }
 
-  private onChangePath = (e: ChangeEvent<HTMLInputElement>) => {
-    this.setState(state => {
+  function onChangePath (e: ChangeEvent<HTMLInputElement>) {
+    setState(state => {
       const path = e.target.value;
       const type = state.type;
       const { presets, searchengines, ...rest } = state.presets[`[${type}]:${path}`] || { type, path };
@@ -89,38 +85,39 @@ export class SettingComponent extends React.Component<Props, States> {
     });
   }
 
-  private onChangeFont = (e: ChangeEvent<HTMLInputElement>) => {
-    this.setState(state => ({ font: { ...state.font, size: +e.target.value } }));
+  function onChangeFont (e: ChangeEvent<HTMLInputElement>) {
+    setState(state => ({ ...state, font: { ...state.font, size: +e.target.value } }));
   }
 
-  private onChangeLspace = (e: ChangeEvent<HTMLInputElement>) => {
-    this.setState(state => ({ font: { ...state.font, lspace: +e.target.value } }));
+  function onChangeLspace (e: ChangeEvent<HTMLInputElement>) {
+    setState(state => ({ ...state, font: { ...state.font, lspace: +e.target.value } }));
   }
 
-  private onChangeOpacity = (e: ChangeEvent<HTMLInputElement>) => {
-    this.setState(() => ({ opacity: +e.target.value }));
+  function onChangeOpacity (e: ChangeEvent<HTMLInputElement>) {
+    setState(state => ({ ...state, opacity: +e.target.value }));
   }
 
-  private onToggleOption = (e: ChangeEvent<HTMLInputElement>) => {
-    this.setState(({ options }) => {
-      options[e.target.name] = e.target.checked;
+  function onToggleOption (e: ChangeEvent<HTMLInputElement>) {
+    setState(state => {
+      state.options[e.target.name] = e.target.checked;
 
-      return { options };
+      return state;
     });
   }
 
-  private onSelectBookmark(index: number) {
-    this.setState(state => ({
+  function onSelectBookmark(index: number) {
+    setState(state => ({
+      ...state,
       bookmarks: state.bookmarks.map((bookmark, i) => ({ ...bookmark, selected: i === index }))
     }));
   }
 
-  private onSelectPreset(key: string) {
-    this.setState(({ searchengines, presets }) => ({ ...presets[key], searchengines, presets }));
+  function onSelectPreset(key: string) {
+    setState(({ searchengines, presets, ...state }) => ({ ...state, ...presets[key], searchengines, presets }));
   }
 
-  private onSubmit = (e: FormEvent) => {
-    const { type, path, font, opacity, options, bookmarks, searchengines } = this.state;
+  function onSubmit (e: FormEvent) {
+    const { type, path, font, opacity, options, bookmarks, searchengines } = state;
 
     e.stopPropagation();
     e.preventDefault();
@@ -136,76 +133,74 @@ export class SettingComponent extends React.Component<Props, States> {
     Emit.send("envim:connect", type, path, bookmarks.find(({ selected }) => selected)?.path);
   }
 
-  private getStyle() {
+  function getStyle() {
     return {
-      opacity: (100 - this.state.opacity) / 100,
+      opacity: (100 - state.opacity) / 100,
       ...styles.backdrop,
     };
   }
 
-  private getExampleStyle() {
+  function getExampleStyle() {
     return {
       padding: "4px 8px",
-      fontSize: this.state.font.size,
-      lineHeight: `${this.state.font.height}px`,
+      fontSize: state.font.size,
+      lineHeight: `${state.font.height}px`,
     };
   }
 
-  render() {
-    return (
-      <form className="color-inverse-fg" style={{ ...this.props, ...styles.scope }} onSubmit={this.onSubmit}>
-        <div className="color-default" style={this.getStyle()}></div>
-        <h1 className="bold">Welcome To Envim!</h1>
+  return (
+    <form className="color-inverse-fg" style={{ ...props, ...styles.scope }} onSubmit={onSubmit}>
+      <div className="color-default" style={getStyle()}></div>
+      <h1 className="bold">Welcome To Envim!</h1>
+      <div>
+        <i className="color-green-fg" style={styles.logo}></i>
+        <i className="color-inverse-fg" style={styles.icon}>󰅖</i>
+        <i className="color-lightblue-fg" style={styles.logo}></i>
+      </div>
+
+      <div style={styles.setting}>
+        <h3 className="bold">Neovim path</h3>
         <div>
-          <i className="color-green-fg" style={styles.logo}></i>
-          <i className="color-inverse-fg" style={styles.icon}>󰅖</i>
-          <i className="color-lightblue-fg" style={styles.logo}></i>
+          <label><input type="radio" value="command" checked={state.type === "command"} onChange={onToggleType} />Command</label>
+          <label><input type="radio" value="address" checked={state.type === "address"} onChange={onToggleType} />Server</label>
+          <label><input type="radio" value="docker" checked={state.type === "docker"} onChange={onToggleType} />Docker</label>
+          <label><input type="radio" value="ssh" checked={state.type === "ssh"} onChange={onToggleType} />SSH</label>
         </div>
+        <label>Enter neovim path<input type="text" value={state.path} onChange={onChangePath} autoFocus /></label>
+        <div className="color-gray divider" />
 
-        <div style={styles.setting}>
-          <h3 className="bold">Neovim path</h3>
-          <div>
-            <label><input type="radio" value="command" checked={this.state.type === "command"} onChange={this.onToggleType} />Command</label>
-            <label><input type="radio" value="address" checked={this.state.type === "address"} onChange={this.onToggleType} />Server</label>
-            <label><input type="radio" value="docker" checked={this.state.type === "docker"} onChange={this.onToggleType} />Docker</label>
-            <label><input type="radio" value="ssh" checked={this.state.type === "ssh"} onChange={this.onToggleType} />SSH</label>
-          </div>
-          <label>Enter neovim path<input type="text" value={this.state.path} onChange={this.onChangePath} autoFocus /></label>
-          <div className="color-gray divider" />
+        <h3 className="bold">Appearance</h3>
+        <div><label>Font Size ({state.font.size}px)<input type="range" min="5" max="20" value={state.font.size} onChange={onChangeFont} /></label></div>
+        <div><label>Line Space ({state.font.lspace}px)<input type="range" min="0" max="10" value={state.font.lspace} onChange={onChangeLspace} /></label></div>
+        <div style={getExampleStyle()}>Example Text</div>
+        <div><label>Transparent ({state.opacity}%)<input type="range" min="0" max="50" value={state.opacity} onChange={onChangeOpacity} /></label></div>
+        <div className="color-gray divider" />
 
-          <h3 className="bold">Appearance</h3>
-          <div><label>Font Size ({this.state.font.size}px)<input type="range" min="5" max="20" value={this.state.font.size} onChange={this.onChangeFont} /></label></div>
-          <div><label>Line Space ({this.state.font.lspace}px)<input type="range" min="0" max="10" value={this.state.font.lspace} onChange={this.onChangeLspace} /></label></div>
-          <div style={this.getExampleStyle()}>Example Text</div>
-          <div><label>Transparent ({this.state.opacity}%)<input type="range" min="0" max="50" value={this.state.opacity} onChange={this.onChangeOpacity} /></label></div>
-          <div className="color-gray divider" />
+        <h3 className="bold">Options</h3>
+        { Object.keys(state.options).map((key, i) => (
+          <label key={i}><input type="checkbox" name={key} checked={state.options[key]} onChange={onToggleOption} />{ key }</label>
+        ))}
+        <div className="color-gray divider" />
 
-          <h3 className="bold">Options</h3>
-          { Object.keys(this.state.options).map((key, i) => (
-            <label key={i}><input type="checkbox" name={key} checked={this.state.options[key]} onChange={this.onToggleOption} />{ key }</label>
-          ))}
-          <div className="color-gray divider" />
-
-          <h3 className="bold">Bookmarks</h3>
-          <div>
-            <label><input type="radio" checked={!this.state.bookmarks.find(({ selected }) => selected)} onChange={() => this.onSelectBookmark(-1)} />Not select</label>
-          </div>
-          { this.state.bookmarks.map((bookmark, i) => (
-            <div key={i}>
-              <label><input type="radio" checked={bookmark.selected} onChange={() => this.onSelectBookmark(i)} />{ bookmark.name.replace(/\//g, "  ") }</label>
-            </div>
-          ))}
-
-          <h3 className="bold">Presets</h3>
-          { Object.keys(this.state.presets).map(key => (
-            <div key={key}>
-              <label><input type="radio" checked={`[${this.state.type}]:${this.state.path}` === key} onChange={() => this.onSelectPreset(key)} />{ key }</label>
-            </div>
-          ))}
+        <h3 className="bold">Bookmarks</h3>
+        <div>
+          <label><input type="radio" checked={!state.bookmarks.find(({ selected }) => selected)} onChange={() => onSelectBookmark(-1)} />Not select</label>
         </div>
+        { state.bookmarks.map((bookmark, i) => (
+          <div key={i}>
+            <label><input type="radio" checked={bookmark.selected} onChange={() => onSelectBookmark(i)} />{ bookmark.name.replace(/\//g, "  ") }</label>
+          </div>
+        ))}
 
-        <button className="color-blue clickable" style={styles.button}>Start</button>
-      </form>
-    );
-  }
+        <h3 className="bold">Presets</h3>
+        { Object.keys(state.presets).map(key => (
+          <div key={key}>
+            <label><input type="radio" checked={`[${state.type}]:${state.path}` === key} onChange={() => onSelectPreset(key)} />{ key }</label>
+          </div>
+        ))}
+      </div>
+
+      <button className="color-blue clickable" style={styles.button}>Start</button>
+    </form>
+  );
 }

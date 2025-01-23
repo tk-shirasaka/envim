@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 
 import { IMessage } from "../../../common/interface";
 
@@ -27,35 +27,28 @@ const styles = {
   },
 };
 
-export class MessageComponent extends React.Component<Props, States> {
-  constructor(props: Props) {
-    super(props);
+export function MessageComponent(props: Props) {
+  const [state, setState] = useState<States>({ open: props.open });
+  const icon = notificates.filter(icon => icon.kinds.indexOf(props.message.kind) >= 0)[0];
+  const defaultHl = props.message.contents[0].hl;
+  const defaultStyle = Highlights.style(defaultHl);
 
-    this.state = { open: this.props.open };
+  function onToggleOpen() {
+    setState(state => ({ ...state, open: !state.open }));
   }
 
-  private onToggleOpen = () => {
-    this.setState(state => ({ open: !state.open }));
-  }
-
-  private contentStyle(defaultStyle: { [k: string]: string }, style: { [k: string]: string }) {
+  function contentStyle(defaultStyle: { [k: string]: string }, style: { [k: string]: string }) {
     return { ...style, ...(defaultStyle.background === style.background ? { background: "" } : {}) };
   }
 
-  render() {
-    const icon = notificates.filter(icon => icon.kinds.indexOf(this.props.message.kind) >= 0)[0];
-    const defaultHl = this.props.message.contents[0].hl;
-    const defaultStyle = Highlights.style(defaultHl);
-
-    return (
-      <FlexComponent grow={1} basis="0" onClick={this.onToggleOpen}>
-        <IconComponent font={icon.font} style={Highlights.style(defaultHl, { reverse: true, normal: true })} />
-        <FlexComponent whiteSpace={this.state.open ? "pre-wrap" : "nowrap"} grow={1} shrink={1} basis="0" padding={[2, 4]} style={defaultStyle} selectable>
-          <div style={styles.message}>
-            {this.props.message.contents.map(({hl, content}, i) => <span style={this.contentStyle(defaultStyle, hl === defaultHl ? defaultStyle : Highlights.style(hl))} key={i}>{ content }</span>)}
-          </div>
-        </FlexComponent>
+  return (
+    <FlexComponent grow={1} basis="0" onClick={onToggleOpen}>
+      <IconComponent font={icon.font} style={Highlights.style(defaultHl, { reverse: true, normal: true })} />
+      <FlexComponent whiteSpace={state.open ? "pre-wrap" : "nowrap"} grow={1} shrink={1} basis="0" padding={[2, 4]} style={defaultStyle} selectable>
+        <div style={styles.message}>
+          {props.message.contents.map(({hl, content}, i) => <span style={contentStyle(defaultStyle, hl === defaultHl ? defaultStyle : Highlights.style(hl))} key={i}>{ content }</span>)}
+        </div>
       </FlexComponent>
-    );
-  }
+    </FlexComponent>
+  );
 }

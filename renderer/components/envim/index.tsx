@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 import { ISetting, IWindow, IHighlight } from "common/interface";
 
@@ -52,62 +52,56 @@ const styles = {
   }
 };
 
-export class EnvimComponent extends React.Component<Props, States> {
-  private refresh: boolean = false;
+export function EnvimComponent(props: Props) {
+  const [state, setState] = useState<States>({ init: true, pause: false, mousemoveevent: false, grids: {} });
+  const { size, height } = Setting.font;
 
-  constructor(props: Props) {
-    super(props);
+  useEffect(() => {
+    Emit.on("app:switch", onSwitch);
+    Emit.on("highlight:set", onHighlight);
+    Emit.on("win:pos", onWin);
+    Emit.on("option:set", onOption);
+    Emit.on("envim:setting", onSetting);
+    Emit.on("envim:pause", onPause);
 
-    this.state = { init: true, pause: false, mousemoveevent: false, grids: {} };
-    Emit.on("app:switch", this.onSwitch);
-    Emit.on("highlight:set", this.onHighlight);
-    Emit.on("win:pos", this.onWin);
-    Emit.on("option:set", this.onOption);
-    Emit.on("envim:setting", this.onSetting);
-    Emit.on("envim:pause", this.onPause);
-    Emit.send("envim:attach", x2Col(this.props.main.width), y2Row(this.props.main.height), Setting.options);
-  }
+    return () => {
+      Emit.off("app:switch", onSwitch);
+      Emit.off("highlight:set", onHighlight);
+      Emit.off("win:pos", onWin);
+      Emit.off("option:set", onOption);
+      Emit.off("envim:setting", onSetting);
+      Emit.off("envim:pause", onPause);
+    };
+  }, []);
 
-  componentDidUpdate({ main }: Props) {
-    if (this.props.main.width === main.width && this.props.main.height === main.height) return
+  useEffect(() => {
+    state.init && Emit.send("envim:attach", x2Col(props.main.width), y2Row(props.main.height), Setting.options);
+  }, [state.init]);
 
-    Emit.send("envim:resize", 0, x2Col(this.props.main.width), y2Row(this.props.main.height));
-  }
+  useEffect(() => {
+    Emit.send("envim:resize", 0, x2Col(props.main.width), y2Row(props.main.height));
+  }, [props.main.width, props.main.height]);
 
-  componentWillUnmount = () => {
-    Emit.off("app:switch", this.onSwitch);
-    Emit.off("highlight:set", this.onHighlight);
-    Emit.off("win:pos", this.onWin);
-    Emit.off("option:set", this.onOption);
-    Emit.off("envim:setting", this.onSetting);
-    Emit.off("envim:pause", this.onPause);
-  }
-
-  private onSwitch = () => {
-    this.setState(({ grids }) => {
-      Object.values(grids).forEach(grid => {
+  function onSwitch(init: boolean) {
+    setState(({ grids, ...state }) => {
+      init || Object.values(grids).forEach(grid => {
         grid.focus = false;
         grid.style.visibility = "hidden";
       });
-      setTimeout(() => this.setState(() => {
-        Emit.send("envim:attach", x2Col(this.props.main.width), y2Row(this.props.main.height), Setting.options);
-        return { init: true };
-      }));
-      return { init: false, grids };
+      return { ...state, init, grids };
     });
   }
 
-  private onHighlight = (highlights: {id: string, ui: boolean, hl: IHighlight}[]) => {
+  function onHighlight(highlights: {id: string, ui: boolean, hl: IHighlight}[]) {
     highlights.forEach(({id, ui, hl}) => {
       Highlights.setHighlight(id, ui, hl);
     });
   }
 
-  private onWin = (wins: IWindow[]) => {
-    this.setState(({ grids }) => {
+  function onWin(wins: IWindow[]) {
+    setState(({ grids, ...state }) => {
       const nextOrder = Object.values(grids).reduce((order, grid) => Math.max(order, grid.order), 1);
-
-      wins.reverse().forEach(({ id, gid, winid, x, y, width, height, zIndex, focusable, focus, type, status }, i) => {
+      const refresh = wins.reverse().filter(({ id, gid, winid, x, y, width, height, zIndex, focusable, focus, type, status }, i) => {
         const curr = grids[id]?.style || {};
         const order = grids[id]?.order || i + nextOrder;
         const next = {
@@ -118,69 +112,64 @@ export class EnvimComponent extends React.Component<Props, States> {
           visibility: status === "show" ? "visible" : "hidden" as "visible" | "hidden",
         };
 
-        this.refresh = this.refresh || (status !== "show" && zIndex < 5);
         if (status === "delete") {
           delete(grids[id]);
         } else if (JSON.stringify(curr) !== JSON.stringify(next)) {
-          this.refresh = this.refresh || (zIndex < 5 && (curr.width !== next.width || curr.height !== next.height));
           grids[id] = { id, gid, winid, order, focusable, focus, type, style: next };
         }
-      });
 
-      this.refresh && Emit.send("envim:command", "mode");
-      this.refresh = false;
+        return zIndex < 5 && (curr.visibility !== next.visibility || curr.width !== next.width || curr.height !== next.height);
+      }).length > 0;
 
-      return { grids };
+      refresh && Emit.send("envim:command", "mode");
+
+      return { ...state, grids };
     });
   }
 
-  private onOption = (options: ISetting["options"]) => {
+  function onOption(options: ISetting["options"]) {
     Setting.options = options;
-    "mousemoveevent" in options && this.setState(() => ({ mousemoveevent: options.mousemoveevent }));
+    "mousemoveevent" in options && setState(state => ({ ...state, mousemoveevent: options.mousemoveevent }));
   }
 
-  private onSetting = (setting: ISetting) => {
+  function onSetting(setting: ISetting) {
     Setting.searchengines = setting.searchengines;
   }
 
-  private onPause = (pause: boolean) => {
-    this.setState(() => ({ pause }));
+  function onPause(pause: boolean) {
+    setState(state => ({ ...state, pause }));
   }
 
-  private onMouseUp = () => {
+  function onMouseUp() {
     Emit.share("envim:drag", "");
     Emit.share("envim:focus");
   }
 
-  render() {
-    const { size, height } = Setting.font;
-
-    return (
-      <div style={{fontSize: size, lineHeight: `${height}px`}} onMouseUp={this.onMouseUp}>
-        { this.state.init && <TablineComponent {...this.props.header} /> }
-        <FlexComponent zIndex={0}>
-          <FlexComponent color="default" zIndex={-1} grow={1} shrink={1} />
-          <FlexComponent zIndex={0} direction="column" overflow="visible">
-            <div className="color-default" style={{height: Setting.font.height}} />
-            <FlexComponent overflow="visible" style={this.props.main}>
-              { Object.values(this.state.grids).sort((a, b) => a.order - b.order).map(grid => (
-                <EditorComponent key={grid.id} mousemoveevent={this.state.mousemoveevent} { ...grid } />
-              )) }
-              { this.state.init && <PopupmenuComponent /> }
-              { this.state.init && <InputComponent /> }
-            </FlexComponent>
+  return (
+    <div style={{fontSize: size, lineHeight: `${height}px`}} onMouseUp={onMouseUp}>
+      { state.init && <TablineComponent {...props.header} /> }
+      <FlexComponent zIndex={0}>
+        <FlexComponent color="default" zIndex={-1} grow={1} shrink={1} />
+        <FlexComponent zIndex={0} direction="column" overflow="visible">
+          <div className="color-default" style={{height: Setting.font.height}} />
+          <FlexComponent overflow="visible" style={props.main}>
+            { Object.values(state.grids).sort((a, b) => a.order - b.order).map(grid => (
+              <EditorComponent key={grid.id} mousemoveevent={state.mousemoveevent} { ...grid } />
+            )) }
+            { state.init && <PopupmenuComponent /> }
+            { state.init && <InputComponent /> }
           </FlexComponent>
-          { this.state.init && <CmdlineComponent /> }
-          { this.state.init && <NotificateComponent /> }
-          <FlexComponent color="default" zIndex={-1} grow={1} shrink={1} />
         </FlexComponent>
-        { this.state.init && <HistoryComponent {...this.props.footer} /> }
-        { this.state.pause && (
-          <FlexComponent direction="column" horizontal="center" vertical="center" color="default" position="absolute" zIndex={100} inset={[0]} style={styles.backdrop}>
-            <div className="animate loading" />
-          </FlexComponent>
-        ) }
-      </div>
-    );
-  }
+        { state.init && <CmdlineComponent /> }
+        { state.init && <NotificateComponent /> }
+        <FlexComponent color="default" zIndex={-1} grow={1} shrink={1} />
+      </FlexComponent>
+      { state.init && <HistoryComponent {...props.footer} /> }
+      { state.pause && (
+        <FlexComponent direction="column" horizontal="center" vertical="center" color="default" position="absolute" zIndex={100} inset={[0]} style={styles.backdrop}>
+          <div className="animate loading" />
+        </FlexComponent>
+      ) }
+    </div>
+  );
 }

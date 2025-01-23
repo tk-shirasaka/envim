@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 import { Emit } from "../utils/emit";
 import { Setting } from "../utils/setting";
@@ -9,71 +9,64 @@ import { y2Row, x2Col, row2Y, col2X } from "../utils/size";
 import { SettingComponent } from "./setting";
 import { EnvimComponent } from "./envim";
 
-interface Props {
-}
-
 interface States {
   init: boolean;
   theme: "dark" | "light";
   window: { width: number; height: number; };
 }
 
-export class AppComponent extends React.Component<Props, States> {
-  constructor(props: Props) {
-    super(props);
-    this.state = { init: false, theme: "dark", window: { width: window.innerWidth, height: window.innerHeight } };
+export function AppComponent() {
+  const [state, setState] = useState<States>({ init: false, theme: "dark", window: { width: window.innerWidth, height: window.innerHeight } });
+  const titlebar = navigator.windowControlsOverlay.getTitlebarAreaRect
+    ? navigator.windowControlsOverlay.getTitlebarAreaRect()
+    : { x: 0, y: 0, width: 0, height: 0, left: 0, right: 0 };
+  const header = {
+    width: titlebar.width + titlebar.left,
+    height: Math.max(row2Y(2), (titlebar.y * 2) + titlebar.height),
+    paddingLeft: titlebar.left || 0,
+  };
+  const main = {
+    width: col2X(x2Col(state.window.width) - 2),
+    height: row2Y(y2Row(state.window.height - header.height - row2Y(1) - 4) - 1),
+  };
+  const footer = { width: state.window.width, height: state.window.height - header.height - main.height - row2Y(1) };
 
-    window.addEventListener("resize", this.onResize);
+  useEffect(() => {
+    window.addEventListener("resize", onResize);
     (document as any).fonts.load("10px Editor Regular").then();
     (document as any).fonts.load("10px Editor Bold").then();
     (document as any).fonts.load("10px Icon").then();
     (document as any).fonts.load("10px Git").then();
-    Emit.on("app:switch", this.onSwitch);
-    Emit.on("app:theme", this.onTheme);
+    Emit.on("app:switch", onSwitch);
+    Emit.on("app:theme", onTheme);
     Highlights.setHighlight("0", true, {  })
+  }, []);
+
+  function onResize () {
+    setState(state => ({ ...state, window: { width: window.innerWidth, height: window.innerHeight } }));
   }
 
-  private onResize = () => {
-    this.setState(() => ({ window: { width: window.innerWidth, height: window.innerHeight } }));
-  }
-
-  private onSwitch = (init: boolean) => {
-    this.setState(state => {
+  function onSwitch (init: boolean) {
+    setState(state => {
       Emit.initialize();
 
       state.init === init || Emit.send("envim:setting", Setting.get());
 
-      return { init };
+      return { ...state, init };
     });
   }
 
-  private onTheme = (theme: "dark" | "light") => {
-    this.setState(() => ({ theme }));
+  function onTheme (theme: "dark" | "light") {
+    setState(state => ({ ...state, theme }));
     Cache.set<"dark" | "light">("common", "theme", theme);
   }
 
-  render() {
-    const titlebar = navigator.windowControlsOverlay.getTitlebarAreaRect
-      ? navigator.windowControlsOverlay.getTitlebarAreaRect()
-      : { x: 0, y: 0, width: 0, height: 0, left: 0, right: 0 };
-    const header = {
-      width: titlebar.width + titlebar.left,
-      height: Math.max(row2Y(2), (titlebar.y * 2) + titlebar.height),
-      paddingLeft: titlebar.left || 0,
-    };
-    const main = {
-      width: col2X(x2Col(this.state.window.width) - 2),
-      height: row2Y(y2Row(this.state.window.height - header.height - row2Y(1) - 4) - 1),
-    };
-    const footer = { width: this.state.window.width, height: this.state.window.height - header.height - main.height - row2Y(1) };
-
-    return (
-      <div className={`theme-${this.state.theme}`}>
-        {this.state.init
-          ? <EnvimComponent { ...{ header, main, footer } } />
-          : <SettingComponent {...this.state.window} />
-        }
-      </div>
-    );
-  }
+  return (
+    <div className={`theme-${state.theme}`}>
+      {state.init
+        ? <EnvimComponent { ...{ header, main, footer } } />
+        : <SettingComponent {...state.window} />
+      }
+    </div>
+  );
 }
