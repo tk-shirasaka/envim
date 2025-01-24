@@ -36,7 +36,7 @@ const styles = {
 };
 
 export class MenuComponent extends React.Component<PropsWithChildren<Props>, States> {
-  private div: RefObject<HTMLDivElement> = createRef<HTMLDivElement>();
+  private div: RefObject<HTMLDivElement | null> = createRef<HTMLDivElement>();
   private timer: number = 0;
 
   constructor(props: Props) {

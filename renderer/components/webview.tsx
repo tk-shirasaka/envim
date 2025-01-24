@@ -43,11 +43,11 @@ const styles = {
 };
 
 export class WebviewComponent extends React.Component<Props, States> {
-  private container: RefObject<HTMLDivElement> = createRef<HTMLDivElement>();
+  private container: RefObject<HTMLDivElement | null> = createRef<HTMLDivElement>();
   private webview: WebviewTag | null = null;
-  private input: RefObject<HTMLInputElement> = createRef<HTMLInputElement>();
-  private search: RefObject<HTMLInputElement> = createRef<HTMLInputElement>();
-  private command: RefObject<HTMLInputElement> = createRef<HTMLInputElement>();
+  private input: RefObject<HTMLInputElement | null> = createRef<HTMLInputElement>();
+  private search: RefObject<HTMLInputElement | null> = createRef<HTMLInputElement>();
+  private command: RefObject<HTMLInputElement | null> = createRef<HTMLInputElement>();
 
   constructor(props: Props) {
     super(props);

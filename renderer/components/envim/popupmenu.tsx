@@ -23,7 +23,7 @@ interface States {
 
 export class PopupmenuComponent extends React.Component<Props, States> {
   private width: number = 0;
-  private scope: RefObject<HTMLDivElement> = createRef<HTMLDivElement>();
+  private scope: RefObject<HTMLDivElement | null> = createRef<HTMLDivElement>();
 
   constructor(props: Props) {
     super(props);

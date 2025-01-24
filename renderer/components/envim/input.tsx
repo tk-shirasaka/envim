@@ -34,7 +34,7 @@ const styles = {
 };
 
 export class InputComponent extends React.Component<Props, States> {
-  private input: RefObject<HTMLInputElement> = createRef<HTMLInputElement>();
+  private input: RefObject<HTMLInputElement | null> = createRef<HTMLInputElement>();
 
   constructor(props: Props) {
     super(props);

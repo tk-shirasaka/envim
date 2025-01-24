@@ -38,7 +38,7 @@ const styles = {
 };
 
 export class HistoryComponent extends React.Component<Props, States> {
-  private bottom: RefObject<HTMLDivElement> = createRef<HTMLDivElement>();
+  private bottom: RefObject<HTMLDivElement | null> = createRef<HTMLDivElement>();
   private timer: number = 0;
 
   constructor(props: Props) {

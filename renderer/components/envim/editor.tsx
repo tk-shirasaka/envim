@@ -47,7 +47,7 @@ interface States {
 const TYPE = "editor";
 
 export class EditorComponent extends React.Component<Props, States> {
-  private canvas: RefObject<HTMLCanvasElement> = createRef<HTMLCanvasElement>();
+  private canvas: RefObject<HTMLCanvasElement | null> = createRef<HTMLCanvasElement>();
   private timer: number = 0;
   private drag: boolean = false;
   private busy: boolean = false;
