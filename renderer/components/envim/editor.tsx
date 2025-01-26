@@ -259,7 +259,7 @@ export function EditorComponent(props: Props) {
   }
 
   function changeMode(mode: IMode) {
-    busy.current = mode.short_name === 'i';
+    busy.current = mode.short_name === "i";
     Cache.set<boolean>(TYPE, "busy", busy.current);
   }
 

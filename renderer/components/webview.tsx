@@ -56,14 +56,24 @@ export function WebviewComponent(props: Props) {
   const color = { command: "green", input: "default", search: "default", browser: "blue", blur: "default" }[state.mode];
 
   useEffect(() => {
-    if (container.current) {
-      container.current.innerHTML = `<webview allowpopups="on" webpreferences="transparent=false" />`;
+    Emit.on("envim:focused", onFocused);
+    Emit.on("webview:action", onAction);
+    Emit.on("webview:searchengines", onSearchengines);
 
+    return () => {
+      Emit.off("envim:focused", onFocused);
+      Emit.off("webview:action", onAction);
+      Emit.off("webview:searchengines", onSearchengines);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (container.current && !webview.current) {
+      container.current.innerHTML = `<webview allowpopups="on" webpreferences="transparent=false" />`;
+    }
+    if (container.current) {
       const nextWebview = container.current.querySelector("webview") as WebviewTag;
       const listener = () => {
-        Emit.on("envim:focused", onFocused);
-        Emit.on("webview:action", onAction);
-        Emit.on("webview:searchengines", onSearchengines);
         nextWebview.removeEventListener("dom-ready", listener);
         nextWebview.addEventListener("did-start-loading", onLoad);
         nextWebview.addEventListener("did-stop-loading", onLoad);
@@ -72,10 +82,10 @@ export function WebviewComponent(props: Props) {
         nextWebview.addEventListener("did-navigate-in-page", onLoad);
         nextWebview.addEventListener("page-title-updated", onLoad);
         nextWebview.addEventListener("focus", onFocus);
+        nextWebview.addEventListener("close", onClose);
 
-        props.active && runAction(nextWebview.getURL() === "about:blank" ? "mode-input" : "mode-command");
         webview.current = nextWebview;
-      }
+      };
 
       nextWebview.addEventListener("dom-ready", listener);
       nextWebview.src = getUrl(props.src);
@@ -88,25 +98,12 @@ export function WebviewComponent(props: Props) {
         nextWebview.removeEventListener("did-navigate-in-page", onLoad);
         nextWebview.removeEventListener("page-title-updated", onLoad);
         nextWebview.removeEventListener("focus", onFocus);
-
-        nextWebview.isDevToolsOpened() && runAction("devtool");
-
-        Emit.off("envim:focused", onFocused);
-        Emit.off("webview:action", onAction);
-        Emit.off("webview:searchengines", onSearchengines);
-      }
+      };
     }
-  }, []);
+  }, [container.current, webview.current, props.src]);
 
   useEffect(() => {
-    if (webview.current) {
-      setState(state => ({ ...state, input: props.src }));
-      webview.current.src = getUrl(props.src);
-    }
-  }, [webview.current, props.src]);
-
-  useEffect(() => {
-    webview.current && props.active && runAction(webview.current.getURL() === "about:blank" ? "mode-input" : "mode-command");
+    webview.current && props.active && runAction("mode-command");
   }, [webview.current, props.active]);;
 
   function getUrl(input: string) {
@@ -131,6 +128,10 @@ export function WebviewComponent(props: Props) {
 
   function onFocus () {
     Emit.share("envim:focused");
+  }
+
+  function onClose() {
+    webview.current = null;
   }
 
   function onFocused () {
@@ -214,9 +215,8 @@ export function WebviewComponent(props: Props) {
       case "input":
         if (state.input) {
           webview.current.src = getUrl(state.input);
-        } else {
-          setState(({ input, ...state }) => ({ ...state, input: webview.current?.getURL() || input }));
         }
+        setState(state => ({ ...state, input: "" }));
         break;
       case "search":
         if (state.search) {
@@ -237,7 +237,7 @@ export function WebviewComponent(props: Props) {
         state.input === "" && webview.current?.clearHistory();
         state.mode !== "command" && state.loading !== loading && runAction("mode-command");
 
-        return { ...state, input: state.mode === "input" ? state.input : input, title, loading }
+        return { ...state, input: state.mode === "input" ? state.input : input, title, loading };
       });
     }
   }
@@ -248,6 +248,8 @@ export function WebviewComponent(props: Props) {
 
   function runAction(action: string) {
     if (webview.current) {
+      if (webview.current.getURL() === "about:blank") return input.current?.focus();
+
       switch (action) {
         case "search-backward": return state.search && webview.current.findInPage(state.search, { forward: false });
         case "search-forward": return state.search && webview.current.findInPage(state.search, { forward: true });

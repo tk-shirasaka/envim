@@ -50,16 +50,20 @@ export function InputComponent () {
   }, [])
 
   function onFocus () {
-    if (!state.focusable) return;
+    setState(state => {
+      if (state.focusable) {
+        const selected = window.getSelection()?.toString();
 
-    const selected = window.getSelection()?.toString();
+        selected && navigator.clipboard.writeText(selected);
+        input.current?.focus();
+      }
 
-    selected && navigator.clipboard.writeText(selected);
-    input.current?.focus();
+      return { ...state, focus: state.focusable };
+    });
   }
 
   function onFocusable (focusable: boolean) {
-    focusable && input.current?.focus();
+    focusable ? input.current?.focus() : input.current?.blur();;
     setState(state => ({ ...state, focusable }));
   }
 
