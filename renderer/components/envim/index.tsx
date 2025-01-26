@@ -75,20 +75,22 @@ export function EnvimComponent(props: Props) {
   }, []);
 
   useEffect(() => {
-    state.init && Emit.send("envim:attach", x2Col(props.main.width), y2Row(props.main.height), Setting.options);
+    state.init
+      ? Emit.send("envim:attach", x2Col(props.main.width), y2Row(props.main.height), Setting.options)
+      : setState(state => ({ ...state, init: true }));
   }, [state.init]);
 
   useEffect(() => {
     Emit.send("envim:resize", 0, x2Col(props.main.width), y2Row(props.main.height));
   }, [props.main.width, props.main.height]);
 
-  function onSwitch(init: boolean) {
+  function onSwitch() {
     setState(({ grids, ...state }) => {
-      init || Object.values(grids).forEach(grid => {
+      Object.values(grids).forEach(grid => {
         grid.focus = false;
         grid.style.visibility = "hidden";
       });
-      return { ...state, init, grids };
+      return { ...state, init: false, grids };
     });
   }
 
