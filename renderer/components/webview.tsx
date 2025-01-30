@@ -68,43 +68,45 @@ export function WebviewComponent(props: Props) {
   }, []);
 
   useEffect(() => {
-    if (container.current && !webview.current) {
-      container.current.innerHTML = `<webview allowpopups="on" webpreferences="transparent=false" />`;
+    if (container.current && !container.current.innerHTML) {
+      container.current.innerHTML = `<webview allowpopups="on" />`;
     }
     if (container.current) {
-      const nextWebview = container.current.querySelector("webview") as WebviewTag;
-      const listener = () => {
-        nextWebview.removeEventListener("dom-ready", listener);
-        nextWebview.addEventListener("did-start-loading", onLoad);
-        nextWebview.addEventListener("did-stop-loading", onLoad);
-        nextWebview.addEventListener("did-finish-load", onLoad);
-        nextWebview.addEventListener("did-navigate", onLoad);
-        nextWebview.addEventListener("did-navigate-in-page", onLoad);
-        nextWebview.addEventListener("page-title-updated", onLoad);
-        nextWebview.addEventListener("focus", onFocus);
-        nextWebview.addEventListener("close", onClose);
+      const webview = container.current.querySelector("webview") as WebviewTag;
 
-        webview.current = nextWebview;
-      };
-
-      nextWebview.addEventListener("dom-ready", listener);
-      nextWebview.src = getUrl(props.src);
+      webview.addEventListener("dom-ready", onReady);
+      webview.src = getUrl(props.src);
 
       return () => {
-        nextWebview.removeEventListener("did-start-loading", onLoad);
-        nextWebview.removeEventListener("did-stop-loading", onLoad);
-        nextWebview.removeEventListener("did-finish-load", onLoad);
-        nextWebview.removeEventListener("did-navigate", onLoad);
-        nextWebview.removeEventListener("did-navigate-in-page", onLoad);
-        nextWebview.removeEventListener("page-title-updated", onLoad);
-        nextWebview.removeEventListener("focus", onFocus);
+        webview.removeEventListener("did-start-loading", onLoad);
+        webview.removeEventListener("did-stop-loading", onLoad);
+        webview.removeEventListener("did-finish-load", onLoad);
+        webview.removeEventListener("did-navigate", onLoad);
+        webview.removeEventListener("did-navigate-in-page", onLoad);
+        webview.removeEventListener("page-title-updated", onLoad);
+        webview.removeEventListener("focus", onFocus);
       };
     }
-  }, [container.current, webview.current, props.src]);
+  }, [container.current, props.src]);
 
   useEffect(() => {
     webview.current && props.active && runAction("mode-command");
-  }, [webview.current, props.active]);;
+  }, [webview.current, props.active]);
+
+  function onReady () {
+    if (container.current) {
+      webview.current = container.current.querySelector("webview") as WebviewTag;
+      webview.current.removeEventListener("dom-ready", onReady);
+      webview.current.addEventListener("did-start-loading", onLoad);
+      webview.current.addEventListener("did-stop-loading", onLoad);
+      webview.current.addEventListener("did-finish-load", onLoad);
+      webview.current.addEventListener("did-navigate", onLoad);
+      webview.current.addEventListener("did-navigate-in-page", onLoad);
+      webview.current.addEventListener("page-title-updated", onLoad);
+      webview.current.addEventListener("focus", onFocus);
+      webview.current.addEventListener("close", onClose);
+    }
+  }
 
   function getUrl(input: string) {
     input = input.trim();

@@ -53,5 +53,10 @@ export class Bootstrap {
     Bootstrap.win.on("closed", this.onQuit);
     Bootstrap.win.once("ready-to-show", () => Emit.share("envim:theme"));
     Bootstrap.win.webContents.on("did-attach-webview", (_, webContents) => new Browser(webContents));
+    Bootstrap.win.webContents.on("will-attach-webview", (_, webPreferences) => {
+      delete(webPreferences.preload);
+      webPreferences.nodeIntegration = false;
+      webPreferences.transparent = false;
+    });
   }
 }
