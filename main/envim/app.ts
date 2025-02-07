@@ -41,8 +41,9 @@ export class App {
       case "envim_clipboard": return Clipboard.copy(args[0], args[1]);
       case "envim_dirchanged": return Autocmd.dirchanged(args[0]);
       case "envim_setbackground": return Emit.share("envim:theme", args[0]);
-      case "envim_openurl": return args[0] && Emit.share("envim:browser", args[0], args[1] || "");
-      case "envim_preview": return args[0] && Emit.share("envim:preview", args[0], args[1] || "", args[2] || "");
+      case "envim_openurl": return args.length && Emit.share("envim:browser", args[0], args[1] || "");
+      case "envim_preview": return args.length === 2 && Emit.share("envim:preview", args[0], args[1]);
+      case "envim_preview_toggle": return args.length === 3 && Emit.share("envim:preview:toggle", args[0], args[1], args[2]);
     }
   }
 

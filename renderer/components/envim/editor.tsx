@@ -204,8 +204,8 @@ export function EditorComponent(props: Props) {
     flush.forEach(({ cells, scroll }) => Canvas.push(props.id, cells, scroll));
   }
 
-  function onPreview(src: string) {
-    setState(state => ({ ...state, preview: { src, active: true } }));
+  function onPreview(src: string, active: boolean) {
+    setState(state => ({ ...state, preview: { src, active } }));
   }
 
   function openExtWindow(e: MouseEvent) {

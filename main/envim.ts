@@ -15,7 +15,6 @@ import { Grids } from "./envim/grid";
 export class Envim {
   private nvim = new NeovimClient;
   private handleError?: (e: Error | any) => boolean;
-  private browserQueue: ((gid: number) => void)[] = [];
 
   constructor() {
     Emit.on("envim:init", this.onInit);
@@ -36,6 +35,7 @@ export class Envim {
     Emit.on("envim:theme", this.onTheme);
     Emit.on("envim:browser", this.onBrowser);
     Emit.on("envim:preview", this.onPreview);
+    Emit.on("envim:preview:toggle", this.togglePreview);
     process.on("uncaughtException", this.onError);
     process.on("unhandledRejection", this.onError);
     nativeTheme.on("updated", this.handleTheme);
@@ -130,10 +130,7 @@ export class Envim {
   }
 
   private onReady = (gid: number) => {
-    const queue = this.browserQueue.shift();
-
     this.onResized(gid);
-    queue && queue(gid);
   }
 
   private onResized = (gid: number) => {
@@ -177,21 +174,26 @@ export class Envim {
   }
 
   private onBrowser = (src: string, command?: string) => {
-    this.browserQueue.push((gid: number) => {
-      const { id } = Grids.get(gid).getInfo();
-
-      Emit.update(`preview:${id}`, false, src)
-    });
-
     command = ["new", "vnew", "tabnew"].find(val => val === command) || "tabnew";
-    this.onCommand(`${command} +set\\ bufhidden=wipe|set\\ buftype=nofile|set\\ nobuflisted [Envim\\ Browser]`);
+    this.onCommand(`${command} +let\\ w:envim_browser_src="${encodeURIComponent(src)}" envim://browser`);
   }
 
-  private onPreview = (content: any, ext: string, command?: string) => {
+  private onPreview = (content: any, ext: string) => {
     const path = join(app.getPath("userData"), `tmp.${ext}`);;
     const src = `file://${path}`;
 
-    writeFile(path, Buffer.from(content)).then(() => this.onBrowser(src, command));
+    writeFile(path, Buffer.from(content)).then(() => this.onBrowser(src, "vnew"));
+  }
+
+  private togglePreview = (winid: number, active: boolean, src: string) => {
+    const timer = setInterval(() => {
+      const { id } = Grids.findByWinId(winid)?.getInfo() || {};
+
+      if (id) {
+        Emit.update(`preview:${id}`, false, decodeURIComponent(src), active);
+        clearInterval(timer);
+      }
+    }, 200);
   }
 
   private handleTheme = () => {
