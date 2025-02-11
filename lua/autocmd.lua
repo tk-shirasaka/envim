@@ -37,7 +37,14 @@ vim.api.nvim_create_autocmd({ "WinNew", "BufWinEnter" }, {
     vim.bo.buftype = "nofile"
     vim.bo.bufhidden = "wipe"
     vim.bo.buflisted = false
-    vim.schedule(function() envim_connect(0, { "envim_preview_toggle", winid, true, vim.w.envim_browser_src or "" }) end)
+
+    if not vim.w.envim_preview_request then
+      vim.w.envim_preview_request = true
+      vim.schedule(function()
+        envim_connect(0, { "envim_preview_toggle", winid, true, vim.w.envim_browser_src or "" })
+        vim.w.envim_browser_src = nil
+      end)
+    end
   end,
 })
 
@@ -54,7 +61,7 @@ vim.api.nvim_create_autocmd({ "BufLeave" }, {
         local curr = vim.fn.win_getid()
 
         if prev == curr then
-          vim.w.envim_browser_src = nil
+          vim.w.envim_preview_request = nil
           vim.schedule(function () envim_connect(0, { "envim_preview_toggle", curr, false, "" }) end)
         end
       end,
