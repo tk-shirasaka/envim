@@ -18,12 +18,19 @@ export class Clipboard {
   }
 
   static paste(res: Response) {
-    const text = clipboard.readText();
-    const lines = text.split("\n");
-    if (Clipboard.lines && Clipboard.lines.join("\n") === text) {
-      res.send([Clipboard.lines, Clipboard.type]);
+    const image = clipboard.availableFormats().find(f => f.startsWith("image/"));
+
+    if (image) {
+      Emit.share("envim:preview", clipboard.readImage().toPNG(), "png");
+      res.send([[""], "v"]);
     } else {
-      res.send([lines, lines.length > 1 ? "V" : "v"]);
+      const text = clipboard.readText();
+      const lines = text.split("\n");
+      if (Clipboard.lines && Clipboard.lines.join("\n") === text) {
+        res.send([Clipboard.lines, Clipboard.type]);
+      } else {
+        res.send([lines, lines.length > 1 ? "V" : "v"]);
+      }
     }
   }
 }
