@@ -1,4 +1,4 @@
-import { app, dialog, clipboard, WebContents, Event, HandlerDetails, LoginAuthenticationResponseDetails, AuthInfo, ContextMenuParams, Input } from "electron";
+import { app, dialog, clipboard, BrowserWindow, WebContents, Event, HandlerDetails, LoginAuthenticationResponseDetails, AuthInfo, ContextMenuParams, Input } from "electron";
 import { lookup } from "dns";
 
 import { Bootstrap } from "./bootstrap";
@@ -6,6 +6,7 @@ import { Emit } from "./emit";
 
 export class Browser {
   private ignoreCertErrorHost: string[] = [];
+  private devtoolWindow?: BrowserWindow;
 
   constructor(private webContents: WebContents) {
     webContents.setWindowOpenHandler(this.onOpenWindow);
@@ -15,7 +16,10 @@ export class Browser {
     webContents.on("will-prevent-unload", this.onUnload);
     webContents.on("context-menu", this.onContextMenu);
     webContents.on("before-input-event", this.onInput);
+    webContents.on("destroyed", this.onDestroy);
     Emit.on(`capture:${webContents.id}`, this.onCapture);
+    Emit.on(`devtool:${webContents.id}`, this.onDevtool);
+    Emit.on(`devtool:${webContents.id}`, this.onDevtool);
   }
 
   private confirm = (message: string) => {
@@ -88,6 +92,19 @@ export class Browser {
     switch (input.key) {
       case "Escape": return Emit.send("webview:action", this.webContents.id, "mode-command");
     }
+  }
+
+  private onDevtool = () => {
+    if (!this.devtoolWindow || this.devtoolWindow.isDestroyed()) {
+      this.devtoolWindow = new BrowserWindow();
+      this.devtoolWindow.setMenu(null);
+      this.webContents.setDevToolsWebContents(this.devtoolWindow.webContents);
+      this.webContents.openDevTools({ mode: "detach" });
+    }
+  }
+
+  private onDestroy = () => {
+    this.devtoolWindow?.destroy();
   }
 
   private onCapture = async () => {

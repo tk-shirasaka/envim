@@ -260,7 +260,7 @@ export function WebviewComponent(props: Props) {
         case "reload": return webview.current.reloadIgnoringCache();
         case "zoom-out": return setZoom(state.zoom - 10)
         case "zoom-in": return setZoom(state.zoom + 10)
-        case "devtool": return webview.current.isDevToolsOpened() ? webview.current.closeDevTools() : webview.current.openDevTools();
+        case "devtool": return Emit.send(`devtool:${webview.current.getWebContentsId()}`);
         case "mode-browser": return webview.current.focus();
         case "mode-input": return input.current?.focus();
         case "mode-search": return search.current?.focus();
