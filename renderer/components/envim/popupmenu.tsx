@@ -1,5 +1,7 @@
 import React, { useEffect, useState, useRef, RefObject } from "react";
 
+import { useEditor } from "../../context/editor";
+
 import { Emit } from "../../utils/emit";
 import { Setting } from "../../utils/setting";
 import { Highlights } from "../../utils/highlight";
@@ -19,20 +21,19 @@ interface States {
 }
 
 export function PopupmenuComponent() {
-  const [ state, setState ] = useState<States>({ items: [], selected: -1, clicked: false, row: 0, col: 0, height: 0, zIndex: 0, enabled: Setting.options.ext_popupmenu });
+  const { options } = useEditor();
+  const [ state, setState ] = useState<States>({ items: [], selected: -1, clicked: false, row: 0, col: 0, height: 0, zIndex: 0, enabled: options.ext_popupmenu });
   const scope: RefObject<HTMLDivElement | null> = useRef(null);
 
   useEffect(() => {
     Emit.on("popupmenu:show", onPopupmenu);
     Emit.on("popupmenu:select", onSelect);
     Emit.on("popupmenu:hide", offPopupmenu);
-    Emit.on("option:set", onOption);
 
     return () => {
       Emit.off("popupmenu:show", onPopupmenu);
       Emit.off("popupmenu:select", onSelect);
       Emit.off("popupmenu:hide", offPopupmenu);
-      Emit.off("option:set", onOption);
     };
   });
 
@@ -65,9 +66,9 @@ export function PopupmenuComponent() {
     Emit.share("envim:drag", "");
   }
 
-  function onOption(options: { ext_popupmenu: boolean }) {
+  useEffect(() => {
     options.ext_popupmenu === undefined || setState(state => ({ ...state, enabled: options.ext_popupmenu }));
-  }
+  }, [options.ext_popupmenu]);
 
   function onItem(i: number) {
     setState(state => ({ ...state, clicked: true }));

@@ -2,6 +2,8 @@ import React, { useEffect, useState, MouseEvent } from "react";
 
 import { ISetting, ITab, IMode, IMenu } from "../../../common/interface";
 
+import { useEditor } from "../../context/editor";
+
 import { Emit } from "../../utils/emit";
 import { Setting } from "../../utils/setting";
 import { icons } from "../../utils/icons";
@@ -34,22 +36,17 @@ const styles = {
 };
 
 export function TablineComponent(props: Props) {
-  const [state, setState] = useState<States>({ cwd: "", tabs: [], menus: [], bookmarks: [], enabled: Setting.options.ext_tabline });
+  const { options, mode, tabs  } = useEditor();
+  const [state, setState] = useState<States>({ cwd: "", tabs, menus: [], bookmarks: [], enabled: options.ext_tabline });
 
   useEffect(() => {
     Emit.on("envim:cwd", onCwd);
-    Emit.on("tabline:update", onTabline);
     Emit.on("menu:update", onMenu);
-    Emit.on("mode:change", changeMode);
-    Emit.on("option:set", onOption);
     Emit.send("envim:command", "menu ]Envim.version <silent> :version<cr>");
 
     return () => {
       Emit.off("envim:cwd", onCwd);
-      Emit.off("tabline:update", onTabline);
       Emit.off("menu:update", onMenu);
-      Emit.off("mode:change", changeMode);
-      Emit.off("option:set", onOption);
     };
   }, []);
 
@@ -102,34 +99,21 @@ export function TablineComponent(props: Props) {
     Emit.send("envim:command", command);
   }
 
-  async function onTabline(tabs: ITab[]) {
-    const buflist: { [key: number]: { filetype?: string, buftype?: string } } = {};;
-
-    for (let i = 0; i < tabs.length; i++) {
-      const { buffer } = tabs[i];
-      const { filetype, buftype } = buflist[buffer] || state.tabs.find(tab => tab.buffer === buffer) || {
-        filetype: await Emit.send<string>("envim:api", "nvim_buf_get_option", [buffer, "filetype"]),
-        buftype: await Emit.send<string>("envim:api", "nvim_buf_get_option", [buffer, "buftype"]),
-      };
-
-      buflist[buffer] = { filetype, buftype };
-    }
-
-    tabs = tabs.map(tab => ({ ...tab, ...buflist[tab.buffer] }))
+  useEffect(() => {
     setState(state => ({ ...state, tabs }));
-  }
+  }, [tabs]);
 
   function onMenu(menus: IMenu[]) {
     setState(state => ({ ...state, menus }));
   }
 
-  function changeMode(mode: IMode) {
+  useEffect(() => {
     setState(state => ({ ...state, mode }));
-  }
+  }, [mode]);
 
-  function onOption(options: { ext_tabline: boolean }) {
+  useEffect(() => {
     options.ext_tabline === undefined || setState(state => ({ ...state, enabled: options.ext_tabline }));
-  }
+  }, [options.ext_tabline]);
 
   function renderTab(i: number, tab: ITab) {
     const icon = icons.filter(icon => (tab.filetype || "").search(icon.type) >= 0 || (tab.buftype || "").search(icon.type) >= 0).shift();

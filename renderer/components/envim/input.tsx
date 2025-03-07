@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef, RefObject, KeyboardEvent } from "react";
 
-import { IMode } from "../../../common/interface";
+import { useEditor } from "../../context/editor";
 
 import { Emit } from "../../utils/emit";
 import { keycode } from "../../utils/keycode";
@@ -31,21 +31,18 @@ const styles = {
 };
 
 export function InputComponent () {
-  const [state, setState] = useState<States>({ cursor: { x: 0, y: 0, width: 0, zIndex: 0, shape: "block" }, value: "", busy: false, focus: true, focusable: true });
+  const { busy, mode } = useEditor();
+  const [state, setState] = useState<States>({ cursor: { x: 0, y: 0, width: 0, zIndex: 0, shape: "block" }, value: "", busy, focus: true, focusable: true });
   const input: RefObject<HTMLInputElement | null> = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     Emit.on("envim:focus", onFocus);
     Emit.on("envim:focusable", onFocusable);
     Emit.on("grid:cursor", onCursor);
-    Emit.on("grid:busy", onBusy);
-    Emit.on("mode:change", changeMode);
 
     return () => {
       Emit.off("envim:focus", onFocus);
       Emit.off("grid:cursor", onCursor);
-      Emit.off("grid:busy", onBusy);
-      Emit.off("mode:change", changeMode);
     };
   }, [])
 
@@ -71,14 +68,16 @@ export function InputComponent () {
     setState(state => ({ ...state, cursor: { ...state.cursor, ...cursor }}));
   }
 
-  function onBusy (busy: boolean) {
+  useEffect(() => {
     setState(state => ({ ...state, busy }));
-  }
+  }, [busy]);
 
-  function changeMode (mode: IMode) {
-    setState(state => ({ ...state, cursor: { ...state.cursor, shape: mode.cursor_shape }}));
-    mode.short_name === "c" && input.current?.focus();
-  }
+  useEffect(() => {
+    if (mode) {
+      setState(state => ({ ...state, cursor: { ...state.cursor, shape: mode.cursor_shape }}));
+      mode.short_name === "c" && input.current?.focus();
+    }
+  }, [mode]);
 
   function makeStyle() {
     const pointerEvent: "none" = "none";

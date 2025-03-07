@@ -433,7 +433,7 @@ export class App {
   }
 
   private busy(busy: boolean) {
-    Emit.update("grid:busy", true, busy);
+    Emit.update("app:busy", true, busy);
   }
 
   private async menu() {

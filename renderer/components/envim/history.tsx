@@ -2,8 +2,9 @@ import React, { useEffect, useState, useRef, RefObject } from "react";
 
 import { ISetting, IMessage } from "../../../common/interface";
 
+import { useEditor } from "../../context/editor";
+
 import { Emit } from "../../utils/emit";
-import { Setting } from "../../utils/setting";
 
 import { FlexComponent } from "../flex";
 import { MenuComponent } from "../menu";
@@ -37,7 +38,8 @@ const styles = {
 };
 
 export function HistoryComponent(props: Props) {
-  const [ state, setState ] = useState<States>({ messages: [], theme: "dark", options: Setting.options, debug: "" });
+  const { options } = useEditor();
+  const [ state, setState ] = useState<States>({ messages: [], theme: "dark", options, debug: "" });
   const bottom: RefObject<HTMLDivElement | null> = useRef<HTMLDivElement>(null);
   const timer: RefObject<number> = useRef<number>(0);
 
@@ -46,14 +48,12 @@ export function HistoryComponent(props: Props) {
     Emit.on("messages:command", onCommand);
     Emit.on("messages:ruler", onRuler);
     Emit.on("messages:history", onHistory);
-    Emit.on("option:set", onOption);
 
     return () => {
       Emit.off("messages:mode", onMode);
       Emit.off("messages:command", onCommand);
       Emit.off("messages:ruler", onRuler);
       Emit.off("messages:history", onHistory);
-      Emit.off("option:set", onOption);
     };
   }, []);
 
@@ -86,9 +86,9 @@ export function HistoryComponent(props: Props) {
     })
   }
 
-  function onOption(options: { [k: string]: boolean }) {
-    setState(state => ({ ...state, options: { ...state.options, ...options } }));
-  }
+  useEffect(() => {
+    setState(state => ({ ...state, options }));
+  }, [options]);
 
   function onDebug(direction: "send" | "receive", event: string, ...args: any[]) {
     if (`${direction} ${event}`.search(state.debug) < 0) return;

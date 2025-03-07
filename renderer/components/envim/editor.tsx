@@ -1,11 +1,12 @@
 import React, { useEffect, useState, useRef, RefObject, MouseEvent, WheelEvent } from "react";
 
-import { ICell, IScroll, ITab, IBuffer, IMode } from "common/interface";
+import { ICell, IScroll, IBuffer } from "common/interface";
+
+import { useEditor } from "../../context/editor";
 
 import { Emit } from "../../utils/emit";
 import { Setting } from "../../utils/setting";
 import { Canvas } from "../../utils/canvas";
-import { Cache } from "../../utils/cache";
 import { y2Row, x2Col } from "../../utils/size";
 
 import { FlexComponent } from "../flex";
@@ -20,7 +21,6 @@ interface Props {
   focusable: boolean;
   focus: boolean;
   type: "normal" | "floating" | "external";
-  mousemoveevent: boolean;
   style: {
     zIndex: number;
     width: number;
@@ -44,14 +44,11 @@ interface States {
   };
 }
 
-const TYPE = "editor";
-
 export function EditorComponent(props: Props) {
-  const [state, setState] = useState<States>({ bufs: Cache.get<IBuffer[]>(TYPE, "bufs") || [], nomouse: Cache.get<boolean>(TYPE, "nomouse"), dragging: false, hidden: false, scrolling: 0, preview: { src: "", active: false }, scroll: { total: 0, height: "100%", transform: "" } });
+  const { busy, options, mode, bufs, drag } = useEditor();
+  const [state, setState] = useState<States>({ bufs, nomouse: drag !== "" && drag !== props.id, dragging: false, hidden: false, scrolling: 0, preview: { src: "", active: false }, scroll: { total: 0, height: "100%", transform: "" } });
   const canvas: RefObject<HTMLCanvasElement | null> = useRef<HTMLCanvasElement>(null);
   const timer: RefObject<number> = useRef(0);
-  const drag: RefObject<boolean> = useRef(false);
-  const busy: RefObject<boolean> = useRef(Cache.get<boolean>(TYPE, "busy"));
   const pointer: RefObject<{ row: number; col: number }> = useRef({ row: 0, col: 0 });
   const dragging: RefObject<{ x: number; y: number }> = useRef({ x: 0, y: 0 });
   const delta: RefObject<{ x: number; y: number }> = useRef({ x: 0, y: 0 });
@@ -62,10 +59,6 @@ export function EditorComponent(props: Props) {
     Emit.on(`flush:${props.id}`, onFlush);
     Emit.on(`preview:${props.id}`, onPreview);
     Emit.on(`viewport:${props.id}`, onViewport);
-    Emit.on("envim:drag", onDrag);
-    Emit.on("grid:busy", onBusy);
-    Emit.on("mode:change", changeMode);
-    Emit.on("tabline:update", onTabline);
 
     return () => {
       clearInterval(timer.current);
@@ -74,10 +67,6 @@ export function EditorComponent(props: Props) {
       Emit.off(`flush:${props.id}`, onFlush);
       Emit.off(`preview:${props.id}`, onPreview);
       Emit.off(`viewport:${props.id}`, onViewport);
-      Emit.off("envim:drag", onDrag);
-      Emit.off("grid:busy", onBusy);
-      Emit.off("mode:change", changeMode);
-      Emit.off("tabline:update", onTabline);
     };
   }, [])
 
@@ -126,7 +115,6 @@ export function EditorComponent(props: Props) {
     clearTimeout(timer.current);
 
     timer.current = +setTimeout(() => {
-      drag.current = true;
       Emit.share("envim:drag", props.id);
     });
 
@@ -134,16 +122,15 @@ export function EditorComponent(props: Props) {
   }
 
   function onMouseMove(e: MouseEvent) {
-    if (!(drag.current || props.mousemoveevent) || busy.current) return;
+    if (!(drag || options.mousemoveevent) || busy || mode?.short_name === "i") return;
 
-    onMouseEvent(e, "drag", drag.current ? "" : "move");
+    onMouseEvent(e, "drag", drag ? "" : "move");
   }
 
   function onMouseUp(e: MouseEvent) {
     clearTimeout(timer.current);
 
-    if (drag.current) {
-      drag.current = false;
+    if (drag) {
       Emit.share("envim:drag", "");
     }
     onMouseEvent(e, "release");
@@ -246,27 +233,15 @@ export function EditorComponent(props: Props) {
     });
   }
 
-  function onDrag(id: string) {
-    const nomouse = ["", props.id].indexOf(id) < 0;
+  useEffect(() => {
+    const nomouse = ["", props.id].indexOf(drag) < 0;
 
-    setState(state => ({ ...state, nomouse, dragging: id === "" ? false : state.dragging }));
-    Cache.set<boolean>(TYPE, "nomouse", id.length > 0);
-  }
+    setState(state => ({ ...state, nomouse, dragging: drag === "" ? false : state.dragging }));
+  }, [drag === "" || drag === props.id]);
 
-  function onBusy(curr: boolean) {
-    busy.current = curr;
-    Cache.set<boolean>(TYPE, "busy", busy.current);
-  }
-
-  function changeMode(mode: IMode) {
-    busy.current = mode.short_name === "i";
-    Cache.set<boolean>(TYPE, "busy", busy.current);
-  }
-
-  function onTabline(_: ITab[], bufs: IBuffer[]) {
-    Cache.set<IBuffer[]>(TYPE, "bufs", bufs);
+  useEffect(() => {
     setState(state => ({ ...state, bufs }));
-  }
+  }, [bufs]);
 
   function renderMenu(label: string, command: string) {
     return (
@@ -318,7 +293,7 @@ export function EditorComponent(props: Props) {
           <FlexComponent color={state.hidden ? "orange" : "default"} position="absolute" overflow="visible" inset={[-height, -4, "auto", "auto"]} rounded={state.hidden ? [4] : [4, 4, 0, 0]} hover={!state.hidden} spacing
             onMouseDown={e => runCommand(e, "")}
           >
-            { !state.preview.active && props.type === "normal" && renderMenu("", "buffer ") }
+            { props.type === "normal" && renderMenu("", "buffer ") }
             { props.type === "normal" && renderIconMenu("", [
               [
                 { font: "", onClick: e => runCommand(e, "enew") },

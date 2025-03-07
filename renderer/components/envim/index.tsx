@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 
 import { ISetting, IWindow, IHighlight } from "common/interface";
 
+import { EditorProvider } from "../../context/editor";
+
 import { Emit } from "../../utils/emit";
 import { Highlights } from "../../utils/highlight";
 import { Setting } from "../../utils/setting";
@@ -26,7 +28,6 @@ interface Props {
 interface States {
   init: boolean;
   pause: boolean;
-  mousemoveevent: boolean;
   grids: { [k: string]: {
     id: string;
     gid: number;
@@ -53,14 +54,13 @@ const styles = {
 };
 
 export function EnvimComponent(props: Props) {
-  const [state, setState] = useState<States>({ init: true, pause: false, mousemoveevent: false, grids: {} });
+  const [state, setState] = useState<States>({ init: true, pause: false, grids: {} });
   const { size, height } = Setting.font;
 
   useEffect(() => {
     Emit.on("app:switch", onSwitch);
     Emit.on("highlight:set", onHighlight);
     Emit.on("win:pos", onWin);
-    Emit.on("option:set", onOption);
     Emit.on("envim:setting", onSetting);
     Emit.on("envim:pause", onPause);
 
@@ -68,7 +68,6 @@ export function EnvimComponent(props: Props) {
       Emit.off("app:switch", onSwitch);
       Emit.off("highlight:set", onHighlight);
       Emit.off("win:pos", onWin);
-      Emit.off("option:set", onOption);
       Emit.off("envim:setting", onSetting);
       Emit.off("envim:pause", onPause);
     };
@@ -129,11 +128,6 @@ export function EnvimComponent(props: Props) {
     });
   }
 
-  function onOption(options: ISetting["options"]) {
-    Setting.options = options;
-    "mousemoveevent" in options && setState(state => ({ ...state, mousemoveevent: options.mousemoveevent }));
-  }
-
   function onSetting(setting: ISetting) {
     Setting.searchengines = setting.searchengines;
   }
@@ -148,30 +142,32 @@ export function EnvimComponent(props: Props) {
   }
 
   return (
-    <div style={{fontSize: size, lineHeight: `${height}px`}} onMouseUp={onMouseUp}>
-      { state.init && <TablineComponent {...props.header} /> }
-      <FlexComponent zIndex={0}>
-        <FlexComponent color="default" zIndex={-1} grow={1} shrink={1} />
-        <FlexComponent zIndex={0} direction="column" overflow="visible">
-          <div className="color-default" style={{height: Setting.font.height}} />
-          <FlexComponent overflow="visible" style={props.main}>
-            { Object.values(state.grids).sort((a, b) => a.order - b.order).map(grid => (
-              <EditorComponent key={grid.id} mousemoveevent={state.mousemoveevent} { ...grid } />
-            )) }
-            { state.init && <PopupmenuComponent /> }
-            { state.init && <InputComponent /> }
+    <EditorProvider>
+      <div style={{fontSize: size, lineHeight: `${height}px`}} onMouseUp={onMouseUp}>
+        { state.init && <TablineComponent {...props.header} /> }
+        <FlexComponent zIndex={0}>
+          <FlexComponent color="default" zIndex={-1} grow={1} shrink={1} />
+          <FlexComponent zIndex={0} direction="column" overflow="visible">
+            <div className="color-default" style={{height: Setting.font.height}} />
+            <FlexComponent overflow="visible" style={props.main}>
+              { Object.values(state.grids).sort((a, b) => a.order - b.order).map(grid => (
+                <EditorComponent key={grid.id} { ...grid } />
+              )) }
+              { state.init && <PopupmenuComponent /> }
+              { state.init && <InputComponent /> }
+            </FlexComponent>
           </FlexComponent>
+          { state.init && <CmdlineComponent /> }
+          { state.init && <NotificateComponent /> }
+          <FlexComponent color="default" zIndex={-1} grow={1} shrink={1} />
         </FlexComponent>
-        { state.init && <CmdlineComponent /> }
-        { state.init && <NotificateComponent /> }
-        <FlexComponent color="default" zIndex={-1} grow={1} shrink={1} />
-      </FlexComponent>
-      { state.init && <HistoryComponent {...props.footer} /> }
-      { state.pause && (
-        <FlexComponent direction="column" horizontal="center" vertical="center" color="default" position="absolute" zIndex={100} inset={[0]} style={styles.backdrop}>
-          <div className="animate loading" />
-        </FlexComponent>
-      ) }
-    </div>
+        { state.init && <HistoryComponent {...props.footer} /> }
+        { state.pause && (
+          <FlexComponent direction="column" horizontal="center" vertical="center" color="default" position="absolute" zIndex={100} inset={[0]} style={styles.backdrop}>
+            <div className="animate loading" />
+          </FlexComponent>
+        ) }
+      </div>
+    </EditorProvider>
   );
 }
