@@ -1,4 +1,4 @@
-import React, { useEffect, useState, MouseEvent } from "react";
+import React, { useEffect, useState, MouseEvent, DragEvent } from "react";
 
 import { ISetting, ITab, IMode, IMenu } from "../../../common/interface";
 
@@ -24,6 +24,7 @@ interface States {
   menus: IMenu[];
   bookmarks: ISetting["bookmarks"];
   mode?: IMode;
+  dragging: number;
   enabled: boolean;
 }
 
@@ -37,7 +38,7 @@ const styles = {
 
 export function TablineComponent(props: Props) {
   const { options, mode, tabs  } = useEditor();
-  const [state, setState] = useState<States>({ cwd: "", tabs, menus: [], bookmarks: [], enabled: options.ext_tabline });
+  const [state, setState] = useState<States>({ cwd: "", tabs, menus: [], bookmarks: [], dragging: -1, enabled: options.ext_tabline });
 
   useEffect(() => {
     Emit.on("envim:cwd", onCwd);
@@ -118,8 +119,39 @@ export function TablineComponent(props: Props) {
   function renderTab(i: number, tab: ITab) {
     const icon = icons.filter(icon => (tab.filetype || "").search(icon.type) >= 0 || (tab.buftype || "").search(icon.type) >= 0).shift();
 
+    function onDragStart() {
+      setState(state => ({ ...state, dragging: i }));
+    }
+
+    function onDragOver(e: DragEvent) {
+      e.preventDefault();
+    }
+
+    function onDragEnd() {
+      setState(state => ({ ...state, dragging: -1 }));
+    }
+
+    function onDrop(e: DragEvent) {
+      const next = i - state.dragging;
+
+      if (next) {
+        const prev = state.dragging + 1;
+        const sign = next < 0 ? "-" : "+";
+        const curr = state.tabs.findIndex(tab => tab.active) + 1;
+        const offset = (() => {
+          if (state.dragging < curr - 1 && i >= curr - 1) return -1;
+          if (state.dragging > curr - 1 && i <= curr - 1) return 1;
+          return 0;
+        })();
+        const prevCommand = prev === curr ? "" : `tabnext ${prev} |`;
+        const nextCommand = prev === curr ? "" : `| tabnext ${curr + offset}`;
+
+        runCommand(e, `${prevCommand} tabmove ${sign}${Math.abs(next)} ${nextCommand}`);;
+      }
+    }
+
     return !icon ? null : (
-      <FlexComponent key={i} animate="fade-in hover" color={icon.color} active={tab.active} title={tab.name} shrink={tab.active ? 0 : 2} margin={[4, 2, 0]} padding={[0, 8]} rounded={[4, 4, 0, 0]} shadow={tab.active} style={styles.tab} onClick={e => runCommand(e, `tabnext ${i + 1}`,)}>
+      <FlexComponent key={i} animate="fade-in hover" color={icon.color} active={tab.active} title={tab.name} shrink={tab.active ? 0 : 2} margin={[4, 2, 0]} padding={[0, 8]} rounded={[4, 4, 0, 0]} shadow={tab.active} style={styles.tab} onClick={e => runCommand(e, `tabnext ${i + 1}`)} onDragStart={onDragStart} onDragOver={onDragOver} onDragEnd={onDragEnd} onDrop={onDrop} >
         <IconComponent font={icon.font} text={tab.name.replace(/.*\//, "…/")} />
         { state.tabs.length > 1 && <IconComponent color="gray" font="" float="right" onClick={e => runCommand(e, `confirm tabclose ${i + 1}`)} hover /> }
       </FlexComponent>

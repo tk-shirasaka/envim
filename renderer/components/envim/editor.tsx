@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, RefObject, MouseEvent, WheelEvent } from "react";
+import React, { useEffect, useState, useRef, RefObject, MouseEvent, DragEvent, WheelEvent } from "react";
 
 import { ICell, IScroll, IBuffer } from "common/interface";
 
@@ -136,11 +136,11 @@ export function EditorComponent(props: Props) {
     onMouseEvent(e, "release");
   }
 
-  function onDragStart(e: MouseEvent) {
+  function onDragStart(e: DragEvent) {
     dragging.current = { x: e.clientX, y: e.clientY };
   }
 
-  function onDragEnd(e: MouseEvent) {
+  function onDragEnd(e: DragEvent) {
     const match = props.style.transform.match(/^translate\((\d+)px, (\d+)px\)$/);
 
     if (match) {
