@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 
-import { ISetting, ITab, IBuffer, IMode } from "../../common/interface";
+import { ISetting, ITab, IBuffer, IMode, IMenu } from "../../common/interface";
 
 import { Emit } from "../utils/emit";
 import { Setting } from "../utils/setting";
@@ -12,6 +12,7 @@ interface EditorContextType {
   tabs: ITab[];
   bufs: IBuffer[];
   drag: string;
+  menus: IMenu[];
 }
 
 const EditorContext = createContext<EditorContextType>({
@@ -19,6 +20,7 @@ const EditorContext = createContext<EditorContextType>({
   options: Setting.options,
   tabs: [],
   bufs: [],
+  menus: [],
   drag: "",
 });
 
@@ -30,6 +32,7 @@ export const EditorProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     options: Setting.options,
     tabs: [],
     bufs: [],
+    menus: [],
     drag: "",
   });
 
@@ -38,6 +41,7 @@ export const EditorProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     Emit.on("option:set", onOption);
     Emit.on("mode:change", onMode);
     Emit.on("tabline:update", onTabline);
+    Emit.on("menu:update", onMenu);
     Emit.on("envim:drag", onDrag);
 
     return () => {
@@ -45,6 +49,7 @@ export const EditorProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       Emit.off("option:set", onOption);
       Emit.off("mode:change", onMode);
       Emit.off("tabline:update", onTabline);
+      Emit.off("menu:update", onMenu);
       Emit.off("envim:drag", onDrag);
     };
   }, []);
@@ -78,6 +83,10 @@ export const EditorProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     tabs = tabs.map(tab => ({ ...tab, ...buflist[tab.buffer] }))
 
     setState(state => ({ ...state, tabs, bufs }));
+  }
+
+  function onMenu(menus: IMenu[]) {
+    setState(state => ({ ...state, menus }));
   }
 
   function onDrag (drag: string) {

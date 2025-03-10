@@ -37,17 +37,14 @@ const styles = {
 };
 
 export function TablineComponent(props: Props) {
-  const { options, mode, tabs  } = useEditor();
-  const [state, setState] = useState<States>({ cwd: "", tabs, menus: [], bookmarks: [], dragging: -1, enabled: options.ext_tabline });
+  const { options, mode, tabs, menus  } = useEditor();
+  const [state, setState] = useState<States>({ cwd: "", tabs, menus, bookmarks: [], dragging: -1, enabled: options.ext_tabline });
 
   useEffect(() => {
     Emit.on("envim:cwd", onCwd);
-    Emit.on("menu:update", onMenu);
-    Emit.send("envim:command", "menu ]Envim.version <silent> :version<cr>");
 
     return () => {
       Emit.off("envim:cwd", onCwd);
-      Emit.off("menu:update", onMenu);
     };
   }, []);
 
@@ -104,9 +101,9 @@ export function TablineComponent(props: Props) {
     setState(state => ({ ...state, tabs }));
   }, [tabs]);
 
-  function onMenu(menus: IMenu[]) {
+  useEffect(() => {
     setState(state => ({ ...state, menus }));
-  }
+  }, [menus]);
 
   useEffect(() => {
     setState(state => ({ ...state, mode }));
