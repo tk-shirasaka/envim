@@ -1,7 +1,4 @@
 node_modules
-styles.css
-main.js
-preload.js
-renderer.js
-*.node
-dist/*
+dist/
+dist-electron/
+release/

@@ -44,12 +44,12 @@ export class Bootstrap {
       webPreferences: {
         webviewTag: true,
         spellcheck: false,
-        preload: join(__dirname, "preload.js"),
+        preload: join(__dirname, "../preload/index.js"),
       },
     });
 
     Bootstrap.win.maximize();
-    Bootstrap.win.loadFile(join(__dirname, "index.html"));
+    Bootstrap.win.loadFile(join(__dirname, "../../dist/index.html"));
     Bootstrap.win.on("closed", this.onQuit);
     Bootstrap.win.once("ready-to-show", () => Emit.share("envim:theme"));
     Bootstrap.win.webContents.on("did-attach-webview", (_, webContents) => new Browser(webContents));

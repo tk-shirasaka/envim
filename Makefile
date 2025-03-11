@@ -16,17 +16,18 @@ UNZIP_CMD			= unzip -o
 RELEASE_CMD			= npm run release --
 TARGET_FILE_NAME		=
 
-build: install fonts/NORMAL/$(NORMAL_FONT_DOWNLOAD_FILE).zip fonts/ICON/$(ICON_FONT_DOWNLOAD_FILE).zip fonts/GIT/$(GIT_FONT_DOWNLOAD_FILE).zip
+build: install renderer/fonts/NORMAL/$(NORMAL_FONT_DOWNLOAD_FILE).zip renderer/fonts/ICON/$(ICON_FONT_DOWNLOAD_FILE).zip renderer/fonts/GIT/$(GIT_FONT_DOWNLOAD_FILE).zip
 	npm run build
+	cp -a lua dist-electron/main/lua
 
 install:
 	npm install
 
-fonts/%.zip:
+renderer/fonts/%.zip:
 	$(DOWNLOAD_CMD) $($(*D)_FONT_DOWNLOAD_URL) -o $($(*D)_FONT_DOWNLOAD_FILE).zip
 	$(UNZIP_CMD) -d $(*F) $(*F)
-	cp $(*F)/$($(*D)_REGULAR_FONT_FILE_NAME) fonts/$(*D)-Regular
-	cp $(*F)/$($(*D)_BOLD_FONT_FILE_NAME) fonts/$(*D)-Bold
+	cp $(*F)/$($(*D)_REGULAR_FONT_FILE_NAME) renderer/fonts/$(*D)-Regular
+	cp $(*F)/$($(*D)_BOLD_FONT_FILE_NAME) renderer/fonts/$(*D)-Bold
 	rm -rf $(@D)
 	mkdir -p $(@D)
 	touch $@
@@ -36,19 +37,19 @@ linux: build
 	$(RELEASE_CMD) --linux appImage
 ifdef TARGET_FILE_NAME
 	rm -rf $(TARGET_FILE_NAME)
-	mv dist/Envim-1.0.0.AppImage $(TARGET_FILE_NAME)
+	mv release/Envim-1.0.0.AppImage $(TARGET_FILE_NAME)
 endif
 
 mac: build
 	$(RELEASE_CMD) --mac zip
 ifdef TARGET_FILE_NAME
 	rm -rf $(TARGET_FILE_NAME)
-	mv dist/mac/Envim.app $(TARGET_FILE_NAME)
+	mv release/mac/Envim.app $(TARGET_FILE_NAME)
 endif
 
 windows: build
 	$(RELEASE_CMD) --win zip
 ifdef TARGET_FILE_NAME
 	rm -rf $(TARGET_FILE_NAME)
-	mv dist/win-unpacked $(TARGET_FILE_NAME)
+	mv release/win-unpacked $(TARGET_FILE_NAME)
 endif
