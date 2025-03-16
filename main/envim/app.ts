@@ -400,11 +400,13 @@ export class App {
   }
 
   private msgHistoryShow(entries: [string, [string, string][]][]) {
-    if (entries.length) {
+    const history = entries.map(
+      ([kind, contents]) => this.convertMessage(kind, contents)
+    ).filter(({ contents }) => contents.length);
+
+    if (history.length) {
       App.nvim.command("messages clear");
-      Emit.send("messages:history", entries.map(
-        ([kind, contents]) => this.convertMessage(kind, contents)
-      ));
+      Emit.send("messages:history", history);
     }
   }
 
