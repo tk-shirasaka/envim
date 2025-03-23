@@ -102,12 +102,21 @@ export function EditorComponent(props: Props) {
     const modiffier = [];
     const skip = (button === "move" || action === "drag") && row === pointer.current.row && col === pointer.current.col;
     const gid = props.gid === 1 ? 0 : props.gid;
+    const url = (action === "press" || button === "move") ? Canvas.link(props.id, row, col) : "";
 
     e.shiftKey && modiffier.push("S");
     e.ctrlKey && modiffier.push("C");
     e.altKey && modiffier.push("A");
 
     pointer.current = { row, col };
+
+    if (url && action === "press") {
+      url.search(/^https?:\/\//) < 0 ? runCommand(e, `edit ${url}`) : Emit.send("envim:browser", url);
+    }
+    if (!skip && button === "move") {
+      (e.currentTarget as HTMLElement).style.cursor = url ? "pointer" : "";
+    }
+
     skip || Emit.send("envim:mouse", gid, button, action, modiffier.join("-"), row, col);
   }
 

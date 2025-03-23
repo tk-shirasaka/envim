@@ -2,6 +2,7 @@ import { ICell, IScroll } from "common/interface";
 
 import { Highlights } from "./highlight";
 import { Setting } from "./setting";
+import { between } from "./size";
 
 export class Context2D {
   private bgcanvas: HTMLCanvasElement;
@@ -11,6 +12,7 @@ export class Context2D {
   private queues: { cells?: ICell[], scroll?: IScroll }[] = [];
   private scrolltmp?: { i: number; capture: HTMLCanvasElement; };
   private rendering: boolean = false;
+  private urlhls: Map<string, string> = new Map;
 
   constructor(
     private canvas: HTMLCanvasElement,
@@ -69,9 +71,14 @@ export class Context2D {
     }
   }
 
-  private decoration(x: number, y: number, width: number, hl: string) {
-    const font = this.font
+  private decoration(row: number, col: number, width: number, hl: string) {
+    const [y, x] = [row * this.font.height, col * this.font.width];
+    const font = this.font;
     const lineWidth = this.bgctx.lineWidth;
+
+    for (let i = 0; i < width; i++) {
+      this.urlhls.delete(`${row},${col + i}`);
+    }
 
     Highlights.decoration(hl).forEach(type => {
       this.style(this.bgctx, hl, "special");
@@ -109,6 +116,11 @@ export class Context2D {
             this.bgctx.arc(x + (i * 4 + 3) * cycle, y + font.height - cycle * 1.5, cycle, 1.1 * Math.PI, 1.9 * Math.PI, false);
           }
           break;
+        case "url":
+          for (let i = 0; i < width; i++) {
+            this.urlhls.set(`${row},${col + i}`, hl);
+          }
+          break;
       }
 
       this.bgctx.stroke()
@@ -144,7 +156,22 @@ export class Context2D {
   private scroll(limit: number, scroll: IScroll) {
     if (!this.scrolltmp) {
       const capture = this.getCapture();
+      const urlhls = new Map<string, string>;
+
       this.scrolltmp = { i: 0, capture };
+      this.urlhls.forEach((hl, key) => {
+        const [row, col] = key.split(',').map(Number);
+        const next = { row: row - scroll.rows, col: col - scroll.cols };
+
+        if (
+          !between(scroll.y, row, scroll.y + scroll.height - 1) ||
+          !between(scroll.x, col, scroll.x + scroll.width - 1) ||
+          (between(scroll.y, next.row, scroll.y + scroll.height -1) && between(scroll.x, next.col, scroll.x + scroll.width - 1))
+        ) {
+          urlhls.set(`${next.row},${next.col}`, hl);
+        }
+      });
+      this.urlhls = urlhls;
     }
 
     const { x, y, width, height, rows, cols } = scroll;
@@ -177,8 +204,7 @@ export class Context2D {
     });
 
     cells.forEach(cell => {
-      const [y, x] = [cell.row * this.font.height, cell.col * this.font.width];
-      this.decoration(x, y, cell.width, cell.hl);
+      this.decoration(cell.row, cell.col, cell.width, cell.hl);
     });
 
     cells.forEach(cell => {
@@ -219,6 +245,12 @@ export class Context2D {
     }
 
     return this.queues.length > 0;
+  }
+
+  link(row: number, col: number) {
+    const hl = this.urlhls.get(`${row},${col}`);
+
+    return hl && Highlights.link(hl);
   }
 
   push(cells: ICell[], scroll?: IScroll) {

@@ -16,7 +16,8 @@ class Highlight {
   public special: { normal: string; alpha: string; lighten: string; };
   public reverse?: boolean;
   private type: "normal" | "bold" | "italic";
-  private decorate: ("strikethrough" | "underline" | "underdouble" | "undercurl" | "underdotted" | "underdashed")[];
+  private decorate: ("strikethrough" | "underline" | "underdouble" | "undercurl" | "underdotted" | "underdashed" | "url")[];
+  private url: string;
 
   constructor(highlight: IHighlight, alpha: number, lighten: number) {
     alpha = highlight.blend === undefined ? alpha : highlight.blend;
@@ -39,6 +40,9 @@ class Highlight {
     if (highlight.undercurl) this.decorate.push("undercurl");
     if (highlight.underdotted) this.decorate.push("underdotted");
     if (highlight.underdashed) this.decorate.push("underdashed");
+    if (highlight.url) this.decorate.push("url");
+
+    this.url = highlight.url || "";
   }
 
   private intToColor(color: number | undefined, a1: number, a2: number) {
@@ -75,6 +79,10 @@ class Highlight {
 
   decoration() {
     return this.decorate;
+  }
+
+  link() {
+    return this.url;
   }
 }
 
@@ -118,6 +126,7 @@ export class Highlights {
         undercurl: ["underline", "wavy", special],
         underdotted: ["underline", "dotted", special],
         underdashed: ["underline", "dashed", special],
+        url: [],
       }[type]))
       .reduce((prev, type) => [ ...prev, ...type ], [])
       .filter((val, i, arr) => i === arr.indexOf(val))
@@ -141,5 +150,9 @@ export class Highlights {
 
   static decoration(id: string) {
     return Cache.get<Highlight>(TYPE, id)?.decoration() || [];
+  }
+
+  static link(id: string) {
+    return Cache.get<Highlight>(TYPE, id)?.link();
   }
 }

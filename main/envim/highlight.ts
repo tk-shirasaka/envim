@@ -19,6 +19,8 @@ export class Highlights {
 
     if (hl.bold) highlight.fg = 0x04000000 | highlight.fg;
     if (hl.italic) highlight.fg = 0x08000000 | highlight.fg;
+    if (hl.altfont) highlight.fg = 0x10000000 | highlight.fg;
+    if (hl.url) highlight.fg = 0x20000000 | highlight.fg;
     if (ui) highlight.bg = 0x04000000 | highlight.bg;
     if (hl.blend) highlight.bg = (hl.blend << 28) | highlight.bg;
     if (hl.strikethrough) highlight.sp = 0x04000000 | highlight.sp;

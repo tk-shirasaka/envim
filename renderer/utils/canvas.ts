@@ -37,6 +37,10 @@ export class Canvas {
     Canvas.render();
   }
 
+  static link(id: string, row: number, col: number) {
+    return Cache.get<Context2D>(TYPE, id)?.link(row, col);
+  }
+
   private static render() {
     if (Canvas.processing) return;
 

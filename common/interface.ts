@@ -55,6 +55,7 @@ export interface IHighlight {
   underdotted?: boolean,
   underdashed?: boolean,
   blend?: number,
+  url?: string,
 }
 
 export interface ITab {

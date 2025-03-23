@@ -17,3 +17,7 @@ export const row2Y = (row: number) => {
 export const col2X = (col: number) => {
   return col * Setting.font.width;
 }
+
+export const between = (min: number, val: number, max: number) => {
+  return min <= val && val <= max;
+}
