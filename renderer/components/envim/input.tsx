@@ -42,6 +42,7 @@ export function InputComponent () {
 
     return () => {
       Emit.off("envim:focus", onFocus);
+      Emit.off("envim:focusable", onFocusable);
       Emit.off("grid:cursor", onCursor);
     };
   }, [])
