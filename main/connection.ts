@@ -18,34 +18,44 @@ export class Connection {
     return nvim;
   }
 
-  private static command(command: string, callback: (nvim: NeovimClient) => void) {
-    const { stdout, stdin } = spawn(command || "nvim", ["--embed"]);
+  private static command(command: string, callback: (nvim: NeovimClient) => void, error: () => void) {
+    try {
+      const { stdout, stdin } = spawn(command || "nvim", ["--embed"]);
 
-    callback(Connection.attach(stdout, stdin));
+      callback(Connection.attach(stdout, stdin));
+    } catch (e) {
+      error();
+    }
   }
 
-  private static network(address: string, callback: (nvim: NeovimClient) => void) {
-    const [port, host] = address.split(":").reverse();
-    const socket = createConnection({ port: +port, host: host });
+  private static network(address: string, callback: (nvim: NeovimClient) => void, error: () => void) {
+    try {
+      const [port, host] = address.split(":").reverse();
+      const socket = createConnection({ port: +port, host: host });
 
-    socket.setNoDelay();
-    callback(Connection.attach(socket, socket));
+      socket.setNoDelay();
+      callback(Connection.attach(socket, socket));
+    } catch (e) {
+      error();
+    }
   }
 
-  private static docker(id: string, callback: (nvim: NeovimClient) => void) {
+  private static docker(id: string, callback: (nvim: NeovimClient) => void, error: () => void) {
     const docker = new Docker;
     const container = docker.getContainer(id);
 
-    container.inspect(async (_, info) => {
-      info?.State.Running ||  (await container.start());
+    container.inspect(async (err, info) => {
+      if (err) return error();
+
+      info?.State.Running || (await container.start());
 
       container.exec({ Cmd: ["nvim", "--embed"], AttachStdin: true, AttachStdout: true }, (e, exec) => {
-        if (e) throw e;
-        if (!exec) return;
+        if (e) return error();
+        if (!exec) return error();
 
         exec.start({ hijack: true, stdin: true, Tty: true }, (e, stream) => {
-          if (e) throw e;
-          if (!stream) return;
+          if (e) return error();
+          if (!stream) return error();
 
           callback(Connection.attach(stream, stream));
         });
@@ -53,20 +63,20 @@ export class Connection {
     });
   }
 
-  private static ssh(uri: string, callback: (nvim: NeovimClient) => void) {
+  private static ssh(uri: string, callback: (nvim: NeovimClient) => void, error: () => void) {
     const { protocol, hostname, port, username, password, searchParams } = new URL(uri);
     const ssh = new SSHClient;
 
     protocol === "ssh:" && ssh
       .on("ready", () => {
         ssh.exec("nvim --embed", {}, (e, stream) => {
-          if (e) throw e;
+          if (e) return error();
 
           callback(Connection.attach(stream, stream));
           stream.on("exit", ssh.end);
         });
       })
-      .on("error", e => { throw e; })
+      .on("error", error)
       .connect({
         host: hostname,
         port: +(port || 22),
@@ -78,7 +88,7 @@ export class Connection {
       });
   }
 
-  static connect(type: string, path: string, bookmark: string, callback: (nvim: NeovimClient, init: boolean, workspace: string) => void) {
+  static connect(type: string, path: string, bookmark: string, callback: (nvim: NeovimClient, init: boolean, workspace: string) => void, error: () => void) {
     const next = Connection.workspaces.find(workspace => !workspace.bookmark || workspace.bookmark === bookmark);
     const attach = (nvim: NeovimClient, init: boolean = true) => {
       const workspace = next?.key || { address: path }[type] || `${path}::${bookmark}`;
@@ -101,10 +111,10 @@ export class Connection {
     if (next) return attach(next.nvim, false);
 
     switch (type) {
-      case "command": return Connection.command(path, attach);
-      case "address": return Connection.network(path, attach);
-      case "docker": return Connection.docker(path, attach);
-      case "ssh": return Connection.ssh(path, attach);
+      case "command": return Connection.command(path, attach, error);
+      case "address": return Connection.network(path, attach, error);
+      case "docker": return Connection.docker(path, attach, error);
+      case "ssh": return Connection.ssh(path, attach, error);
     }
   }
 

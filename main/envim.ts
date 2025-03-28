@@ -14,7 +14,6 @@ import { Grids } from "./envim/grid";
 
 export class Envim {
   private nvim = new NeovimClient;
-  private handleError?: (e: Error | any) => boolean;
 
   constructor() {
     Emit.on("envim:init", this.onInit);
@@ -48,7 +47,7 @@ export class Envim {
   }
 
   private onConnect = (type: string, path: string, bookmark: string ) => {
-    this.handleError = (_) => {
+    const error = () => {
       const setting = Setting.get();
       const message = `Connection error occurred : "[${type}]:${path}".\nDelete preset?`;
 
@@ -57,11 +56,9 @@ export class Envim {
         Setting.remove(type, path);
         this.onInit();
       }
-
-      return true;
     }
 
-    Connection.connect(type, path, bookmark, async (nvim: NeovimClient, init: boolean, workspace: string) => {
+    const connect = async (nvim: NeovimClient, init: boolean, workspace: string) => {
       this.nvim = nvim;
       new App(this.nvim, init, workspace);
       bookmark && this.onCommand(`cd ${bookmark}`);
@@ -71,11 +68,12 @@ export class Envim {
         this.nvim.on("disconnect", () => this.onDisconnect(workspace));
         await this.nvim.setVar('envim_id', await this.nvim.channelId);
       }
-      delete(this.handleError);
       Emit.send("app:switch", true);
 
       this.handleTheme();
-    });
+    };
+
+    Connection.connect(type, path, bookmark, connect, error);
   }
 
   private onSetting = (setting: ISetting) => {
@@ -152,8 +150,6 @@ export class Envim {
   }
 
   private onError = (e: Error | any) => {
-    if (this.handleError && this.handleError(e)) return
-
     if (e instanceof Error) {
       dialog.showErrorBox('Error', `${e.message}\n${e.stack || ""}`);
     } else if (e instanceof String) {
