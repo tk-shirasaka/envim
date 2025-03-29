@@ -1,4 +1,4 @@
-import { WebviewTag } from "electron";
+import { WebviewTag, PageFaviconUpdatedEvent } from "electron";
 import React, { useEffect, useState, useRef, RefObject, MouseEvent, FormEvent, ChangeEvent, KeyboardEvent } from "react";
 
 import { ISetting } from "../../common/interface";
@@ -21,6 +21,7 @@ interface States {
   search: string;
   title: string;
   loading: boolean;
+  favicon?: string;
   mode: "command" | "input" | "search" | "browser" | "blur";
   searchengines: ISetting["searchengines"];
   zoom: number;
@@ -84,6 +85,7 @@ export function WebviewComponent(props: Props) {
         webview.removeEventListener("did-navigate", onLoad);
         webview.removeEventListener("did-navigate-in-page", onLoad);
         webview.removeEventListener("page-title-updated", onLoad);
+        webview.removeEventListener("page-favicon-updated", onFavicon);
         webview.removeEventListener("focus", onFocus);
       };
     }
@@ -103,6 +105,7 @@ export function WebviewComponent(props: Props) {
       webview.current.addEventListener("did-navigate", onLoad);
       webview.current.addEventListener("did-navigate-in-page", onLoad);
       webview.current.addEventListener("page-title-updated", onLoad);
+      webview.current.addEventListener("page-favicon-updated", onFavicon);
       webview.current.addEventListener("focus", onFocus);
       webview.current.addEventListener("close", onClose);
     }
@@ -244,6 +247,12 @@ export function WebviewComponent(props: Props) {
     }
   }
 
+  function onFavicon (e: PageFaviconUpdatedEvent) {
+    if (webview.current) {
+      setState(state => ({ ...state, favicon: e.favicons[0] }));
+    }
+  }
+
   function onAction (id: number, action: string) {
     webview.current?.getWebContentsId() === id && runAction(action);
   }
@@ -350,8 +359,10 @@ export function WebviewComponent(props: Props) {
     <FlexComponent animate="fade-in" direction="column" position="absolute" color="default" overflow="visible" inset={[0]} style={props.style} onMouseDown={onCancel} onMouseMove={onCancel} onMouseUp={onCancel}>
       <input style={styles.command} type="text" ref={command} onChange={onChange} onFocus={onFocus} onKeyDown={preview ? undefined : onKeyDown} tabIndex={-1} />
       <FlexComponent color="gray-fg" vertical="center" horizontal="center">
-        { state.loading && <div className="animate loading inline"></div> }
-        <FlexComponent margin={[0, 8]}>{ state.title }</FlexComponent>
+        { state.loading
+          ? <><div className="animate loading inline"></div><FlexComponent margin={[0, 4]}>{ state.title }</FlexComponent></>
+          : <IconComponent font={state.favicon || ""} text={state.title} />
+        }
       </FlexComponent>
       <FlexComponent vertical="center" overflow="visible" nomouse={preview}>
         <IconComponent font="" onClick={() => runAction("navigate-backward")} />

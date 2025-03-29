@@ -1,5 +1,7 @@
 import React from "react";
 
+import { Setting } from "../utils/setting";
+
 import { FlexComponent } from "./flex";
 
 interface Props {
@@ -27,6 +29,7 @@ const styles = {
 export function IconComponent(props: Props) {
   const float = props.float;
   const style = props.style || {};
+  const url = props.font.search(/https?:\/\//) === 0;
 
   if (float) {
     style.transform = "translateY(-50%)";
@@ -37,7 +40,7 @@ export function IconComponent(props: Props) {
 
   return (
     <FlexComponent vertical="center" position={float && "absolute"} rounded={float && [4]} padding={[4]} spacing={!float} shrink={1} style={style} { ...props }>
-      <i>{ props.font }</i>
+      { url ? <img src={props.font} height={Setting.font.size} /> : <i>{ props.font }</i> }
       { props.text && <div style={styles.text}>{ props.text }</div> }
     </FlexComponent>
   );
