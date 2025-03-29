@@ -32,18 +32,18 @@ export function AppComponent() {
   const footer = { width: state.window.width, height: state.window.height - header.height - main.height - row2Y(1) };
 
   useEffect(() => {
-    window.addEventListener("resize", onResize);
     (document as any).fonts.load("10px Editor Regular").then();
     (document as any).fonts.load("10px Editor Bold").then();
     (document as any).fonts.load("10px Icon").then();
     (document as any).fonts.load("10px Git").then();
+    Emit.on("app:resize", onResize);
     Emit.on("app:switch", onSwitch);
     Emit.on("app:theme", onTheme);
     Highlights.setHighlight("0", true, {  })
   }, []);
 
-  function onResize () {
-    setState(state => ({ ...state, window: { width: window.innerWidth, height: window.innerHeight } }));
+  function onResize (width: number, height: number) {
+    setState(state => ({ ...state, window: { width, height } }));
   }
 
   function onSwitch (init: boolean) {
