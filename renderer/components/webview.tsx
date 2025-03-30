@@ -53,7 +53,7 @@ export function WebviewComponent(props: Props) {
   const icon = state.searchengines.some(({ uri }) => uri === state.input)
     ? { color: "blue-fg", font: "" }
     : { color: "gray-fg", font: "" };
-  const preview = props.src.search(/^file:\/\/.*\/Envim\/tmp.\w+$/) === 0;
+  const preview = props.src.search(/^file:\/\/.*[\/\\]Envim[\/\\]tmp.\w+$/) === 0;
   const color = { command: "green", input: "default", search: "default", browser: "blue", blur: "default" }[state.mode];
 
   useEffect(() => {
@@ -89,11 +89,11 @@ export function WebviewComponent(props: Props) {
         webview.removeEventListener("focus", onFocus);
       };
     }
-  }, [container.current, props.src]);
+  }, [container.current === undefined, props.src]);
 
   useEffect(() => {
-    webview.current && props.active && runAction("mode-command");
-  }, [webview.current, props.active]);
+    props.active && runAction("mode-command");
+  }, [props.active]);
 
   function onReady () {
     if (container.current) {
@@ -108,6 +108,7 @@ export function WebviewComponent(props: Props) {
       webview.current.addEventListener("page-favicon-updated", onFavicon);
       webview.current.addEventListener("focus", onFocus);
       webview.current.addEventListener("close", onClose);
+      props.active && runAction("mode-command");
     }
   }
 
@@ -240,7 +241,7 @@ export function WebviewComponent(props: Props) {
 
       setState(state => {
         state.input === "" && webview.current?.clearHistory();
-        state.mode !== "command" && state.loading !== loading && runAction("mode-command");
+        !["blur", "command"].includes(state.mode) && state.loading !== loading && runAction("mode-command");
 
         return { ...state, input: state.mode === "input" ? state.input : input, title, loading };
       });
