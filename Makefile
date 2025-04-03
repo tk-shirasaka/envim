@@ -2,6 +2,10 @@ NORMAL_FONT_DOWNLOAD_URL	=
 NORMAL_FONT_DOWNLOAD_FILE	=
 NORMAL_REGULAR_FONT_FILE_NAME	=
 NORMAL_BOLD_FONT_FILE_NAME	=
+ALT_FONT_DOWNLOAD_URL		=
+ALT_FONT_DOWNLOAD_FILE		=
+ALT_REGULAR_FONT_FILE_NAME	=
+ALT_BOLD_FONT_FILE_NAME		=
 ICON_FONT_DOWNLOAD_URL		= https://github.com/ryanoasis/nerd-fonts/releases/download/v3.3.0/NerdFontsSymbolsOnly.zip
 ICON_FONT_DOWNLOAD_FILE		= NerdFontsSymbolsOnly_v3.3.0
 ICON_REGULAR_FONT_FILE_NAME	= SymbolsNerdFontMono-Regular.ttf
@@ -16,7 +20,7 @@ UNZIP_CMD			= unzip -o
 RELEASE_CMD			= npm run release --
 TARGET_FILE_NAME		=
 
-build: install renderer/fonts/NORMAL/$(NORMAL_FONT_DOWNLOAD_FILE).zip renderer/fonts/ICON/$(ICON_FONT_DOWNLOAD_FILE).zip renderer/fonts/GIT/$(GIT_FONT_DOWNLOAD_FILE).zip
+build: install renderer/fonts/NORMAL/$(NORMAL_FONT_DOWNLOAD_FILE).zip renderer/fonts/ALT/$(ALT_FONT_DOWNLOAD_FILE).zip renderer/fonts/ICON/$(ICON_FONT_DOWNLOAD_FILE).zip renderer/fonts/GIT/$(GIT_FONT_DOWNLOAD_FILE).zip
 	npm run build
 	cp -a lua dist-electron/main/lua
 

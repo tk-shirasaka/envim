@@ -32,10 +32,12 @@ export function AppComponent() {
   const footer = { width: state.window.width, height: state.window.height - header.height - main.height - row2Y(1) };
 
   useEffect(() => {
-    (document as any).fonts.load("10px Editor Regular").then();
-    (document as any).fonts.load("10px Editor Bold").then();
-    (document as any).fonts.load("10px Icon").then();
-    (document as any).fonts.load("10px Git").then();
+    document.fonts.load("10px Regular").then();
+    document.fonts.load("10px Bold").then();
+    document.fonts.load("10px Alt").then();
+    document.fonts.load("10px Alt Bold").then();
+    document.fonts.load("10px Icon").then();
+    document.fonts.load("10px Git").then();
     Emit.on("app:resize", onResize);
     Emit.on("app:switch", onSwitch);
     Emit.on("app:theme", onTheme);

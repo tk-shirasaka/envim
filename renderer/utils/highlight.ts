@@ -15,6 +15,7 @@ class Highlight {
   public background: { normal: string; alpha: string; lighten: string; };
   public special: { normal: string; alpha: string; lighten: string; };
   public reverse?: boolean;
+  public altfont?: boolean;
   private type: "normal" | "bold" | "italic";
   private decorate: ("strikethrough" | "underline" | "underdouble" | "undercurl" | "underdotted" | "underdashed" | "url")[];
   private url: string;
@@ -28,6 +29,7 @@ class Highlight {
     this.foreground = this.intToColor(highlight.foreground, alpha, lighten);
     this.special = highlight.special ? this.intToColor(highlight.special, alpha, lighten) : this.foreground;
     this.reverse = highlight.reverse || false;
+    this.altfont = highlight.altfont || false;
 
     this.type = "normal";
     if (highlight.bold) this.type = "bold";
@@ -67,9 +69,9 @@ class Highlight {
 
   fontFamily() {
     return {
-      normal: `"Regular","Icon","Git"`,
-      bold: `"Bold","Icon","Git"`,
-      italic: `"Regular","Icon","Git"`
+      normal: `${this.altfont ? `"Alt",` : ""}"Regular","Icon","Git"`,
+      bold: `${this.altfont ? `"Alt Bold",` : ""}"Bold","Icon","Git"`,
+      italic: `${this.altfont ? `"Alt",` : ""}"Regular","Icon","Git"`
     }[this.type];
   }
 

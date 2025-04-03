@@ -54,6 +54,7 @@ export interface IHighlight {
   undercurl?: boolean,
   underdotted?: boolean,
   underdashed?: boolean,
+  altfont?: boolean,
   blend?: number,
   url?: string,
 }
