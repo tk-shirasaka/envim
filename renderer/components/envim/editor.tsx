@@ -172,16 +172,13 @@ export function EditorComponent(props: Props) {
     delta.current.x = delta.current.x * e.deltaX >= 0 ? delta.current.x + e.deltaX : 0;
     delta.current.y = delta.current.y * e.deltaY >= 0 ? delta.current.y + e.deltaY : 0;
 
-    const row = Math.abs(y2Row(delta.current.y));
-    const col = Math.abs(x2Col(delta.current.x));
+    const direction = Math.abs(delta.current.x) < Math.abs(delta.current.y) ? "y" : "x";
+    const limit = Math.abs(direction === "x" ? x2Col(delta.current.x) : y2Row(delta.current.y));
+    const action = {x: e.deltaX < 0 ? "left" : "right", y: e.deltaY < 0 ? "up" : "down"}[direction];
 
-    for (let i = 0; i < row; i++) {
+    for (let i = 0; i < limit; i++) {
       delta.current = { x: 0, y: 0 };
-      onMouseEvent(e, e.deltaY < 0 ? "up" : "down", "wheel");
-    }
-    for (let i = 0; i < col; i++) {
-      delta.current = { x: 0, y: 0 };
-      onMouseEvent(e, e.deltaX < 0 ? "left" : "right", "wheel");
+      onMouseEvent(e, action, "wheel");
     }
   }
 
