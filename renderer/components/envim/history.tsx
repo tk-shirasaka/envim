@@ -94,8 +94,8 @@ export function HistoryComponent(props: Props) {
     if (`${direction} ${event}`.search(state.debug) < 0) return;
 
     onHistory([{ contents: [
-      direction === "send" ? { hl: "yellow", content: `[ 󰕒${event} ]\n` } : { hl: "blue", content: `[ 󰇚 ${event} ]\n` },
-      { hl: "0", content: JSON.stringify(args, null, 2) }], kind: "debug" }
+      direction === "send" ? { hl: "color-yellow", content: `[ 󰕒${event} ]` } : { hl: "color-blue", content: `[ 󰇚 ${event} ]` },
+      { hl: "0", content: `\n${JSON.stringify(args, null, 2)}` }], kind: "debug" }
     ]);
   }
 
@@ -130,7 +130,7 @@ export function HistoryComponent(props: Props) {
       setState(state => ({ ...state, debug }));
     } catch (e: any) {
       if (e instanceof Error) {
-        const contents = [{ hl: "red", content: e.message }];
+        const contents = [{ hl: "color-red", content: e.message }];
         Emit.share("messages:show", [{ kind: "debug", contents }], true);
       }
     }

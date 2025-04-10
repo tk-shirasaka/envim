@@ -37,8 +37,11 @@ export function MessageComponent(props: Props) {
     setState(state => ({ ...state, open: !state.open }));
   }
 
-  function contentStyle(defaultStyle: { [k: string]: string }, style: { [k: string]: string }) {
-    return { ...style, ...(defaultStyle.background === style.background ? { background: "" } : {}) };
+  function contentStyle(hl: string, style: { [k: string]: string }) {
+    return {
+      ...(`${hl}`.startsWith("color-") ? { className: hl } : {}),
+      style: { ...style, ...(defaultStyle.background === style.background ? { background: "" } : {}) }
+    };
   }
 
   return (
@@ -46,7 +49,7 @@ export function MessageComponent(props: Props) {
       <IconComponent font={icon.font} style={Highlights.style(defaultHl, { reverse: true, normal: true })} />
       <FlexComponent whiteSpace={state.open ? "pre-wrap" : "nowrap"} grow={1} shrink={1} basis="0" padding={[2, 4]} style={defaultStyle} selectable>
         <div style={styles.message}>
-          {props.message.contents.map(({hl, content}, i) => <span style={contentStyle(defaultStyle, hl === defaultHl ? defaultStyle : Highlights.style(hl))} key={i}>{ content }</span>)}
+          {props.message.contents.map(({hl, content}, i) => <span {...contentStyle(hl, hl === defaultHl ? {} : Highlights.style(hl))} key={i}>{ content }</span>)}
         </div>
       </FlexComponent>
     </FlexComponent>
