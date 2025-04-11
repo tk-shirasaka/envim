@@ -227,9 +227,9 @@ export function EditorComponent(props: Props) {
     setState(state => {
       const limit = props.style.height;
       const height = Math.min(Math.floor((bottom - top) / total * 100), 100);
-      const scrolling = height === 100 ? 0 : +setTimeout(() => {
-        state.scrolling === scrolling && setState(state => ({ ...state, scrolling: 0 }));
-      }, 500);
+      const scrolling = height === 100 ? 0 : +setTimeout(() => setState(state => ({ ...state, scrolling: 0 })) , 500);
+
+      state.scroll && clearTimeout(state.scrolling);
 
       return { ...state, scrolling, scroll: {
         total,
