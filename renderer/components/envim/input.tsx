@@ -25,9 +25,6 @@ const styles = {
     margin: 0,
     caretColor: "transparent",
   },
-  text: {
-    visibility: "hidden",
-  },
 };
 
 export function InputComponent () {
@@ -88,17 +85,17 @@ export function InputComponent () {
 
     return {
       pointerEvent,
-      minWidth: getWidth(),
+      minWidth: state.busy || !state.focus ? 0 : col2X(state.cursor.width),
       height: row2Y(1),
       transform: `translate(${col2X(cursor.x) - offset}px, ${row2Y(cursor.y)}px)`,
       zIndex: cursor.zIndex,
       backdropFilter: "invert(1)",
+      ...({
+        horizontal: { filter: "invert(1)", borderBottom: "2px solid" },
+        vertical: { filter: "invert(1)", borderLeft: "2px solid" },
+        block: {},
+      }[cursor.shape]),
     };
-  }
-
-  function getWidth() {
-    if (state.busy || !state.focus) return 0;
-    return state.cursor.shape === "block" ? col2X(state.cursor.width) : 2;
   }
 
   function toggleFocus (focus: boolean) {
@@ -126,14 +123,14 @@ export function InputComponent () {
   }
 
   return (
-    <FlexComponent animate="fade-in" style={makeStyle()} shadow={!state.busy && state.focus} nomouse>
+    <FlexComponent animate="fade-in" style={makeStyle()} shadow={!state.busy && state.focus && state.cursor.shape === "block"} nomouse>
       <input type="text" style={styles.input} ref={input} tabIndex={-1} autoFocus
         onFocus={() => toggleFocus(true)}
         onBlur={() => toggleFocus(false)}
         onKeyDown={onKeyDown}
         onKeyUp={onKeyUp}
       />
-      <FlexComponent style={styles.text}>{ state.value }</FlexComponent>
+      <FlexComponent color="default">{ state.value }</FlexComponent>
     </FlexComponent>
   );
 }
